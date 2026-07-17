@@ -1,6 +1,9 @@
-from django.test import TestCase
+from django.test import SimpleTestCase
+from django.urls import reverse
 
 
-class SmokeTest(TestCase):
-    def test_smoke(self):
-        self.assertTrue(True)
+class SmokeTest(SimpleTestCase):
+    def test_admin_url_resolves(self):
+        url = reverse("admin:index")
+
+        self.assertEqual(url, "/admin/")
