@@ -1,0 +1,33 @@
+name: Django CI
+
+on:
+  pull_request:
+    branches: [main, dev]
+
+jobs:
+  quality-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Lint with Ruff (Style & Logic)
+        run: ruff check .
+
+      - name: Check Code Complexity (Radon)
+        run: radon cc . -s -a -nb --min B
+
+      - name: Security Check (Bandit)
+        run: bandit -r . -x ./tests
+
+      - name: Run Tests (Pytest)
+        run: pytest
