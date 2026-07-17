@@ -15,7 +15,9 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
 if not SECRET_KEY:
     if DEBUG:
-        SECRET_KEY = "django-insecure-development-only-key"
+        SECRET_KEY = os.getenv(
+            "DJANGO_SECRET_KEY", "django-insecure-development-only-key"
+        )
     else:
         raise RuntimeError(
             "DJANGO_SECRET_KEY must be set when DEBUG=False. "
