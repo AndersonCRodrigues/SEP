@@ -1,0 +1,6 @@
+django
+ruff
+pytest-django
+pytest-cov
+radon
+bandit
