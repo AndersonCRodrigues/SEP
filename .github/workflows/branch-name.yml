@@ -1,0 +1,35 @@
+name: Branch Name Validation
+
+on:
+  pull_request:
+    branches:
+      - dev
+      - main
+
+jobs:
+  validate-branch-name:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Validate branch name
+        run: |
+          BRANCH="${{ github.head_ref }}"
+
+          echo "Branch: $BRANCH"
+
+          if [[ "$BRANCH" =~ ^(feature|fix|hotfix|docs|refactor|test|chore|release)/[a-z0-9._-]+$ ]]; then
+            echo "Branch name is valid."
+            exit 0
+          fi
+
+          echo "::error::Invalid branch name: '$BRANCH'"
+          echo "::error::Use one of:"
+          echo "  feature/<name>"
+          echo "  fix/<name>"
+          echo "  hotfix/<name>"
+          echo "  docs/<name>"
+          echo "  refactor/<name>"
+          echo "  test/<name>"
+          echo "  chore/<name>"
+          echo "  release/<name>"
+          exit 1
