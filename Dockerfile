@@ -7,9 +7,9 @@ FROM python:3.14.5-slim AS builder
 WORKDIR /app
 
 #Cancela a criacao de arquivos pycache
-ENV PYTHONDONTWRITEBYTECODE = 1
+ENV PYTHONDONTWRITEBYTECODE=1
 #Previne o python de "demorar" a entregar as mensagens(prints)
-ENV PYTHONUNBUFFERED = 1
+ENV PYTHONUNBUFFERED=1
 
 # Atualiza o apt(pip do linux), instala os compiladores base, remove o cache criado durante as instalações
 RUN apt-get update \
@@ -27,24 +27,22 @@ FROM python:3.14.5-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
-
+# Intala apenas a biblioteca de execução do PostgreSQL
 RUN apt-get update \
     && apt-get install -y --no-install-recommends libpq5 \
     && rm -rf /var/lib/apt/lists/*
-
-RUN useradd -m -r appuser && \
-    mkdir /app && \
-    chown -R appuser /app
+# Cria o uusu;ario não-root
+RUN useradd -m -r appuser
 
 WORKDIR /app
-
+#Coia as libs(library) python já instaladas do estágio "builder"
 COPY --from=builder /usr/local/lib/python3.14/site-packages/ /usr/local/lib/python3.14/site-packages/
 COPY --from=builder /usr/local/bin/ /usr/local/bin/
-
+# Copia o código da sua aplicação já atribuindo as permissões ao usuuário appuser
 COPY --chown=appuser:appuser . .
-
+#Troca para o user
 USER appuser
 
 EXPOSE 8000
 
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "my_docker_django_app.wsgi:application"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "config.wsgi:application"]
