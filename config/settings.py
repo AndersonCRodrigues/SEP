@@ -8,7 +8,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env")
 
 
-DEBUG = os.getenv("DJANGO_DEBUG", "True").lower() == "true"
+DEBUG = os.getenv("DJANGO_DEBUG", "True").lower() == "false"
 
 
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
@@ -79,12 +79,29 @@ WSGI_APPLICATION = "config.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+db_engine = os.getenv("DJANGO_DATABASE_ENGINE", "")
+
+if db_engine:
+
+    DATABASES = {
+        "default": {
+            "ENGINE": db_engine,
+            "NAME": os.getenv("DJANGO_DATABASE_NAME"),
+            "USER": os.getenv("DJANGO_DATABASE_USER"),
+            "PASSWORD": os.getenv("DJANGO_DATABASE_PASSWORD"),
+            "HOST": os.getenv("DJANGO_DATABASE_HOST"),
+            "PORT": os.getenv("DJANGO_DATABASE_PORT"),
+        }
     }
-}
+    
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
+    
 
 AUTH_PASSWORD_VALIDATORS = [
     {
