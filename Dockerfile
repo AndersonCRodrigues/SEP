@@ -1,6 +1,7 @@
 # Refs: https://www.docker.com/blog/how-to-dockerize-django-app/ 
 #Nao sei qual versão de python estamos usando então coloquei a que usei no momento e usei a versao slim para pesar menos
-FROM python:3.14.5-slim
+#Estágio de Construção
+FROM python:3.14.5-slim AS builder
 
 #Cria e seta a pasta app como workdir
 WORKDIR /app
@@ -15,12 +16,35 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends gcc libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
+# Copia o requirements, atualiza o pip e instala o requirements
 COPY requirements.txt /app/
-RUN pip install --upgrade pip
-RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . /app/
+RUN pip install --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt
+
+#Estagio de produção
+FROM python:3.14.5-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libpq5 \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN useradd -m -r appuser && \
+    mkdir /app && \
+    chown -R appuser /app
+
+WORKDIR /app
+
+COPY --from=builder /usr/local/lib/python3.14/site-packages/ /usr/local/lib/python3.14/site-packages/
+COPY --from=builder /usr/local/bin/ /usr/local/bin/
+
+COPY --chown=appuser:appuser . .
+
+USER appuser
 
 EXPOSE 8000
 
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "my_docker_django_app.wsgi:application"]
