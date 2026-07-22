@@ -3,6 +3,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 load_dotenv(BASE_DIR / ".env")
@@ -32,7 +33,7 @@ if _allowed_hosts_env:
         host.strip() for host in _allowed_hosts_env.split(",") if host.strip()
     ]
 else:
-    ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+    ALLOWED_HOSTS = ["localhost", "127.0.0.1",'host.docker.internal']
 
 
 # Application definition
@@ -44,6 +45,10 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "accounts",
+    "core",
+    "pacientes",
+    "triagem"
 ]
 
 MIDDLEWARE = [
@@ -119,3 +124,4 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = "static/"
+
