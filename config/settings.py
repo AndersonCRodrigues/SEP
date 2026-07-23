@@ -109,14 +109,23 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 
+DB_ENGINE = os.getenv("DATABASE_ENGINE", "postgresql")
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.{}'.format(os.getenv('DATABASE_ENGINE', 'sqlite3')),
-        'NAME': os.getenv('DATABASE_NAME', 'polls'),
-        'USER': os.getenv('DATABASE_USERNAME', 'myprojectuser'),
-        'PASSWORD': os.getenv('DATABASE_PASSWORD', 'password'),
-        'HOST': os.getenv('DATABASE_HOST', '127.0.0.1'),
-        'PORT': os.getenv('DATABASE_PORT', '5432'),
+if DB_ENGINE == "sqlite3":
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": os.getenv("DATABASE_NAME", BASE_DIR / "db.sqlite3"),
+        }
     }
-}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": f"django.db.backends.{DB_ENGINE}",
+            "NAME": os.getenv("DATABASE_NAME", "django_db"),
+            "USER": os.getenv("DATABASE_USERNAME", "myprojectuser"),
+            "PASSWORD": os.getenv("DATABASE_PASSWORD", "password"),
+            "HOST": os.getenv("DATABASE_HOST", "127.0.0.1"),
+            "PORT": os.getenv("DATABASE_PORT", "5432"),
+        }
+    }
