@@ -1,15 +1,18 @@
-.venv/
-venv/
-env/
+.git
+.gitignore
+.github/
 
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
+*.sqlite3
 
-.git/
-.github/
+venv/
+.venv/
+env/
+.env/
 
-.env
-
-.pytest_cache/
+.vscode/
+.idea/
+.DS_Store

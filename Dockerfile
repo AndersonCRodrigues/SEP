@@ -1,7 +1,7 @@
 # Refs: https://www.docker.com/blog/how-to-dockerize-django-app/ 
 #Nao sei qual versão de python estamos usando então coloquei a que usei no momento e usei a versao slim para pesar menos
 #Estágio de Construção
-FROM python:3.14.5-slim AS builder
+FROM python:3.12-slim AS builder
 
 #Cria e seta a pasta app como workdir
 WORKDIR /app
@@ -23,7 +23,7 @@ RUN pip install --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt
 
 #Estagio de produção
-FROM python:3.14.5-slim
+FROM python:3.12-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
@@ -35,9 +35,11 @@ RUN apt-get update \
 RUN useradd -m -r appuser
 
 WORKDIR /app
-#Coia as libs(library) python já instaladas do estágio "builder"
-COPY --from=builder /usr/local/lib/python3.14/site-packages/ /usr/local/lib/python3.14/site-packages/
-COPY --from=builder /usr/local/bin/ /usr/local/bin/
+
+# Copia as libs (libraries) Python já instaladas do estágio "builder" sem fixar a versão minor.
+# O wildcard (*) garante que pegará o diretório site-packages de qualquer versão do python3.
+COPY --from=builder /usr/local/lib/python3.*/site-packages/ /usr/local/lib/
+COPY --from=builder /usr/local/bin/ /usr/local/bin
 # Copia o código da sua aplicação já atribuindo as permissões ao usuuário appuser
 COPY --chown=appuser:appuser . .
 #Troca para o user
