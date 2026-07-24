@@ -22,3 +22,6 @@ ruff==0.15.22
 six==1.17.0
 sqlparse==0.5.5
 stevedore==5.9.0
+python-decouple==3.8
+requests==2.31
+docuseal==1.0.8
