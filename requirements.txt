@@ -10,6 +10,7 @@ markdown-it-py==4.2.0
 mdurl==0.1.2
 packaging==26.2
 pluggy==1.6.0
+psycopg2-binary==2.9.12
 Pygments==2.20.0
 pytest==9.1.1
 pytest-cov==7.1.0
@@ -22,6 +23,4 @@ ruff==0.15.22
 six==1.17.0
 sqlparse==0.5.5
 stevedore==5.9.0
-python-decouple==3.8
-requests==2.31
-docuseal==1.0.8
+tzdata==2026.3
