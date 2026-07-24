@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from django.core.exceptions import ImproperlyConfigured
 
 from dotenv import load_dotenv
 
@@ -84,18 +85,53 @@ WSGI_APPLICATION = "config.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-db_engine = os.getenv("DJANGO_DATABASE_ENGINE", "")
+ENGINES_VALIDOS = {
+    "django.db.backends.sqlite3",
+    "django.db.backends.postgresql",
+}
+
+db_engine = os.getenv("DJANGO_DATABASE_ENGINE", "").strip()
+
+if db_engine and db_engine not in ENGINES_VALIDOS:
+    raise ImproperlyConfigured(
+        f"DJANGO_DATABASE_ENGINE inválido: '{db_engine}'. "
+        f"Valores aceitos: {', '.join(ENGINES_VALIDOS)}"
+    )
 
 if db_engine:
+
+    db_name = os.getenv("DJANGO_DATABASE_NAME")
+    db_user = os.getenv("DJANGO_DATABASE_USER")
+    db_password = os.getenv("DJANGO_DATABASE_PASSWORD")
+    db_host = os.getenv("DJANGO_DATABASE_HOST")
+    db_port = os.getenv("DJANGO_DATABASE_PORT")
+
+    missing_vars = [
+        var_name
+        for var_name, value in (
+            ("DJANGO_DATABASE_NAME", db_name),
+            ("DJANGO_DATABASE_USER", db_user),
+            ("DJANGO_DATABASE_PASSWORD", db_password),
+            ("DJANGO_DATABASE_HOST", db_host),
+            ("DJANGO_DATABASE_PORT", db_port),
+        )
+        if not value
+    ]
+
+    if missing_vars:
+        raise ImproperlyConfigured(
+            "Bancos de dados configurados incorretamente: variável(is) de ambiente obrigatória(s) ausente(s): "
+            + ", ".join(missing_vars)
+        )
 
     DATABASES = {
         "default": {
             "ENGINE": db_engine,
-            "NAME": os.getenv("DJANGO_DATABASE_NAME"),
-            "USER": os.getenv("DJANGO_DATABASE_USER"),
-            "PASSWORD": os.getenv("DJANGO_DATABASE_PASSWORD"),
-            "HOST": os.getenv("DJANGO_DATABASE_HOST"),
-            "PORT": os.getenv("DJANGO_DATABASE_PORT"),
+            "NAME": db_name,
+            "USER": db_user,
+            "PASSWORD": db_password,
+            "HOST": db_host,
+            "PORT": db_port,
         }
     }
     
