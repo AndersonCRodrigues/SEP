@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Painel do Professor{% endblock %}
+
+{% block content %}
+<h1>Meus Alunos</h1>
+
+{% if alunos %}
+    <ul>
+        {% for aluno in alunos %}
+            <li>{{ aluno.nome_completo }}</li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>Nenhum aluno cadastrado.</p>
+{% endif %}
+{% endblock %}
