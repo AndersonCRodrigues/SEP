@@ -48,7 +48,8 @@ INSTALLED_APPS = [
     "accounts",
     "core",
     "patients",
-    "screening"
+    "screening",
+    'localflavor'
 ]
 
 MIDDLEWARE = [
@@ -61,12 +62,17 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+AUTHENTICATION_BACKENDS = [
+    "core.cadastro.EmailOUMatricula",
+    "django.contrib.auth.backends.ModelBackend",
+]
+
 ROOT_URLCONF = "config.urls"
 
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR/'templates'],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -97,8 +103,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# Internationalization
-# https://docs.djangoproject.com/en/6.0/topics/i18n/
 
 LANGUAGE_CODE = "en-us"
 
@@ -109,8 +113,7 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/6.0/howto/static-files/
+
 
 STATIC_URL = "static/"
 
@@ -127,3 +130,7 @@ DATABASES = {
         "PORT": os.getenv("DATABASE_PORT", "5432"),
     }
 }
+
+AUTH_USER_MODEL = "core.CustomUser"
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'lista_tarefas'
