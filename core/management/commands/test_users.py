@@ -24,7 +24,7 @@ def gerar_cpf_valido():
     return f"{cpf[0]}{cpf[1]}{cpf[2]}.{cpf[3]}{cpf[4]}{cpf[5]}.{cpf[6]}{cpf[7]}{cpf[8]}-{cpf[9]}{cpf[10]}"
 
 class Command(BaseCommand):
-    help = 'Popula o banco de dados com usuários de teste para as Roles selecionadas.' # E printado no terminal se colocado 'docker compose exec django-web python3 manage.py popular_usuarios --help'
+    help = 'Popula o banco de dados com usuários de teste para as Roles selecionadas.' # E printado no terminal se colocado 'docker compose exec django-web python3 manage.py test_user --help'
 
     def add_arguments(self, parser): 
         #Permite passar roles como argumentos separados por espaço. ex.: --roles PR AL
