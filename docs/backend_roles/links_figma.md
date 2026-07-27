@@ -14,4 +14,8 @@ adicionei navegação às 3 telas (landing-login-home).
 landing page contendo: nome e descrição do site/objetivo da plataforma, botao de redirecionamento pra login e botoes no footer (ainda ficticios)
 
 
+## 3 - Link para Home (PC):
 
+# https://www.figma.com/proto/PqhMPF0vRsREp9qVcALJx9/Projeto-Psicologia-Testes?node-id=202-311&t=0JxumZxz2IinrecO-1&scaling=min-zoom&content-scaling=fixed&page-id=28%3A2&starting-point-node-id=202%3A311
+
+link pra visualização, aceito sugestões do que mais implementar… tela ainda sem navegação mas com variação visual de botões e rolagem dos pacientes.
