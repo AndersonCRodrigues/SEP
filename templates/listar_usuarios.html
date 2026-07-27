@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Usuários Cadastrados{% endblock %}
+
+{% block content %}
+<h1>Usuários Cadastrados</h1>
+
+<a href="{% url 'cadastro' %}">Cadastrar novo usuário</a>
+
+<table>
+    <thead>
+        <tr>
+            <th>Nome</th>
+            <th>Papel</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for usuario in usuarios_listados %}
+        <tr>
+            <td>{{ usuario.nome_completo }}</td>
+            <td>{{ usuario.get_role_display }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
