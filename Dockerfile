@@ -37,9 +37,8 @@ RUN useradd -m -r appuser
 WORKDIR /app
 
 # Copia as libs (libraries) Python já instaladas do estágio "builder" sem fixar a versão minor.
-# O wildcard (*) garante que pegará o diretório site-packages de qualquer versão do python3.
-COPY --from=builder /usr/local/lib/python3.*/site-packages/ /usr/local/lib/
-COPY --from=builder /usr/local/bin/ /usr/local/bin
+COPY --from=builder /usr/local/lib/python3.12/site-packages/ /usr/local/lib/python3.12/site-packages/
+COPY --from=builder /usr/local/bin/ /usr/local/bin/
 # Copia o código da sua aplicação já atribuindo as permissões ao usuuário appuser
 COPY --chown=appuser:appuser . .
 #Troca para o user
@@ -47,4 +46,4 @@ USER appuser
 
 EXPOSE 8000
 
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "config.wsgi:application"]
+CMD ["sh", "-c", "python3 manage.py makemigrations core && python3 manage.py migrate && python3 manage.py popular_users && python3 manage.py popular_users && python3 manage.py popular_users && gunicorn --bind 0.0.0.0:8000 --workers 3 config.wsgi:application"]
