@@ -50,6 +50,10 @@ INSTALLED_APPS = [
     "core",
     "patients",
     "screening",
+    "professors",
+    "students",
+    "supervisor",
+    "administration",
     'localflavor'
 ]
 
