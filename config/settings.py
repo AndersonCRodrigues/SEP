@@ -5,15 +5,14 @@ from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
 
 
+from dotenv import load_dotenv
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 load_dotenv(BASE_DIR / ".env")
 
-
-DEBUG = os.getenv("DJANGO_DEBUG", "False").lower() == "true"
-
-
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "django-insecure-dev-key")
+DEBUG = os.getenv("DJANGO_DEBUG", "True").lower() == "true"
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
 if not SECRET_KEY:
     if DEBUG:
@@ -34,6 +33,7 @@ if _allowed_hosts_env:
         host.strip() for host in _allowed_hosts_env.split(",") if host.strip()
     ]
 else:
+    ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
     ALLOWED_HOSTS = ["localhost", "127.0.0.1",'host.docker.internal']
 
 
@@ -50,7 +50,12 @@ INSTALLED_APPS = [
     "core",
     "patients",
     "screening",
-    'localflavor'
+    "professors",
+    "students",
+    "supervisor",
+    "administration",
+    "superadmin",
+    "localflavor",
 ]
 
 MIDDLEWARE = [
@@ -86,7 +91,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "config.wsgi.application"
-
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
@@ -179,4 +183,4 @@ STATIC_URL = "static/"
 
 AUTH_USER_MODEL = "core.CustomUser"
 LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'lista_tarefas'
+LOGIN_REDIRECT_URL = 'area_usuario'
