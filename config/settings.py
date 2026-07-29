@@ -5,6 +5,7 @@ from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
 
 
+<<<<<<< HEAD
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 load_dotenv(BASE_DIR / ".env")
@@ -15,6 +16,20 @@ DEBUG = os.getenv("DJANGO_DEBUG", "False").lower() == "true"
 
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "django-insecure-dev-key")
 
+=======
+from dotenv import load_dotenv
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+load_dotenv(BASE_DIR / ".env")
+
+
+DEBUG = os.getenv("DJANGO_DEBUG", "True").lower() == "true"
+
+
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
+
+>>>>>>> 93ecbb2a66600214ce4ba76be4ff0cb02a1db06a
 if not SECRET_KEY:
     if DEBUG:
         SECRET_KEY = os.getenv(
@@ -34,7 +49,11 @@ if _allowed_hosts_env:
         host.strip() for host in _allowed_hosts_env.split(",") if host.strip()
     ]
 else:
+<<<<<<< HEAD
     ALLOWED_HOSTS = ["localhost", "127.0.0.1",'host.docker.internal']
+=======
+    ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+>>>>>>> 93ecbb2a66600214ce4ba76be4ff0cb02a1db06a
 
 
 # Application definition
