@@ -2,9 +2,9 @@ services:
   db:
     image: postgres:16
     environment:
-      POSTGRES_DB: ${DATABASE_NAME}
-      POSTGRES_USER: ${DATABASE_USERNAME}
-      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DJANGO_DATABASE_NAME}
+      POSTGRES_USER: ${DJANGO_DATABASE_USER}
+      POSTGRES_PASSWORD: ${DJANGO_DATABASE_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
@@ -12,7 +12,7 @@ services:
     env_file:
       - .env
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USERNAME} -d ${DATABASE_NAME}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DJANGO_DATABASE_USER} -d ${DJANGO_DATABASE_NAME}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -29,16 +29,16 @@ services:
         condition: service_healthy
     environment:
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
-      DEBUG: ${DEBUG}
+      DEBUG: ${DJANGO_DEBUG}
       DJANGO_LOGLEVEL: ${DJANGO_LOGLEVEL}
       DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS}
-      
-      DJANGO_DATABASE_ENGINE: ${DATABASE_ENGINE}
-      DJANGO_DATABASE_NAME: ${DATABASE_NAME}
-      DJANGO_DATABASE_USER: ${DATABASE_USERNAME}
-      DJANGO_DATABASE_PASSWORD: ${DATABASE_PASSWORD}
-      DJANGO_DATABASE_HOST: ${DATABASE_HOST}
-      DJANGO_DATABASE_PORT: ${DATABASE_PORT}
+      DATABASE_ENGINE: ${DJANGO_DATABASE_ENGINE}
+      DATABASE_NAME: ${DJANGO_DATABASE_NAME}
+      DATABASE_USERNAME: ${DJANGO_DATABASE_USER}
+
+      DATABASE_PASSWORD: ${DJANGO_DATABASE_PASSWORD}
+      DATABASE_HOST: ${DJANGO_DATABASE_HOST}
+      DATABASE_PORT: ${DJANGO_DATABASE_PORT}
     env_file:
       - .env
 
