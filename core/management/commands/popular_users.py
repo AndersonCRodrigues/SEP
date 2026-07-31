@@ -7,6 +7,7 @@ import os
 from django.core.management.base import BaseCommand
 from django.core.exceptions import ValidationError
 from core.models import CustomUser
+from core.utils import sincronizar_grupo
 
 if os.getenv("NODE_ENV") == "dev":
     def gerar_cpf_valido():
@@ -86,9 +87,9 @@ if os.getenv("NODE_ENV") == "dev":
                 user.set_password("SenhaForte123!")
 
                 try:
-                    # O .full_clean() força a chamada da função clean() que você declarou no models.py
-                    user.full_clean() 
+                    user.full_clean()
                     user.save()
+                    sincronizar_grupo(user)
                     self.stdout.write(self.style.SUCCESS(f"Usuário {role} ({email}) criado com sucesso!"))
                 except ValidationError as e:
                     self.stdout.write(self.style.ERROR(f"Erro de validação no usuário {role}: {e}"))
