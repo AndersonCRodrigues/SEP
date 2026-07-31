@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Início | Sistema SEP{% endblock %}
+
+{% block content %}
+<header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+    <h1>Olá, {{ usuario.nome_completo }}</h1>
+    
+
+    <form action="{% url 'logout' %}" method="post" style="display: inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Sair / Logout</button>
+    </form>
+</header>
+
+<div class="dashboards-grid">
+
+    {# Painel para Superadmin #}
+    {% if "Superadmin" in user_groups or usuario.is_superuser %}
+    <section class="card">
+        <h2>Painel Superadmin</h2>
+        <p>Acesso total às configurações globais do sistema.</p>
+        <a href="{% url 'superadmin:painel' %}">Acessar Painel Global</a>
+    </section>
+    {% endif %}
+
+    {# Painel para Supervisor #}
+    {% if "Supervisor" in user_groups or usuario.is_superuser %}
+    <section class="card">
+        <h2>Coordenação & Supervisão</h2>
+        <p>Gestão de equipe, usuários e relatórios.</p>
+        <a href="{% url 'supervisor:painel' %}">Acessar Painel do Supervisor</a>
+        <a href="{% url 'cadastro' %}">Cadastrar Novo Usuário</a>
+        <button>triagem</button>
+        <button>estatisticas</button>
+    </section>
+    {% endif %}
+
+    {# Painel para Administração #}
+    {% if "Administration" in user_groups or "Administracao" in user_groups or usuario.is_superuser %}
+    <section class="card">
+        <h2>Administração</h2>
+        <p>Módulos de triagem, finanças e registros de atendimento.</p>
+        <a href="{% url 'administration:painel' %}">Acessar Painel Administrativo</a>
+        <button>Declarações/Atestados</button>
+        <button>Cadastro de paciente</button>
+    </section>
+    {% endif %}
+
+    {# Painel para Professor #}
+    {% if "Professors" in user_groups or "Professor" in user_groups or usuario.is_superuser %}
+    <section class="card">
+        <h2>Área do Professor</h2>
+        <p>Acompanhamento de estudantes, diários e apontamentos.</p>
+        <a href="{% url 'professors:painel' %}">Acessar Painel do Professor</a>
+        <button>Prontuarios</button>
+    </section>
+    {% endif %}
+
+    {# Painel para Estudantes #}
+    {% if "Students" in user_groups or "Estudantes" in user_groups or usuario.is_superuser %}
+    <section class="card">
+        <h2>Área do Estudante</h2>
+        <p>Visualização de dados pessoais, horários e consultas.</p>
+        <a href="{% url 'students:painel' %}">Acessar Painel do Estudante</a>
+        <button>Submissão de pronturaios</button>
+        <button>Calendarios</button>
+    </section>
+    {% endif %}
+
+</div>
+{% endblock %}
