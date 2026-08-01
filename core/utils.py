@@ -8,6 +8,7 @@ MAPA_GRUPOS = {
     CustomUser.Role.ADMIN: "Administration",
     CustomUser.Role.PROFESSOR: "Professors",
     CustomUser.Role.ALUNO: "Students",
+    CustomUser.Role.PACIENTE:"Patient",
 }
 
 
