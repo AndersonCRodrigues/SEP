@@ -1,22 +1,18 @@
-from django.contrib.auth.mixins import UserPassesTestMixin
-from django.views.generic import ListView
+from django.views.generic import ListView, TemplateView
 from core.models import CustomUser
+from core.mixins import GroupRequiredMixin
 
 
-class SuperadminRequiredMixin(UserPassesTestMixin):
-    def test_func(self):
-        if not self.request.user.is_authenticated:
-            return False
-        return (
-            self.request.user.groups.filter(name="Superadmin").exists() 
-            or self.request.user.is_superuser
-        )
-
-
-class PainelSuperadminView(SuperadminRequiredMixin, ListView):
+class PainelSuperadminView(GroupRequiredMixin, ListView):
+    required_group = "Superadmin"
     model = CustomUser
-    template_name = "painel_superadmin.html"  
+    template_name = "superadmin/superadmin_panel.html"
     context_object_name = "todos_usuarios"
 
     def get_queryset(self):
         return CustomUser.objects.all().order_by("-id")
+
+
+class HomeSuperadminView(GroupRequiredMixin, TemplateView):
+    required_group = "Superadmin"
+    template_name = "superadmin/home_superadmin.html"
