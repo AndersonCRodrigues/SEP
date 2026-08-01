@@ -1,0 +1,13 @@
+{% extends "home.html" %}
+
+{% block home_title %}Administração{% endblock %}
+
+{% block home_content %}
+<section class="card">
+    <h2>Administração</h2>
+    <p>Módulos de triagem, finanças e registros de atendimento.</p>
+    <a href="{% url 'administration:painel' %}">Acessar Painel Administrativo</a>
+    <button>Declarações/Atestados</button>
+    <button>Cadastro de paciente</button>
+</section>
+{% endblock %}
