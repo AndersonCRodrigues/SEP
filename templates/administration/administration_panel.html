@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Painel Administrativo | Sistema SEP{% endblock %}
+
+{% block content %}
+<header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+    <h1>Painel de Gestão Administrativa</h1>
+    <a href="{% url 'administration:home' %}">&larr; Voltar para a Home</a>
+</header>
+
+<section class="card">
+    <h2>Registros e Triagens (Alunos e Professores)</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Email</th>
+                <th>Tipo</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for usuario in atendimentos_ou_usuarios %}
+            <tr>
+                <td>{{ usuario.nome_completo }}</td>
+                <td>{{ usuario.email }}</td>
+                <td>{{ usuario.get_role_display }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3">Nenhum registro encontrado.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endblock %}
