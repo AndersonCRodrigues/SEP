@@ -1,0 +1,11 @@
+{% extends "home.html" %}
+
+{% block home_title %}Painel Superadmin{% endblock %}
+
+{% block home_content %}
+<section class="card">
+    <h2>Painel Superadmin</h2>
+    <p>Acesso total às configurações globais do sistema.</p>
+    <a href="{% url 'superadmin:painel' %}">Acessar Painel Global</a>
+</section>
+{% endblock %}
