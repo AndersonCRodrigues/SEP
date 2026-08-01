@@ -1,59 +1,40 @@
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView
-from django.core.exceptions import PermissionDenied
+from django.shortcuts import redirect
 from django.urls import reverse_lazy
-from .utils import sincronizar_grupo
-
-from .forms import CustomUserCreationForm, LoginEmailOuMatriculaForm
-
-
-
-@login_required
-def home(request):
-    user_groups = list(request.user.groups.values_list('name', flat=True))
-    return render(request, "home.html", {
-        "usuario": request.user,
-        "user_groups": user_groups,
-    })
+from django.views import View
+from core.models import CustomUser
+from .forms import LoginEmailOuMatriculaForm
 
 
-@login_required
-def cadastrar_usuario(request):
-    is_supervisor = (
-        request.user.groups.filter(name="Supervisor").exists()
-        or request.user.is_superuser
-    )
+class RedirecionarHomeView(LoginRequiredMixin, View):
+    ROLE_URL_MAP = {
+        CustomUser.Role.SUPERADMIN: "superadmin:home",
+        CustomUser.Role.SUPERVISOR: "supervisor:home",
+        CustomUser.Role.PROFESSOR: "teacher:home",
+        CustomUser.Role.ALUNO: "students:home",
+        CustomUser.Role.ADMIN: "administration:home",
+        CustomUser.Role.PACIENTE: "patient:home",
+    }
 
-    if not is_supervisor:
-        raise PermissionDenied("Apenas Supervisores podem cadastrar novos usuários.")
+    def get(self, request, *args, **kwargs):
+        if request.user.is_superuser:
+            return redirect("superadmin:home")
 
-    if request.method == "POST":
-        form = CustomUserCreationForm(request.POST, criado_por=request.user)
-        if form.is_valid():
-            user = form.save()
-            sincronizar_grupo(user)
-            messages.success(request, "Cadastro realizado com sucesso!")
-            return redirect("supervisor:painel")
-    else:
-        form = CustomUserCreationForm(criado_por=request.user)
+        url_name = self.ROLE_URL_MAP.get(request.user.role)
+        if url_name is None:
+            return redirect("login")
 
-    return render(request, "cadastro.html", {"form": form})
+        return redirect(url_name)
 
 
 class CustomLoginView(LoginView):
-    template_name = 'login.html'
+    template_name = "login.html"
     authentication_form = LoginEmailOuMatriculaForm
 
     def get_success_url(self):
-        return reverse_lazy("home")
+        return reverse_lazy("home_redirect")
 
 
 class CustomLogoutView(LogoutView):
     next_page = reverse_lazy("login")
-
-
-@login_required
-def area_usuario(request):
-    return render(request, "area_usuario.html", {"usuario": request.user})
