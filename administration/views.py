@@ -1,26 +1,20 @@
-from django.contrib.auth.mixins import UserPassesTestMixin
-from django.views.generic import ListView
+from django.views.generic import ListView, TemplateView
 from core.models import CustomUser
-
-
-class GroupRequiredMixin(UserPassesTestMixin):
-    required_group = "Administration"
-
-    def test_func(self):
-        if not self.request.user.is_authenticated:
-            return False
-        return (
-            self.request.user.groups.filter(name=self.required_group).exists() 
-            or self.request.user.is_superuser
-        )
+from core.mixins import GroupRequiredMixin
 
 
 class PainelAdministracaoView(GroupRequiredMixin, ListView):
+    required_group = "Administration"
     model = CustomUser
-    template_name = "painel_administracao.html"  
+    template_name = "administration/administration_panel.html"
     context_object_name = "atendimentos_ou_usuarios"
 
     def get_queryset(self):
         return CustomUser.objects.filter(
             role__in=[CustomUser.Role.ALUNO, CustomUser.Role.PROFESSOR]
         )
+
+
+class HomeAdministracaoView(GroupRequiredMixin, TemplateView):
+    required_group = "Administration"
+    template_name = "administration/home_administration.html"
