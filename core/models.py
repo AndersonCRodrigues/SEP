@@ -70,11 +70,11 @@ class OrientacaoManager(models.Manager):
     @transaction.atomic
     def trocar_orientador(self, aluno, novo_professor, area, periodo):
       
-        orientacao_atual = self.filter(aluno=aluno, data_fim__isnull=True).first()
+        orientacao_atual = self.select_for_update().filter(aluno=aluno, data_fim__isnull=True).first()
 
         if orientacao_atual:
             if orientacao_atual.professor == novo_professor:
-                raise ValueError(
+                raise ValidationError(
                     "O aluno ja esta sendo orientado por este professor."
                 )
             orientacao_atual.data_fim = timezone.now().date()
