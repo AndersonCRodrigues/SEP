@@ -1,0 +1,15 @@
+{% extends "home.html" %}
+
+{% block home_title %}Editar Meus Dados{% endblock %}
+<!-- OS DADOS USADOS EU PEGUEI DO POPULAR_USER,OU SEJA NÃO SÃO DADOS REAIS -->
+{% block home_content %}
+<section class="card">
+    <h2>Editar meus dados</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn">Salvar</button>
+    </form>
+    <a href="{% url 'patient:home' %}">← Voltar</a>
+</section>
+{% endblock %}

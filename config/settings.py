@@ -48,9 +48,9 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "accounts",
     "core",
-    "patients",
+    "patient",
     "screening",
-    "professors",
+    "teacher",
     "students",
     "supervisor",
     "administration",
@@ -183,4 +183,4 @@ STATIC_URL = "static/"
 
 AUTH_USER_MODEL = "core.CustomUser"
 LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'area_usuario'
+LOGIN_REDIRECT_URL = 'home_redirect'

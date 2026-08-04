@@ -1,0 +1,12 @@
+{% extends "home.html" %}
+
+{% block home_title %}Área do Professor{% endblock %}
+
+{% block home_content %}
+<section class="card">
+    <h2>Área do Professor</h2>
+    <p>Acompanhamento de estudantes, diários e apontamentos.</p>
+    <a href="{% url 'teacher:painel' %}">Acessar Painel do Professor</a>
+    <button>Prontuários</button>
+</section>
+{% endblock %}

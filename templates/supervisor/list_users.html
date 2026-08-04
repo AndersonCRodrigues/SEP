@@ -1,7 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}Usuários Cadastrados{% endblock %}
+
 {% block content %}
 <h1>Usuários Cadastrados</h1>
 
-<a href="{% url 'cadastro' %}">Cadastrar novo usuário</a>
+<a href="{% url 'supervisor:register' %}">Cadastrar novo usuário</a>
+<a href="{% url 'supervisor:home' %}">&larr; Voltar para a Home</a>
 
 <table>
     <thead>

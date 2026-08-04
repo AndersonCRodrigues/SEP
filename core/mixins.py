@@ -1,12 +1,17 @@
-from django.core.exceptions import PermissionDenied
-from django.contrib.auth.mixins import AccessMixin
+from django.contrib.auth.mixins import UserPassesTestMixin
 
-class RoleRequiredMixin(AccessMixin):
-    allowed_roles = []
-    
-    def dispatch(self,request,*args,**kwargs):
-        if not request.user.is_authenticated:
-            return self.handle_no_permission()
-        if request.user.role in self.allowed_roles:
-            return super().dispatch(request,*args,**kwargs)
-        raise PermissionDenied("Vc ñ tem permissão pra acessar essa pag")
+
+class GroupRequiredMixin(UserPassesTestMixin):
+    required_group = None
+
+    def test_func(self):
+        if not self.request.user.is_authenticated:
+            return False
+        if self.required_group is None:
+            raise NotImplementedError(
+                "Defina 'required_group' na subclasse de GroupRequiredMixin."
+            )
+        return (
+            self.request.user.groups.filter(name=self.required_group).exists()
+            or self.request.user.is_superuser
+        )

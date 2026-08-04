@@ -30,6 +30,7 @@ class CustomUser(AbstractUser):
             PROFESSOR = "PR", _("Professor Responsável")
             ADMIN = "AD", _("Administrativo")
             ALUNO = "AL", _("Aluno")
+            PACIENTE = "PA", _("Paciente")
         
     role = models.CharField(
         max_length=2,choices=Role.choices,default=Role.ALUNO,verbose_name="Cargo"

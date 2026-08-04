@@ -1,0 +1,13 @@
+{% extends "home.html" %}
+
+{% block home_title %}Área do Estudante{% endblock %}
+
+{% block home_content %}
+<section class="card">
+    <h2>Área do Estudante</h2>
+    <p>Visualização de dados pessoais, horários e consultas.</p>
+    <a href="{% url 'students:painel' %}">Acessar Painel do Estudante</a>
+    <button>Submissão de prontuários</button>
+    <button>Calendário</button>
+</section>
+{% endblock %}
