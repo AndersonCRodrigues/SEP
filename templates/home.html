@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}{% block home_title %}Início{% endblock %} | Sistema SEP{% endblock %}
+
+{% block content %}
+<header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+    <h1>Olá, {{ request.user.nome_completo }}</h1>
+    <form action="{% url 'logout' %}" method="post" style="display: inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Sair / Logout</button>
+    </form>
+</header>
+
+<div class="dashboards-grid">
+    {% block home_content %}{% endblock %}
+</div>
+{% endblock %}
