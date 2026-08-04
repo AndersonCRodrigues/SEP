@@ -58,7 +58,6 @@ class CustomUser(AbstractUser):
     
     class Meta:
         verbose_name = "Usuário"
-<<<<<<< HEAD
         verbose_name_plural = 'Usuários'
 
     
@@ -120,6 +119,3 @@ class Orientacao(models.Model):
         status = "ativa" if self.data_fim is None else f"encerrada em {self.data_fim}"
         return f"{self.aluno} orientado por {self.professor} ({self.periodo}, {status})"
 
-=======
-        verbose_name_plural = 'Usuários'
->>>>>>> 5ce5bcf2653bd5cec8573f2d6b70f7df6dd93560
