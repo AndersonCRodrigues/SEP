@@ -1,0 +1,14 @@
+{% extends "home.html" %}
+
+{% block home_title %}Coordenação & Supervisão{% endblock %}
+
+{% block home_content %}
+<section class="card">
+    <h2>Coordenação & Supervisão</h2>
+    <p>Gestão de equipe, usuários e relatórios.</p>
+    <a href="{% url 'supervisor:painel' %}">Acessar Painel do Supervisor</a>
+    <a href="{% url 'supervisor:register' %}">Cadastrar Novo Usuário</a>
+    <button>Triagem</button>
+    <button>Estatísticas</button>
+</section>
+{% endblock %}

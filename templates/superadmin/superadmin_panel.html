@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Painel Superadmin | Sistema SEP{% endblock %}
+
+{% block content %}
+<header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+    <h1>Painel Global (Superadmin)</h1>
+    <a href="{% url 'superadmin:home' %}">&larr; Voltar para a Home</a>
+</header>
+
+<section class="card" style="margin-bottom: 1.5rem;">
+    <h2>Ações do Sistema</h2>
+    <a href="{% url 'supervisor:register' %}" class="btn">Cadastrar Novo Usuário</a>
+</section>
+
+<section class="card">
+    <h2>Todos os Usuários Cadastrados</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Email</th>
+                <th>Papel (Role)</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for usuario in todos_usuarios %}
+            <tr>
+                <td>{{ usuario.id }}</td>
+                <td>{{ usuario.nome_completo }}</td>
+                <td>{{ usuario.email }}</td>
+                <td>{{ usuario.get_role_display }}</td>
+                <td>{% if usuario.is_active %}Ativo{% else %}Inativo{% endif %}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5">Nenhum usuário cadastrado até o momento.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endblock %}

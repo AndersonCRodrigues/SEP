@@ -30,6 +30,7 @@ class CustomUser(AbstractUser):
             PROFESSOR = "PR", _("Professor Responsável")
             ADMIN = "AD", _("Administrativo")
             ALUNO = "AL", _("Aluno")
+            PACIENTE = "PA", _("Paciente")
         
     role = models.CharField(
         max_length=2,choices=Role.choices,default=Role.ALUNO,verbose_name="Cargo"
@@ -57,6 +58,7 @@ class CustomUser(AbstractUser):
     
     class Meta:
         verbose_name = "Usuário"
+<<<<<<< HEAD
         verbose_name_plural = 'Usuários'
 
     
@@ -118,3 +120,6 @@ class Orientacao(models.Model):
         status = "ativa" if self.data_fim is None else f"encerrada em {self.data_fim}"
         return f"{self.aluno} orientado por {self.professor} ({self.periodo}, {status})"
 
+=======
+        verbose_name_plural = 'Usuários'
+>>>>>>> 5ce5bcf2653bd5cec8573f2d6b70f7df6dd93560

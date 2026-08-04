@@ -1,0 +1,21 @@
+{% extends "home.html" %}
+
+{% block home_title %}Meus Agendamentos{% endblock %}
+
+{% block home_content %}
+<section class="card">
+    <h2>Meus agendamentos</h2>
+    <ul>
+        {% for agendamento in agendamentos %}
+        <li>{{ agendamento.data }} — {{ agendamento.descricao }}</li>
+        {% empty %}
+        <li>Nenhum agendamento no momento.</li>
+        {% endfor %}
+    </ul>
+</section>
+
+<section class="card">
+    <h2>Meus dados</h2>
+    <a href="{% url 'patient:edit_data' %}" class="btn">Editar meus dados</a>
+</section>
+{% endblock %}
