@@ -56,7 +56,6 @@ INSTALLED_APPS = [
     "administration",
     "superadmin",
     "localflavor",
-    "orientacoes",
     "areas"
 ]
 
