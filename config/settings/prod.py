@@ -78,3 +78,12 @@ else:
             "NAME": BASE_DIR / "db.sqlite3",
         }
     }
+
+#Devo esconder essas infos na env?
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.servidor.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER','seu-email@dominio.com')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD','sua-senha-segura') 
+DEFAULT_FROM_EMAIL = 'Sistema Clínico <nao-responda@dominio.com>'

@@ -1,6 +1,7 @@
 from django.contrib.auth.models import Group
 from .models import CustomUser
-
+import secrets
+import string
 
 MAPA_GRUPOS = {
     CustomUser.Role.SUPERADMIN: "Superadmin",
@@ -18,3 +19,8 @@ def sincronizar_grupo(user):
         return
     grupo, _ = Group.objects.get_or_create(name=nome_grupo)
     user.groups.set([grupo])
+
+def gerar_senha_temporaria(tamanho=8):
+    caracteres = string.ascii_letters + string.digits
+    senha_provisoria = ''.join(secrets.choice(caracteres) for _ in range(tamanho))
+    return senha_provisoria

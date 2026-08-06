@@ -7,6 +7,9 @@ from core.models import CustomUser
 from core.mixins import GroupRequiredMixin
 from core.forms import CustomUserCreationForm
 from core.utils import sincronizar_grupo
+from .utils import gerar_senha_temporaria, enviar_email_credenciais
+
+# Importe a sua função sincronizar_grupo
 
 
 class PainelSupervisorView(GroupRequiredMixin, ListView):
@@ -50,11 +53,33 @@ def cadastrar_usuario(request):
     if request.method == "POST":
         form = CustomUserCreationForm(request.POST, criado_por=request.user)
         if form.is_valid():
-            user = form.save()
+            # 1. Pausa o salvamento no banco para podermos manipular o objeto
+            user = form.save(commit=False)
+            
+            # 2. Gera e criptografa a senha temporária
+            senha_temporaria = gerar_senha_temporaria()
+            user.set_password(senha_temporaria)
+            
+            # 3. Salva o usuário e os campos ManyToMany (necessário quando usamos commit=False)
+            user.save()
+            form.save_m2m() 
+            
+            # 4. Sincroniza os grupos baseados no cargo
             sincronizar_grupo(user)
-            messages.success(request, "Cadastro realizado com sucesso!")
+            
+            # 5. Verifica se é Paciente (US-5.1) e dispara o e-mail
+            if user.role == CustomUser.Role.PACIENTE:
+                enviar_email_credenciais(user, senha_temporaria)
+                messages.success(request, f"Paciente {user.nome_completo} cadastrado e e-mail enviado com sucesso!")
+            else:
+                # Caso a view cadastre alunos/professores, você pode usar a mesma função
+                enviar_email_credenciais(user, senha_temporaria)
+                messages.success(request, f"Usuário {user.nome_completo} cadastrado com sucesso!")
+                
             return redirect("supervisor:painel")
     else:
         form = CustomUserCreationForm(criado_por=request.user)
+
+    return render(request, "supervisor/register.html", {"form": form})
 
     return render(request, "supervisor/register.html", {"form": form})
