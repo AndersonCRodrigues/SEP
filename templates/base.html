@@ -43,8 +43,7 @@
             {% if request.user.is_authenticated %}
             <li class="nav-item">
               <span class="navbar-text">
-                Bem-vindo, {{
-                request.user.nome_completo|default:request.user.email }}
+                Bem-vindo, {{ request.user.nome_completo }}
               </span>
             </li>
             <li class="nav-item">
@@ -70,15 +69,25 @@
       </div>
     </nav>
 
-    <main class="container py-4 flex-grow-1">
-      {% if messages %}
-      <ul>
-        {% for message in messages %}
-        <li>{{ message }}</li>
-        {% endfor %}
-      </ul>
-      {% endif %} {% block content %} {% endblock %}
-    </main>
+    <div class="container-fluid flex-grow-1">
+      <div class="row h-100">
+        {% if request.user.is_authenticated %}
+        <aside class="col-12 col-md-3 col-lg-2 bg-light border-end p-3">
+          {% include "partials/_sidebar.html" %}
+        </aside>
+        {% endif %}
+
+        <main class="col py-4">
+          {% if messages %}
+          <ul>
+            {% for message in messages %}
+            <li>{{ message }}</li>
+            {% endfor %}
+          </ul>
+          {% endif %} {% block content %} {% endblock %}
+        </main>
+      </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
