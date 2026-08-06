@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 from django.core.exceptions import ImproperlyConfigured
+from django.contrib.messages import constants as messages
 
 from dotenv import load_dotenv
 
@@ -184,3 +185,11 @@ STATIC_URL = "static/"
 AUTH_USER_MODEL = "core.CustomUser"
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'home_redirect'
+
+MESSAGE_TAGS = {
+    messages.DEBUG: "secondary",
+    messages.INFO: "info",
+    messages.SUCCESS: "success",
+    messages.WARNING: "danger",
+    messages.ERROR: "danger",
+}

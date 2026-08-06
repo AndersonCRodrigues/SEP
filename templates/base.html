@@ -77,19 +77,13 @@
         </aside>
         {% endif %}
 
-        <main class="col py-4">
-          {% if messages %}
-          <ul>
-            {% for message in messages %}
-            <li>{{ message }}</li>
-            {% endfor %}
-          </ul>
-          {% endif %} {% block content %} {% endblock %}
-        </main>
+        <main class="col py-4">{% block content %}{% endblock %}</main>
       </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    {% include "partials/_toasts.html" %}
 
     {% block extra_js %}{% endblock %}
   </body>
