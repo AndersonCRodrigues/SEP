@@ -44,11 +44,11 @@ class CustomUser(AbstractUser):
     
     def clean(self):
         super().clean()
-        if self.role == self.Role.ALUNO and not self.matricula:
-            raise ValidationError({"Matricula":"Aluno precisa de matricula."})
-        
-        if self.role in(self.Role.PROFESSOR,self.Role.SUPERVISOR) and not self.crp:
-            raise ValidationError({"CRP":"Professor/Supervisor precisa ter o crp"})
+        if self.role in (self.Role.ALUNO, self.Role.ADMIN) and not self.matricula:
+            raise ValidationError({"matricula": "Aluno e Administrativo precisam de matrícula."})
+
+        if self.role in (self.Role.PROFESSOR, self.Role.SUPERVISOR) and not self.crp:
+            raise ValidationError({"crp": "Professor/Supervisor precisa ter o CRP."})
     
     def __str__(self):
         return f"{self.nome_completo} / {self.email}"
