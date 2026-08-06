@@ -38,3 +38,8 @@ link para visualização da tela de login mobile
 
 link para visualização landing page mobile 
 
+## 7 - Link para Triage Page (MOBILE)
+
+# https://www.figma.com/proto/PqhMPF0vRsREp9qVcALJx9/Projeto-Psicologia-Testes?node-id=492-141&t=X5yY0X3rPCBiGgV7-0&scaling=scale-down&content-scaling=fixed&page-id=0%3A1&starting-point-node-id=141%3A176
+
+link para visualização triage page mobile 
