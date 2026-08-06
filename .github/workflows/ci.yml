@@ -9,9 +9,29 @@ on:
 jobs:
   quality-check:
     runs-on: ubuntu-latest
+    
+    services:
+      db:
+        image: postgres:16
+        env:
+          POSTGRES_USER: admin
+          POSTGRES_PASSWORD: adminpassword
+          POSTGRES_DB: testdb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     env:
       DJANGO_SETTINGS_MODULE: config.settings
+      DB_NAME: testdb
+      DB_USER: admin
+      DB_PASSWORD: adminpassword
+      DB_HOST: localhost
+      DB_PORT: 5432
 
     steps:
       - uses: actions/checkout@v4
@@ -22,13 +42,15 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
+          python3 -m pip install --upgrade pip
           pip install -r requirements.txt
+          pip install black flake8  # Garante que os linters exigidos estejam instalados
 
-      - name: Ruff
-        run: |
-          ruff check .
-          ruff format --check .
+      - name: Formatação (Black)
+        run: black --check .
+
+      - name: Linting (Flake8)
+        run: flake8 .
 
       - name: Radon
         run: |
@@ -37,6 +59,9 @@ jobs:
       - name: Bandit
         run: |
           bandit -r . -x tests,.venv
+
+      - name: Executar Migrações
+        run: python3 manage.py migrate
 
       - name: Pytest
         run: |
