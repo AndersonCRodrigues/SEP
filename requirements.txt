@@ -2,7 +2,9 @@ asgiref==3.12.1
 bandit==1.9.4
 colorama==0.4.6
 coverage==7.15.2
+crispy-bootstrap5==2026.3
 Django==6.0.7
+django-crispy-forms==2.7
 django-localflavor==5.0
 dotenv==0.9.9
 gunicorn==23.0.0

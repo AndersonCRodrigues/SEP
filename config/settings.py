@@ -57,6 +57,8 @@ INSTALLED_APPS = [
     "administration",
     "superadmin",
     "localflavor",
+    "crispy_forms",
+    "crispy_bootstrap5",
 ]
 
 MIDDLEWARE = [
@@ -193,3 +195,6 @@ MESSAGE_TAGS = {
     messages.WARNING: "danger",
     messages.ERROR: "danger",
 }
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"
