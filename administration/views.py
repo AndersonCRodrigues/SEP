@@ -25,7 +25,7 @@ def cadastrar_paciente(request):
             user = form.save()
             sincronizar_grupo(user)
             messages.success(request, "Paciente cadastrado com sucesso!")
-            return redirect("administration:painel")
+            return redirect("administration:home")
     else:
         form = PacienteCreationForm()
 
@@ -33,7 +33,7 @@ def cadastrar_paciente(request):
 
 
 class PainelAdministracaoView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
-    template_name = "administration/painel.html"
+    template_name = "administration/administration_panel.html"
 
     def test_func(self):
         return self.request.user.is_superuser or self.request.user.role == CustomUser.Role.ADMINISTRATIVO
@@ -65,7 +65,7 @@ def cadastrar_administrativo(request):
             user = form.save()
             sincronizar_grupo(user)
             messages.success(request, "Administrativo cadastrado com sucesso!")
-            return redirect("superadmin:painel")  # era administration:painel
+            return redirect("superadmin:painel")  
     else:
         form = AdministrativoCreationForm()
 
