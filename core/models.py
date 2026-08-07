@@ -1,11 +1,9 @@
-from django.db import models, transaction
+from django.db import models
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
 from localflavor.br.models import BRCPFField,BRStateField,BRPostalCodeField
 from .managers import CustomUserManager
-from django.db.models import Q, UniqueConstraint
-from django.utils import timezone
 
 
 class CustomUser(AbstractUser):

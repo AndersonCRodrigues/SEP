@@ -1,27 +1,50 @@
-from django.db import models, transaction
-from core.models import CustomUser
-from teacher.models import Professor
-from django.db.models import Q, UniqueConstraint
-from django.utils import timezone
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
+from django.db import models, transaction
+from django.db.models import Q, UniqueConstraint
+from django.utils import timezone
+
+from core.models import CustomUser
+from teacher.models import Professor
 
 
-class Aluno(CustomUser):
+class Aluno(models.Model):
+    usuario = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="perfil_aluno",
+        verbose_name="Usuário",
+    )
 
     orientador_atual = models.ForeignKey(
         Professor,
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
-        related_name="orientandos_atuais"
+        related_name="orientandos_atuais",
+        verbose_name="Orientador atual",
     )
+
+    class Meta:
+        verbose_name = "Aluno"
+        verbose_name_plural = "Alunos"
+
+    def clean(self):
+        super().clean()
+        if self.usuario_id and self.usuario.role != CustomUser.Role.ALUNO:
+            raise ValidationError(
+                {"usuario": "O usuário vinculado precisa ter o cargo Aluno."}
+            )
+
+    def __str__(self):
+        return self.usuario.nome_completo
 
 
 class OrientacaoManager(models.Manager):
     @transaction.atomic
     def trocar_orientador(self, aluno, novo_professor, periodo):
-      
+
         orientacao_atual = self.select_for_update().filter(aluno=aluno, data_fim__isnull=True).first()
 
         if orientacao_atual:
@@ -51,8 +74,8 @@ class Orientacao(models.Model):
         on_delete=models.PROTECT,
     )
     professor= models.ForeignKey(
-        Professor, 
-        related_name="historico_orientandos", 
+        Professor,
+        related_name="historico_orientandos",
         on_delete=models.PROTECT,
     )
 
