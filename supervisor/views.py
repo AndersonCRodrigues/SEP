@@ -48,13 +48,13 @@ def cadastrar_usuario(request):
         raise PermissionDenied("Apenas Supervisores podem cadastrar novos usuários.")
 
     if request.method == "POST":
-        form = CustomUserCreationForm(request.POST, criado_por=request.user)
+        form = CustomUserCreationForm(request.POST, created_by=request.user)
         if form.is_valid():
             user = form.save()
             sincronizar_grupo(user)
             messages.success(request, "Cadastro realizado com sucesso!")
             return redirect("supervisor:painel")
     else:
-        form = CustomUserCreationForm(criado_por=request.user)
+        form = CustomUserCreationForm(created_by=request.user)
 
     return render(request, "supervisor/register.html", {"form": form})

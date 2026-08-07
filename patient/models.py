@@ -23,8 +23,6 @@ class Patient(CustomUser):
         verbose_name="Professor responsável",
     )
 
-    # Nao confundir com o is_active herdado do CustomUser, que controla o acesso
-    # ao sistema. Este indica se o paciente esta em atendimento.
     active_treatment = models.BooleanField(
         default=True,
         verbose_name="Em atendimento ativo",

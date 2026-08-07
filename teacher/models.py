@@ -16,8 +16,6 @@ class Teacher(CustomUser):
         verbose_name_plural = "Professores"
 
     def save(self, *args, **kwargs):
-        # O tipo E o cargo: sob heranca multi-tabela nao faz sentido um Teacher
-        # com role diferente de PROFESSOR, entao o campo nao fica a cargo de quem cria.
         self.role = CustomUser.Role.PROFESSOR
         super().save(*args, **kwargs)
 

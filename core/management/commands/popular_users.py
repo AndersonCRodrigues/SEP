@@ -6,30 +6,45 @@ import random
 import os
 from django.core.management.base import BaseCommand
 from django.core.exceptions import ValidationError
+from areas.models import AreaActing
 from core.models import CustomUser
 from core.utils import sincronizar_grupo
+from patient.models import Patient
+from students.models import Student
+from teacher.models import Teacher
 
 if os.getenv("NODE_ENV") == "dev":
-    def gerar_cpf_valido():
+
+    # Sob heranca multi-tabela, criar um CustomUser com role="PR" nao cria a linha
+    # em teacher_teacher. O papel precisa definir qual classe e instanciada.
+    MODEL_BY_ROLE = {
+        CustomUser.Role.PROFESSOR: Teacher,
+        CustomUser.Role.ALUNO: Student,
+        CustomUser.Role.PACIENTE: Patient,
+    }
+
+    DEFAULT_ACTING_AREA = "Psicologia Clínica"
+
+    def generate_valid_cpf():
         """Gera um CPF matematicamente válido para burlar a validação em ambiente de teste."""
         cpf = [random.randint(0, 9) for _ in range(9)]
-        
-        soma1 = sum(x * y for x, y in zip(cpf, range(10, 1, -1)))
-        d1 = 11 - (soma1 % 11)
-        d1 = 0 if d1 >= 10 else d1
-        cpf.append(d1)
-        
-        soma2 = sum(x * y for x, y in zip(cpf, range(11, 1, -1)))
-        d2 = 11 - (soma2 % 11)
-        d2 = 0 if d2 >= 10 else d2
-        cpf.append(d2)
-        
+
+        first_sum = sum(x * y for x, y in zip(cpf, range(10, 1, -1)))
+        first_digit = 11 - (first_sum % 11)
+        first_digit = 0 if first_digit >= 10 else first_digit
+        cpf.append(first_digit)
+
+        second_sum = sum(x * y for x, y in zip(cpf, range(11, 1, -1)))
+        second_digit = 11 - (second_sum % 11)
+        second_digit = 0 if second_digit >= 10 else second_digit
+        cpf.append(second_digit)
+
         return f"{cpf[0]}{cpf[1]}{cpf[2]}.{cpf[3]}{cpf[4]}{cpf[5]}.{cpf[6]}{cpf[7]}{cpf[8]}-{cpf[9]}{cpf[10]}"
 
     class Command(BaseCommand):
         help = 'Popula o banco de dados com usuários de teste para as Roles selecionadas.' # E printado no terminal se colocado 'docker compose exec django-web python3 manage.py test_user --help'
 
-        def add_arguments(self, parser): 
+        def add_arguments(self, parser):
             #Permite passar roles como argumentos separados por espaço. ex.: --roles PR AL
             parser.add_argument(
                 '--roles',
@@ -40,26 +55,35 @@ if os.getenv("NODE_ENV") == "dev":
             )# Decidi fazer desse jeito para ser mais pratico se quisermos testar so 1 tipo de role
 
         def handle(self, *args, **options):
-            roles_selecionadas = options['roles']
+            selected_roles = options['roles']
 
-            if not roles_selecionadas: # Se nenhum role foi passada, seleciona todas
-                roles_selecionadas = [role[0] for role in CustomUser.Role.choices]
-            
-            for role in roles_selecionadas:
-                prefixo = role.lower()
-                email = f"{prefixo}@teste.com"
-                contador = 1
+            if not selected_roles: # Se nenhum role foi passada, seleciona todas
+                selected_roles = [role[0] for role in CustomUser.Role.choices]
+
+            for role in selected_roles:
+                prefix = role.lower()
+                email = f"{prefix}@teste.com"
+                counter = 1
 
                 while CustomUser.objects.filter(email=email).exists():
-                    email = f"{prefixo}{contador}@teste.com"
-                    contador += 1
-                
-                cpf_dinamico = gerar_cpf_valido()
+                    email = f"{prefix}{counter}@teste.com"
+                    counter += 1
 
-                user = CustomUser(
+                model = MODEL_BY_ROLE.get(role, CustomUser)
+                extra_fields = {}
+
+                if model is Teacher:
+                    # acting_area e FK obrigatoria com PROTECT: sem uma area cadastrada
+                    # nenhum professor pode ser criado.
+                    acting_area, _ = AreaActing.objects.get_or_create(
+                        nome=DEFAULT_ACTING_AREA
+                    )
+                    extra_fields["acting_area"] = acting_area
+
+                user = model(
                     email=email,
-                    nome_completo=f"Usuario Teste {role} {contador if contador > 1 else ''}".strip(),
-                    cpf=cpf_dinamico,
+                    nome_completo=f"Usuario Teste {role} {counter if counter > 1 else ''}".strip(),
+                    cpf=generate_valid_cpf(),
                     telefone="(99) 99999-9999",
                     logradouro="Rua de Teste",
                     numero="0",
@@ -67,23 +91,22 @@ if os.getenv("NODE_ENV") == "dev":
                     cidade="Maricá",
                     estado="RJ",
                     cep="24900-000",
-                    role=role
+                    role=role,
+                    **extra_fields,
                 )
 
-                if role == CustomUser.Role.ALUNO:
+                if role in (CustomUser.Role.ALUNO, CustomUser.Role.PROFESSOR):
                     # Gera uma matrícula aleatória (ex: 2026 + 4 números aleatórios)
-                    numero_aleatorio = random.randint(1000, 9999)
-                    user.matricula = f"2026{numero_aleatorio}"
-                    
-                elif role in (CustomUser.Role.PROFESSOR, CustomUser.Role.SUPERVISOR):
+                    user.matricula = f"2026{random.randint(1000, 9999)}"
+
+                if role in (CustomUser.Role.PROFESSOR, CustomUser.Role.SUPERVISOR):
                     # Gera um CRP aleatório
-                    numero_crp = random.randint(10000, 99999)
-                    user.crp = f"{numero_crp}/RJ-{role}"
-                
+                    user.crp = f"{random.randint(10000, 99999)}/RJ-{role}"
+
                 if role == CustomUser.Role.SUPERADMIN:
                     user.is_staff = True
                     user.is_superuser = True
-                
+
                 user.set_password("SenhaForte123!")
 
                 try:
