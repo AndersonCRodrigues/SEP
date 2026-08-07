@@ -1,17 +1,31 @@
-{% extends "base.html" %}
+{% extends "home.html" %}
 
-{% block title %}Painel do Professor{% endblock %}
+{% block home_title %}Painel do Professor{% endblock %}
 
-{% block content %}
-<h1>Meus Alunos</h1>
-
-{% if alunos %}
-    <ul>
-        {% for aluno in alunos %}
-            <li>{{ aluno.nome_completo }}</li>
+{% block home_content %}
+<section class="card">
+    <h2>Meus Alunos Orientandos</h2>
+    {% if alunos_vinculados %}
+        <ul>
+        {% for aluno in alunos_vinculados %}
+            <li>{{ aluno.nome_completo }} — {{ aluno.matricula }}</li>
         {% endfor %}
-    </ul>
-{% else %}
-    <p>Nenhum aluno cadastrado.</p>
-{% endif %}
+        </ul>
+    {% else %}
+        <p>Você ainda não tem alunos vinculados.</p>
+    {% endif %}
+</section>
+
+<section class="card">
+    <h2>Alunos Disponíveis pra Vincular</h2>
+    {% if alunos_disponiveis %}
+        <form method="post" action="{% url 'teacher:vincular_aluno' %}">
+            {% csrf_token %}
+            {{ form_vincular.as_p }}
+            <button type="submit">Vincular Aluno</button>
+        </form>
+    {% else %}
+        <p>Não há alunos disponíveis no momento.</p>
+    {% endif %}
+</section>
 {% endblock %}
