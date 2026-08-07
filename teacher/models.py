@@ -1,23 +1,22 @@
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
-
 from areas.models import AreaActing
 from core.models import CustomUser
 
 
-class Professor(models.Model):
-    usuario = models.OneToOneField(
+class Teacher(models.Model):
+    user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name="perfil_professor",
+        related_name="teacher_profile",
         verbose_name="Usuário",
     )
 
-    area_atuacao = models.ForeignKey(
+    acting_area = models.ForeignKey(
         AreaActing,
         on_delete=models.PROTECT,
-        related_name="professores",
+        related_name="teachers",
         verbose_name="Área de atuação",
     )
 
@@ -27,12 +26,12 @@ class Professor(models.Model):
 
     def clean(self):
         super().clean()
-        if self.usuario_id and self.usuario.role != CustomUser.Role.PROFESSOR:
+        if self.user_id and self.user.role != CustomUser.Role.PROFESSOR:
             raise ValidationError(
                 {
-                    "usuario": "O usuário vinculado precisa ter o cargo Professor Responsável."
+                    "user": "O usuário vinculado precisa ter o cargo Professor Responsável."
                 }
             )
 
     def __str__(self):
-        return f"{self.usuario.nome_completo} ({self.area_atuacao})"
+        return f"{self.user.nome_completo} ({self.acting_area})"

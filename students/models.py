@@ -4,25 +4,24 @@ from django.core.validators import RegexValidator
 from django.db import models, transaction
 from django.db.models import Q, UniqueConstraint
 from django.utils import timezone
-
 from core.models import CustomUser
-from teacher.models import Professor
+from teacher.models import Teacher
 
 
-class Aluno(models.Model):
-    usuario = models.OneToOneField(
+class Student(models.Model):
+    user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name="perfil_aluno",
+        related_name="student_profile",
         verbose_name="Usuário",
     )
 
-    orientador_atual = models.ForeignKey(
-        Professor,
+    current_advisor = models.ForeignKey(
+        Teacher,
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
-        related_name="orientandos_atuais",
+        related_name="current_advisees",
         verbose_name="Orientador atual",
     )
 
@@ -32,77 +31,82 @@ class Aluno(models.Model):
 
     def clean(self):
         super().clean()
-        if self.usuario_id and self.usuario.role != CustomUser.Role.ALUNO:
+        if self.user_id and self.user.role != CustomUser.Role.ALUNO:
             raise ValidationError(
-                {"usuario": "O usuário vinculado precisa ter o cargo Aluno."}
+                {"user": "O usuário vinculado precisa ter o cargo Aluno."}
             )
 
     def __str__(self):
-        return self.usuario.nome_completo
+        return self.user.nome_completo
 
 
-class OrientacaoManager(models.Manager):
+class AdvisingManager(models.Manager):
     @transaction.atomic
-    def trocar_orientador(self, aluno, novo_professor, periodo):
+    def change_advisor(self, student, new_teacher, term):
 
-        orientacao_atual = self.select_for_update().filter(aluno=aluno, data_fim__isnull=True).first()
+        current_advising = self.select_for_update().filter(student=student, end_date__isnull=True).first()
 
-        if orientacao_atual:
-            if orientacao_atual.professor == novo_professor:
+        if current_advising:
+            if current_advising.teacher == new_teacher:
                 raise ValidationError(
                     "O aluno ja esta sendo orientado por este professor."
                 )
-            orientacao_atual.data_fim = timezone.now().date()
-            orientacao_atual.save()
+            current_advising.end_date = timezone.now().date()
+            current_advising.save()
 
-        nova_orientacao = self.create(
-        aluno=aluno,
-        professor=novo_professor,
-        periodo=periodo,
+        new_advising = self.create(
+        student=student,
+        teacher=new_teacher,
+        term=term,
         )
 
-        aluno.orientador_atual = novo_professor
-        aluno.save(update_fields=["orientador_atual"])
+        student.current_advisor = new_teacher
+        student.save(update_fields=["current_advisor"])
 
-        return nova_orientacao
+        return new_advising
 
 
-class Orientacao(models.Model):
-    aluno = models.ForeignKey(
-        Aluno,
-        related_name="historico_orientacoes",
+class Advising(models.Model):
+    student = models.ForeignKey(
+        Student,
+        related_name="advising_history",
         on_delete=models.PROTECT,
+        verbose_name="Aluno",
     )
-    professor= models.ForeignKey(
-        Professor,
-        related_name="historico_orientandos",
+    teacher = models.ForeignKey(
+        Teacher,
+        related_name="advisee_history",
         on_delete=models.PROTECT,
+        verbose_name="Professor",
     )
 
-    periodo = models.CharField(
+    term = models.CharField(
         max_length=6,
         validators=[
             RegexValidator(
                 regex=r"^\d{4}\.[12]$",
                 message="O  período deve estar no formato AAAA.1 ou AAAA.2 (exemplo.:2026.1)."
             )
-        ]
+        ],
+        verbose_name="Período",
     )  # ex: "2026.1"
 
-    data_inicio = models.DateField(auto_now_add=True)
-    data_fim = models.DateField(null=True, blank=True)
+    start_date = models.DateField(auto_now_add=True, verbose_name="Data de início")
+    end_date = models.DateField(null=True, blank=True, verbose_name="Data de término")
 
-    objects = OrientacaoManager()
+    objects = AdvisingManager()
 
     class Meta:
+        verbose_name = "Orientação"
+        verbose_name_plural = "Orientações"
         constraints = [
             UniqueConstraint(
-                fields=["aluno"],
-                condition=Q(data_fim__isnull=True),
-                name="aluno_com_no_maximo_uma_orientacao_ativa",
+                fields=["student"],
+                condition=Q(end_date__isnull=True),
+                name="student_with_at_most_one_active_advising",
             )
         ]
 
     def __str__(self):
-        status = "ativa" if self.data_fim is None else f"encerrada em {self.data_fim}"
-        return f"{self.aluno} orientado por {self.professor} ({self.periodo}, {status})"
+        status = "ativa" if self.end_date is None else f"encerrada em {self.end_date}"
+        return f"{self.student} orientado por {self.teacher} ({self.term}, {status})"
