@@ -1,7 +1,8 @@
 {% block content %}
 <h1>Usuários Cadastrados</h1>
 
-<a href="{% url 'supervisor:register' %}">Cadastrar novo usuário</a>
+    <a href="{% url 'students:cadastrar' %}">Cadastrar Aluno</a>
+    <a href="{% url 'teacher:cadastrar' %}">Cadastrar Professor</a>
 
 <table>
     <thead>
