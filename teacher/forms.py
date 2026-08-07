@@ -16,7 +16,7 @@ class VincularAlunoForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        from students.models import Aluno  # import local: evita ciclo teacher <-> students
+        from students.models import Aluno  
         self.fields["aluno"].queryset = Aluno.objects.filter(orientador_atual__isnull=True)
 
     def clean_periodo(self):
@@ -35,7 +35,7 @@ class ProfessorCreationForm(UserCreationForm):
     )
 
     class Meta:
-        model = Professor  # Alterado para Professor!
+        model = Professor
         fields = (
             "email",
             "nome_completo",
@@ -52,6 +52,10 @@ class ProfessorCreationForm(UserCreationForm):
             "crp",
             "area_atuacao",
         )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.instance.role = CustomUser.Role.PROFESSOR
 
     def save(self, commit=True):
         professor = super().save(commit=False)
