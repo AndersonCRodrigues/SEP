@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from .models import CustomUser
-from .forms import SupervisorCreationForm
+from supervisor.forms import SupervisorCreationForm
 
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
