@@ -5,10 +5,10 @@ from .models import CustomUser
 MAPA_GRUPOS = {
     CustomUser.Role.SUPERADMIN: "Superadmin",
     CustomUser.Role.SUPERVISOR: "Supervisor",
-    CustomUser.Role.ADMIN: "Administration",
+    CustomUser.Role.ADMINISTRATIVO: "Administration",  
     CustomUser.Role.PROFESSOR: "Professors",
     CustomUser.Role.ALUNO: "Students",
-    CustomUser.Role.PACIENTE:"Patient",
+    CustomUser.Role.PACIENTE: "Patient",
 }
 
 
