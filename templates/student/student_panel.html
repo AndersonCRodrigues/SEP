@@ -8,6 +8,13 @@
    <a href="{% url 'students:home' %}">&larr; Voltar para a Home</a>
 </header>
 
+<section class="card">
+    <h2>Painel do Aluno</h2>
+    <ul class="menu-botoes">
+        <li><a href="{% url 'students:meu_professor' %}"><button>Meu Professor</button></a></li>
+        <li><a href="{% url 'students:perfil' %}"><button>Meu Perfil</button></a></li>
+    </ul>
+</section>
 <section class="card" style="margin-bottom: 2rem;">
     <h2>Minhas Informações</h2>
     <p><strong>Nome:</strong> {{ estudante.nome_completo }}</p>
