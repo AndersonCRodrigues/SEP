@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.db import models, transaction
@@ -8,14 +7,7 @@ from core.models import CustomUser
 from teacher.models import Teacher
 
 
-class Student(models.Model):
-    user = models.OneToOneField(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="student_profile",
-        verbose_name="Usuário",
-    )
-
+class Student(CustomUser):
     current_advisor = models.ForeignKey(
         Teacher,
         null=True,
@@ -29,15 +21,12 @@ class Student(models.Model):
         verbose_name = "Aluno"
         verbose_name_plural = "Alunos"
 
-    def clean(self):
-        super().clean()
-        if self.user_id and self.user.role != CustomUser.Role.ALUNO:
-            raise ValidationError(
-                {"user": "O usuário vinculado precisa ter o cargo Aluno."}
-            )
+    def save(self, *args, **kwargs):
+        self.role = CustomUser.Role.ALUNO
+        super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.user.nome_completo
+        return self.nome_completo
 
 
 class AdvisingManager(models.Manager):

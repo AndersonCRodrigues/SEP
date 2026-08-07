@@ -1,19 +1,10 @@
-from django.conf import settings
-from django.core.exceptions import ValidationError
 from django.db import models
 from core.models import CustomUser
 from students.models import Student
 from teacher.models import Teacher
 
 
-class Patient(models.Model):
-    user = models.OneToOneField(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="patient_profile",
-        verbose_name="Usuário",
-    )
-
+class Patient(CustomUser):
     responsible_student = models.ForeignKey(
         Student,
         null=True,
@@ -32,7 +23,12 @@ class Patient(models.Model):
         verbose_name="Professor responsável",
     )
 
-    active = models.BooleanField(default=True, verbose_name="Ativo")
+    # Nao confundir com o is_active herdado do CustomUser, que controla o acesso
+    # ao sistema. Este indica se o paciente esta em atendimento.
+    active_treatment = models.BooleanField(
+        default=True,
+        verbose_name="Em atendimento ativo",
+    )
 
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Criado em")
 
@@ -40,12 +36,9 @@ class Patient(models.Model):
         verbose_name = "Paciente"
         verbose_name_plural = "Pacientes"
 
-    def clean(self):
-        super().clean()
-        if self.user_id and self.user.role != CustomUser.Role.PACIENTE:
-            raise ValidationError(
-                {"user": "O usuário vinculado precisa ter o cargo Paciente."}
-            )
+    def save(self, *args, **kwargs):
+        self.role = CustomUser.Role.PACIENTE
+        super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.user.nome_completo
+        return self.nome_completo
