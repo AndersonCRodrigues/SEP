@@ -12,9 +12,13 @@ class AdministrativoCreationForm(UserCreationForm):
             "cep", "matricula",
         )
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.instance.role = CustomUser.Role.ADMINISTRATIVO
+
     def save(self, commit=True):
         user = super().save(commit=False)
-        user.role = CustomUser.Role.ADMINISTRATIVO  # era ADMIN
+        user.role = CustomUser.Role.ADMINISTRATIVO
         if commit:
             user.save()
         return user
