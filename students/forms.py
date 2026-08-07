@@ -6,12 +6,16 @@ from .models import Aluno
 
 class AlunoCreationForm(UserCreationForm):
     class Meta:
-        model = Aluno 
+        model = Aluno
         fields = (
             "email", "nome_completo", "cpf", "telefone", "logradouro",
             "numero", "complemento", "bairro", "cidade", "estado",
             "cep", "matricula",
         )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.instance.role = CustomUser.Role.ALUNO
 
     def save(self, commit=True):
         aluno = super().save(commit=False)
