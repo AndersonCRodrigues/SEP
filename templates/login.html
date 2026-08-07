@@ -43,6 +43,7 @@
         campoSenha.type = ehSenha ? "text" : "password";
         olhoFechado.style.display = ehSenha ? "none" : "inline";
         olhoAberto.style.display = ehSenha ? "inline" : "none";
+        this.setAttribute("aria-label", ehSenha ? "Ocultar senha" : "Mostrar senha");
     });
 </script>
 {% endblock %}
