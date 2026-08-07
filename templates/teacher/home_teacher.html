@@ -3,10 +3,16 @@
 {% block home_title %}Área do Professor{% endblock %}
 
 {% block home_content %}
-<section class="card">
-    <h2>Área do Professor</h2>
-    <p>Acompanhamento de estudantes, diários e apontamentos.</p>
-    <a href="{% url 'teacher:painel' %}">Acessar Painel do Professor</a>
-    <button>Prontuários</button>
-</section>
+<div class="col-12 col-md-6">
+    <div class="card h-100">
+        <div class="card-body">
+            <h2 class="h5 card-title">Área do Professor</h2>
+            <p class="card-text">Acompanhamento de estudantes, diários e apontamentos.</p>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{% url 'teacher:painel' %}" class="btn btn-primary">Acessar Painel do Professor</a>
+                <button type="button" class="btn btn-outline-secondary">Prontuários</button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

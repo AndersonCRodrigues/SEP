@@ -3,12 +3,18 @@
 {% block home_title %}Coordenação & Supervisão{% endblock %}
 
 {% block home_content %}
-<section class="card">
-    <h2>Coordenação & Supervisão</h2>
-    <p>Gestão de equipe, usuários e relatórios.</p>
-    <a href="{% url 'supervisor:painel' %}">Acessar Painel do Supervisor</a>
-    <a href="{% url 'supervisor:register' %}">Cadastrar Novo Usuário</a>
-    <button>Triagem</button>
-    <button>Estatísticas</button>
-</section>
+<div class="col-12 col-md-6">
+    <div class="card h-100">
+        <div class="card-body">
+            <h2 class="h5 card-title">Coordenação &amp; Supervisão</h2>
+            <p class="card-text">Gestão de equipe, usuários e relatórios.</p>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{% url 'supervisor:painel' %}" class="btn btn-primary">Acessar Painel do Supervisor</a>
+                <a href="{% url 'supervisor:register' %}" class="btn btn-outline-primary">Cadastrar Novo Usuário</a>
+                <button type="button" class="btn btn-outline-secondary">Triagem</button>
+                <button type="button" class="btn btn-outline-secondary">Estatísticas</button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
