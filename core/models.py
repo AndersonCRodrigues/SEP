@@ -25,28 +25,28 @@ class CustomUser(AbstractUser):
     cep = BRPostalCodeField(verbose_name="CEP")
     
     class Role(models.TextChoices):
-            SUPERADMIN = "SA", _("Superadmin")
-            SUPERVISOR = "SV", _("Supervisor Geral")
-            PROFESSOR = "PR", _("Professor Responsável")
-            ADMIN = "AD", _("Administrativo")
-            ALUNO = "AL", _("Aluno")
-            PACIENTE = "PA", _("Paciente")
-        
+        SUPERADMIN = "SA", _("Superadmin")
+        SUPERVISOR = "SV", _("Supervisor Geral")
+        PROFESSOR = "PR", _("Professor Responsável")
+        ADMINISTRATIVO = "AD", _("Administrativo")  
+        ALUNO = "AL", _("Aluno")
+        PACIENTE = "PA", _("Paciente")
+
     role = models.CharField(
-        max_length=2,choices=Role.choices,default=Role.ALUNO,verbose_name="Cargo"
-        )
-    
-    matricula = models.CharField(max_length=20,blank=True,verbose_name="Matricula")
-    crp = models.CharField(max_length=15,blank=True,verbose_name='CRP')
-    
+        max_length=2, choices=Role.choices, default=Role.ALUNO, verbose_name="Cargo"
+    )
+
+    matricula = models.CharField(max_length=20, blank=True, verbose_name="Matricula")
+    crp = models.CharField(max_length=15, blank=True, verbose_name='CRP')
+
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = ["nome_completo","cpf"]
-    
+    REQUIRED_FIELDS = ["nome_completo", "cpf"]
+
     objects = CustomUserManager()
-    
+
     def clean(self):
         super().clean()
-        if self.role in (self.Role.ALUNO, self.Role.ADMIN) and not self.matricula:
+        if self.role in (self.Role.ALUNO, self.Role.ADMINISTRATIVO) and not self.matricula:
             raise ValidationError({"matricula": "Aluno e Administrativo precisam de matrícula."})
 
         if self.role in (self.Role.PROFESSOR, self.Role.SUPERVISOR) and not self.crp:
