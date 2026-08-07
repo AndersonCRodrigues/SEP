@@ -56,7 +56,8 @@ INSTALLED_APPS = [
     "administration",
     "superadmin",
     "localflavor",
-    "areas"
+    "areas",
+    "documents",
 ]
 
 MIDDLEWARE = [

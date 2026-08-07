@@ -15,8 +15,6 @@ from teacher.models import Teacher
 
 if os.getenv("NODE_ENV") == "dev":
 
-    # Sob heranca multi-tabela, criar um CustomUser com role="PR" nao cria a linha
-    # em teacher_teacher. O papel precisa definir qual classe e instanciada.
     MODEL_BY_ROLE = {
         CustomUser.Role.PROFESSOR: Teacher,
         CustomUser.Role.ALUNO: Student,
@@ -73,8 +71,6 @@ if os.getenv("NODE_ENV") == "dev":
                 extra_fields = {}
 
                 if model is Teacher:
-                    # acting_area e FK obrigatoria com PROTECT: sem uma area cadastrada
-                    # nenhum professor pode ser criado.
                     acting_area, _ = AreaActing.objects.get_or_create(
                         nome=DEFAULT_ACTING_AREA
                     )

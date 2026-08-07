@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from patient.models import Patient
 from students.models import Student
@@ -47,3 +48,33 @@ class Screening(models.Model):
 
     def __str__(self):
         return f"Triagem de {self.patient} ({self.get_priority_display()})"
+
+
+class ScreeningFeedback(models.Model):
+    screening = models.ForeignKey(
+        Screening,
+        on_delete=models.PROTECT,
+        related_name="feedbacks",
+        verbose_name="Triagem",
+    )
+
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="screening_feedbacks",
+        verbose_name="Autor",
+    )
+
+    content = models.TextField(verbose_name="Parecer")
+
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Criado em")
+
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Atualizado em")
+
+    class Meta:
+        verbose_name = "Feedback de triagem"
+        verbose_name_plural = "Feedbacks de triagem"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Feedback de {self.author.nome_completo} em {self.screening}"
