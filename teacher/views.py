@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from students.models import Orientacao  
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin,UserPassesTestMixin
@@ -8,6 +9,9 @@ from django.urls import reverse_lazy
 from .forms import ProfessorCreationForm, PerfilProfessorForm
 from .models import Professor
 from core.utils import sincronizar_grupo
+from django.core.exceptions import ValidationError
+from core.models import CustomUser
+from .forms import VincularAlunoForm
 
 
 
@@ -44,12 +48,10 @@ class PerfilProfessorView(LoginRequiredMixin, UpdateView):
     success_url = reverse_lazy("teacher:home") 
 
     def get_object(self, queryset=None):
-        # Como Professor herda de CustomUser, busca pelo PK do próprio usuário logado
+        
         return get_object_or_404(Professor, pk=self.request.user.pk)
     
-from django.core.exceptions import ValidationError
-from core.models import CustomUser
-from .forms import VincularAlunoForm
+
 
 
 class PainelProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
@@ -71,7 +73,6 @@ class PainelProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView)
 
 @login_required
 def vincular_aluno(request):
-    from students.models import Orientacao  # import local: evita ciclo teacher <-> students
 
     is_professor = request.user.role in (CustomUser.Role.PROFESSOR, CustomUser.Role.SUPERVISOR)
     if not is_professor:
