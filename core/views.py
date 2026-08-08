@@ -13,7 +13,7 @@ class RedirecionarHomeView(LoginRequiredMixin, View):
         CustomUser.Role.SUPERVISOR: "supervisor:home",
         CustomUser.Role.PROFESSOR: "teacher:home",
         CustomUser.Role.ALUNO: "students:home",
-        CustomUser.Role.ADMIN: "administration:home",
+        CustomUser.Role.ADMINISTRATIVO: "administration:home",
         CustomUser.Role.PACIENTE: "patient:home",
     }
 

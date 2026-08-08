@@ -1,4 +1,5 @@
-from django.views.generic import ListView, TemplateView
+from django.urls import reverse_lazy
+from django.views.generic import ListView, TemplateView, UpdateView
 from core.models import CustomUser
 from core.mixins import GroupRequiredMixin
 
@@ -16,3 +17,13 @@ class PainelSuperadminView(GroupRequiredMixin, ListView):
 class HomeSuperadminView(GroupRequiredMixin, TemplateView):
     required_group = "Superadmin"
     template_name = "superadmin/home_superadmin.html"
+
+
+class PerfilSuperadminView(GroupRequiredMixin, UpdateView):
+    required_group = "Superadmin"
+    model = CustomUser
+    template_name = "superadmin/perfil.html"
+    success_url = reverse_lazy("superadmin:perfil")
+
+    def get_object(self, queryset=None):
+        return self.request.user

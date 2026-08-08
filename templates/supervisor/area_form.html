@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Área de Atuação{% endblock %}
+{% block content %}
+<section class="card">
+    <h2>{% if form.instance.pk %}Editar{% else %}Nova{% endif %} Área de Atuação</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Salvar</button>
+    </form>
+</section>
+{% endblock %}
