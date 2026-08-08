@@ -57,7 +57,7 @@ INSTALLED_APPS = [
     "administration",
     "superadmin",
     "localflavor",
-    "areas"
+    "areas",
     "crispy_forms",
     "crispy_bootstrap5",
 ]
