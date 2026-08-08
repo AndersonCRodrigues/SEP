@@ -4,15 +4,19 @@ from django.core.exceptions import ImproperlyConfigured
 
 from dotenv import load_dotenv
 
-
-from dotenv import load_dotenv
-
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 load_dotenv(BASE_DIR / ".env")
 
 DEBUG = os.getenv("DJANGO_DEBUG", "True").lower() == "true"
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
+
+FIELD_ENCRYPTION_KEY = os.environ.get("FIELD_ENCRYPTION_KEY")
+if not FIELD_ENCRYPTION_KEY:
+    raise ImproperlyConfigured(
+    "FIELD_ENCRYPTION_KEY nao encontrada. Verifique o .env."
+    )
+
 
 if not SECRET_KEY:
     if DEBUG:
@@ -56,7 +60,9 @@ INSTALLED_APPS = [
     "administration",
     "superadmin",
     "localflavor",
-    "areas"
+    "areas",
+    "triage",
+    "audit.apps.AuditConfig",
 ]
 
 MIDDLEWARE = [
@@ -65,6 +71,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "audit.middleware.AuditMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
