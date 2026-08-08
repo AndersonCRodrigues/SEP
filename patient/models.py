@@ -4,6 +4,7 @@ from django.db.models import Q
 from core.managers import CustomUserManager
 from core.models import CustomUser
 from core.permissions import BusinessRulesMixin, RoleScopedQuerySet
+from screening.constants import ScreeningStatus
 from students.models import Student
 from teacher.models import Teacher
 
@@ -24,7 +25,16 @@ class PatientQuerySet(RoleScopedQuerySet):
                 | Q(responsible_teachers=user.pk)
             ).distinct()
         if role == Role.ALUNO:
-            return self.filter(responsible_student_id=user.pk)
+            # Duas vias de acesso, conforme as duas fases do documento de perfis:
+            # atendimento ativo sob seus cuidados, ou triagem dele ainda aberta.
+            # Fechado o caso, a segunda via cai e resta apenas o feedback.
+            return self.filter(
+                Q(responsible_student_id=user.pk, active_treatment=True)
+                | Q(
+                    screenings__student_id=user.pk,
+                    screenings__status=ScreeningStatus.OPEN,
+                )
+            ).distinct()
         if role == Role.PACIENTE:
             return self.filter(pk=user.pk)
         return self.none()
@@ -170,6 +180,24 @@ class ProgressNote(BusinessRulesMixin, models.Model):
         return f"Evolução de {self.patient} em {self.session_date}"
 
 
+class Room(models.Model):
+    """Sala de atendimento. O Administrativo "administra a agenda geral de
+    atendimentos e salas" -- sem entidade de sala nao ha como detectar dois
+    atendimentos no mesmo horario e local."""
+
+    name = models.CharField(max_length=100, unique=True, verbose_name="Nome")
+
+    active = models.BooleanField(default=True, verbose_name="Ativa")
+
+    class Meta:
+        verbose_name = "Sala"
+        verbose_name_plural = "Salas"
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
+
+
 class AppointmentQuerySet(RoleScopedQuerySet):
     def visible_to(self, user):
         if not user.is_authenticated:
@@ -188,11 +216,32 @@ class AppointmentQuerySet(RoleScopedQuerySet):
 
 
 class Appointment(BusinessRulesMixin, models.Model):
+    # A agenda cobre "triagem e sessoes regulares", que tem fluxos distintos.
+    class Kind(models.TextChoices):
+        SCREENING = "TR", "Triagem"
+        SESSION = "SE", "Sessão"
+
     patient = models.ForeignKey(
         Patient,
         on_delete=models.PROTECT,
         related_name="appointments",
         verbose_name="Paciente",
+    )
+
+    kind = models.CharField(
+        max_length=2,
+        choices=Kind.choices,
+        default=Kind.SESSION,
+        verbose_name="Tipo",
+    )
+
+    room = models.ForeignKey(
+        Room,
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name="appointments",
+        verbose_name="Sala",
     )
 
     assigned_student = models.ForeignKey(
@@ -214,8 +263,9 @@ class Appointment(BusinessRulesMixin, models.Model):
 
     CREATABLE_BY = (Role.PROFESSOR, Role.ADMIN)
     EDITABLE_FIELDS = {
+        # "so atribuicao de quem atende, nao o horario"
         Role.PROFESSOR: ("assigned_student",),
-        Role.ADMIN: ("scheduled_at", "notes", "assigned_student"),
+        Role.ADMIN: ("scheduled_at", "notes", "assigned_student", "kind", "room"),
     }
     DELETABLE_BY = ()
 
@@ -223,6 +273,15 @@ class Appointment(BusinessRulesMixin, models.Model):
         verbose_name = "Agendamento"
         verbose_name_plural = "Agendamentos"
         ordering = ["scheduled_at"]
+        constraints = [
+            # Duas sessoes na mesma sala e horario e conflito de agenda, nao dado
+            # valido. Parcial porque room e opcional.
+            models.UniqueConstraint(
+                fields=["room", "scheduled_at"],
+                condition=Q(room__isnull=False),
+                name="room_not_double_booked",
+            )
+        ]
 
     def __str__(self):
-        return f"{self.patient} em {self.scheduled_at:%d/%m/%Y %H:%M}"
+        return f"{self.get_kind_display()} de {self.patient} em {self.scheduled_at:%d/%m/%Y %H:%M}"

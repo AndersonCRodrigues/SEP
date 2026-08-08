@@ -3,6 +3,7 @@ from django.db import models
 from core.models import CustomUser
 from core.permissions import BusinessRulesMixin, RoleScopedQuerySet
 from patient.models import Patient
+from screening.constants import ScreeningStatus
 from students.models import Student
 
 Role = CustomUser.Role
@@ -19,16 +20,17 @@ class ScreeningQuerySet(RoleScopedQuerySet):
         if role == Role.PROFESSOR:
             return self.filter(student__current_advisor_id=user.pk)
         if role == Role.ALUNO:
-            return self.filter(student_id=user.pk)
+            # "O acesso aos dados do paciente na fase de triagem e revogado assim
+            # que o Supervisor Geral fecha ou encaminha o caso, mantendo o aluno
+            # apenas com acesso ao feedback recebido." O feedback continua visivel
+            # por ScreeningFeedbackQuerySet, que nao filtra por situacao.
+            return self.filter(student_id=user.pk, status=ScreeningStatus.OPEN)
         return self.none()
 
 
 class Screening(BusinessRulesMixin, models.Model):
-    
-    class Status(models.TextChoices):
-        OPEN = "AB", "Aberta"
-        CLOSED = "FE", "Fechada"
-        REFERRED = "EN", "Encaminhada"
+
+    Status = ScreeningStatus
 
     class Priority(models.TextChoices):
         MAXIMUM = "MX", "Prioridade Máxima"
@@ -60,8 +62,8 @@ class Screening(BusinessRulesMixin, models.Model):
 
     status = models.CharField(
         max_length=2,
-        choices=Status.choices,
-        default=Status.OPEN,
+        choices=ScreeningStatus.choices,
+        default=ScreeningStatus.OPEN,
         verbose_name="Situação",
     )
 
@@ -104,10 +106,15 @@ class Screening(BusinessRulesMixin, models.Model):
         verbose_name_plural = "Triagens"
         ordering = ["-created_at"]
 
+    def editable_fields_for(self, user):
+        # Fechado o caso, o aluno perde tambem a edicao da ficha que preencheu.
+        if user.is_authenticated and user.role == Role.ALUNO and not self.is_open:
+            return ()
+        return super().editable_fields_for(user)
+
     @property
     def is_open(self):
-        
-        return self.status == self.Status.OPEN
+        return self.status == ScreeningStatus.OPEN
 
     def __str__(self):
         return f"Triagem de {self.patient} ({self.get_priority_display()})"

@@ -4,7 +4,10 @@ from django.db import models, transaction
 from django.db.models import Q, UniqueConstraint
 from django.utils import timezone
 from core.models import CustomUser
+from core.permissions import BusinessRulesMixin, RoleScopedQuerySet
 from teacher.models import Teacher
+
+Role = CustomUser.Role
 
 
 class Student(CustomUser):
@@ -29,7 +32,22 @@ class Student(CustomUser):
         return self.nome_completo
 
 
-class AdvisingManager(models.Manager):
+class AdvisingQuerySet(RoleScopedQuerySet):
+    def visible_to(self, user):
+        if not user.is_authenticated:
+            return self.none()
+
+        role = user.role
+        if role == Role.SUPERVISOR:
+            return self
+        if role == Role.PROFESSOR:
+            return self.filter(teacher_id=user.pk)
+        if role == Role.ALUNO:
+            return self.filter(student_id=user.pk)
+        return self.none()
+
+
+class AdvisingManager(models.Manager.from_queryset(AdvisingQuerySet)):
     @transaction.atomic
     def change_advisor(self, student, new_teacher, term):
 
@@ -55,7 +73,7 @@ class AdvisingManager(models.Manager):
         return new_advising
 
 
-class Advising(models.Model):
+class Advising(BusinessRulesMixin, models.Model):
     student = models.ForeignKey(
         Student,
         related_name="advising_history",
@@ -84,6 +102,24 @@ class Advising(models.Model):
     end_date = models.DateField(null=True, blank=True, verbose_name="Data de término")
 
     objects = AdvisingManager()
+
+    # "Administra os alunos sob sua orientacao (adiciona/remove de sua area)":
+    # o professor cria vinculos e os encerra, mas so os proprios.
+    CREATABLE_BY = (Role.SUPERVISOR, Role.PROFESSOR)
+    EDITABLE_FIELDS = {
+        Role.SUPERVISOR: ("teacher", "term", "end_date"),
+        Role.PROFESSOR: ("end_date",),   # encerrar = remover da sua area
+    }
+    DELETABLE_BY = ()
+
+    @classmethod
+    def can_be_created_by(cls, user, teacher=None, **context):
+        if not super().can_be_created_by(user):
+            return False
+        if user.role == Role.PROFESSOR:
+            # o professor vincula alunos a si mesmo, nao a outro professor
+            return teacher is not None and teacher.pk == user.pk
+        return True
 
     class Meta:
         verbose_name = "Orientação"
