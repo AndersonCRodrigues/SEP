@@ -1,8 +1,29 @@
 from django.conf import settings
 from django.db import models
+from core.managers import CustomUserManager
 from core.models import CustomUser
+from core.permissions import BusinessRulesMixin, RoleScopedQuerySet
 from students.models import Student
 from teacher.models import Teacher
+
+Role = CustomUser.Role
+
+
+class PatientQuerySet(RoleScopedQuerySet):
+    def visible_to(self, user):
+        if not user.is_authenticated:
+            return self.none()
+
+        role = user.role
+        if user.is_superuser or role in (Role.SUPERVISOR, Role.ADMIN):
+            return self
+        if role == Role.PROFESSOR:
+            return self.filter(responsible_student__current_advisor_id=user.pk)
+        if role == Role.ALUNO:
+            return self.filter(responsible_student_id=user.pk)
+        if role == Role.PACIENTE:
+            return self.filter(pk=user.pk)
+        return self.none()
 
 
 class Patient(CustomUser):
@@ -31,9 +52,41 @@ class Patient(CustomUser):
 
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Criado em")
 
+    objects = CustomUserManager.from_queryset(PatientQuerySet)()
+
+    REGISTRATION_FIELDS = ("nome_completo", "cpf") + CustomUser.ADDRESS_FIELDS
+
+    CREATABLE_BY = (Role.ADMIN,)
+    EDITABLE_FIELDS = {
+        Role.SUPERVISOR: ("responsible_teacher",),
+        Role.PROFESSOR: ("responsible_teacher",),
+        Role.ADMIN: REGISTRATION_FIELDS,
+        Role.PACIENTE: CustomUser.ADDRESS_FIELDS,
+    }
+    DELETABLE_BY = ()
+
     class Meta:
         verbose_name = "Paciente"
         verbose_name_plural = "Pacientes"
+
+    # Patient herda de CustomUser, entao herdaria tambem as regras de gestao de
+    # usuarios (criar/apagar conforme o papel-alvo). A matriz da a ele uma tabela
+    # propria, entao os tres metodos voltam ao comportamento generico do mixin.
+    @classmethod
+    def can_be_created_by(cls, user, **context):
+        if not user.is_authenticated:
+            return False
+        return user.role in cls.CREATABLE_BY
+
+    def editable_fields_for(self, user):
+        if not user.is_authenticated:
+            return ()
+        return self.editable_fields_for_role(user.role)
+
+    def can_be_deleted_by(self, user):
+        if not user.is_authenticated:
+            return False
+        return user.role in self.DELETABLE_BY
 
     def save(self, *args, **kwargs):
         self.role = CustomUser.Role.PACIENTE
@@ -43,7 +96,22 @@ class Patient(CustomUser):
         return self.nome_completo
 
 
-class ProgressNote(models.Model):
+class ProgressNoteQuerySet(RoleScopedQuerySet):
+    def visible_to(self, user):
+        if not user.is_authenticated:
+            return self.none()
+
+        role = user.role
+        if user.is_superuser or role == Role.SUPERVISOR:
+            return self
+        if role == Role.PROFESSOR:
+            return self.filter(student__current_advisor_id=user.pk)
+        if role == Role.ALUNO:
+            return self.filter(student_id=user.pk)
+        return self.none()
+
+
+class ProgressNote(BusinessRulesMixin, models.Model):
     patient = models.ForeignKey(
         Patient,
         on_delete=models.PROTECT,
@@ -81,10 +149,36 @@ class ProgressNote(models.Model):
 
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Atualizado em")
 
+    objects = ProgressNoteQuerySet.as_manager()
+
+    CREATABLE_BY = (Role.ALUNO,)
+    EDITABLE_FIELDS = {
+        Role.SUPERVISOR: ("confirmed_by", "confirmed_at"),
+        Role.ALUNO: ("content", "session_date"),
+    }
+    DELETABLE_BY = ()
+
     class Meta:
         verbose_name = "Evolução"
         verbose_name_plural = "Evoluções"
         ordering = ["-session_date"]
+
+    @classmethod
+    def can_be_created_by(cls, user, patient=None, **context):
+        if not super().can_be_created_by(user):
+            return False
+        if user.role == Role.ALUNO:
+            if patient is None:
+                return False
+            return patient.active_treatment and patient.responsible_student_id == user.pk
+        return True
+
+    def editable_fields_for(self, user):
+        fields = super().editable_fields_for(user)
+        # O supervisor confirma; uma vez confirmada, a evolucao fecha.
+        if user.is_authenticated and user.role == Role.SUPERVISOR and not self.pending_confirmation:
+            return ()
+        return fields
 
     @property
     def pending_confirmation(self):
@@ -94,7 +188,26 @@ class ProgressNote(models.Model):
         return f"Evolução de {self.patient} em {self.session_date}"
 
 
-class Appointment(models.Model):
+class AppointmentQuerySet(RoleScopedQuerySet):
+    def visible_to(self, user):
+        if not user.is_authenticated:
+            return self.none()
+
+        role = user.role
+        if user.is_superuser or role in (Role.SUPERVISOR, Role.ADMIN):
+            return self
+        if role == Role.PROFESSOR:
+            return self.filter(assigned_student__current_advisor_id=user.pk)
+        if role == Role.ALUNO:
+            return self.filter(assigned_student_id=user.pk)
+        if role == Role.PACIENTE:
+            # A matriz omite a linha do Paciente, mas a tela dele ja lista
+            # "Meus agendamentos": decisao de produto foi sustentar a tela.
+            return self.filter(patient_id=user.pk)
+        return self.none()
+
+
+class Appointment(BusinessRulesMixin, models.Model):
     patient = models.ForeignKey(
         Patient,
         on_delete=models.PROTECT,
@@ -116,6 +229,16 @@ class Appointment(models.Model):
     notes = models.TextField(blank=True, verbose_name="Observações")
 
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Criado em")
+
+    objects = AppointmentQuerySet.as_manager()
+
+    CREATABLE_BY = (Role.PROFESSOR, Role.ADMIN)
+    EDITABLE_FIELDS = {
+        # "so atribuicao de quem atende, nao o horario"
+        Role.PROFESSOR: ("assigned_student",),
+        Role.ADMIN: ("scheduled_at", "notes", "assigned_student"),
+    }
+    DELETABLE_BY = ()
 
     class Meta:
         verbose_name = "Agendamento"

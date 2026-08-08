@@ -1,10 +1,29 @@
 from django.conf import settings
 from django.db import models
+from core.models import CustomUser
+from core.permissions import BusinessRulesMixin, RoleScopedQuerySet
 from patient.models import Patient
 from students.models import Student
 
+Role = CustomUser.Role
 
-class Screening(models.Model):
+
+class ScreeningQuerySet(RoleScopedQuerySet):
+    def visible_to(self, user):
+        if not user.is_authenticated:
+            return self.none()
+
+        role = user.role
+        if user.is_superuser or role == Role.SUPERVISOR:
+            return self
+        if role == Role.PROFESSOR:
+            return self.filter(student__current_advisor_id=user.pk)
+        if role == Role.ALUNO:
+            return self.filter(student_id=user.pk)
+        return self.none()
+
+
+class Screening(BusinessRulesMixin, models.Model):
     class Priority(models.TextChoices):
         MAXIMUM = "MX", "Prioridade Máxima"
         HIGH = "HI", "Alta"
@@ -41,6 +60,18 @@ class Screening(models.Model):
 
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Atualizado em")
 
+    objects = ScreeningQuerySet.as_manager()
+
+    # --- regras da matriz -------------------------------------------------
+    FICHA_FIELDS = ("priority", "main_complaint", "notes")
+
+    CREATABLE_BY = (Role.ALUNO,)
+    EDITABLE_FIELDS = {
+        Role.SUPERVISOR: FICHA_FIELDS,   # "analise / edicao da ficha"
+        Role.ALUNO: FICHA_FIELDS,
+    }
+    DELETABLE_BY = ()
+
     class Meta:
         verbose_name = "Triagem"
         verbose_name_plural = "Triagens"
@@ -50,7 +81,23 @@ class Screening(models.Model):
         return f"Triagem de {self.patient} ({self.get_priority_display()})"
 
 
-class ScreeningFeedback(models.Model):
+class ScreeningFeedbackQuerySet(RoleScopedQuerySet):
+    def visible_to(self, user):
+        if not user.is_authenticated:
+            return self.none()
+
+        role = user.role
+        if user.is_superuser or role == Role.SUPERVISOR:
+            return self
+        if role == Role.PROFESSOR:
+            return self.filter(screening__student__current_advisor_id=user.pk)
+        if role == Role.ALUNO:
+            # "Proprio (recebido)": o feedback da triagem que ele realizou
+            return self.filter(screening__student_id=user.pk)
+        return self.none()
+
+
+class ScreeningFeedback(BusinessRulesMixin, models.Model):
     screening = models.ForeignKey(
         Screening,
         on_delete=models.PROTECT,
@@ -70,6 +117,16 @@ class ScreeningFeedback(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Criado em")
 
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Atualizado em")
+
+    objects = ScreeningFeedbackQuerySet.as_manager()
+
+    # --- regras da matriz -------------------------------------------------
+    CREATABLE_BY = (Role.SUPERVISOR, Role.PROFESSOR)
+    EDITABLE_FIELDS = {
+        Role.SUPERVISOR: ("content",),
+        Role.PROFESSOR: ("content",),
+    }
+    DELETABLE_BY = ()
 
     class Meta:
         verbose_name = "Feedback de triagem"
