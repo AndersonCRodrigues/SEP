@@ -15,7 +15,7 @@ class PatientQuerySet(RoleScopedQuerySet):
             return self.none()
 
         role = user.role
-        if user.is_superuser or role in (Role.SUPERVISOR, Role.ADMIN):
+        if role in (Role.SUPERVISOR, Role.ADMIN):
             return self
         if role == Role.PROFESSOR:
             return self.filter(responsible_student__current_advisor_id=user.pk)
@@ -56,7 +56,7 @@ class Patient(BusinessRulesMixin, CustomUser):
 
     REGISTRATION_FIELDS = ("nome_completo", "cpf") + CustomUser.ADDRESS_FIELDS
 
-    CREATABLE_BY = (Role.ADMIN,)
+    CREATABLE_BY = (Role.ADMIN, Role.ALUNO)
     EDITABLE_FIELDS = {
         Role.SUPERVISOR: ("responsible_teacher",),
         Role.PROFESSOR: ("responsible_teacher",),
@@ -83,7 +83,7 @@ class ProgressNoteQuerySet(RoleScopedQuerySet):
             return self.none()
 
         role = user.role
-        if user.is_superuser or role == Role.SUPERVISOR:
+        if role == Role.SUPERVISOR:
             return self
         if role == Role.PROFESSOR:
             return self.filter(student__current_advisor_id=user.pk)
@@ -174,7 +174,7 @@ class AppointmentQuerySet(RoleScopedQuerySet):
             return self.none()
 
         role = user.role
-        if user.is_superuser or role in (Role.SUPERVISOR, Role.ADMIN):
+        if role in (Role.SUPERVISOR, Role.ADMIN):
             return self
         if role == Role.PROFESSOR:
             return self.filter(assigned_student__current_advisor_id=user.pk)

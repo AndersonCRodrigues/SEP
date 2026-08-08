@@ -13,7 +13,7 @@ class CertificateQuerySet(RoleScopedQuerySet):
             return self.none()
 
         role = user.role
-        if user.is_superuser or role in (Role.SUPERVISOR, Role.PROFESSOR, Role.ADMIN):
+        if role in (Role.SUPERVISOR, Role.PROFESSOR, Role.ADMIN):
             return self
         if role == Role.ALUNO:
             return self.filter(patient__responsible_student_id=user.pk)

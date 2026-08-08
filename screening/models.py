@@ -14,7 +14,7 @@ class ScreeningQuerySet(RoleScopedQuerySet):
             return self.none()
 
         role = user.role
-        if user.is_superuser or role == Role.SUPERVISOR:
+        if role == Role.SUPERVISOR:
             return self
         if role == Role.PROFESSOR:
             return self.filter(student__current_advisor_id=user.pk)
@@ -62,12 +62,11 @@ class Screening(BusinessRulesMixin, models.Model):
 
     objects = ScreeningQuerySet.as_manager()
 
-    # --- regras da matriz -------------------------------------------------
     FICHA_FIELDS = ("priority", "main_complaint", "notes")
 
     CREATABLE_BY = (Role.ALUNO,)
     EDITABLE_FIELDS = {
-        Role.SUPERVISOR: FICHA_FIELDS,   # "analise / edicao da ficha"
+        Role.SUPERVISOR: FICHA_FIELDS,
         Role.ALUNO: FICHA_FIELDS,
     }
     DELETABLE_BY = ()
@@ -87,12 +86,11 @@ class ScreeningFeedbackQuerySet(RoleScopedQuerySet):
             return self.none()
 
         role = user.role
-        if user.is_superuser or role == Role.SUPERVISOR:
+        if role == Role.SUPERVISOR:
             return self
         if role == Role.PROFESSOR:
             return self.filter(screening__student__current_advisor_id=user.pk)
         if role == Role.ALUNO:
-            # "Proprio (recebido)": o feedback da triagem que ele realizou
             return self.filter(screening__student_id=user.pk)
         return self.none()
 
@@ -120,7 +118,6 @@ class ScreeningFeedback(BusinessRulesMixin, models.Model):
 
     objects = ScreeningFeedbackQuerySet.as_manager()
 
-    # --- regras da matriz -------------------------------------------------
     CREATABLE_BY = (Role.SUPERVISOR, Role.PROFESSOR)
     EDITABLE_FIELDS = {
         Role.SUPERVISOR: ("content",),
