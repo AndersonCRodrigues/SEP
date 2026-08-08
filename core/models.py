@@ -4,34 +4,9 @@ from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
 from localflavor.br.models import BRCPFField,BRStateField,BRPostalCodeField
 from .managers import CustomUserManager
-from .permissions import BusinessRulesMixin, RoleScopedQuerySet
 
 
-class CustomUserQuerySet(RoleScopedQuerySet):
-    def visible_to(self, user):
-        if not user.is_authenticated:
-            return self.none()
-
-        role = user.role
-        if user.is_superuser or role == CustomUser.Role.SUPERADMIN:
-            return self
-        if role == CustomUser.Role.SUPERVISOR:
-            # "Todos exceto Superadmin/Supervisor"
-            return self.exclude(
-                role__in=[CustomUser.Role.SUPERADMIN, CustomUser.Role.SUPERVISOR]
-            )
-        if role == CustomUser.Role.PROFESSOR:
-            # "So seus Alunos orientandos". O acessor reverso da heranca
-            # multi-tabela e 'student', e a PK do Student e a do proprio usuario.
-            return self.filter(student__current_advisor_id=user.pk)
-        if role == CustomUser.Role.ADMIN:
-            return self.filter(
-                role__in=[CustomUser.Role.ALUNO, CustomUser.Role.PACIENTE]
-            )
-        return self.filter(pk=user.pk)
-
-
-class CustomUser(BusinessRulesMixin, AbstractUser):
+class CustomUser(AbstractUser):
     username=None
     email=models.EmailField(_("Adicionar email"),unique=True)
     
@@ -65,9 +40,7 @@ class CustomUser(BusinessRulesMixin, AbstractUser):
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["nome_completo","cpf"]
 
-    # from_queryset preserva create_user/create_superuser, que o createsuperuser
-    # e o admin dependem, e acrescenta o visible_to().
-    objects = CustomUserManager.from_queryset(CustomUserQuerySet)()
+    objects = CustomUserManager()
 
     ADDRESS_FIELDS = (
         "telefone", "logradouro", "numero", "complemento",
@@ -75,38 +48,6 @@ class CustomUser(BusinessRulesMixin, AbstractUser):
     )
     ALL_EDITABLE_FIELDS = ("nome_completo", "email", "cpf", "role",
                            "matricula", "crp") + ADDRESS_FIELDS
-
-    # Quem cria/apaga depende do papel do ALVO, nao so do autor -- por isso
-    # estes mapas em vez do CREATABLE_BY/DELETABLE_BY generico.
-    MANAGEABLE_ROLES_BY = {
-        "SA": ("SV", "AD"),
-        "SV": ("PR", "AL"),
-    }
-
-    @classmethod
-    def can_be_created_by(cls, user, target_role=None, **context):
-        if not user.is_authenticated:
-            return False
-        return target_role in cls.MANAGEABLE_ROLES_BY.get(user.role, ())
-
-    def editable_fields_for(self, user):
-        if not user.is_authenticated:
-            return ()
-        if user.is_superuser or user.role == self.Role.SUPERADMIN:
-            return self.ALL_EDITABLE_FIELDS
-        if user.role == self.Role.SUPERVISOR:
-            if self.role in (self.Role.PROFESSOR, self.Role.ALUNO):
-                return self.ALL_EDITABLE_FIELDS
-            return ()
-        if user.role == self.Role.PACIENTE and self.pk == user.pk:
-            return self.ADDRESS_FIELDS
-        return ()
-
-    def can_be_deleted_by(self, user):
-        if not user.is_authenticated:
-            return False
-        return self.role in self.MANAGEABLE_ROLES_BY.get(user.role, ())
-
 
     def clean(self):
         super().clean()

@@ -1,5 +1,5 @@
 """
-Regras de CRUD por papel, derivadas de docs/backend_roles/matriz-permissoes1.pdf.
+Regras de CRUD por Role
 
 A matriz opera em tres granularidades e so a primeira cabe no sistema nativo de
 Permission do Django:
@@ -39,7 +39,6 @@ class BusinessRulesMixin:
 
     @classmethod
     def editable_fields_for_role(cls, role):
-        """Declaracao estatica: util para montar formularios de criacao."""
         return tuple(cls.EDITABLE_FIELDS.get(role, ()))
 
     @classmethod
@@ -60,8 +59,6 @@ class BusinessRulesMixin:
     def can_be_changed_by(self, user):
         if not self.editable_fields_for(user):
             return False
-        # Ter campo gravavel nao basta: o objeto tambem precisa estar no escopo
-        # de leitura do usuario.
         return type(self).objects.visible_to(user).filter(pk=self.pk).exists()
 
     def can_be_deleted_by(self, user):

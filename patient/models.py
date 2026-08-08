@@ -26,7 +26,7 @@ class PatientQuerySet(RoleScopedQuerySet):
         return self.none()
 
 
-class Patient(CustomUser):
+class Patient(BusinessRulesMixin, CustomUser):
     responsible_student = models.ForeignKey(
         Student,
         null=True,
@@ -68,25 +68,6 @@ class Patient(CustomUser):
     class Meta:
         verbose_name = "Paciente"
         verbose_name_plural = "Pacientes"
-
-    # Patient herda de CustomUser, entao herdaria tambem as regras de gestao de
-    # usuarios (criar/apagar conforme o papel-alvo). A matriz da a ele uma tabela
-    # propria, entao os tres metodos voltam ao comportamento generico do mixin.
-    @classmethod
-    def can_be_created_by(cls, user, **context):
-        if not user.is_authenticated:
-            return False
-        return user.role in cls.CREATABLE_BY
-
-    def editable_fields_for(self, user):
-        if not user.is_authenticated:
-            return ()
-        return self.editable_fields_for_role(user.role)
-
-    def can_be_deleted_by(self, user):
-        if not user.is_authenticated:
-            return False
-        return user.role in self.DELETABLE_BY
 
     def save(self, *args, **kwargs):
         self.role = CustomUser.Role.PACIENTE
@@ -175,7 +156,6 @@ class ProgressNote(BusinessRulesMixin, models.Model):
 
     def editable_fields_for(self, user):
         fields = super().editable_fields_for(user)
-        # O supervisor confirma; uma vez confirmada, a evolucao fecha.
         if user.is_authenticated and user.role == Role.SUPERVISOR and not self.pending_confirmation:
             return ()
         return fields
@@ -201,8 +181,6 @@ class AppointmentQuerySet(RoleScopedQuerySet):
         if role == Role.ALUNO:
             return self.filter(assigned_student_id=user.pk)
         if role == Role.PACIENTE:
-            # A matriz omite a linha do Paciente, mas a tela dele ja lista
-            # "Meus agendamentos": decisao de produto foi sustentar a tela.
             return self.filter(patient_id=user.pk)
         return self.none()
 
@@ -234,7 +212,6 @@ class Appointment(BusinessRulesMixin, models.Model):
 
     CREATABLE_BY = (Role.PROFESSOR, Role.ADMIN)
     EDITABLE_FIELDS = {
-        # "so atribuicao de quem atende, nao o horario"
         Role.PROFESSOR: ("assigned_student",),
         Role.ADMIN: ("scheduled_at", "notes", "assigned_student"),
     }
