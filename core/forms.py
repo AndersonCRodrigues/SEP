@@ -10,7 +10,6 @@ class LoginEmailOuMatriculaForm(AuthenticationForm):
 
 class CustomUserCreationForm(UserCreationForm):
 
-
     class Meta:
         model = CustomUser
         fields = (
@@ -39,29 +38,3 @@ class CustomUserCreationForm(UserCreationForm):
         if not matricula:
             raise forms.ValidationError("Matrícula é obrigatória.")
         return matricula
-
-
-class SupervisorCreationForm(UserCreationForm):
-
-
-    class Meta:
-        model = CustomUser
-        fields = (
-            "email", "nome_completo", "cpf", "telefone", "logradouro",
-            "numero", "complemento", "bairro", "cidade", "estado",
-            "cep", "role", "crp", "matricula",
-        )
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["role"].choices = [
-            (v, l) for v, l in CustomUser.Role.choices
-            if v == CustomUser.Role.SUPERVISOR
-        ]
-        self.initial["role"] = CustomUser.Role.SUPERVISOR
-
-    def clean_role(self):
-        role = self.cleaned_data["role"]
-        if role != CustomUser.Role.SUPERVISOR:
-            raise forms.ValidationError("Pelo admin, só é possível cadastrar Supervisor.")
-        return role

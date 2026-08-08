@@ -11,6 +11,18 @@
 </header>
 
 <div class="row g-3">
+    <div class="col-12">
+        <section class="card">
+            <div class="card-body">
+                <h2 class="h5 card-title">Painel do Aluno</h2>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{% url 'students:meu_professor' %}" class="btn btn-primary">Meu Professor</a>
+                    <a href="{% url 'students:perfil' %}" class="btn btn-outline-primary">Meu Perfil</a>
+                </div>
+            </div>
+        </section>
+    </div>
+
     <div class="col-12 col-md-6">
         <section class="card h-100">
             <div class="card-body">

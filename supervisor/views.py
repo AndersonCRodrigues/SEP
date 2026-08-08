@@ -1,36 +1,46 @@
+from itertools import chain
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import render, redirect
-from django.views.generic import ListView, TemplateView
+from django.urls import reverse_lazy
+from django.views.generic import ListView, TemplateView, CreateView, UpdateView
 from core.models import CustomUser
 from core.mixins import GroupRequiredMixin
-from core.forms import CustomUserCreationForm
+from teacher.models import Professor
+from students.models import Aluno
+from areas.models import AreaActing
+from .forms import SupervisorCreationForm
+from areas.forms import AreaAtuacaoForm
 from core.utils import sincronizar_grupo
+
+
+def usuarios_alunos_e_professores():
+    """
+    Busca Alunos e Professores como suas subclasses reais (não CustomUser genérico),
+    pra garantir que campos como crp/area_atuacao/matricula venham preenchidos.
+    """
+    alunos = Aluno.objects.filter(role=CustomUser.Role.ALUNO)
+    professores = Professor.objects.filter(role__in=[CustomUser.Role.PROFESSOR, CustomUser.Role.SUPERVISOR])
+    return sorted(chain(alunos, professores), key=lambda u: u.nome_completo)
 
 
 class PainelSupervisorView(GroupRequiredMixin, ListView):
     required_group = "Supervisor"
-    model = CustomUser
     template_name = "supervisor/supervisor_panel.html"
     context_object_name = "usuarios_listados"
 
     def get_queryset(self):
-        return CustomUser.objects.exclude(
-            role__in=[CustomUser.Role.SUPERADMIN, CustomUser.Role.SUPERVISOR]
-        )
+        return usuarios_alunos_e_professores()
 
 
 class ListarUsuariosView(GroupRequiredMixin, ListView):
     required_group = "Supervisor"
-    model = CustomUser
     template_name = "supervisor/list_users.html"
     context_object_name = "usuarios_listados"
 
     def get_queryset(self):
-        return CustomUser.objects.exclude(
-            role__in=[CustomUser.Role.SUPERADMIN, CustomUser.Role.SUPERVISOR]
-        )
+        return usuarios_alunos_e_professores()
 
 
 class HomeSupervisorView(GroupRequiredMixin, TemplateView):
@@ -39,22 +49,41 @@ class HomeSupervisorView(GroupRequiredMixin, TemplateView):
 
 
 @login_required
-def cadastrar_usuario(request):
-    is_supervisor = (
-        request.user.groups.filter(name="Supervisor").exists()
-        or request.user.is_superuser
-    )
-    if not is_supervisor:
-        raise PermissionDenied("Apenas Supervisores podem cadastrar novos usuários.")
+def cadastrar_supervisor(request):
+    if not request.user.is_superuser:
+        raise PermissionDenied("Apenas o Superadmin pode cadastrar Supervisor.")
 
     if request.method == "POST":
-        form = CustomUserCreationForm(request.POST, criado_por=request.user)
+        form = SupervisorCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
             sincronizar_grupo(user)
-            messages.success(request, "Cadastro realizado com sucesso!")
-            return redirect("supervisor:painel")
+            messages.success(request, "Supervisor cadastrado com sucesso!")
+            return redirect("superadmin:painel")
     else:
-        form = CustomUserCreationForm(criado_por=request.user)
+        form = SupervisorCreationForm()
 
-    return render(request, "supervisor/register.html", {"form": form})
+    return render(request, "supervisor/cadastro_supervisor.html", {"form": form})
+
+
+class ListaAreasView(GroupRequiredMixin, ListView):
+    required_group = "Supervisor"
+    model = AreaActing
+    template_name = "supervisor/area_list.html"
+    context_object_name = "areas"
+
+
+class CriarAreaView(GroupRequiredMixin, CreateView):
+    required_group = "Supervisor"
+    model = AreaActing
+    form_class = AreaAtuacaoForm
+    template_name = "supervisor/area_form.html"
+    success_url = reverse_lazy("supervisor:areas")
+
+
+class EditarAreaView(GroupRequiredMixin, UpdateView):
+    required_group = "Supervisor"
+    model = AreaActing
+    form_class = AreaAtuacaoForm
+    template_name = "supervisor/area_form.html"
+    success_url = reverse_lazy("supervisor:areas")

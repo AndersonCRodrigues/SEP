@@ -1,17 +1,39 @@
-{% extends "base.html" %}
+{% extends "home.html" %}
 
-{% block title %}Painel do Professor{% endblock %}
+{% block home_title %}Painel do Professor{% endblock %}
 
-{% block content %}
-<h1>Meus Alunos</h1>
+{% block home_content %}
+<div class="col-12 col-md-6">
+    <section class="card h-100">
+        <div class="card-body">
+            <h2 class="h5 card-title">Meus Alunos Orientandos</h2>
+            {% if alunos_vinculados %}
+            <ul class="list-group list-group-flush">
+                {% for aluno in alunos_vinculados %}
+                <li class="list-group-item px-0">{{ aluno.nome_completo }} — {{ aluno.matricula }}</li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="card-text text-body-secondary mb-0">Você ainda não tem alunos vinculados.</p>
+            {% endif %}
+        </div>
+    </section>
+</div>
 
-{% if alunos %}
-    <ul>
-        {% for aluno in alunos %}
-            <li>{{ aluno.nome_completo }}</li>
-        {% endfor %}
-    </ul>
-{% else %}
-    <p>Nenhum aluno cadastrado.</p>
-{% endif %}
+<div class="col-12 col-md-6">
+    <section class="card h-100">
+        <div class="card-body">
+            <h2 class="h5 card-title">Alunos Disponíveis pra Vincular</h2>
+            {% if alunos_disponiveis %}
+            <form method="post" action="{% url 'teacher:vincular_aluno' %}">
+                {% csrf_token %}
+                {{ form_vincular.as_p }}
+                <button type="submit" class="btn btn-primary">Vincular Aluno</button>
+            </form>
+            {% else %}
+            <p class="card-text text-body-secondary mb-0">Não há alunos disponíveis no momento.</p>
+            {% endif %}
+        </div>
+    </section>
+</div>
 {% endblock %}

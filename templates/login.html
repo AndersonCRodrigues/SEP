@@ -7,7 +7,43 @@
 
 <form method="post">
     {% csrf_token %}
-    {{ form.as_p }}
+    {{ form.non_field_errors }}
+    <p>
+        {{ form.username.label_tag }}
+        {{ form.username }}
+        {{ form.username.errors }}
+    </p>
+    <p>
+        {{ form.password.label_tag }}
+        <span style="display: inline-flex; align-items: center; gap: 4px;">
+            {{ form.password }}
+            <button type="button" id="toggle-senha" aria-label="Mostrar senha" style="cursor: pointer; background: none; border: none; padding: 0; display: inline-flex;">
+                <svg id="icone-olho-fechado" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+                    <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a18.9 18.9 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                </svg>
+                <svg id="icone-olho-aberto" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+            </button>
+        </span>
+        {{ form.password.errors }}
+    </p>
     <button type="submit" class="btn btn-primary">Entrar</button>
 </form>
+
+<script>
+    document.getElementById("toggle-senha").addEventListener("click", function () {
+        const campoSenha = document.getElementById("id_password");
+        const olhoAberto = document.getElementById("icone-olho-aberto");
+        const olhoFechado = document.getElementById("icone-olho-fechado");
+        const ehSenha = campoSenha.type === "password";
+
+        campoSenha.type = ehSenha ? "text" : "password";
+        olhoFechado.style.display = ehSenha ? "none" : "inline";
+        olhoAberto.style.display = ehSenha ? "inline" : "none";
+        this.setAttribute("aria-label", ehSenha ? "Ocultar senha" : "Mostrar senha");
+    });
+</script>
 {% endblock %}
