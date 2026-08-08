@@ -60,7 +60,7 @@ def create_triage(request, patient_id):
                 iarv.triage_record = triage_record
                 iarv.save()
 
-            return redirect("triage_detail", pk=triage_record.pk)
+            return redirect("home_redirect", pk=triage_record.pk)
 
     else:
         triage_form = TriageRecordForm()
