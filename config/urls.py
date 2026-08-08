@@ -15,4 +15,5 @@ urlpatterns = [
     path("supervisor/", include("supervisor.urls")),
     path("superadmin/", include("superadmin.urls")),
     path("patient/", include("patient.urls")),
+    path("triage/", include("triage.urls")),
 ]
