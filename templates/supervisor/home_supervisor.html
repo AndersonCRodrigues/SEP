@@ -6,9 +6,15 @@
 <section class="card">
     <h2>Coordenação & Supervisão</h2>
     <p>Gestão de equipe, usuários e relatórios.</p>
-    <a href="{% url 'supervisor:painel' %}">Acessar Painel do Supervisor</a>
-    <a href="{% url 'supervisor:register' %}">Cadastrar Novo Usuário</a>
-    <button>Triagem</button>
-    <button>Estatísticas</button>
+    <ul class="menu-botoes">
+        <li><a href="{% url 'supervisor:painel' %}"><button>Acessar Painel do Supervisor</button></a></li>
+        <li><a href="{% url 'students:cadastrar' %}"><button>Cadastrar Aluno</button></a></li>
+        <li><a href="{% url 'teacher:cadastrar' %}"><button>Cadastrar Professor</button></a></li>
+        <li><a href="{% url 'teacher:painel' %}"><button>Meus Alunos Orientandos</button></a></li>
+        <li><a href="{% url 'supervisor:areas' %}"><button>Áreas de Atuação</button></a></li>
+        <a href="{% url 'teacher:perfil' %}"><button>Meu Perfil</button></a>
+        <li><button>Triagem</button></li>
+        <li><button>Estatísticas</button></li>
+    </ul>
 </section>
 {% endblock %}
