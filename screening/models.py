@@ -24,6 +24,12 @@ class ScreeningQuerySet(RoleScopedQuerySet):
 
 
 class Screening(BusinessRulesMixin, models.Model):
+    
+    class Status(models.TextChoices):
+        OPEN = "AB", "Aberta"
+        CLOSED = "FE", "Fechada"
+        REFERRED = "EN", "Encaminhada"
+
     class Priority(models.TextChoices):
         MAXIMUM = "MX", "Prioridade Máxima"
         HIGH = "HI", "Alta"
@@ -52,6 +58,28 @@ class Screening(BusinessRulesMixin, models.Model):
         verbose_name="Prioridade",
     )
 
+    status = models.CharField(
+        max_length=2,
+        choices=Status.choices,
+        default=Status.OPEN,
+        verbose_name="Situação",
+    )
+
+    closed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="closed_screenings",
+        verbose_name="Fechada por",
+    )
+
+    closed_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Fechada em",
+    )
+
     main_complaint = models.TextField(verbose_name="Queixa principal")
 
     notes = models.TextField(blank=True, verbose_name="Observações")
@@ -66,7 +94,7 @@ class Screening(BusinessRulesMixin, models.Model):
 
     CREATABLE_BY = (Role.ALUNO,)
     EDITABLE_FIELDS = {
-        Role.SUPERVISOR: FICHA_FIELDS,
+        Role.SUPERVISOR: FICHA_FIELDS + ("status", "closed_by", "closed_at"),
         Role.ALUNO: FICHA_FIELDS,
     }
     DELETABLE_BY = ()
@@ -75,6 +103,11 @@ class Screening(BusinessRulesMixin, models.Model):
         verbose_name = "Triagem"
         verbose_name_plural = "Triagens"
         ordering = ["-created_at"]
+
+    @property
+    def is_open(self):
+        
+        return self.status == self.Status.OPEN
 
     def __str__(self):
         return f"Triagem de {self.patient} ({self.get_priority_display()})"

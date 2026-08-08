@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db import models
+from django.db.models import Q
 from core.managers import CustomUserManager
 from core.models import CustomUser
 from core.permissions import BusinessRulesMixin, RoleScopedQuerySet
@@ -18,7 +19,10 @@ class PatientQuerySet(RoleScopedQuerySet):
         if role in (Role.SUPERVISOR, Role.ADMIN):
             return self
         if role == Role.PROFESSOR:
-            return self.filter(responsible_student__current_advisor_id=user.pk)
+            return self.filter(
+                Q(responsible_student__current_advisor_id=user.pk)
+                | Q(responsible_teachers=user.pk)
+            ).distinct()
         if role == Role.ALUNO:
             return self.filter(responsible_student_id=user.pk)
         if role == Role.PACIENTE:
@@ -36,13 +40,11 @@ class Patient(BusinessRulesMixin, CustomUser):
         verbose_name="Aluno responsável",
     )
 
-    responsible_teacher = models.ForeignKey(
+    responsible_teachers = models.ManyToManyField(
         Teacher,
-        null=True,
         blank=True,
-        on_delete=models.SET_NULL,
         related_name="referred_patients",
-        verbose_name="Professor responsável",
+        verbose_name="Professores responsáveis",
     )
 
     active_treatment = models.BooleanField(
@@ -58,8 +60,8 @@ class Patient(BusinessRulesMixin, CustomUser):
 
     CREATABLE_BY = (Role.ADMIN, Role.ALUNO)
     EDITABLE_FIELDS = {
-        Role.SUPERVISOR: ("responsible_teacher",),
-        Role.PROFESSOR: ("responsible_teacher",),
+        Role.SUPERVISOR: ("responsible_teachers",),
+        Role.PROFESSOR: ("responsible_teachers",),
         Role.ADMIN: REGISTRATION_FIELDS,
         Role.PACIENTE: CustomUser.ADDRESS_FIELDS,
     }
