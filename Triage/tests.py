@@ -1,5 +1,7 @@
 from django.core.exceptions import ValidationError
-from django.test import SimpleTestCase
+from django.test import SimpleTestCase, TestCase
+from patient.models import Patient
+from students.models import Aluno
 
 from .forms import (
     IarvAdultForm,
@@ -238,6 +240,29 @@ class TriageRecordRiskTests(SimpleTestCase):
             triage_record.calculate_total_risk()
         )
 
+    def test_get_risk_classification_uses_related_iarv(self):
+        triage_record = TriageRecord()
+
+        iarv = IarvAdult()
+        iarv.calculate_score = lambda: 20
+
+        triage_record.get_iarv = lambda: iarv
+
+        self.assertEqual(
+            triage_record.get_risk_classification(),
+            "MAXIMUM",
+        )
+
+
+def test_get_risk_classification_returns_none_without_iarv(self):
+    triage_record = TriageRecord()
+
+    triage_record.get_iarv = lambda: None
+
+    self.assertIsNone(
+        triage_record.get_risk_classification()
+    )
+
 class IarvRoutingTests(SimpleTestCase):
     def test_child_form_is_selected_for_age_under_13(self):
         patient = type(
@@ -299,3 +324,68 @@ class IarvRoutingTests(SimpleTestCase):
             "A data de nascimento do paciente é obrigatória para selecionar o questionário IARV.",
         ):
             get_iarv_form_class(patient)
+
+class TriageRecordSaveTests(TestCase):
+    def setUp(self):
+        self.patient = Patient.objects.create(
+            email="patient.triage@test.com",
+            nome_completo="Paciente Teste",
+            cpf="12345678909",
+            telefone="21999999999",
+        )
+
+        self.student = Aluno.objects.create(
+            email="student.triage@test.com",
+            nome_completo="Aluno Teste",
+            cpf="52998224725",
+            telefone="21888888888",
+        )
+
+    def test_save_sets_patient_flow_status_to_in_triage_on_creation(self):
+        self.assertEqual(
+            self.patient.flow_status,
+            "",
+        )
+
+        TriageRecord.objects.create(
+            patient=self.patient,
+            student_author=self.student,
+            chief_complaint="Queixa clínica de teste.",
+        )
+
+        self.patient.refresh_from_db()
+
+        self.assertEqual(
+            self.patient.flow_status,
+            Patient.FlowStatus.IN_TRIAGE,
+        )
+
+    def test_subsequent_save_does_not_change_patient_flow_status(self):
+        triage_record = TriageRecord.objects.create(
+            patient=self.patient,
+            student_author=self.student,
+            chief_complaint="Queixa clínica de teste.",
+        )
+
+        self.patient.refresh_from_db()
+
+        self.assertEqual(
+            self.patient.flow_status,
+            Patient.FlowStatus.IN_TRIAGE,
+        )
+
+        # Simula uma alteração posterior no status do paciente.
+        self.patient.flow_status = ""
+        self.patient.save(update_fields=["flow_status"])
+
+        triage_record.summary_and_impressions = "Atualização da triagem."
+        triage_record.save(
+            update_fields=["summary_and_impressions"]
+        )
+
+        self.patient.refresh_from_db()
+
+        self.assertEqual(
+            self.patient.flow_status,
+            "",
+        )
