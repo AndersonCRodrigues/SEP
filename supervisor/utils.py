@@ -22,3 +22,8 @@ def enviar_email_credenciais(user, senha_temporaria):
         recipient_list=[user.email],
         fail_silently=False, 
     )
+
+def gerar_senha_temporaria(tamanho=8):
+    caracteres = string.ascii_letters + string.digits
+    senha_provisoria = ''.join(secrets.choice(caracteres) for _ in range(tamanho))
+    return senha_provisoria
