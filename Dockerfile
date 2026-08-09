@@ -46,4 +46,4 @@ USER appuser
 
 EXPOSE 8000
 
-CMD ["sh", "-c", "python3 manage.py makemigrations core && python3 manage.py makemigrations areas && python3 manage.py makemigrations students && python3 manage.py makemigrations teacher && python3 manage.py migrate && python3 manage.py popular_users && gunicorn --bind 0.0.0.0:8000 --workers 3 config.wsgi:application"]
+CMD ["sh", "-c", "python3 manage.py makemigrations core && python3 manage.py makemigrations areas && python3 manage.py makemigrations students && python3 manage.py makemigrations teacher && python3 manage.py migrate && python3 manage.py popular_users && python3 manage.py setup_roles && gunicorn --bind 0.0.0.0:8000 --workers 3 config.wsgi:application"]
