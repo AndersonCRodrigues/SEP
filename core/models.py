@@ -46,13 +46,18 @@ class CustomUser(AbstractUser):
 
     objects = CustomUserManager()
 
-    def clean(self):
-        super().clean()
-        if self.role in (self.Role.ALUNO, self.Role.ADMINISTRATIVO) and not self.matricula:
-            raise ValidationError({"matricula": "Aluno e Administrativo precisam de matrícula."})
+def clean(self):
+    super().clean()
+    if self.role in (self.Role.ALUNO, self.Role.ADMINISTRATIVO) and not self.matricula:
+        raise ValidationError({"matricula": "Aluno e Administrativo precisam de matrícula."})
 
-        if self.role in (self.Role.PROFESSOR, self.Role.SUPERVISOR) and not self.crp:
-            raise ValidationError({"crp": "Professor/Supervisor precisa ter o CRP."})
+    if self.role in (self.Role.PROFESSOR, self.Role.SUPERVISOR) and not self.crp:
+        raise ValidationError({"crp": "Professor/Supervisor precisa ter o CRP."})
+
+    if self.data_nascimento == date(2000, 1, 1):
+        raise ValidationError({
+            "data_nascimento": "Data de nascimento não pode ser o valor padrão — preencha a data real."
+        })
     
     def __str__(self):
         return f"{self.nome_completo} / {self.email}"
