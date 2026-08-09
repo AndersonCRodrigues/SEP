@@ -1,6 +1,15 @@
 services:
   db:
-    image: postgres:16
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: db
+    command:
+      - postgres
+      - -c
+      - shared_preload_libraries=pg_cron
+      - -c
+      - cron.database_name=${DJANGO_DATABASE_NAME}
     environment:
       POSTGRES_DB: ${DJANGO_DATABASE_NAME}
       POSTGRES_USER: ${DJANGO_DATABASE_USER}
@@ -21,6 +30,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      target: app
     container_name: django-docker
     ports:
       - "8000:8000"
