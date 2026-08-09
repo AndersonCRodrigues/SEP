@@ -25,9 +25,6 @@ class PatientQuerySet(RoleScopedQuerySet):
                 | Q(responsible_teachers=user.pk)
             ).distinct()
         if role == Role.ALUNO:
-            # Duas vias de acesso, conforme as duas fases do documento de perfis:
-            # atendimento ativo sob seus cuidados, ou triagem dele ainda aberta.
-            # Fechado o caso, a segunda via cai e resta apenas o feedback.
             return self.filter(
                 Q(responsible_student_id=user.pk, active_treatment=True)
                 | Q(
@@ -181,10 +178,6 @@ class ProgressNote(BusinessRulesMixin, models.Model):
 
 
 class Room(models.Model):
-    """Sala de atendimento. O Administrativo "administra a agenda geral de
-    atendimentos e salas" -- sem entidade de sala nao ha como detectar dois
-    atendimentos no mesmo horario e local."""
-
     name = models.CharField(max_length=100, unique=True, verbose_name="Nome")
 
     active = models.BooleanField(default=True, verbose_name="Ativa")
@@ -216,7 +209,6 @@ class AppointmentQuerySet(RoleScopedQuerySet):
 
 
 class Appointment(BusinessRulesMixin, models.Model):
-    # A agenda cobre "triagem e sessoes regulares", que tem fluxos distintos.
     class Kind(models.TextChoices):
         SCREENING = "TR", "Triagem"
         SESSION = "SE", "Sessão"
@@ -263,7 +255,6 @@ class Appointment(BusinessRulesMixin, models.Model):
 
     CREATABLE_BY = (Role.PROFESSOR, Role.ADMIN)
     EDITABLE_FIELDS = {
-        # "so atribuicao de quem atende, nao o horario"
         Role.PROFESSOR: ("assigned_student",),
         Role.ADMIN: ("scheduled_at", "notes", "assigned_student", "kind", "room"),
     }
@@ -274,8 +265,6 @@ class Appointment(BusinessRulesMixin, models.Model):
         verbose_name_plural = "Agendamentos"
         ordering = ["scheduled_at"]
         constraints = [
-            # Duas sessoes na mesma sala e horario e conflito de agenda, nao dado
-            # valido. Parcial porque room e opcional.
             models.UniqueConstraint(
                 fields=["room", "scheduled_at"],
                 condition=Q(room__isnull=False),

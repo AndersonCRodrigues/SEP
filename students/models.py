@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.db import models, transaction
@@ -103,12 +104,10 @@ class Advising(BusinessRulesMixin, models.Model):
 
     objects = AdvisingManager()
 
-    # "Administra os alunos sob sua orientacao (adiciona/remove de sua area)":
-    # o professor cria vinculos e os encerra, mas so os proprios.
     CREATABLE_BY = (Role.SUPERVISOR, Role.PROFESSOR)
     EDITABLE_FIELDS = {
         Role.SUPERVISOR: ("teacher", "term", "end_date"),
-        Role.PROFESSOR: ("end_date",),   # encerrar = remover da sua area
+        Role.PROFESSOR: ("end_date",),   
     }
     DELETABLE_BY = ()
 
@@ -117,7 +116,6 @@ class Advising(BusinessRulesMixin, models.Model):
         if not super().can_be_created_by(user):
             return False
         if user.role == Role.PROFESSOR:
-            # o professor vincula alunos a si mesmo, nao a outro professor
             return teacher is not None and teacher.pk == user.pk
         return True
 
@@ -135,3 +133,113 @@ class Advising(BusinessRulesMixin, models.Model):
     def __str__(self):
         status = "ativa" if self.end_date is None else f"encerrada em {self.end_date}"
         return f"{self.student} orientado por {self.teacher} ({self.term}, {status})"
+
+
+class AdviseeScopedQuerySet(RoleScopedQuerySet):
+
+    def visible_to(self, user):
+        if not user.is_authenticated:
+            return self.none()
+
+        role = user.role
+        if role == Role.SUPERVISOR:
+            return self
+        if role == Role.PROFESSOR:
+            return self.filter(student__current_advisor_id=user.pk)
+        if role == Role.ALUNO:
+            return self.filter(student_id=user.pk)
+        return self.none()
+
+
+class Attendance(BusinessRulesMixin, models.Model):
+
+    student = models.ForeignKey(
+        Student,
+        on_delete=models.PROTECT,
+        related_name="attendances",
+        verbose_name="Aluno",
+    )
+
+    date = models.DateField(verbose_name="Data")
+
+    registered_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="registered_attendances",
+        verbose_name="Registrada por",
+    )
+
+    notes = models.TextField(blank=True, verbose_name="Observações")
+
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Criado em")
+
+    objects = AdviseeScopedQuerySet.as_manager()
+
+    CREATABLE_BY = (Role.PROFESSOR,)
+    EDITABLE_FIELDS = {Role.PROFESSOR: ("date", "notes")}
+    DELETABLE_BY = (Role.PROFESSOR,)
+
+    class Meta:
+        verbose_name = "Presença"
+        verbose_name_plural = "Presenças"
+        ordering = ["-date"]
+        constraints = [
+            UniqueConstraint(
+                fields=["student", "date"],
+                name="one_attendance_per_student_per_day",
+            )
+        ]
+
+    @classmethod
+    def can_be_created_by(cls, user, student=None, **context):
+        if not super().can_be_created_by(user):
+            return False
+        return student is not None and student.current_advisor_id == user.pk
+
+    def __str__(self):
+        return f"{self.student} presente em {self.date}"
+
+
+class PerformanceReview(BusinessRulesMixin, models.Model):
+    
+    student = models.ForeignKey(
+        Student,
+        on_delete=models.PROTECT,
+        related_name="performance_reviews",
+        verbose_name="Aluno",
+    )
+
+    teacher = models.ForeignKey(
+        Teacher,
+        on_delete=models.PROTECT,
+        related_name="performance_reviews",
+        verbose_name="Professor",
+    )
+
+    content = models.TextField(verbose_name="Avaliação")
+
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Criado em")
+
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Atualizado em")
+
+    objects = AdviseeScopedQuerySet.as_manager()
+
+    CREATABLE_BY = (Role.PROFESSOR,)
+    EDITABLE_FIELDS = {Role.PROFESSOR: ("content",)}
+    DELETABLE_BY = (Role.PROFESSOR,)
+
+    class Meta:
+        verbose_name = "Avaliação de desempenho"
+        verbose_name_plural = "Avaliações de desempenho"
+        ordering = ["-updated_at"]
+
+    @classmethod
+    def can_be_created_by(cls, user, student=None, **context):
+        if not super().can_be_created_by(user):
+            return False
+        return student is not None and student.current_advisor_id == user.pk
+
+    def __str__(self):
+        return f"Avaliação de {self.student} por {self.teacher}"

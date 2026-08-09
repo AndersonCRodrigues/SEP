@@ -20,10 +20,6 @@ class ScreeningQuerySet(RoleScopedQuerySet):
         if role == Role.PROFESSOR:
             return self.filter(student__current_advisor_id=user.pk)
         if role == Role.ALUNO:
-            # "O acesso aos dados do paciente na fase de triagem e revogado assim
-            # que o Supervisor Geral fecha ou encaminha o caso, mantendo o aluno
-            # apenas com acesso ao feedback recebido." O feedback continua visivel
-            # por ScreeningFeedbackQuerySet, que nao filtra por situacao.
             return self.filter(student_id=user.pk, status=ScreeningStatus.OPEN)
         return self.none()
 
@@ -107,7 +103,6 @@ class Screening(BusinessRulesMixin, models.Model):
         ordering = ["-created_at"]
 
     def editable_fields_for(self, user):
-        # Fechado o caso, o aluno perde tambem a edicao da ficha que preencheu.
         if user.is_authenticated and user.role == Role.ALUNO and not self.is_open:
             return ()
         return super().editable_fields_for(user)

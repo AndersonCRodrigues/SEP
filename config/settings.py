@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     "localflavor",
     "areas",
     "documents",
+    "audit",
 ]
 
 MIDDLEWARE = [
