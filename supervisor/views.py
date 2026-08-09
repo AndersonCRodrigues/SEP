@@ -6,7 +6,6 @@ from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views.generic import ListView, TemplateView, CreateView, UpdateView
 from core.models import CustomUser
-from core.mixins import GroupRequiredMixin
 from teacher.models import Professor
 from students.models import Aluno
 from areas.models import AreaActing
@@ -17,10 +16,7 @@ from django.contrib.auth.mixins import PermissionRequiredMixin
 
 
 def usuarios_alunos_e_professores():
-    """
-    Busca Alunos e Professores como suas subclasses reais (não CustomUser genérico),
-    pra garantir que campos como crp/area_atuacao/matricula venham preenchidos.
-    """
+  
     alunos = Aluno.objects.filter(role=CustomUser.Role.ALUNO)
     professores = Professor.objects.filter(role__in=[CustomUser.Role.PROFESSOR, CustomUser.Role.SUPERVISOR])
     return sorted(chain(alunos, professores), key=lambda u: u.nome_completo)
