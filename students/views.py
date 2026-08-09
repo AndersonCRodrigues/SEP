@@ -17,6 +17,8 @@ class HomeEstudanteView(LoginRequiredMixin, TemplateView):
 
 @login_required
 def cadastrar_aluno(request):
+    if not request.user.has_perm("students.add_aluno"):
+        raise PermissionDenied("Você não tem permissão para cadastrar Alunos.")
     is_supervisor = request.user.groups.filter(name="Supervisor").exists() or request.user.is_superuser
     if not is_supervisor:
         raise PermissionDenied("Apenas Supervisores podem cadastrar Alunos.")
@@ -34,8 +36,7 @@ def cadastrar_aluno(request):
     return render(request, "student/cadastro.html", {"form": form})
 
 
-class PerfilAlunoView(GroupRequiredMixin, UpdateView):
-    required_group = "Students"
+class PerfilAlunoView(LoginRequiredMixin, UpdateView):
     model = Aluno
     fields = [
         "nome_completo", "telefone",
@@ -43,7 +44,7 @@ class PerfilAlunoView(GroupRequiredMixin, UpdateView):
         "bairro", "cidade", "estado", "cep",
     ]
     template_name = "student/perfil.html"
-    success_url = reverse_lazy("students:perfil")  
+    success_url = reverse_lazy("students:perfil")
 
     def get_object(self, queryset=None):
         return get_object_or_404(Aluno, pk=self.request.user.pk)
