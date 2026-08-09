@@ -45,13 +45,16 @@ class PainelAdministracaoView(LoginRequiredMixin, UserPassesTestMixin, TemplateV
 class PerfilAdministrativoView(PermissionRequiredMixin, UpdateView):
     permission_required = "core.view_customuser"
     model = CustomUser
-    fields = [...]
+    fields = [
+        "nome_completo", "telefone",
+        "logradouro", "numero", "complemento",
+        "bairro", "cidade", "estado", "cep",
+    ]
     template_name = "administration/perfil.html"
     success_url = reverse_lazy("administration:perfil")
 
     def get_object(self, queryset=None):
         return self.request.user
-
 
 @login_required
 def cadastrar_administrativo(request):
