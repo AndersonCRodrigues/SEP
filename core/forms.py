@@ -13,7 +13,7 @@ class CustomUserCreationForm(UserCreationForm):
     class Meta:
         model = CustomUser
         fields = (
-            "email", "nome_completo", "cpf", "telefone", "logradouro",
+            "email", "nome_completo", "cpf", "telefone","data_nascimento", "logradouro",
             "numero", "complemento", "bairro", "cidade", "estado",
             "cep", "role", "crp", "matricula",
         )
