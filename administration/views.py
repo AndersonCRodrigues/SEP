@@ -11,10 +11,13 @@ from core.utils import sincronizar_grupo
 from core.models import CustomUser
 from .forms import AdministrativoCreationForm
 from patient.forms import PacienteCreationForm
+from django.contrib.auth.mixins import PermissionRequiredMixin
 
 
 @login_required
 def cadastrar_paciente(request):
+    if not request.user.has_perm("core.add_customuser"):
+        raise PermissionDenied("Você não tem permissão para cadastrar Paciente.")
     is_administrativo = request.user.is_superuser or request.user.role == CustomUser.Role.ADMINISTRATIVO
     if not is_administrativo:
         raise PermissionDenied("Apenas o Administrativo pode cadastrar Paciente.")
@@ -36,17 +39,13 @@ class PainelAdministracaoView(LoginRequiredMixin, UserPassesTestMixin, TemplateV
     template_name = "administration/administration_panel.html"
 
     def test_func(self):
-        return self.request.user.is_superuser or self.request.user.role == CustomUser.Role.ADMINISTRATIVO
+        return self.request.user.has_perm("core.view_customuser")
 
 
-class PerfilAdministrativoView(GroupRequiredMixin, UpdateView):
-    required_group = "Administration"
+class PerfilAdministrativoView(PermissionRequiredMixin, UpdateView):
+    permission_required = "core.view_customuser"
     model = CustomUser
-    fields = [
-        "nome_completo", "telefone",
-        "logradouro", "numero", "complemento",
-        "bairro", "cidade", "estado", "cep",
-    ]
+    fields = [...]
     template_name = "administration/perfil.html"
     success_url = reverse_lazy("administration:perfil")
 
