@@ -177,10 +177,24 @@ class ProgressNote(BusinessRulesMixin, models.Model):
         return f"Evolução de {self.patient} em {self.session_date}"
 
 
-class Room(models.Model):
+class RoomQuerySet(RoleScopedQuerySet):
+    def visible_to(self, user):
+        if not user.is_authenticated:
+            return self.none()
+        return self
+
+
+class Room(BusinessRulesMixin, models.Model):
     name = models.CharField(max_length=100, unique=True, verbose_name="Nome")
 
     active = models.BooleanField(default=True, verbose_name="Ativa")
+
+    objects = RoomQuerySet.as_manager()
+
+    CREATABLE_BY = (Role.ADMIN,)
+    EDITABLE_FIELDS = {Role.ADMIN: ("name", "active")}
+    # Appointment.room usa PROTECT: desativar pelo campo `active`, nao apagar.
+    DELETABLE_BY = ()
 
     class Meta:
         verbose_name = "Sala"
