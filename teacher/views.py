@@ -21,6 +21,8 @@ class HomeProfessorView(LoginRequiredMixin, TemplateView):
 
 @login_required
 def cadastrar_professor(request):
+    if not (request.user.has_perm("teacher.add_professor") or request.user.is_superuser):
+        raise PermissionDenied("Você não tem permissão para cadastrar Professores.")
     is_supervisor = (
         request.user.groups.filter(name="Supervisor").exists()
         or request.user.is_superuser
@@ -58,7 +60,8 @@ class PainelProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView)
     template_name = "teacher/teacher_panel.html"
 
     def test_func(self):
-        return self.request.user.role in (CustomUser.Role.PROFESSOR, CustomUser.Role.SUPERVISOR)
+        return self.request.user.has_perm("students.view_orientacao")
+
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -73,6 +76,8 @@ class PainelProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView)
 
 @login_required
 def vincular_aluno(request):
+    if not request.user.has_perm("students.add_orientacao"):
+        raise PermissionDenied("Você não tem permissão para vincular Alunos.")
 
     is_professor = request.user.role in (CustomUser.Role.PROFESSOR, CustomUser.Role.SUPERVISOR)
     if not is_professor:
