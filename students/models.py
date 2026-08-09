@@ -2,7 +2,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.db import models, transaction
-from django.db.models import Q, UniqueConstraint
+from django.db.models import Q, Sum, UniqueConstraint
 from django.utils import timezone
 from core.models import CustomUser
 from core.permissions import BusinessRulesMixin, RoleScopedQuerySet
@@ -243,3 +243,100 @@ class PerformanceReview(BusinessRulesMixin, models.Model):
 
     def __str__(self):
         return f"Avaliação de {self.student} por {self.teacher}"
+
+
+class StudentActivity(BusinessRulesMixin, models.Model):
+
+    class Kind(models.TextChoices):
+        SESSION = "AT", "Atendimento"
+        SCREENING = "TR", "Triagem"
+        RECORDS = "PR", "Prontuário"
+        OTHER = "OU", "Outra"
+
+    student = models.ForeignKey(
+        Student,
+        on_delete=models.PROTECT,
+        related_name="activities",
+        verbose_name="Aluno",
+    )
+
+    date = models.DateField(verbose_name="Data")
+
+    kind = models.CharField(
+        max_length=2,
+        choices=Kind.choices,
+        verbose_name="Tipo",
+    )
+
+    minutes = models.PositiveIntegerField(verbose_name="Minutos")
+
+    appointment = models.ForeignKey(
+        "patient.Appointment",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="student_activities",
+        verbose_name="Agendamento de origem",
+    )
+
+    registered_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="registered_activities",
+        verbose_name="Registrada por",
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Criado em")
+
+    objects = AdviseeScopedQuerySet.as_manager()
+
+    CREATABLE_BY = (Role.PROFESSOR, Role.ALUNO)
+    EDITABLE_FIELDS = {
+        Role.PROFESSOR: ("date", "kind", "minutes"),
+        Role.ALUNO: ("date", "kind", "minutes"),
+    }
+    DELETABLE_BY = (Role.PROFESSOR,)
+
+    class Meta:
+        verbose_name = "Atividade de estágio"
+        verbose_name_plural = "Atividades de estágio"
+        ordering = ["-date"]
+        constraints = [
+            UniqueConstraint(
+                fields=["appointment"],
+                condition=Q(appointment__isnull=False),
+                name="one_activity_per_appointment",
+            )
+        ]
+
+    @classmethod
+    def can_be_created_by(cls, user, student=None, **context):
+        if not super().can_be_created_by(user):
+            return False
+        if student is None:
+            return False
+        if user.role == Role.ALUNO:
+            return student.pk == user.pk
+        return student.current_advisor_id == user.pk
+
+    def editable_fields_for(self, user):
+        if self.appointment_id:
+            return ()
+        return super().editable_fields_for(user)
+
+    def can_be_deleted_by(self, user):
+        if self.appointment_id:
+            return False
+        return super().can_be_deleted_by(user)
+
+    @classmethod
+    def total_minutes_for(cls, student, start_date, end_date):
+        total = cls.objects.filter(
+            student=student, date__gte=start_date, date__lte=end_date
+        ).aggregate(total=Sum("minutes"))["total"]
+        return total or 0
+
+    def __str__(self):
+        return f"{self.get_kind_display()} de {self.student} em {self.date} ({self.minutes} min)"

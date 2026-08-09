@@ -1,68 +1,21 @@
 from django.conf import settings
-from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import Q
+from django.db.models import F, Q
 from core.models import CustomUser
 from core.permissions import BusinessRulesMixin, RoleScopedQuerySet
-from patient.models import Patient
+from patient.models import Appointment, Patient
 from students.models import Student
 
 Role = CustomUser.Role
 
 
-class CertificateQuerySet(RoleScopedQuerySet):
-    def visible_to(self, user):
-        if not user.is_authenticated:
-            return self.none()
-
-        role = user.role
-        if role in (Role.SUPERVISOR, Role.PROFESSOR, Role.ADMIN):
-            return self
-        if role == Role.ALUNO:
-            return self.filter(
-                Q(student_id=user.pk) | Q(patient__responsible_student_id=user.pk)
-            ).distinct()
-        if role == Role.PACIENTE:
-            return self.filter(patient_id=user.pk)
-        return self.none()
-
-
-class Certificate(BusinessRulesMixin, models.Model):
-    class Kind(models.TextChoices):
-        DECLARATION = "DE", "Declaração"
-        MEDICAL_CERTIFICATE = "AT", "Atestado"
-
-    patient = models.ForeignKey(
-        Patient,
-        null=True,
-        blank=True,
-        on_delete=models.PROTECT,
-        related_name="certificates",
-        verbose_name="Paciente",
-    )
-
-    student = models.ForeignKey(
-        Student,
-        null=True,
-        blank=True,
-        on_delete=models.PROTECT,
-        related_name="certificates",
-        verbose_name="Aluno",
-    )
-
-    kind = models.CharField(
-        max_length=2,
-        choices=Kind.choices,
-        default=Kind.DECLARATION,
-        verbose_name="Tipo",
-    )
-
+class BaseCertificate(BusinessRulesMixin, models.Model):
     content = models.TextField(verbose_name="Conteúdo")
 
     issued_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
-        related_name="issued_certificates",
+        related_name="%(class)s_set",
         verbose_name="Emitido por",
     )
 
@@ -72,42 +25,133 @@ class Certificate(BusinessRulesMixin, models.Model):
 
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Atualizado em")
 
-    objects = CertificateQuerySet.as_manager()
-
-    DOCUMENT_FIELDS = ("kind", "content", "issued_at")
+    DOCUMENT_FIELDS = ("content", "issued_at")
 
     CREATABLE_BY = (Role.ADMIN,)
-    EDITABLE_FIELDS = {
-        Role.SUPERVISOR: DOCUMENT_FIELDS,
-        Role.PROFESSOR: DOCUMENT_FIELDS,
-        Role.ADMIN: DOCUMENT_FIELDS,
-    }
     DELETABLE_BY = ()
 
     class Meta:
-        verbose_name = "Declaração/Atestado"
-        verbose_name_plural = "Declarações/Atestados"
+        abstract = True
         ordering = ["-issued_at"]
+
+
+class AttendanceCertificateQuerySet(RoleScopedQuerySet):
+    def visible_to(self, user):
+        if not user.is_authenticated:
+            return self.none()
+
+        role = user.role
+        if role in (Role.SUPERVISOR, Role.ADMIN):
+            return self
+        if role == Role.PROFESSOR:
+            return self.filter(
+                Q(patient__responsible_student__current_advisor_id=user.pk)
+                | Q(patient__responsible_teachers=user.pk)
+            ).distinct()
+        if role == Role.ALUNO:
+            return self.filter(patient__responsible_student_id=user.pk)
+        if role == Role.PACIENTE:
+            return self.filter(patient_id=user.pk)
+        return self.none()
+
+
+class AttendanceCertificate(BaseCertificate):
+    """Comprova ao paciente a ida ao atendimento."""
+
+    class Kind(models.TextChoices):
+        DECLARATION = "DE", "Declaração de comparecimento"
+        MEDICAL_CERTIFICATE = "AT", "Atestado"
+
+    patient = models.ForeignKey(
+        Patient,
+        on_delete=models.PROTECT,
+        related_name="certificates",
+        verbose_name="Paciente",
+    )
+
+    appointment = models.ForeignKey(
+        Appointment,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="certificates",
+        verbose_name="Atendimento",
+    )
+
+    kind = models.CharField(
+        max_length=2,
+        choices=Kind.choices,
+        default=Kind.DECLARATION,
+        verbose_name="Tipo",
+    )
+
+    objects = AttendanceCertificateQuerySet.as_manager()
+
+    EDITABLE_FIELDS = {
+        role: BaseCertificate.DOCUMENT_FIELDS + ("kind", "appointment")
+        for role in (Role.SUPERVISOR, Role.PROFESSOR, Role.ADMIN)
+    }
+
+    class Meta(BaseCertificate.Meta):
+        verbose_name = "Declaração de comparecimento"
+        verbose_name_plural = "Declarações de comparecimento"
+
+    def __str__(self):
+        return f"{self.get_kind_display()} de {self.patient} ({self.issued_at})"
+
+
+class InternshipDeclarationQuerySet(RoleScopedQuerySet):
+    def visible_to(self, user):
+        if not user.is_authenticated:
+            return self.none()
+
+        role = user.role
+        if role in (Role.SUPERVISOR, Role.ADMIN):
+            return self
+        if role == Role.PROFESSOR:
+            return self.filter(student__current_advisor_id=user.pk)
+        if role == Role.ALUNO:
+            return self.filter(student_id=user.pk)
+        return self.none()
+
+
+class InternshipDeclaration(BaseCertificate):
+    """Comprova à universidade as horas de estágio cumpridas no período."""
+
+    student = models.ForeignKey(
+        Student,
+        on_delete=models.PROTECT,
+        related_name="declarations",
+        verbose_name="Aluno",
+    )
+
+    start_date = models.DateField(verbose_name="Início do período")
+
+    end_date = models.DateField(verbose_name="Fim do período")
+
+    total_minutes = models.PositiveIntegerField(verbose_name="Total em minutos")
+
+    objects = InternshipDeclarationQuerySet.as_manager()
+
+    EDITABLE_FIELDS = {
+        role: BaseCertificate.DOCUMENT_FIELDS
+        + ("start_date", "end_date", "total_minutes")
+        for role in (Role.SUPERVISOR, Role.PROFESSOR, Role.ADMIN)
+    }
+
+    class Meta(BaseCertificate.Meta):
+        verbose_name = "Declaração de estágio"
+        verbose_name_plural = "Declarações de estágio"
         constraints = [
             models.CheckConstraint(
-                condition=(
-                    Q(patient__isnull=False, student__isnull=True)
-                    | Q(patient__isnull=True, student__isnull=False)
-                ),
-                name="certificate_exactly_one_recipient",
+                condition=Q(end_date__gte=F("start_date")),
+                name="internship_period_is_ordered",
             )
         ]
 
     @property
-    def recipient(self):
-        return self.patient or self.student
-
-    def clean(self):
-        super().clean()
-        if bool(self.patient_id) == bool(self.student_id):
-            raise ValidationError(
-                "Informe exatamente um destinatário: paciente ou aluno."
-            )
+    def total_hours(self):
+        return round(self.total_minutes / 60, 2)
 
     def __str__(self):
-        return f"{self.get_kind_display()} de {self.recipient} ({self.issued_at})"
+        return f"Declaração de estágio de {self.student} ({self.total_hours}h)"

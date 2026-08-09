@@ -214,7 +214,10 @@ class AppointmentQuerySet(RoleScopedQuerySet):
         if role in (Role.SUPERVISOR, Role.ADMIN):
             return self
         if role == Role.PROFESSOR:
-            return self.filter(assigned_student__current_advisor_id=user.pk)
+            return self.filter(
+                Q(teacher_id=user.pk)
+                | Q(assigned_student__current_advisor_id=user.pk)
+            ).distinct()
         if role == Role.ALUNO:
             return self.filter(assigned_student_id=user.pk)
         if role == Role.PACIENTE:
@@ -226,6 +229,13 @@ class Appointment(BusinessRulesMixin, models.Model):
     class Kind(models.TextChoices):
         SCREENING = "TR", "Triagem"
         SESSION = "SE", "Sessão"
+
+    class Status(models.TextChoices):
+        SCHEDULED = "AG", "Agendado"
+        ATTENDED = "RE", "Realizado"
+        PATIENT_NO_SHOW = "FP", "Falta do paciente"
+        STUDENT_NO_SHOW = "FA", "Falta do aluno"
+        CANCELLED = "CA", "Cancelado"
 
     patient = models.ForeignKey(
         Patient,
@@ -250,6 +260,15 @@ class Appointment(BusinessRulesMixin, models.Model):
         verbose_name="Sala",
     )
 
+    teacher = models.ForeignKey(
+        Teacher,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="allocated_appointments",
+        verbose_name="Professor responsável",
+    )
+
     assigned_student = models.ForeignKey(
         Student,
         null=True,
@@ -259,7 +278,19 @@ class Appointment(BusinessRulesMixin, models.Model):
         verbose_name="Aluno que atende",
     )
 
+    status = models.CharField(
+        max_length=2,
+        choices=Status.choices,
+        default=Status.SCHEDULED,
+        verbose_name="Situação",
+    )
+
     scheduled_at = models.DateTimeField(verbose_name="Data e hora")
+
+    duration_minutes = models.PositiveIntegerField(
+        default=50,
+        verbose_name="Duração (minutos)",
+    )
 
     notes = models.TextField(blank=True, verbose_name="Observações")
 
@@ -270,9 +301,20 @@ class Appointment(BusinessRulesMixin, models.Model):
     CREATABLE_BY = (Role.PROFESSOR, Role.ADMIN)
     EDITABLE_FIELDS = {
         Role.PROFESSOR: ("assigned_student",),
-        Role.ADMIN: ("scheduled_at", "notes", "assigned_student", "kind", "room"),
+        Role.ADMIN: (
+            "scheduled_at", "duration_minutes", "notes", "assigned_student",
+            "kind", "room", "teacher", "status",
+        ),
     }
     DELETABLE_BY = ()
+
+    @classmethod
+    def can_be_created_by(cls, user, teacher=None, **context):
+        if not super().can_be_created_by(user):
+            return False
+        if user.role == Role.PROFESSOR:
+            return teacher is not None and teacher.pk == user.pk
+        return True
 
     class Meta:
         verbose_name = "Agendamento"
