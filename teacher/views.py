@@ -60,7 +60,7 @@ class PainelProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView)
     template_name = "teacher/teacher_panel.html"
 
     def test_func(self):
-        return self.request.user.has_perm("students.view_orientacao")
+        return self.request.user.has_perm("teacher.change_professor")
 
 
     def get_context_data(self, **kwargs):
