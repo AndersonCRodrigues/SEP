@@ -6,6 +6,7 @@ from localflavor.br.models import BRCPFField,BRStateField,BRPostalCodeField
 from .managers import CustomUserManager
 from django.db.models import Q, UniqueConstraint
 from django.utils import timezone
+from datetime import date
 
 
 class CustomUser(AbstractUser):
@@ -15,6 +16,7 @@ class CustomUser(AbstractUser):
     nome_completo=models.CharField(max_length=350,verbose_name="Nome Completo")
     cpf = BRCPFField(unique=True,verbose_name="CPF")
     telefone = models.CharField(max_length=20,verbose_name="Telefone")
+    data_nascimento = models.DateField(default=date(2000, 1, 1),verbose_name="Data de nascimento")
     
     logradouro = models.CharField(max_length=200,verbose_name="Logradouro")
     numero = models.CharField(max_length=10,verbose_name="Número")
