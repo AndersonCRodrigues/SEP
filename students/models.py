@@ -4,6 +4,7 @@ from django.core.validators import RegexValidator
 from django.db import models, transaction
 from django.db.models import Q, Sum, UniqueConstraint
 from django.utils import timezone
+from areas.models import AreaActing
 from core.models import CustomUser
 from core.permissions import BusinessRulesMixin, RoleScopedQuerySet
 from teacher.models import Teacher
@@ -40,17 +41,19 @@ class Student(CustomUser):
     def acting_area(self):
         return self.current_advisor.acting_area if self.current_advisor_id else None
 
+    @classmethod
+    def has_room_for(cls, patient, ignoring=None):
+        ocupantes = cls.objects.filter(current_patient=patient)
+        if ignoring is not None and ignoring.pk:
+            ocupantes = ocupantes.exclude(pk=ignoring.pk)
+        return ocupantes.count() < cls.MAX_STUDENTS_PER_PATIENT
+
     def clean(self):
         super().clean()
         if self.current_patient_id is None:
             return
 
-        ocupantes = (
-            Student.objects.filter(current_patient_id=self.current_patient_id)
-            .exclude(pk=self.pk)
-            .count()
-        )
-        if ocupantes >= self.MAX_STUDENTS_PER_PATIENT:
+        if not Student.has_room_for(self.current_patient_id, ignoring=self):
             raise ValidationError({
                 "current_patient": (
                     f"Este paciente já tem {self.MAX_STUDENTS_PER_PATIENT} "
@@ -182,6 +185,105 @@ class AdviseeScopedQuerySet(RoleScopedQuerySet):
         if role == Role.ALUNO:
             return self.filter(student_id=user.pk)
         return self.none()
+
+
+class CaseAssignmentManager(models.Manager.from_queryset(AdviseeScopedQuerySet)):
+    @transaction.atomic
+    def change_patient(self, student, new_patient):
+        """Encerra o caso atual, abre o novo e move o ponteiro do aluno."""
+        current = (
+            self.select_for_update()
+            .filter(student=student, end_date__isnull=True)
+            .first()
+        )
+
+        if current and current.patient_id == getattr(new_patient, "pk", None):
+            raise ValidationError("O aluno ja esta encarregado deste paciente.")
+
+        if new_patient is not None and not Student.has_room_for(
+            new_patient, ignoring=student
+        ):
+            raise ValidationError(
+                f"Este paciente ja tem {Student.MAX_STUDENTS_PER_PATIENT} "
+                "alunos responsaveis."
+            )
+
+        if current:
+            current.end_date = timezone.now().date()
+            current.save(update_fields=["end_date"])
+
+        student.current_patient = new_patient
+        student.save(update_fields=["current_patient"])
+
+        if new_patient is None:
+            return None
+
+        return self.create(
+            student=student,
+            patient=new_patient,
+            acting_area=student.acting_area,
+        )
+
+
+class CaseAssignment(BusinessRulesMixin, models.Model):
+    student = models.ForeignKey(
+        Student,
+        on_delete=models.PROTECT,
+        related_name="case_history",
+        verbose_name="Aluno",
+    )
+
+    patient = models.ForeignKey(
+        "patient.Patient",
+        on_delete=models.PROTECT,
+        related_name="assignment_history",
+        verbose_name="Paciente",
+    )
+
+    acting_area = models.ForeignKey(
+        AreaActing,
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name="case_assignments",
+        verbose_name="Área de atuação",
+    )
+
+    start_date = models.DateField(auto_now_add=True, verbose_name="Data de início")
+    end_date = models.DateField(null=True, blank=True, verbose_name="Data de término")
+
+    objects = CaseAssignmentManager()
+
+    CREATABLE_BY = (Role.SUPERVISOR, Role.PROFESSOR)
+    EDITABLE_FIELDS = {
+        Role.SUPERVISOR: ("end_date",),
+        Role.PROFESSOR: ("end_date",),
+    }
+    DELETABLE_BY = ()
+
+    class Meta:
+        verbose_name = "Designação de caso"
+        verbose_name_plural = "Designações de caso"
+        ordering = ["-start_date"]
+        constraints = [
+            UniqueConstraint(
+                fields=["student"],
+                condition=Q(end_date__isnull=True),
+                name="student_with_at_most_one_active_case",
+            )
+        ]
+
+    @classmethod
+    def can_be_created_by(cls, user, student=None, **context):
+        if not super().can_be_created_by(user):
+            return False
+        if user.role == Role.PROFESSOR:
+            return student is not None and student.current_advisor_id == user.pk
+        return True
+
+    def __str__(self):
+        status = "ativa" if self.end_date is None else f"encerrada em {self.end_date}"
+        return f"{self.student} encarregado de {self.patient} ({status})"
 
 
 class Attendance(BusinessRulesMixin, models.Model):
