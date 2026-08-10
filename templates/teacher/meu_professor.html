@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Meu Professor{% endblock %}
+{% block content %}
+<section class="card">
+    <h2>Meu Professor/Supervisor Responsável</h2>
+    {% if professor %}
+        <p><strong>Nome:</strong> {{ professor.nome_completo }}</p>
+        <p><strong>Área de Atuação:</strong> {{ professor.area_atuacao.nome }}</p>
+    {% else %}
+        <p>Você ainda não foi vinculado a um Professor.</p>
+    {% endif %}
+</section>
+{% endblock %}

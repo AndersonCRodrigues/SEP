@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Áreas de Atuação{% endblock %}
+{% block content %}
+<section class="card">
+    <h2>Áreas de Atuação</h2>
+    <a href="{% url 'supervisor:area_criar' %}">Nova Área</a>
+    <ul>
+    {% for area in areas %}
+        <li>{{ area.nome }} — <a href="{% url 'supervisor:area_editar' area.pk %}">editar</a></li>
+    {% empty %}
+        <li>Nenhuma área cadastrada ainda.</li>
+    {% endfor %}
+    </ul>
+</section>
+{% endblock %}

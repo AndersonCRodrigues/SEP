@@ -2,6 +2,8 @@
 Refs.:
 https://docs.djangoproject.com/en/6.0/howto/custom-management-commands/
 '''
+
+
 import random
 import os
 from django.core.management.base import BaseCommand
@@ -39,9 +41,18 @@ if os.getenv("NODE_ENV") == "dev":
 
         return f"{cpf[0]}{cpf[1]}{cpf[2]}.{cpf[3]}{cpf[4]}{cpf[5]}.{cpf[6]}{cpf[7]}{cpf[8]}-{cpf[9]}{cpf[10]}"
 
-    class Command(BaseCommand):
-        help = 'Popula o banco de dados com usuários de teste para as Roles selecionadas.' # E printado no terminal se colocado 'docker compose exec django-web python3 manage.py test_user --help'
 
+class Command(BaseCommand):
+    help = 'Popula o banco de dados com áreas de atuação e usuários de teste.'
+
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--roles',
+            nargs='+',
+            type=str,
+            choices=[role[0] for role in CustomUser.Role.choices],
+            help='Especifica quais roles criar (SUPERADMIN, SUPERVISOR, PROFESSOR, ADMIN, ALUNO).'
+        )
         def add_arguments(self, parser):
             #Permite passar roles como argumentos separados por espaço. ex.: --roles PR AL
             parser.add_argument(
@@ -52,16 +63,28 @@ if os.getenv("NODE_ENV") == "dev":
                 help='Especifica quais roles criar (SA SV PR AD AL). Se não for passado, cria uma de cada.'
             )# Decidi fazer desse jeito para ser mais pratico se quisermos testar so 1 tipo de role
 
-        def handle(self, *args, **options):
-            selected_roles = options['roles']
+    def handle(self, *args, **options):
+        default_area = [
+            "Esquizoanálise",
+            "TCC Adulto/Infantil",
+            "Fenomenológico-Existencial",
+            "Psicanálise",
+        ]
+        objects_area = []
+        for name_area in areas_padrao:
+            area_obj, _ = AreaActing.objects.get_or_create(nome=nome_area)
+            objetos_area.append(area_obj)
 
-            if not selected_roles: # Se nenhum role foi passada, seleciona todas
-                selected_roles = [role[0] for role in CustomUser.Role.choices]
+        self.stdout.write(self.style.SUCCESS("Áreas de Atuação verificadas/criadas com sucesso!"))
 
-            for role in selected_roles:
-                prefix = role.lower()
-                email = f"{prefix}@teste.com"
-                counter = 1
+        roles_selecionadas = options['roles']
+        if not roles_selecionadas:
+            roles_selecionadas = [role[0] for role in CustomUser.Role.choices]
+
+        for role in roles_selecionadas:
+            prefixo = role.lower()
+            email = f"{prefixo}@teste.com"
+            contador = 1
 
                 while CustomUser.objects.filter(email=email).exists():
                     email = f"{prefix}{counter}@teste.com"
