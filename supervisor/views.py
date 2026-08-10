@@ -54,14 +54,14 @@ def cadastrar_supervisor(request):
         raise PermissionDenied("Apenas o Superadmin pode cadastrar Supervisor.")
 
     if request.method == "POST":
-        form = SupervisorCreationForm(request.POST, created_by=request.user)
+        form = SupervisorCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
             sincronizar_grupo(user)
             messages.success(request, "Supervisor cadastrado com sucesso!")
             return redirect("superadmin:painel")
     else:
-        form = SupervisorCreationForm(created_by=request.user)
+        form = SupervisorCreationForm()
 
     return render(request, "supervisor/cadastro_supervisor.html", {"form": form})
 
