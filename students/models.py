@@ -12,6 +12,11 @@ from teacher.models import Teacher
 Role = CustomUser.Role
 
 
+def current_term(today=None):
+    today = today or timezone.now().date()
+    return f"{today.year}.{1 if today.month <= 6 else 2}"
+
+
 class Student(CustomUser):
     current_advisor = models.ForeignKey(
         Teacher,
@@ -86,28 +91,39 @@ class AdvisingQuerySet(RoleScopedQuerySet):
 
 class AdvisingManager(models.Manager.from_queryset(AdvisingQuerySet)):
     @transaction.atomic
-    def change_advisor(self, student, new_teacher, term):
-
-        current_advising = self.select_for_update().filter(student=student, end_date__isnull=True).first()
-
-        if current_advising:
-            if current_advising.teacher == new_teacher:
-                raise ValidationError(
-                    "O aluno ja esta sendo orientado por este professor."
-                )
-            current_advising.end_date = timezone.now().date()
-            current_advising.save()
-
-        new_advising = self.create(
-        student=student,
-        teacher=new_teacher,
-        term=term,
+    def sync_from_student(self, student, term=None):
+        open_row = (
+            self.select_for_update()
+            .filter(student=student, end_date__isnull=True)
+            .first()
         )
+        if open_row:
+            open_row.end_date = timezone.now().date()
+            open_row._from_sync = True
+            open_row.save(update_fields=["end_date"])
 
+        if student.current_advisor_id is None:
+            return None
+
+        row = self.model(
+            student=student,
+            teacher_id=student.current_advisor_id,
+            term=term or current_term(),
+        )
+        row._from_sync = True
+        row.save()
+        return row
+
+    @transaction.atomic
+    def change_advisor(self, student, new_teacher, term=None):
+        if student.current_advisor_id == getattr(new_teacher, "pk", None):
+            raise ValidationError("O aluno ja esta sendo orientado por este professor.")
+
+        student._advising_term = term
         student.current_advisor = new_teacher
         student.save(update_fields=["current_advisor"])
 
-        return new_advising
+        return self.filter(student=student, end_date__isnull=True).first()
 
 
 class Advising(BusinessRulesMixin, models.Model):
@@ -166,6 +182,14 @@ class Advising(BusinessRulesMixin, models.Model):
             )
         ]
 
+    def save(self, *args, **kwargs):
+        if not getattr(self, "_from_sync", False):
+            raise ValueError(
+                "Histórico é derivado: mova Student.current_advisor "
+                "(Advising.objects.change_advisor)."
+            )
+        super().save(*args, **kwargs)
+
     def __str__(self):
         status = "ativa" if self.end_date is None else f"encerrada em {self.end_date}"
         return f"{self.student} orientado por {self.teacher} ({self.term}, {status})"
@@ -189,14 +213,32 @@ class AdviseeScopedQuerySet(RoleScopedQuerySet):
 
 class CaseAssignmentManager(models.Manager.from_queryset(AdviseeScopedQuerySet)):
     @transaction.atomic
-    def change_patient(self, student, new_patient):
-        current = (
+    def sync_from_student(self, student):
+        open_row = (
             self.select_for_update()
             .filter(student=student, end_date__isnull=True)
             .first()
         )
+        if open_row:
+            open_row.end_date = timezone.now().date()
+            open_row._from_sync = True
+            open_row.save(update_fields=["end_date"])
 
-        if current and current.patient_id == getattr(new_patient, "pk", None):
+        if student.current_patient_id is None:
+            return None
+
+        row = self.model(
+            student=student,
+            patient_id=student.current_patient_id,
+            acting_area=student.acting_area,
+        )
+        row._from_sync = True
+        row.save()
+        return row
+
+    @transaction.atomic
+    def change_patient(self, student, new_patient):
+        if student.current_patient_id == getattr(new_patient, "pk", None):
             raise ValidationError("O aluno ja esta encarregado deste paciente.")
 
         if new_patient is not None and not Student.has_room_for(
@@ -207,21 +249,10 @@ class CaseAssignmentManager(models.Manager.from_queryset(AdviseeScopedQuerySet))
                 "alunos responsaveis."
             )
 
-        if current:
-            current.end_date = timezone.now().date()
-            current.save(update_fields=["end_date"])
-
         student.current_patient = new_patient
         student.save(update_fields=["current_patient"])
 
-        if new_patient is None:
-            return None
-
-        return self.create(
-            student=student,
-            patient=new_patient,
-            acting_area=student.acting_area,
-        )
+        return self.filter(student=student, end_date__isnull=True).first()
 
 
 class CaseAssignment(BusinessRulesMixin, models.Model):
@@ -279,6 +310,14 @@ class CaseAssignment(BusinessRulesMixin, models.Model):
         if user.role == Role.PROFESSOR:
             return student is not None and student.current_advisor_id == user.pk
         return True
+
+    def save(self, *args, **kwargs):
+        if not getattr(self, "_from_sync", False):
+            raise ValueError(
+                "Histórico é derivado: mova Student.current_patient "
+                "(CaseAssignment.objects.change_patient)."
+            )
+        super().save(*args, **kwargs)
 
     def __str__(self):
         status = "ativa" if self.end_date is None else f"encerrada em {self.end_date}"
