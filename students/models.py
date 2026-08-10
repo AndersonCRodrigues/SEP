@@ -190,7 +190,6 @@ class AdviseeScopedQuerySet(RoleScopedQuerySet):
 class CaseAssignmentManager(models.Manager.from_queryset(AdviseeScopedQuerySet)):
     @transaction.atomic
     def change_patient(self, student, new_patient):
-        """Encerra o caso atual, abre o novo e move o ponteiro do aluno."""
         current = (
             self.select_for_update()
             .filter(student=student, end_date__isnull=True)

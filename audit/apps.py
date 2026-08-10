@@ -6,4 +6,6 @@ class AuditConfig(AppConfig):
     verbose_name = "Auditoria"
 
     def ready(self):
-        from . import signals  # noqa: F401
+        from . import signals
+
+        signals.connect()

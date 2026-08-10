@@ -39,6 +39,9 @@ class SecurityLog(BusinessRulesMixin, models.Model):
         UPDATE = "UP", "Alteração"
         DELETE = "DE", "Exclusão"
         ACCESS_DENIED = "AD", "Acesso negado"
+        ROLE_CHANGE = "RC", "Mudança de papel"
+        PERMISSION_CHANGE = "PC", "Mudança de permissão"
+        EXPORT = "EX", "Exportação"
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -49,7 +52,6 @@ class SecurityLog(BusinessRulesMixin, models.Model):
         verbose_name="Usuário",
     )
 
-    # Texto e nao FK: o log precisa sobreviver a exclusao do usuario.
     user_identifier = models.CharField(
         max_length=254,
         blank=True,
@@ -76,6 +78,8 @@ class SecurityLog(BusinessRulesMixin, models.Model):
         verbose_name="Endereço IP",
     )
 
+    changes = models.JSONField(default=dict, blank=True, verbose_name="Alterações")
+
     detail = models.TextField(blank=True, verbose_name="Detalhe")
 
     created_at = models.DateTimeField(
@@ -86,7 +90,6 @@ class SecurityLog(BusinessRulesMixin, models.Model):
 
     objects = SecurityLogQuerySet.as_manager()
 
-    # Escrito pelos signals e removido apenas pela purga de retenção.
     CREATABLE_BY = ()
     EDITABLE_FIELDS = {}
     DELETABLE_BY = ()
@@ -95,6 +98,18 @@ class SecurityLog(BusinessRulesMixin, models.Model):
         verbose_name = "Log de segurança"
         verbose_name_plural = "Logs de segurança"
         ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["target_model", "target_id"]),
+            models.Index(fields=["user", "created_at"]),
+        ]
+
+    def save(self, *args, **kwargs):
+        if self.pk:
+            raise ValueError("Log de auditoria não pode ser alterado depois de criado.")
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        raise ValueError("Log de auditoria só sai pelo purge de retenção.")
 
     def __str__(self):
         who = self.user_identifier or "anônimo"
