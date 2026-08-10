@@ -21,7 +21,6 @@ class Student(CustomUser):
         verbose_name="Orientador atual",
     )
 
-    # FK do lado do aluno: e o que torna "um paciente por vez" estrutural.
     current_patient = models.ForeignKey(
         "patient.Patient",
         null=True,
@@ -39,7 +38,6 @@ class Student(CustomUser):
 
     @property
     def acting_area(self):
-        """Herdada do orientador; o aluno nao guarda copia."""
         return self.current_advisor.acting_area if self.current_advisor_id else None
 
     def clean(self):

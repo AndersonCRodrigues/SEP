@@ -89,8 +89,6 @@ class ProgressNoteQuerySet(RoleScopedQuerySet):
         if role == Role.PROFESSOR:
             return self.filter(student__current_advisor_id=user.pk)
         if role == Role.ALUNO:
-            # Pelo paciente, e nao por autoria: quem assume o caso no meio do
-            # processo precisa do que ja foi escrito.
             return self.filter(patient__responsible_students=user.pk)
         return self.none()
 

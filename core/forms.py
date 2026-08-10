@@ -32,7 +32,6 @@ class CustomUserCreationForm(UserCreationForm):
         CustomUser.Role.PROFESSOR,
     )
 
-    # Administrativo sai daqui porque so o Superadmin o cadastra.
     BLOCKED_ROLES = (
         CustomUser.Role.SUPERVISOR,
         CustomUser.Role.SUPERADMIN,
