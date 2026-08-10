@@ -17,7 +17,7 @@ Role = CustomUser.Role
 
 MANAGEABLE_ROLES_BY = {
     Role.SUPERADMIN: (Role.SUPERVISOR, Role.ADMIN),
-    Role.SUPERVISOR: (Role.PROFESSOR, Role.ALUNO, Role.ADMIN),
+    Role.SUPERVISOR: (Role.PROFESSOR, Role.ALUNO),
 }
 
 

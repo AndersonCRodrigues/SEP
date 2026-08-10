@@ -21,9 +21,44 @@ class Student(CustomUser):
         verbose_name="Orientador atual",
     )
 
+    # FK do lado do aluno: e o que torna "um paciente por vez" estrutural.
+    current_patient = models.ForeignKey(
+        "patient.Patient",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="responsible_students",
+        verbose_name="Paciente atual",
+    )
+
+    MAX_STUDENTS_PER_PATIENT = 2
+
     class Meta:
         verbose_name = "Aluno"
         verbose_name_plural = "Alunos"
+
+    @property
+    def acting_area(self):
+        """Herdada do orientador; o aluno nao guarda copia."""
+        return self.current_advisor.acting_area if self.current_advisor_id else None
+
+    def clean(self):
+        super().clean()
+        if self.current_patient_id is None:
+            return
+
+        ocupantes = (
+            Student.objects.filter(current_patient_id=self.current_patient_id)
+            .exclude(pk=self.pk)
+            .count()
+        )
+        if ocupantes >= self.MAX_STUDENTS_PER_PATIENT:
+            raise ValidationError({
+                "current_patient": (
+                    f"Este paciente já tem {self.MAX_STUDENTS_PER_PATIENT} "
+                    "alunos responsáveis."
+                )
+            })
 
     def save(self, *args, **kwargs):
         self.role = CustomUser.Role.ALUNO

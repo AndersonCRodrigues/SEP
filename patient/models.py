@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.db import models
 from django.db.models import Q
+from areas.models import AreaActing
 from core.managers import CustomUserManager
 from core.models import CustomUser
 from core.permissions import BusinessRulesMixin, RoleScopedQuerySet
@@ -21,12 +22,12 @@ class PatientQuerySet(RoleScopedQuerySet):
             return self
         if role == Role.PROFESSOR:
             return self.filter(
-                Q(responsible_student__current_advisor_id=user.pk)
+                Q(responsible_students__current_advisor_id=user.pk)
                 | Q(responsible_teachers=user.pk)
             ).distinct()
         if role == Role.ALUNO:
             return self.filter(
-                Q(responsible_student_id=user.pk, active_treatment=True)
+                Q(responsible_students=user.pk, active_treatment=True)
                 | Q(
                     screenings__student_id=user.pk,
                     screenings__status=ScreeningStatus.OPEN,
@@ -38,15 +39,6 @@ class PatientQuerySet(RoleScopedQuerySet):
 
 
 class Patient(BusinessRulesMixin, CustomUser):
-    responsible_student = models.ForeignKey(
-        Student,
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
-        related_name="patients",
-        verbose_name="Aluno responsável",
-    )
-
     responsible_teachers = models.ManyToManyField(
         Teacher,
         blank=True,
@@ -97,7 +89,9 @@ class ProgressNoteQuerySet(RoleScopedQuerySet):
         if role == Role.PROFESSOR:
             return self.filter(student__current_advisor_id=user.pk)
         if role == Role.ALUNO:
-            return self.filter(student_id=user.pk)
+            # Pelo paciente, e nao por autoria: quem assume o caso no meio do
+            # processo precisa do que ja foi escrito.
+            return self.filter(patient__responsible_students=user.pk)
         return self.none()
 
 
@@ -116,10 +110,19 @@ class ProgressNote(BusinessRulesMixin, models.Model):
         verbose_name="Aluno responsável",
     )
 
+    acting_area = models.ForeignKey(
+        AreaActing,
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name="progress_notes",
+        verbose_name="Área de atuação",
+    )
+
     content = models.TextField(verbose_name="Evolução")
 
     session_date = models.DateField(verbose_name="Data da sessão")
-    
+
     confirmed_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         null=True,
@@ -160,7 +163,10 @@ class ProgressNote(BusinessRulesMixin, models.Model):
         if user.role == Role.ALUNO:
             if patient is None:
                 return False
-            return patient.active_treatment and patient.responsible_student_id == user.pk
+            return (
+                patient.active_treatment
+                and patient.responsible_students.filter(pk=user.pk).exists()
+            )
         return True
 
     def editable_fields_for(self, user):

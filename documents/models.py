@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.db import models
 from django.db.models import F, Q
+from areas.models import AreaActing
 from core.models import CustomUser
 from core.permissions import BusinessRulesMixin, RoleScopedQuerySet
 from patient.models import Appointment, Patient
@@ -45,11 +46,11 @@ class AttendanceCertificateQuerySet(RoleScopedQuerySet):
             return self
         if role == Role.PROFESSOR:
             return self.filter(
-                Q(patient__responsible_student__current_advisor_id=user.pk)
+                Q(patient__responsible_students__current_advisor_id=user.pk)
                 | Q(patient__responsible_teachers=user.pk)
             ).distinct()
         if role == Role.ALUNO:
-            return self.filter(patient__responsible_student_id=user.pk)
+            return self.filter(patient__responsible_students=user.pk)
         if role == Role.PACIENTE:
             return self.filter(patient_id=user.pk)
         return self.none()
@@ -76,6 +77,15 @@ class AttendanceCertificate(BaseCertificate):
         on_delete=models.SET_NULL,
         related_name="certificates",
         verbose_name="Atendimento",
+    )
+
+    acting_area = models.ForeignKey(
+        AreaActing,
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name="certificates",
+        verbose_name="Área de atuação",
     )
 
     kind = models.CharField(
