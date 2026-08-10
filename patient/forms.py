@@ -1,10 +1,13 @@
 from django.contrib.auth.forms import UserCreationForm
 from core.models import CustomUser
+from .models import Patient
 
 
 class PacienteCreationForm(UserCreationForm):
     class Meta:
-        model = CustomUser
+        # Patient, nao CustomUser: sem a linha filha da heranca multi-tabela o
+        # paciente nao existe para Patient.objects nem para as FKs que o apontam.
+        model = Patient
         fields = (
             "email", "nome_completo", "cpf", "telefone", "logradouro",
             "numero", "complemento", "bairro", "cidade", "estado",
