@@ -32,12 +32,6 @@ class CustomUserCreationForm(UserCreationForm):
         CustomUser.Role.PROFESSOR,
     )
 
-    BLOCKED_ROLES = (
-        CustomUser.Role.SUPERVISOR,
-        CustomUser.Role.SUPERADMIN,
-        CustomUser.Role.ADMIN,
-    )
-
     acting_area = forms.ModelChoiceField(
         queryset=AreaActing.objects.all(),
         required=False,
@@ -48,20 +42,6 @@ class CustomUserCreationForm(UserCreationForm):
     class Meta:
         model = CustomUser
         fields = PERSONAL_FIELDS
-
-    def __init__(self, *args, created_by=None, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.created_by = created_by
-        self.fields["role"].choices = [
-            (value, label) for value, label in CustomUser.Role.choices
-            if value not in self.BLOCKED_ROLES
-        ]
-
-    def clean_role(self):
-        role = self.cleaned_data["role"]
-        if role in self.BLOCKED_ROLES:
-            raise forms.ValidationError("Você não tem permissão para criar esse tipo de usuário.")
-        return role
 
     def clean(self):
         cleaned_data = super().clean()

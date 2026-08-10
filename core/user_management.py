@@ -25,7 +25,8 @@ def can_manage_user(actor, target_role):
     """Colunas Create e Delete: quais papeis o `actor` pode criar ou apagar."""
     if not actor.is_authenticated:
         return False
-    return target_role in MANAGEABLE_ROLES_BY.get(actor.role, ())
+    role = Role.SUPERADMIN if actor.is_superuser else actor.role
+    return target_role in MANAGEABLE_ROLES_BY.get(role, ())
 
 
 def editable_user_fields(actor, target):
