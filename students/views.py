@@ -6,7 +6,7 @@ from django.core.exceptions import PermissionDenied
 from django.views.generic import TemplateView, UpdateView
 from django.urls import reverse_lazy
 from .forms import AlunoCreationForm
-from .models import Aluno
+from .models import Student
 from core.utils import sincronizar_grupo
 from core.mixins import GroupRequiredMixin
 
@@ -36,7 +36,7 @@ def cadastrar_aluno(request):
 
 class PerfilAlunoView(GroupRequiredMixin, UpdateView):
     required_group = "Students"
-    model = Aluno
+    model = Student
     fields = [
         "nome_completo", "telefone",
         "logradouro", "numero", "complemento",
@@ -46,7 +46,7 @@ class PerfilAlunoView(GroupRequiredMixin, UpdateView):
     success_url = reverse_lazy("students:perfil")  
 
     def get_object(self, queryset=None):
-        return get_object_or_404(Aluno, pk=self.request.user.pk)
+        return get_object_or_404(Student, pk=self.request.user.pk)
 
 
 class MeuProfessorView(LoginRequiredMixin, TemplateView):
@@ -54,8 +54,8 @@ class MeuProfessorView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        aluno = get_object_or_404(Aluno, pk=self.request.user.pk)
-        context["professor"] = aluno.orientador_atual
+        aluno = get_object_or_404(Student, pk=self.request.user.pk)
+        context["professor"] = aluno.current_advisor
         return context
     
 

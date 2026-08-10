@@ -7,8 +7,8 @@ from django.urls import reverse_lazy
 from django.views.generic import ListView, TemplateView, CreateView, UpdateView
 from core.models import CustomUser
 from core.mixins import GroupRequiredMixin
-from teacher.models import Professor
-from students.models import Aluno
+from teacher.models import Teacher
+from students.models import Student
 from areas.models import AreaActing
 from .forms import SupervisorCreationForm
 from areas.forms import AreaAtuacaoForm
@@ -18,10 +18,10 @@ from core.utils import sincronizar_grupo
 def usuarios_alunos_e_professores():
     """
     Busca Alunos e Professores como suas subclasses reais (não CustomUser genérico),
-    pra garantir que campos como crp/area_atuacao/matricula venham preenchidos.
+    pra garantir que campos como crp/acting_area/matricula venham preenchidos.
     """
-    alunos = Aluno.objects.filter(role=CustomUser.Role.ALUNO)
-    professores = Professor.objects.filter(role__in=[CustomUser.Role.PROFESSOR, CustomUser.Role.SUPERVISOR])
+    alunos = Student.objects.filter(role=CustomUser.Role.ALUNO)
+    professores = Teacher.objects.filter(role__in=[CustomUser.Role.PROFESSOR, CustomUser.Role.SUPERVISOR])
     return sorted(chain(alunos, professores), key=lambda u: u.nome_completo)
 
 

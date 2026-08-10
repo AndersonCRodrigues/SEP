@@ -5,7 +5,7 @@
     <h2>Meu Professor/Supervisor Responsável</h2>
     {% if professor %}
         <p><strong>Nome:</strong> {{ professor.nome_completo }}</p>
-        <p><strong>Área de Atuação:</strong> {{ professor.area_atuacao.nome }}</p>
+        <p><strong>Área de Atuação:</strong> {{ professor.acting_area.nome }}</p>
     {% else %}
         <p>Você ainda não foi vinculado a um Professor.</p>
     {% endif %}

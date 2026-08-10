@@ -26,7 +26,7 @@ class CustomUser(AbstractUser):
         SUPERADMIN = "SA", _("Superadmin")
         SUPERVISOR = "SV", _("Supervisor Geral")
         PROFESSOR = "PR", _("Professor Responsável")
-        ADMINISTRATIVO = "AD", _("Administrativo")  
+        ADMIN = "AD", _("Administrativo")  
         ALUNO = "AL", _("Aluno")
         PACIENTE = "PA", _("Paciente")
 
@@ -51,7 +51,7 @@ class CustomUser(AbstractUser):
 
     def clean(self):
         super().clean()
-        if self.role in (self.Role.ALUNO, self.Role.ADMINISTRATIVO) and not self.matricula:
+        if self.role in (self.Role.ALUNO, self.Role.ADMIN) and not self.matricula:
             raise ValidationError({"matricula": "Aluno e Administrativo precisam de matrícula."})
 
         if self.role in (self.Role.PROFESSOR, self.Role.SUPERVISOR) and not self.crp:
