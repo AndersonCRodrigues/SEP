@@ -8,7 +8,6 @@ from django.urls import reverse_lazy
 from .forms import AlunoCreationForm
 from .models import Aluno
 from core.utils import sincronizar_grupo
-from core.mixins import GroupRequiredMixin
 
 
 class HomeEstudanteView(LoginRequiredMixin, TemplateView):
