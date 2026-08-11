@@ -40,7 +40,7 @@ class Command(BaseCommand):
             nargs='+',
             type=str,
             choices=[role[0] for role in CustomUser.Role.choices],
-            help='Especifica quais roles criar (SA SV PR AD AL PA). Se não for passado, cria uma de cada.'
+            help='Especifica quais roles criar. Valores aceitos: SUPERADMIN, SUPERVISOR, PROFESSOR, ADMIN, ALUNO.'
         )
 
     def handle(self, *args, **options):
