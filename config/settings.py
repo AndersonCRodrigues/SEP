@@ -5,14 +5,19 @@ from django.contrib.messages import constants as messages
 
 from dotenv import load_dotenv
 
-
-
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 load_dotenv(BASE_DIR / ".env")
 
 DEBUG = os.getenv("DJANGO_DEBUG", "True").lower() == "true"
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
+
+FIELD_ENCRYPTION_KEY = os.environ.get("FIELD_ENCRYPTION_KEY")
+if not FIELD_ENCRYPTION_KEY:
+    raise ImproperlyConfigured(
+    "FIELD_ENCRYPTION_KEY nao encontrada. Verifique o .env."
+    )
+
 
 if not SECRET_KEY:
     if DEBUG:
@@ -33,7 +38,6 @@ if _allowed_hosts_env:
         host.strip() for host in _allowed_hosts_env.split(",") if host.strip()
     ]
 else:
-    ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
     ALLOWED_HOSTS = ["localhost", "127.0.0.1",'host.docker.internal']
 
 
@@ -49,7 +53,6 @@ INSTALLED_APPS = [
     "accounts",
     "core",
     "patient",
-    "screening",
     "teacher",
     "students",
     "supervisor",
@@ -57,6 +60,8 @@ INSTALLED_APPS = [
     "superadmin",
     "localflavor",
     "areas",
+    "triage",
+    "audit.apps.AuditConfig",
     "crispy_forms",
     "crispy_bootstrap5",
 ]
@@ -67,6 +72,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "audit.middleware.AuditMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
