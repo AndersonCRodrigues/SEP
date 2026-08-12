@@ -14,6 +14,9 @@ from patient.models import Patient
 from students.models import Student
 from teacher.models import Teacher
 
+# Os usos de `random` levam `# nosec B311`: geram dados falsos de seed num comando
+# que so roda com NODE_ENV=dev, nunca material criptografico.
+
 MODEL_BY_ROLE = {
     CustomUser.Role.PROFESSOR: Teacher,
     CustomUser.Role.ALUNO: Student,
@@ -30,7 +33,7 @@ DEFAULT_AREAS = [
 
 def generate_valid_cpf():
     """Gera um CPF matematicamente válido para burlar a validação em ambiente de teste."""
-    cpf = [random.randint(0, 9) for _ in range(9)]
+    cpf = [random.randint(0, 9) for _ in range(9)]  # nosec B311
 
     first_sum = sum(x * y for x, y in zip(cpf, range(10, 1, -1)))
     first_digit = 11 - (first_sum % 11)
@@ -90,7 +93,7 @@ class Command(BaseCommand):
             model = MODEL_BY_ROLE.get(role, CustomUser)
             extra_fields = {}
             if model is Teacher:
-                extra_fields["acting_area"] = random.choice(areas)
+                extra_fields["acting_area"] = random.choice(areas)  # nosec B311
 
             suffix = f" {counter}" if counter > 1 else ""
             user = model(
@@ -113,10 +116,10 @@ class Command(BaseCommand):
                 CustomUser.Role.PROFESSOR,
                 CustomUser.Role.ADMINISTRATIVO,
             ):
-                user.matricula = f"2026{random.randint(1000, 9999)}"
+                user.matricula = f"2026{random.randint(1000, 9999)}"  # nosec B311
 
             if role in (CustomUser.Role.PROFESSOR, CustomUser.Role.SUPERVISOR):
-                user.crp = f"{random.randint(10000, 99999)}/RJ-{role}"
+                user.crp = f"{random.randint(10000, 99999)}/RJ-{role}"  # nosec B311
 
             if role == CustomUser.Role.SUPERADMIN:
                 user.is_staff = True
