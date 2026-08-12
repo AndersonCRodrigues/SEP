@@ -1,15 +1,36 @@
 {% extends "base.html" %}
-{% block title %}Áreas de Atuação{% endblock %}
+
+{% block title %}Áreas de Atuação | Sistema SEP{% endblock %}
+
 {% block content %}
+<header class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Áreas de Atuação</h1>
+    <div class="d-flex flex-wrap gap-2">
+        <a href="{% url 'supervisor:area_criar' %}" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-lg"></i> Nova Área
+        </a>
+        <a href="{% url 'supervisor:home' %}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left"></i> Voltar para a Home
+        </a>
+    </div>
+</header>
+
 <section class="card">
-    <h2>Áreas de Atuação</h2>
-    <a href="{% url 'supervisor:area_criar' %}">Nova Área</a>
-    <ul>
-    {% for area in areas %}
-        <li>{{ area.nome }} — <a href="{% url 'supervisor:area_editar' area.pk %}">editar</a></li>
-    {% empty %}
-        <li>Nenhuma área cadastrada ainda.</li>
-    {% endfor %}
-    </ul>
+    <div class="card-body">
+        <ul class="list-group list-group-flush">
+            {% for area in areas %}
+            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                {{ area.nome }}
+                <a href="{% url 'supervisor:area_editar' area.pk %}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-pencil"></i> Editar
+                </a>
+            </li>
+            {% empty %}
+            <li class="list-group-item px-0 text-body-secondary">
+                Nenhuma área cadastrada ainda.
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
 </section>
 {% endblock %}

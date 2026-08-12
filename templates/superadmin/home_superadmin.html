@@ -3,9 +3,13 @@
 {% block home_title %}Painel Superadmin{% endblock %}
 
 {% block home_content %}
-<section class="card">
-    <h2>Painel Superadmin</h2>
-    <p>Acesso total às configurações globais do sistema.</p>
-    <a href="{% url 'superadmin:painel' %}">Acessar Painel Global</a>
-</section>
+<div class="col-12 col-md-6">
+    <div class="card h-100">
+        <div class="card-body">
+            <h2 class="h5 card-title">Painel Superadmin</h2>
+            <p class="card-text">Acesso total às configurações globais do sistema.</p>
+            <a href="{% url 'superadmin:painel' %}" class="btn btn-primary">Acessar Painel Global</a>
+        </div>
+    </div>
+</div>
 {% endblock %}

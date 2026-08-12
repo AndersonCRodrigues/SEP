@@ -1,13 +1,29 @@
 {% extends "base.html" %}
-{% block title %}Meu Professor{% endblock %}
+
+{% block title %}Meu Professor | Sistema SEP{% endblock %}
+
 {% block content %}
-<section class="card">
-    <h2>Meu Professor/Supervisor Responsável</h2>
-    {% if professor %}
-        <p><strong>Nome:</strong> {{ professor.nome_completo }}</p>
-        <p><strong>Área de Atuação:</strong> {{ professor.acting_area.nome }}</p>
-    {% else %}
-        <p>Você ainda não foi vinculado a um Professor.</p>
-    {% endif %}
-</section>
+<header class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Meu Professor/Supervisor Responsável</h1>
+    <a href="{% url 'students:painel' %}" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left"></i> Voltar para o Painel
+    </a>
+</header>
+
+<div class="row">
+    <div class="col-12 col-lg-8">
+        <section class="card">
+            <div class="card-body">
+                {% if professor %}
+                <p class="mb-1"><strong>Nome:</strong> {{ professor.nome_completo }}</p>
+                <p class="mb-0"><strong>Área de Atuação:</strong> {{ professor.acting_area.nome }}</p>
+                {% else %}
+                <p class="card-text text-body-secondary mb-0">
+                    Você ainda não foi vinculado a um Professor.
+                </p>
+                {% endif %}
+            </div>
+        </section>
+    </div>
+</div>
 {% endblock %}

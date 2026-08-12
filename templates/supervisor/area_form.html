@@ -1,12 +1,28 @@
 {% extends "base.html" %}
-{% block title %}Área de Atuação{% endblock %}
+
+{% block title %}{% if form.instance.pk %}Editar{% else %}Nova{% endif %} Área de Atuação | Sistema SEP{% endblock %}
+
 {% block content %}
-<section class="card">
-    <h2>{% if form.instance.pk %}Editar{% else %}Nova{% endif %} Área de Atuação</h2>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Salvar</button>
-    </form>
-</section>
+<header class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">
+        {% if form.instance.pk %}Editar{% else %}Nova{% endif %} Área de Atuação
+    </h1>
+    <a href="{% url 'supervisor:areas' %}" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left"></i> Voltar para as Áreas
+    </a>
+</header>
+
+<div class="row">
+    <div class="col-12 col-lg-8">
+        <section class="card">
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </form>
+            </div>
+        </section>
+    </div>
+</div>
 {% endblock %}

@@ -1,12 +1,26 @@
 {% extends "base.html" %}
-{% block title %}Cadastrar Paciente{% endblock %}
+
+{% block title %}Cadastrar Paciente | Sistema SEP{% endblock %}
+
 {% block content %}
-<section class="card">
-    <h2>Cadastrar Paciente</h2>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Cadastrar</button>
-    </form>
-</section>
+<header class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Cadastrar Paciente</h1>
+    <a href="{% url 'administration:painel' %}" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left"></i> Voltar para o Painel
+    </a>
+</header>
+
+<div class="row">
+    <div class="col-12 col-lg-8">
+        <section class="card">
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit" class="btn btn-primary">Cadastrar</button>
+                </form>
+            </div>
+        </section>
+    </div>
+</div>
 {% endblock %}
