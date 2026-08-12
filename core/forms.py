@@ -23,8 +23,8 @@ class CustomUserCreationForm(UserCreationForm):
         self.criado_por = criado_por
         roles_bloqueados = [CustomUser.Role.SUPERVISOR, CustomUser.Role.SUPERADMIN]
         self.fields["role"].choices = [
-            (v, l) for v, l in CustomUser.Role.choices
-            if v not in roles_bloqueados
+            (cargo_valor, cargo_rotulo) for cargo_valor, cargo_rotulo in CustomUser.Role.choices
+            if cargo_valor not in roles_bloqueados
         ]
 
     def clean_role(self):
