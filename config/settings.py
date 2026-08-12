@@ -38,7 +38,6 @@ if _allowed_hosts_env:
         host.strip() for host in _allowed_hosts_env.split(",") if host.strip()
     ]
 else:
-    ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
     ALLOWED_HOSTS = ["localhost", "127.0.0.1",'host.docker.internal']
 
 
