@@ -3,44 +3,58 @@
 {% block title %}Painel Superadmin | Sistema SEP{% endblock %}
 
 {% block content %}
-<header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-    <h1>Painel Global (Superadmin)</h1>
-    <a href="{% url 'superadmin:home' %}">&larr; Voltar para a Home</a>
+<header class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Painel Global (Superadmin)</h1>
+    <a href="{% url 'superadmin:home' %}" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left"></i> Voltar para a Home
+    </a>
 </header>
 
-<section class="card" style="margin-bottom: 1.5rem;">
-    <h2>Ações do Sistema</h2>
-    <a href="{% url 'supervisor:register' %}" class="btn">Cadastrar Supervisor</a>
+<section class="card mb-3">
+    <div class="card-body">
+        <h2 class="h5 card-title">Ações do Sistema</h2>
+        <a href="{% url 'supervisor:register' %}" class="btn btn-primary">Cadastrar Supervisor</a>
     <a href="{% url 'administration:cadastrar' %}" class="btn">Cadastrar Administrativo</a>
+    </div>
 </section>
 
 <section class="card">
-    <h2>Todos os Usuários Cadastrados</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Nome</th>
-                <th>Email</th>
-                <th>Papel (Role)</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for usuario in todos_usuarios %}
-            <tr>
-                <td>{{ usuario.id }}</td>
-                <td>{{ usuario.nome_completo }}</td>
-                <td>{{ usuario.email }}</td>
-                <td>{{ usuario.get_role_display }}</td>
-                <td>{% if usuario.is_active %}Ativo{% else %}Inativo{% endif %}</td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="5">Nenhum usuário cadastrado até o momento.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="card-body">
+        <h2 class="h5 card-title">Todos os Usuários Cadastrados</h2>
+        <div class="table-responsive">
+            <table class="table table-striped align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Nome</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Papel (Role)</th>
+                        <th scope="col">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for usuario in todos_usuarios %}
+                    <tr>
+                        <td>{{ usuario.id }}</td>
+                        <td>{{ usuario.nome_completo }}</td>
+                        <td>{{ usuario.email }}</td>
+                        <td><span class="badge text-bg-primary">{{ usuario.get_role_display }}</span></td>
+                        <td>
+                            {% if usuario.is_active %}
+                            <span class="badge text-bg-success">Ativo</span>
+                            {% else %}
+                            <span class="badge text-bg-danger">Inativo</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-body-secondary">Nenhum usuário cadastrado até o momento.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 </section>
 {% endblock %}

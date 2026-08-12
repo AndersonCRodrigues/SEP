@@ -1,0 +1,147 @@
+{% with current_view=request.resolver_match.view_name %}
+<ul class="nav nav-pills flex-column gap-1">
+  {% if request.user.role == 'SA' %}
+  <li class="nav-item">
+    <a
+      class="nav-link {% if current_view == 'superadmin:home' %}active{% endif %}"
+      href="{% url 'superadmin:home' %}"
+      aria-current="{% if current_view == 'superadmin:home' %}page{% else %}false{% endif %}"
+    >
+      <i class="bi bi-house-door me-2"></i>Início
+    </a>
+  </li>
+  <li class="nav-item">
+    <a
+      class="nav-link {% if current_view == 'superadmin:painel' %}active{% endif %}"
+      href="{% url 'superadmin:painel' %}"
+      aria-current="{% if current_view == 'superadmin:painel' %}page{% else %}false{% endif %}"
+    >
+      <i class="bi bi-shield-lock me-2"></i>Painel Global
+    </a>
+  </li>
+  {% endif %}
+
+  {% if request.user.role == 'SV' %}
+  <li class="nav-item">
+    <a
+      class="nav-link {% if current_view == 'supervisor:home' %}active{% endif %}"
+      href="{% url 'supervisor:home' %}"
+      aria-current="{% if current_view == 'supervisor:home' %}page{% else %}false{% endif %}"
+    >
+      <i class="bi bi-house-door me-2"></i>Início
+    </a>
+  </li>
+  <li class="nav-item">
+    <a
+      class="nav-link {% if current_view == 'supervisor:painel' %}active{% endif %}"
+      href="{% url 'supervisor:painel' %}"
+      aria-current="{% if current_view == 'supervisor:painel' %}page{% else %}false{% endif %}"
+    >
+      <i class="bi bi-speedometer2 me-2"></i>Painel do Supervisor
+    </a>
+  </li>
+  <li class="nav-item">
+    <a
+      class="nav-link {% if current_view == 'supervisor:listar_usuarios' %}active{% endif %}"
+      href="{% url 'supervisor:listar_usuarios' %}"
+      aria-current="{% if current_view == 'supervisor:listar_usuarios' %}page{% else %}false{% endif %}"
+    >
+      <i class="bi bi-people me-2"></i>Usuários Cadastrados
+    </a>
+  </li>
+  <li class="nav-item">
+    <a
+      class="nav-link {% if current_view == 'supervisor:register' %}active{% endif %}"
+      href="{% url 'supervisor:register' %}"
+      aria-current="{% if current_view == 'supervisor:register' %}page{% else %}false{% endif %}"
+    >
+      <i class="bi bi-person-plus me-2"></i>Cadastrar Usuário
+    </a>
+  </li>
+  {% endif %}
+
+  {% if request.user.role == 'PR' %}
+  <li class="nav-item">
+    <a
+      class="nav-link {% if current_view == 'teacher:home' %}active{% endif %}"
+      href="{% url 'teacher:home' %}"
+      aria-current="{% if current_view == 'teacher:home' %}page{% else %}false{% endif %}"
+    >
+      <i class="bi bi-house-door me-2"></i>Início
+    </a>
+  </li>
+  <li class="nav-item">
+    <a
+      class="nav-link {% if current_view == 'teacher:painel' %}active{% endif %}"
+      href="{% url 'teacher:painel' %}"
+      aria-current="{% if current_view == 'teacher:painel' %}page{% else %}false{% endif %}"
+    >
+      <i class="bi bi-clipboard-data me-2"></i>Painel do Professor
+    </a>
+  </li>
+  {% endif %}
+
+  {% if request.user.role == 'AD' %}
+  <li class="nav-item">
+    <a
+      class="nav-link {% if current_view == 'administration:home' %}active{% endif %}"
+      href="{% url 'administration:home' %}"
+      aria-current="{% if current_view == 'administration:home' %}page{% else %}false{% endif %}"
+    >
+      <i class="bi bi-house-door me-2"></i>Início
+    </a>
+  </li>
+  <li class="nav-item">
+    <a
+      class="nav-link {% if current_view == 'administration:painel' %}active{% endif %}"
+      href="{% url 'administration:painel' %}"
+      aria-current="{% if current_view == 'administration:painel' %}page{% else %}false{% endif %}"
+    >
+      <i class="bi bi-folder2-open me-2"></i>Painel Administrativo
+    </a>
+  </li>
+  {% endif %}
+
+  {% if request.user.role == 'AL' %}
+  <li class="nav-item">
+    <a
+      class="nav-link {% if current_view == 'students:home' %}active{% endif %}"
+      href="{% url 'students:home' %}"
+      aria-current="{% if current_view == 'students:home' %}page{% else %}false{% endif %}"
+    >
+      <i class="bi bi-house-door me-2"></i>Início
+    </a>
+  </li>
+  <li class="nav-item">
+    <a
+      class="nav-link {% if current_view == 'students:painel' %}active{% endif %}"
+      href="{% url 'students:painel' %}"
+      aria-current="{% if current_view == 'students:painel' %}page{% else %}false{% endif %}"
+    >
+      <i class="bi bi-journal-text me-2"></i>Painel do Estudante
+    </a>
+  </li>
+  {% endif %}
+
+  {% if request.user.role == 'PA' %}
+  <li class="nav-item">
+    <a
+      class="nav-link {% if current_view == 'patient:home' %}active{% endif %}"
+      href="{% url 'patient:home' %}"
+      aria-current="{% if current_view == 'patient:home' %}page{% else %}false{% endif %}"
+    >
+      <i class="bi bi-house-door me-2"></i>Início
+    </a>
+  </li>
+  <li class="nav-item">
+    <a
+      class="nav-link {% if current_view == 'patient:edit_data' %}active{% endif %}"
+      href="{% url 'patient:edit_data' %}"
+      aria-current="{% if current_view == 'patient:edit_data' %}page{% else %}false{% endif %}"
+    >
+      <i class="bi bi-person-vcard me-2"></i>Meus Dados
+    </a>
+  </li>
+  {% endif %}
+</ul>
+{% endwith %}
