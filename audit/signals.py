@@ -97,7 +97,9 @@ def log_permission_change(sender, instance, action, pk_set, **kwargs):
 def connect():
     for model in audited_models():
         uid = model._meta.label_lower
-        pre_save.connect(capture_previous, sender=model, dispatch_uid=f"audit_pre_{uid}")
+        pre_save.connect(
+            capture_previous, sender=model, dispatch_uid=f"audit_pre_{uid}"
+        )
         post_save.connect(log_write, sender=model, dispatch_uid=f"audit_post_{uid}")
         post_delete.connect(log_delete, sender=model, dispatch_uid=f"audit_del_{uid}")
 

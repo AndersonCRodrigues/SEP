@@ -1,7 +1,7 @@
-'''
+"""
 Refs.:
 https://docs.djangoproject.com/en/6.0/howto/custom-management-commands/
-'''
+"""
 
 import random
 import os
@@ -46,29 +46,37 @@ def generate_valid_cpf():
 
 
 class Command(BaseCommand):
-    help = 'Popula o banco de dados com áreas de atuação e usuários de teste.'
+    help = "Popula o banco de dados com áreas de atuação e usuários de teste."
 
     def add_arguments(self, parser):
         # Permite passar roles separadas por espaço. ex.: --roles PR AL
         parser.add_argument(
-            '--roles',
-            nargs='+',
+            "--roles",
+            nargs="+",
             type=str,
             choices=[role[0] for role in CustomUser.Role.choices],
-            help='Especifica quais roles criar (SA SV PR AD AL PA). Se não for passado, cria uma de cada.'
+            help="Especifica quais roles criar (SA SV PR AD AL PA). Se não for passado, cria uma de cada.",
         )
 
     def handle(self, *args, **options):
         if os.getenv("NODE_ENV") != "dev":
-            self.stdout.write(self.style.WARNING(
-                "popular_users só roda com NODE_ENV=dev. Nada foi criado."
-            ))
+            self.stdout.write(
+                self.style.WARNING(
+                    "popular_users só roda com NODE_ENV=dev. Nada foi criado."
+                )
+            )
             return
 
-        areas = [AreaActing.objects.get_or_create(nome=name)[0] for name in DEFAULT_AREAS]
-        self.stdout.write(self.style.SUCCESS("Áreas de Atuação verificadas/criadas com sucesso!"))
+        areas = [
+            AreaActing.objects.get_or_create(nome=name)[0] for name in DEFAULT_AREAS
+        ]
+        self.stdout.write(
+            self.style.SUCCESS("Áreas de Atuação verificadas/criadas com sucesso!")
+        )
 
-        selected_roles = options['roles'] or [role[0] for role in CustomUser.Role.choices]
+        selected_roles = options["roles"] or [
+            role[0] for role in CustomUser.Role.choices
+        ]
 
         for role in selected_roles:
             prefix = role.lower()
@@ -100,7 +108,11 @@ class Command(BaseCommand):
                 **extra_fields,
             )
 
-            if role in (CustomUser.Role.ALUNO, CustomUser.Role.PROFESSOR, CustomUser.Role.ADMINISTRATIVO):
+            if role in (
+                CustomUser.Role.ALUNO,
+                CustomUser.Role.PROFESSOR,
+                CustomUser.Role.ADMINISTRATIVO,
+            ):
                 user.matricula = f"2026{random.randint(1000, 9999)}"
 
             if role in (CustomUser.Role.PROFESSOR, CustomUser.Role.SUPERVISOR):
@@ -116,8 +128,14 @@ class Command(BaseCommand):
                 user.full_clean()
                 user.save()
                 sincronizar_grupo(user)
-                self.stdout.write(self.style.SUCCESS(f"Usuário {role} ({email}) criado com sucesso!"))
+                self.stdout.write(
+                    self.style.SUCCESS(f"Usuário {role} ({email}) criado com sucesso!")
+                )
             except ValidationError as e:
-                self.stdout.write(self.style.ERROR(f"Erro de validação no usuário {role}: {e}"))
+                self.stdout.write(
+                    self.style.ERROR(f"Erro de validação no usuário {role}: {e}")
+                )
             except Exception as e:
-                self.stdout.write(self.style.ERROR(f"Erro inesperado no usuário {role}: {e}"))
+                self.stdout.write(
+                    self.style.ERROR(f"Erro inesperado no usuário {role}: {e}")
+                )

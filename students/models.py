@@ -59,12 +59,14 @@ class Student(CustomUser):
             return
 
         if not Student.has_room_for(self.current_patient_id, ignoring=self):
-            raise ValidationError({
-                "current_patient": (
-                    f"Este paciente já tem {self.MAX_STUDENTS_PER_PATIENT} "
-                    "alunos responsáveis."
-                )
-            })
+            raise ValidationError(
+                {
+                    "current_patient": (
+                        f"Este paciente já tem {self.MAX_STUDENTS_PER_PATIENT} "
+                        "alunos responsáveis."
+                    )
+                }
+            )
 
     def save(self, *args, **kwargs):
         self.role = CustomUser.Role.ALUNO
@@ -145,7 +147,7 @@ class Advising(BusinessRulesMixin, models.Model):
         validators=[
             RegexValidator(
                 regex=r"^\d{4}\.[12]$",
-                message="O  período deve estar no formato AAAA.1 ou AAAA.2 (exemplo.:2026.1)."
+                message="O  período deve estar no formato AAAA.1 ou AAAA.2 (exemplo.:2026.1).",
             )
         ],
         verbose_name="Período",
@@ -159,7 +161,7 @@ class Advising(BusinessRulesMixin, models.Model):
     CREATABLE_BY = (Role.SUPERVISOR, Role.PROFESSOR)
     EDITABLE_FIELDS = {
         Role.SUPERVISOR: ("teacher", "term", "end_date"),
-        Role.PROFESSOR: ("end_date",),   
+        Role.PROFESSOR: ("end_date",),
     }
     DELETABLE_BY = ()
 
@@ -196,7 +198,6 @@ class Advising(BusinessRulesMixin, models.Model):
 
 
 class AdviseeScopedQuerySet(RoleScopedQuerySet):
-
     def visible_to(self, user):
         if not user.is_authenticated:
             return self.none()
@@ -325,7 +326,6 @@ class CaseAssignment(BusinessRulesMixin, models.Model):
 
 
 class Attendance(BusinessRulesMixin, models.Model):
-
     student = models.ForeignKey(
         Student,
         on_delete=models.PROTECT,
@@ -376,7 +376,6 @@ class Attendance(BusinessRulesMixin, models.Model):
 
 
 class PerformanceReview(BusinessRulesMixin, models.Model):
-    
     student = models.ForeignKey(
         Student,
         on_delete=models.PROTECT,
@@ -419,7 +418,6 @@ class PerformanceReview(BusinessRulesMixin, models.Model):
 
 
 class StudentActivity(BusinessRulesMixin, models.Model):
-
     class Kind(models.TextChoices):
         SESSION = "AT", "Atendimento"
         SCREENING = "TR", "Triagem"

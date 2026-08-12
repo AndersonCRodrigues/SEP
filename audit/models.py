@@ -113,4 +113,6 @@ class SecurityLog(BusinessRulesMixin, models.Model):
 
     def __str__(self):
         who = self.user_identifier or "anônimo"
-        return f"{self.get_action_display()} por {who} em {self.created_at:%d/%m/%Y %H:%M}"
+        return (
+            f"{self.get_action_display()} por {who} em {self.created_at:%d/%m/%Y %H:%M}"
+        )

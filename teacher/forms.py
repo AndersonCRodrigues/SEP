@@ -16,13 +16,18 @@ class VincularAlunoForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        from students.models import Student  
-        self.fields["aluno"].queryset = Student.objects.filter(current_advisor__isnull=True)
+        from students.models import Student
+
+        self.fields["aluno"].queryset = Student.objects.filter(
+            current_advisor__isnull=True
+        )
 
     def clean_periodo(self):
         periodo = self.cleaned_data["periodo"]
         if not re.match(r"^\d{4}\.[12]$", periodo):
-            raise forms.ValidationError("Formato inválido. Use AAAA.1 ou AAAA.2 (ex: 2026.1).")
+            raise forms.ValidationError(
+                "Formato inválido. Use AAAA.1 ou AAAA.2 (ex: 2026.1)."
+            )
         return periodo
 
 

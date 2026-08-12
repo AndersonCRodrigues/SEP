@@ -8,9 +8,18 @@ class AlunoCreationForm(UserCreationForm):
     class Meta:
         model = Student
         fields = (
-            "email", "nome_completo", "cpf", "telefone", "logradouro",
-            "numero", "complemento", "bairro", "cidade", "estado",
-            "cep", "matricula",
+            "email",
+            "nome_completo",
+            "cpf",
+            "telefone",
+            "logradouro",
+            "numero",
+            "complemento",
+            "bairro",
+            "cidade",
+            "estado",
+            "cep",
+            "matricula",
         )
 
     def __init__(self, *args, **kwargs):

@@ -169,7 +169,11 @@ class ProgressNote(BusinessRulesMixin, models.Model):
 
     def editable_fields_for(self, user):
         fields = super().editable_fields_for(user)
-        if user.is_authenticated and user.role == Role.SUPERVISOR and not self.pending_confirmation:
+        if (
+            user.is_authenticated
+            and user.role == Role.SUPERVISOR
+            and not self.pending_confirmation
+        ):
             return ()
         return fields
 
@@ -219,8 +223,7 @@ class AppointmentQuerySet(RoleScopedQuerySet):
             return self
         if role == Role.PROFESSOR:
             return self.filter(
-                Q(teacher_id=user.pk)
-                | Q(assigned_student__current_advisor_id=user.pk)
+                Q(teacher_id=user.pk) | Q(assigned_student__current_advisor_id=user.pk)
             ).distinct()
         if role == Role.ALUNO:
             return self.filter(assigned_student_id=user.pk)
@@ -306,8 +309,14 @@ class Appointment(BusinessRulesMixin, models.Model):
     EDITABLE_FIELDS = {
         Role.PROFESSOR: ("assigned_student",),
         Role.ADMINISTRATIVO: (
-            "scheduled_at", "duration_minutes", "notes", "assigned_student",
-            "kind", "room", "teacher", "status",
+            "scheduled_at",
+            "duration_minutes",
+            "notes",
+            "assigned_student",
+            "kind",
+            "room",
+            "teacher",
+            "status",
         ),
     }
     DELETABLE_BY = ()

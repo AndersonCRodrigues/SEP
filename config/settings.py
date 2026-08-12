@@ -32,7 +32,7 @@ if _allowed_hosts_env:
     ]
 else:
     ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
-    ALLOWED_HOSTS = ["localhost", "127.0.0.1",'host.docker.internal']
+    ALLOWED_HOSTS = ["localhost", "127.0.0.1", "host.docker.internal"]
 
 
 # Application definition
@@ -82,7 +82,7 @@ ROOT_URLCONF = "config.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR/'templates'],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -113,7 +113,6 @@ if db_engine and db_engine not in ENGINES_VALIDOS:
     )
 
 if db_engine:
-
     db_name = os.getenv("DJANGO_DATABASE_NAME")
     db_user = os.getenv("DJANGO_DATABASE_USER")
     db_password = os.getenv("DJANGO_DATABASE_PASSWORD")
@@ -148,7 +147,7 @@ if db_engine:
             "PORT": db_port,
         }
     }
-    
+
 else:
     DATABASES = {
         "default": {
@@ -156,7 +155,7 @@ else:
             "NAME": BASE_DIR / "db.sqlite3",
         }
     }
-    
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -186,8 +185,8 @@ USE_TZ = True
 STATIC_URL = "static/"
 
 AUTH_USER_MODEL = "core.CustomUser"
-LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'home_redirect'
+LOGIN_URL = "login"
+LOGIN_REDIRECT_URL = "home_redirect"
 
 MESSAGE_TAGS = {
     messages.DEBUG: "secondary",

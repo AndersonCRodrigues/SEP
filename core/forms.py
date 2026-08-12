@@ -8,19 +8,28 @@ from .models import CustomUser
 
 
 PERSONAL_FIELDS = (
-    "email", "nome_completo", "cpf", "telefone", "logradouro",
-    "numero", "complemento", "bairro", "cidade", "estado",
-    "cep", "role", "crp", "matricula",
+    "email",
+    "nome_completo",
+    "cpf",
+    "telefone",
+    "logradouro",
+    "numero",
+    "complemento",
+    "bairro",
+    "cidade",
+    "estado",
+    "cep",
+    "role",
+    "crp",
+    "matricula",
 )
 
 
 class LoginEmailOuMatriculaForm(AuthenticationForm):
-
     username = forms.CharField(label="Email ou Matrícula")
 
 
 class CustomUserCreationForm(UserCreationForm):
-
     MODEL_BY_ROLE = {
         CustomUser.Role.PROFESSOR: Teacher,
         CustomUser.Role.ALUNO: Student,
@@ -47,11 +56,17 @@ class CustomUserCreationForm(UserCreationForm):
         cleaned_data = super().clean()
         role = cleaned_data.get("role")
 
-        if role in self.ROLES_REQUIRING_REGISTRATION and not cleaned_data.get("matricula"):
-            self.add_error("matricula", "Matrícula é obrigatória para Aluno e Professor.")
+        if role in self.ROLES_REQUIRING_REGISTRATION and not cleaned_data.get(
+            "matricula"
+        ):
+            self.add_error(
+                "matricula", "Matrícula é obrigatória para Aluno e Professor."
+            )
 
         if role == CustomUser.Role.PROFESSOR and not cleaned_data.get("acting_area"):
-            self.add_error("acting_area", "Professor Responsável precisa de área de atuação.")
+            self.add_error(
+                "acting_area", "Professor Responsável precisa de área de atuação."
+            )
 
         return cleaned_data
 
@@ -65,7 +80,6 @@ class CustomUserCreationForm(UserCreationForm):
 
 
 class SupervisorCreationForm(UserCreationForm):
-
     class Meta:
         model = CustomUser
         fields = PERSONAL_FIELDS
@@ -73,7 +87,8 @@ class SupervisorCreationForm(UserCreationForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["role"].choices = [
-            (value, label) for value, label in CustomUser.Role.choices
+            (value, label)
+            for value, label in CustomUser.Role.choices
             if value == CustomUser.Role.SUPERVISOR
         ]
         self.initial["role"] = CustomUser.Role.SUPERVISOR
@@ -81,5 +96,7 @@ class SupervisorCreationForm(UserCreationForm):
     def clean_role(self):
         role = self.cleaned_data["role"]
         if role != CustomUser.Role.SUPERVISOR:
-            raise forms.ValidationError("Pelo admin, só é possível cadastrar Supervisor.")
+            raise forms.ValidationError(
+                "Pelo admin, só é possível cadastrar Supervisor."
+            )
         return role

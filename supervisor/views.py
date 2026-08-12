@@ -21,7 +21,9 @@ def usuarios_alunos_e_professores():
     pra garantir que campos como crp/acting_area/matricula venham preenchidos.
     """
     alunos = Student.objects.filter(role=CustomUser.Role.ALUNO)
-    professores = Teacher.objects.filter(role__in=[CustomUser.Role.PROFESSOR, CustomUser.Role.SUPERVISOR])
+    professores = Teacher.objects.filter(
+        role__in=[CustomUser.Role.PROFESSOR, CustomUser.Role.SUPERVISOR]
+    )
     return sorted(chain(alunos, professores), key=lambda u: u.nome_completo)
 
 

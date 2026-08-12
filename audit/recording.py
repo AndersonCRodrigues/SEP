@@ -1,15 +1,33 @@
 from .middleware import get_current_ip, get_current_user
 from .models import SecurityLog
 
-IGNORED_FIELDS = frozenset({
-    "created_at", "updated_at", "password", "last_login", "changes",
-})
+IGNORED_FIELDS = frozenset(
+    {
+        "created_at",
+        "updated_at",
+        "password",
+        "last_login",
+        "changes",
+    }
+)
 
-SENSITIVE_FIELDS = frozenset({
-    "cpf", "telefone", "logradouro", "numero", "complemento", "bairro",
-    "cidade", "estado", "cep",
-    "content", "main_complaint", "notes", "detail",
-})
+SENSITIVE_FIELDS = frozenset(
+    {
+        "cpf",
+        "telefone",
+        "logradouro",
+        "numero",
+        "complemento",
+        "bairro",
+        "cidade",
+        "estado",
+        "cep",
+        "content",
+        "main_complaint",
+        "notes",
+        "detail",
+    }
+)
 
 
 def _plain(value):

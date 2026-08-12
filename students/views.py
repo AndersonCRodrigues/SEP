@@ -17,7 +17,10 @@ class HomeEstudanteView(LoginRequiredMixin, TemplateView):
 
 @login_required
 def cadastrar_aluno(request):
-    is_supervisor = request.user.groups.filter(name="Supervisor").exists() or request.user.is_superuser
+    is_supervisor = (
+        request.user.groups.filter(name="Supervisor").exists()
+        or request.user.is_superuser
+    )
     if not is_supervisor:
         raise PermissionDenied("Apenas Supervisores podem cadastrar Alunos.")
 
@@ -38,12 +41,18 @@ class PerfilAlunoView(GroupRequiredMixin, UpdateView):
     required_group = "Students"
     model = Student
     fields = [
-        "nome_completo", "telefone",
-        "logradouro", "numero", "complemento",
-        "bairro", "cidade", "estado", "cep",
+        "nome_completo",
+        "telefone",
+        "logradouro",
+        "numero",
+        "complemento",
+        "bairro",
+        "cidade",
+        "estado",
+        "cep",
     ]
     template_name = "student/perfil.html"
-    success_url = reverse_lazy("students:perfil")  
+    success_url = reverse_lazy("students:perfil")
 
     def get_object(self, queryset=None):
         return get_object_or_404(Student, pk=self.request.user.pk)
@@ -57,7 +66,7 @@ class MeuProfessorView(LoginRequiredMixin, TemplateView):
         aluno = get_object_or_404(Student, pk=self.request.user.pk)
         context["professor"] = aluno.current_advisor
         return context
-    
+
 
 class PainelEstudanteView(LoginRequiredMixin, TemplateView):
     template_name = "student/student_panel.html"

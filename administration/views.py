@@ -14,7 +14,9 @@ from patient.forms import PacienteCreationForm
 
 @login_required
 def cadastrar_paciente(request):
-    is_administrativo = request.user.is_superuser or request.user.role == CustomUser.Role.ADMINISTRATIVO
+    is_administrativo = (
+        request.user.is_superuser or request.user.role == CustomUser.Role.ADMINISTRATIVO
+    )
     if not is_administrativo:
         raise PermissionDenied("Apenas o Administrativo pode cadastrar Paciente.")
 
@@ -35,16 +37,25 @@ class PainelAdministracaoView(LoginRequiredMixin, UserPassesTestMixin, TemplateV
     template_name = "administration/administration_panel.html"
 
     def test_func(self):
-        return self.request.user.is_superuser or self.request.user.role == CustomUser.Role.ADMINISTRATIVO
+        return (
+            self.request.user.is_superuser
+            or self.request.user.role == CustomUser.Role.ADMINISTRATIVO
+        )
 
 
 class PerfilAdministrativoView(GroupRequiredMixin, UpdateView):
     required_group = "Administration"
     model = CustomUser
     fields = [
-        "nome_completo", "telefone",
-        "logradouro", "numero", "complemento",
-        "bairro", "cidade", "estado", "cep",
+        "nome_completo",
+        "telefone",
+        "logradouro",
+        "numero",
+        "complemento",
+        "bairro",
+        "cidade",
+        "estado",
+        "cep",
     ]
     template_name = "administration/perfil.html"
     success_url = reverse_lazy("administration:perfil")
@@ -64,7 +75,7 @@ def cadastrar_administrativo(request):
             user = form.save()
             sincronizar_grupo(user)
             messages.success(request, "Administrativo cadastrado com sucesso!")
-            return redirect("superadmin:painel")  
+            return redirect("superadmin:painel")
     else:
         form = AdministrativoCreationForm()
 

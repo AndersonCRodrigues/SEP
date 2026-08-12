@@ -25,7 +25,6 @@ class ScreeningQuerySet(RoleScopedQuerySet):
 
 
 class Screening(BusinessRulesMixin, models.Model):
-
     Status = ScreeningStatus
 
     class Priority(models.TextChoices):
