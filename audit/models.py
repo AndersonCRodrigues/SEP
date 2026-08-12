@@ -37,6 +37,7 @@ class AuditLog(models.Model):
         if self.pk:
             raise ValueError("Segurança: Logs de Auditoria não podem ser alterados após criados.")
         super().save(*args, **kwargs)
-
+    
     def delete(self, *args, **kwargs):
         raise ValueError("Segurança: Logs de Auditoria não podem ser apagados pelo sistema.")
+    
