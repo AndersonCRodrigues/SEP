@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 from django.core.exceptions import ImproperlyConfigured
+from django.contrib.messages import constants as messages
 
 from dotenv import load_dotenv
 
@@ -63,6 +64,8 @@ INSTALLED_APPS = [
     "areas",
     "triage",
     "audit.apps.AuditConfig",
+    "crispy_forms",
+    "crispy_bootstrap5",
 ]
 
 MIDDLEWARE = [
@@ -192,3 +195,14 @@ STATIC_URL = "static/"
 AUTH_USER_MODEL = "core.CustomUser"
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'home_redirect'
+
+MESSAGE_TAGS = {
+    messages.DEBUG: "secondary",
+    messages.INFO: "info",
+    messages.SUCCESS: "success",
+    messages.WARNING: "danger",
+    messages.ERROR: "danger",
+}
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"

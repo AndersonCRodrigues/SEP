@@ -3,19 +3,27 @@
 {% block home_title %}Meus Agendamentos{% endblock %}
 
 {% block home_content %}
-<section class="card">
-    <h2>Meus agendamentos</h2>
-    <ul>
-        {% for agendamento in agendamentos %}
-        <li>{{ agendamento.data }} — {{ agendamento.descricao }}</li>
-        {% empty %}
-        <li>Nenhum agendamento no momento.</li>
-        {% endfor %}
-    </ul>
-</section>
+<div class="col-12 col-md-6">
+    <div class="card h-100">
+        <div class="card-body">
+            <h2 class="h5 card-title">Meus agendamentos</h2>
+        </div>
+        <ul class="list-group list-group-flush">
+            {% for agendamento in agendamentos %}
+            <li class="list-group-item">{{ agendamento.data }} — {{ agendamento.descricao }}</li>
+            {% empty %}
+            <li class="list-group-item text-body-secondary">Nenhum agendamento no momento.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
 
-<section class="card">
-    <h2>Meus dados</h2>
-    <a href="{% url 'patient:edit_data' %}" class="btn">Editar meus dados</a>
-</section>
+<div class="col-12 col-md-6">
+    <div class="card h-100">
+        <div class="card-body">
+            <h2 class="h5 card-title">Meus dados</h2>
+            <a href="{% url 'patient:edit_data' %}" class="btn btn-primary">Editar meus dados</a>
+        </div>
+    </div>
+</div>
 {% endblock %}

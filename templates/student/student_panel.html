@@ -3,29 +3,38 @@
 {% block title %}Área do Estudante | Sistema SEP{% endblock %}
 
 {% block content %}
-<header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-    <h1>Painel do Estudante</h1>
-   <a href="{% url 'students:home' %}">&larr; Voltar para a Home</a>
+<header class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Painel do Estudante</h1>
+    <div class="d-flex flex-wrap gap-2">
+        <a href="{% url 'students:meu_professor' %}" class="btn btn-primary btn-sm">Meu Professor</a>
+        <a href="{% url 'students:perfil' %}" class="btn btn-outline-primary btn-sm">Meu Perfil</a>
+        <a href="{% url 'students:home' %}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left"></i> Voltar para a Home
+        </a>
+    </div>
 </header>
 
-<section class="card">
-    <h2>Painel do Aluno</h2>
-    <ul class="menu-botoes">
-        <li><a href="{% url 'students:meu_professor' %}"><button>Meu Professor</button></a></li>
-        <li><a href="{% url 'students:perfil' %}"><button>Meu Perfil</button></a></li>
-    </ul>
-</section>
-<section class="card" style="margin-bottom: 2rem;">
-    <h2>Minhas Informações</h2>
-    <p><strong>Nome:</strong> {{ estudante.nome_completo }}</p>
-    <p><strong>Email:</strong> {{ estudante.email }}</p>
-    {% if estudante.matricula %}
-        <p><strong>Matrícula:</strong> {{ estudante.matricula }}</p>
-    {% endif %}
-</section>
+<div class="row g-3">
+    <div class="col-12 col-md-6">
+        <section class="card h-100">
+            <div class="card-body">
+                <h2 class="h5 card-title">Minhas Informações</h2>
+                <p class="mb-1"><strong>Nome:</strong> {{ estudante.nome_completo }}</p>
+                <p class="mb-1"><strong>Email:</strong> {{ estudante.email }}</p>
+                {% if estudante.matricula %}
+                <p class="mb-0"><strong>Matrícula:</strong> {{ estudante.matricula }}</p>
+                {% endif %}
+            </div>
+        </section>
+    </div>
 
-<section class="card">
-    <h2>Meus Atendimentos e Consultas</h2>
-    <p>Seus agendamentos e registros acadêmicos/clínicos aparecerão aqui.</p>
-</section>
+    <div class="col-12 col-md-6">
+        <section class="card h-100">
+            <div class="card-body">
+                <h2 class="h5 card-title">Meus Atendimentos e Consultas</h2>
+                <p class="card-text">Seus agendamentos e registros acadêmicos/clínicos aparecerão aqui.</p>
+            </div>
+        </section>
+    </div>
+</div>
 {% endblock %}

@@ -29,3 +29,4 @@ six==1.17.0
 sqlparse==0.5.5
 stevedore==5.9.0
 tzdata==2026.3
+psycopg2-binary==2.9.10

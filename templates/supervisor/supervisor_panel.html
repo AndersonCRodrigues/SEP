@@ -1,23 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Painel do Supervisor | Sistema SEP{% endblock %}
+
 {% block content %}
-<h1>Usuários Cadastrados</h1>
+<header class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Usuários Cadastrados</h1>
+        <a href="{% url 'students:cadastrar' %}" class="btn btn-primary btn-sm">
+        <i class="bi bi-person-plus"></i> Cadastrar Aluno</a>
+    <a href="{% url 'teacher:cadastrar' %}">Cadastrar Professor
+    </a>
+</header>
 
-    <a href="{% url 'students:cadastrar' %}">Cadastrar Aluno</a>
-    <a href="{% url 'teacher:cadastrar' %}">Cadastrar Professor</a>
-
-<table>
-    <thead>
-        <tr>
-            <th>Nome</th>
-            <th>Papel</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for usuario in usuarios_listados %}
-        <tr>
-            <td>{{ usuario.nome_completo }}</td>
-            <td>{{ usuario.get_role_display }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<section class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col">Nome</th>
+                        <th scope="col">Papel</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for usuario in usuarios_listados %}
+                    <tr>
+                        <td>{{ usuario.nome_completo }}</td>
+                        <td><span class="badge text-bg-primary">{{ usuario.get_role_display }}</span></td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="2" class="text-body-secondary">Nenhum usuário cadastrado.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
 {% endblock %}

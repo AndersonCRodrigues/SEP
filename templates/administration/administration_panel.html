@@ -3,35 +3,45 @@
 {% block title %}Painel Administrativo | Sistema SEP{% endblock %}
 
 {% block content %}
-<header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-    <h1>Painel de Gestão Administrativa</h1>
-    <a href="{% url 'administration:home' %}">&larr; Voltar para a Home</a>
-    <a href="{% url 'administration:cadastrar_paciente' %}"><button>Cadastrar Paciente</button></a>
+<header class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Painel de Gestão Administrativa</h1>
+    <div class="d-flex flex-wrap gap-2">
+        <a href="{% url 'administration:cadastrar_paciente' %}" class="btn btn-primary btn-sm">
+            <i class="bi bi-person-plus"></i> Cadastrar Paciente
+        </a>
+        <a href="{% url 'administration:home' %}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left"></i> Voltar para a Home
+        </a>
+    </div>
 </header>
 
 <section class="card">
-    <h2>Registros e Triagens (Alunos e Professores)</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Nome</th>
-                <th>Email</th>
-                <th>Tipo</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for usuario in atendimentos_ou_usuarios %}
-            <tr>
-                <td>{{ usuario.nome_completo }}</td>
-                <td>{{ usuario.email }}</td>
-                <td>{{ usuario.get_role_display }}</td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="3">Nenhum registro encontrado.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="card-body">
+        <h2 class="h5 card-title">Registros e Triagens (Alunos e Professores)</h2>
+        <div class="table-responsive">
+            <table class="table table-striped align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col">Nome</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Tipo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for usuario in atendimentos_ou_usuarios %}
+                    <tr>
+                        <td>{{ usuario.nome_completo }}</td>
+                        <td>{{ usuario.email }}</td>
+                        <td><span class="badge text-bg-primary">{{ usuario.get_role_display }}</span></td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="text-body-secondary">Nenhum registro encontrado.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 </section>
 {% endblock %}
