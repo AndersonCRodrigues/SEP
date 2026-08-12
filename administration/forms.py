@@ -14,11 +14,11 @@ class AdministrativoCreationForm(UserCreationForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.instance.role = CustomUser.Role.ADMIN
+        self.instance.role = CustomUser.Role.ADMINISTRATIVO
 
     def save(self, commit=True):
         user = super().save(commit=False)
-        user.role = CustomUser.Role.ADMIN
+        user.role = CustomUser.Role.ADMINISTRATIVO
         if commit:
             user.save()
         return user

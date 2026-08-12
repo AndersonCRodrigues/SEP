@@ -28,7 +28,7 @@ class BaseCertificate(BusinessRulesMixin, models.Model):
 
     DOCUMENT_FIELDS = ("content", "issued_at")
 
-    CREATABLE_BY = (Role.ADMIN,)
+    CREATABLE_BY = (Role.ADMINISTRATIVO,)
     DELETABLE_BY = ()
 
     class Meta:
@@ -42,7 +42,7 @@ class AttendanceCertificateQuerySet(RoleScopedQuerySet):
             return self.none()
 
         role = user.role
-        if role in (Role.SUPERVISOR, Role.ADMIN):
+        if role in (Role.SUPERVISOR, Role.ADMINISTRATIVO):
             return self
         if role == Role.PROFESSOR:
             return self.filter(
@@ -99,7 +99,7 @@ class AttendanceCertificate(BaseCertificate):
 
     EDITABLE_FIELDS = {
         role: BaseCertificate.DOCUMENT_FIELDS + ("kind", "appointment")
-        for role in (Role.SUPERVISOR, Role.PROFESSOR, Role.ADMIN)
+        for role in (Role.SUPERVISOR, Role.PROFESSOR, Role.ADMINISTRATIVO)
     }
 
     class Meta(BaseCertificate.Meta):
@@ -116,7 +116,7 @@ class InternshipDeclarationQuerySet(RoleScopedQuerySet):
             return self.none()
 
         role = user.role
-        if role in (Role.SUPERVISOR, Role.ADMIN):
+        if role in (Role.SUPERVISOR, Role.ADMINISTRATIVO):
             return self
         if role == Role.PROFESSOR:
             return self.filter(student__current_advisor_id=user.pk)
@@ -146,7 +146,7 @@ class InternshipDeclaration(BaseCertificate):
     EDITABLE_FIELDS = {
         role: BaseCertificate.DOCUMENT_FIELDS
         + ("start_date", "end_date", "total_minutes")
-        for role in (Role.SUPERVISOR, Role.PROFESSOR, Role.ADMIN)
+        for role in (Role.SUPERVISOR, Role.PROFESSOR, Role.ADMINISTRATIVO)
     }
 
     class Meta(BaseCertificate.Meta):

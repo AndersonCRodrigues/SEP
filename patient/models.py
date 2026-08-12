@@ -18,7 +18,7 @@ class PatientQuerySet(RoleScopedQuerySet):
             return self.none()
 
         role = user.role
-        if role in (Role.SUPERVISOR, Role.ADMIN):
+        if role in (Role.SUPERVISOR, Role.ADMINISTRATIVO):
             return self
         if role == Role.PROFESSOR:
             return self.filter(
@@ -57,11 +57,11 @@ class Patient(BusinessRulesMixin, CustomUser):
 
     REGISTRATION_FIELDS = ("nome_completo", "cpf") + CustomUser.ADDRESS_FIELDS
 
-    CREATABLE_BY = (Role.ADMIN, Role.ALUNO)
+    CREATABLE_BY = (Role.ADMINISTRATIVO, Role.ALUNO)
     EDITABLE_FIELDS = {
         Role.SUPERVISOR: ("responsible_teachers",),
         Role.PROFESSOR: ("responsible_teachers",),
-        Role.ADMIN: REGISTRATION_FIELDS,
+        Role.ADMINISTRATIVO: REGISTRATION_FIELDS,
         Role.PACIENTE: CustomUser.ADDRESS_FIELDS,
     }
     DELETABLE_BY = ()
@@ -195,8 +195,8 @@ class Room(BusinessRulesMixin, models.Model):
 
     objects = RoomQuerySet.as_manager()
 
-    CREATABLE_BY = (Role.ADMIN,)
-    EDITABLE_FIELDS = {Role.ADMIN: ("name", "active")}
+    CREATABLE_BY = (Role.ADMINISTRATIVO,)
+    EDITABLE_FIELDS = {Role.ADMINISTRATIVO: ("name", "active")}
     # Appointment.room usa PROTECT: desativar pelo campo `active`, nao apagar.
     DELETABLE_BY = ()
 
@@ -215,7 +215,7 @@ class AppointmentQuerySet(RoleScopedQuerySet):
             return self.none()
 
         role = user.role
-        if role in (Role.SUPERVISOR, Role.ADMIN):
+        if role in (Role.SUPERVISOR, Role.ADMINISTRATIVO):
             return self
         if role == Role.PROFESSOR:
             return self.filter(
@@ -302,10 +302,10 @@ class Appointment(BusinessRulesMixin, models.Model):
 
     objects = AppointmentQuerySet.as_manager()
 
-    CREATABLE_BY = (Role.PROFESSOR, Role.ADMIN)
+    CREATABLE_BY = (Role.PROFESSOR, Role.ADMINISTRATIVO)
     EDITABLE_FIELDS = {
         Role.PROFESSOR: ("assigned_student",),
-        Role.ADMIN: (
+        Role.ADMINISTRATIVO: (
             "scheduled_at", "duration_minutes", "notes", "assigned_student",
             "kind", "room", "teacher", "status",
         ),

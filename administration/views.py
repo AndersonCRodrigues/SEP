@@ -15,7 +15,7 @@ from patient.forms import PacienteCreationForm
 
 @login_required
 def cadastrar_paciente(request):
-    is_administrativo = request.user.is_superuser or request.user.role == CustomUser.Role.ADMIN
+    is_administrativo = request.user.is_superuser or request.user.role == CustomUser.Role.ADMINISTRATIVO
     if not is_administrativo:
         raise PermissionDenied("Apenas o Administrativo pode cadastrar Paciente.")
 
@@ -36,7 +36,7 @@ class PainelAdministracaoView(LoginRequiredMixin, UserPassesTestMixin, TemplateV
     template_name = "administration/administration_panel.html"
 
     def test_func(self):
-        return self.request.user.is_superuser or self.request.user.role == CustomUser.Role.ADMIN
+        return self.request.user.is_superuser or self.request.user.role == CustomUser.Role.ADMINISTRATIVO
 
 
 class PerfilAdministrativoView(GroupRequiredMixin, UpdateView):

@@ -100,7 +100,7 @@ class Command(BaseCommand):
                 **extra_fields,
             )
 
-            if role in (CustomUser.Role.ALUNO, CustomUser.Role.PROFESSOR, CustomUser.Role.ADMIN):
+            if role in (CustomUser.Role.ALUNO, CustomUser.Role.PROFESSOR, CustomUser.Role.ADMINISTRATIVO):
                 user.matricula = f"2026{random.randint(1000, 9999)}"
 
             if role in (CustomUser.Role.PROFESSOR, CustomUser.Role.SUPERVISOR):
