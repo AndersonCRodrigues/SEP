@@ -41,6 +41,7 @@ class ProfessorCreationForm(UserCreationForm):
             "nome_completo",
             "cpf",
             "telefone",
+            "data_nascimento",
             "logradouro",
             "numero",
             "complemento",

@@ -17,7 +17,7 @@ class CustomUserAdmin(UserAdmin):
         (None, {"fields": ("email", "password")}),
         ("Informações Pessoais", {
             "fields": (
-                "nome_completo", "cpf", "telefone",
+                "nome_completo", "cpf", "telefone","data_nascimento",
                 "logradouro", "numero", "complemento", "bairro", "cidade", "estado", "cep",
                 "role", "crp", "matricula"
             )
@@ -34,7 +34,7 @@ class CustomUserAdmin(UserAdmin):
         (None, {
             "classes": ("wide",),
             "fields": (
-                "email", "nome_completo", "cpf", "telefone",
+                "email", "nome_completo", "cpf", "telefone","data_nascimento",
                 "logradouro", "numero", "complemento", "bairro", "cidade", "estado", "cep",
                 "role", "crp", "matricula", "password1", "password2", "is_staff", "is_active"
             )
