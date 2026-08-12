@@ -9,7 +9,6 @@ from core.mixins import GroupRequiredMixin
 from .forms import AdministrativoCreationForm
 from core.utils import sincronizar_grupo
 from core.models import CustomUser
-from .forms import AdministrativoCreationForm
 from patient.forms import PacienteCreationForm
 
 
