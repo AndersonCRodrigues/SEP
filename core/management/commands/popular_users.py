@@ -2,10 +2,9 @@
 Refs.:
 https://docs.djangoproject.com/en/6.0/howto/custom-management-commands/
 '''
-
-
 import random
 import os
+from datetime import date
 from django.core.management.base import BaseCommand
 from django.core.exceptions import ValidationError
 from core.models import CustomUser
@@ -16,7 +15,7 @@ from students.models import Aluno
 
 
 def gerar_cpf_valido():
-    """Gera um CPF matematicamente válido para os testes."""
+    """Gera um CPF matematicamente válido para burlar a validação em ambiente de teste."""
     cpf = [random.randint(0, 9) for _ in range(9)]
 
     soma1 = sum(x * y for x, y in zip(cpf, range(10, 1, -1)))
@@ -33,7 +32,7 @@ def gerar_cpf_valido():
 
 
 class Command(BaseCommand):
-    help = 'Popula o banco de dados com áreas de atuação e usuários de teste.'
+    help = 'Popula o banco de dados com usuários de teste para as Roles selecionadas. Só roda se NODE_ENV=dev.'
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -41,22 +40,17 @@ class Command(BaseCommand):
             nargs='+',
             type=str,
             choices=[role[0] for role in CustomUser.Role.choices],
-            help='Especifica quais roles criar (SUPERADMIN, SUPERVISOR, PROFESSOR, ADMIN, ALUNO).'
+            help='Especifica quais roles criar. Valores aceitos: SUPERADMIN, SUPERVISOR, PROFESSOR, ADMIN, ALUNO.'
         )
 
     def handle(self, *args, **options):
-        areas_padrao = [
-            "Esquizoanálise",
-            "TCC Adulto/Infantil",
-            "Fenomenológico-Existencial",
-            "Psicanálise",
-        ]
-        objetos_area = []
-        for nome_area in areas_padrao:
-            area_obj, _ = AreaActing.objects.get_or_create(nome=nome_area)
-            objetos_area.append(area_obj)
+        if os.getenv("NODE_ENV") != "dev":
+            self.stdout.write(self.style.WARNING(
+                "NODE_ENV != 'dev' — comando ignorado (evita popular dados de teste em produção)."
+            ))
+            return
 
-        self.stdout.write(self.style.SUCCESS("Áreas de Atuação verificadas/criadas com sucesso!"))
+        area_padrao, _ = AreaActing.objects.get_or_create(nome="Psicanálise")
 
         roles_selecionadas = options['roles']
         if not roles_selecionadas:
@@ -71,14 +65,12 @@ class Command(BaseCommand):
                 email = f"{prefixo}{contador}@teste.com"
                 contador += 1
 
-            cpf_dinamico = gerar_cpf_valido()
-            matricula_gerada = f"2026{random.randint(1000, 9999)}"
-
-            dados_base = dict(
+            campos_base = dict(
                 email=email,
                 nome_completo=f"Usuario Teste {role} {contador if contador > 1 else ''}".strip(),
-                cpf=cpf_dinamico,
+                cpf=gerar_cpf_valido(),
                 telefone="(99) 99999-9999",
+                data_nascimento=date(1995, 1, 1),
                 logradouro="Rua de Teste",
                 numero="0",
                 bairro="Centro",
@@ -86,27 +78,28 @@ class Command(BaseCommand):
                 estado="RJ",
                 cep="24900-000",
                 role=role,
-                matricula=matricula_gerada if role != CustomUser.Role.SUPERADMIN else ""
             )
 
-            # Escolhe a classe certa dependendo do role — Professor/Supervisor e Aluno
-            # são subclasses de CustomUser (herança multi-tabela); os demais continuam CustomUser puro.
             if role in (CustomUser.Role.PROFESSOR, CustomUser.Role.SUPERVISOR):
                 numero_crp = random.randint(10000, 99999)
                 user = Professor(
-                    **dados_base,
-                    crp=f"{numero_crp}/RJ",
-                    area_atuacao=random.choice(objetos_area),
+                    **campos_base,
+                    crp=f"{numero_crp}/RJ-{role}",
+                    area_atuacao=area_padrao,
                 )
             elif role == CustomUser.Role.ALUNO:
-                user = Aluno(**dados_base)
+                numero_aleatorio = random.randint(1000, 9999)
+                user = Aluno(**campos_base, matricula=f"2026{numero_aleatorio}")
+            elif role == CustomUser.Role.ADMINISTRATIVO:
+                numero_aleatorio = random.randint(1000, 9999)
+                user = CustomUser(**campos_base, matricula=f"2026{numero_aleatorio}")
             else:
-                user = CustomUser(**dados_base)
+                user = CustomUser(**campos_base)
                 if role == CustomUser.Role.SUPERADMIN:
                     user.is_staff = True
                     user.is_superuser = True
 
-            user.set_password("SenhaForte123!")
+            user.set_password("Senha123!")
 
             try:
                 user.full_clean()

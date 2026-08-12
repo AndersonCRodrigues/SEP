@@ -53,7 +53,6 @@ INSTALLED_APPS = [
     "accounts",
     "core",
     "patient",
-    "screening",
     "teacher",
     "students",
     "supervisor",
