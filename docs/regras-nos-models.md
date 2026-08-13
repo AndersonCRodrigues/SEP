@@ -4,6 +4,9 @@ Dois mecanismos que você precisa conhecer antes de mexer em qualquer model dest
 projeto. Ignorá-los não gera erro de import — gera regra de acesso furada ou
 histórico clínico incompleto, que só aparecem em produção.
 
+Para criptografia, auditoria e configuração de ambiente, ver
+[seguranca-e-ambiente.md](seguranca-e-ambiente.md).
+
 ---
 
 ## 1. `BusinessRulesMixin` — quem pode o quê
@@ -23,6 +26,9 @@ cabe no sistema nativo de `Permission` do Django**:
 `core.models` de propósito: `CustomUser` importa daqui, e o caminho inverso
 criaria ciclo.
 
+O nível 1 é preenchido a partir dos outros dois — ver *Projeção sobre o
+`Permission` do Django*, adiante.
+
 ### As quatro declarações
 
 Toda model de conteúdo declara quatro coisas — três constantes e um queryset:
@@ -34,8 +40,8 @@ class Room(BusinessRulesMixin, models.Model):
 
     objects = RoomQuerySet.as_manager()      # traz visible_to()
 
-    CREATABLE_BY = (Role.ADMIN,)
-    EDITABLE_FIELDS = {Role.ADMIN: ("name", "active")}
+    CREATABLE_BY = (Role.ADMINISTRATIVO,)
+    EDITABLE_FIELDS = {Role.ADMINISTRATIVO: ("name", "active")}
     DELETABLE_BY = ()
 ```
 
@@ -43,7 +49,7 @@ class Room(BusinessRulesMixin, models.Model):
 - **`EDITABLE_FIELDS`** — `{papel: (campos graváveis)}`. Papel ausente do dicionário
   não edita **nada**. Não existe "edita tudo": os campos são sempre explícitos.
 - **`DELETABLE_BY`** — papéis que podem apagar. **Vazio é o default correto** neste
-  projeto: 11 das 15 models não permitem exclusão, porque prontuário clínico não
+  projeto: 14 das 18 models não permitem exclusão, porque prontuário clínico não
   se apaga, encerra-se. Abrem exceção `AreaActing`, `Attendance`,
   `PerformanceReview` e `StudentActivity` — e nesta última só as linhas lançadas
   à mão, nunca as geradas por signal.
@@ -105,13 +111,74 @@ def editable_fields_for(self, user):
     return super().editable_fields_for(user)
 ```
 
-Esse é o `Screening`: o aluno preenche a ficha enquanto a triagem está aberta e
-perde a edição quando o Supervisor fecha o caso. Outros dois casos no projeto:
+Esse é o `TriageRecord`: o aluno preenche a ficha enquanto a triagem está aberta
+e perde a edição quando o Supervisor fecha o caso. Outros casos no projeto:
 
+- `BaseIarv` — o instrumento de risco segue o estado da **triagem**, não o próprio.
 - `ProgressNote` — o Supervisor só grava a confirmação **enquanto pendente**.
 - `StudentActivity` — linha gerada por signal (com `appointment` preenchido) não
   é editável **por ninguém**, porque o próximo `save()` do agendamento
   sobrescreveria a edição em silêncio.
+
+Uma exceção que vale entender: quando a triagem fecha, o aluno perde o caso mas
+**mantém o `TriageFeedback`**. O `TriageFeedbackQuerySet` não filtra por status
+de propósito — o parecer é o retorno pedagógico, e é o que sobra para ele.
+
+### Campos editáveis calculados, não listados
+
+`TriageRecord` tem mais de 30 campos de ficha. Listá-los em `EDITABLE_FIELDS`
+viraria lista morta na primeira alteração do model. Nesses casos, declare os
+campos de **controle** e derive o resto:
+
+```python
+CONTROL_FIELDS = frozenset(
+    {"id", "patient", "student_author", "status", "closed_by", "closed_at", "created_at"}
+)
+
+@classmethod
+def ficha_fields(cls):
+    return tuple(
+        f.name for f in cls._meta.concrete_fields if f.name not in cls.CONTROL_FIELDS
+    )
+
+@classmethod
+def editable_fields_for_role(cls, role):
+    if role == Role.ALUNO:
+        return cls.ficha_fields()
+    if role == Role.SUPERVISOR:
+        return cls.ficha_fields() + ("status", "closed_by", "closed_at")
+    return ()
+```
+
+Campo novo na ficha entra editável sozinho; campo de controle novo tem de entrar
+em `CONTROL_FIELDS`. É a inversão certa: a lista curta é a das exceções.
+
+### Regras em model abstrato
+
+`BaseIarv` é abstrato e declara as regras uma vez; `IarvAdult`, `IarvAdolescent`
+e `IarvChild` herdam tudo, inclusive o `objects = IarvQuerySet.as_manager()`.
+Quando três models compartilham a mesma regra, declare na base — não copie.
+
+### Projeção sobre o `Permission` do Django
+
+`core/management/commands/setup_roles.py` cria os `Group` dos papéis e aplica as
+permissões **derivadas das declarações acima**:
+
+```python
+if role in model.CREATABLE_BY:            → add_<model>
+if model.editable_fields_for_role(role):  → change_<model>
+if role in model.DELETABLE_BY:            → delete_<model>
+if _le(model, role):                      → view_<model>
+```
+
+O `view_` sai de uma sondagem do próprio `visible_to`: monta o queryset para o
+papel e checa `query.is_empty()`. Não toca no banco — só inspeciona a query.
+As permissões de gestão de usuário saem de `MANAGEABLE_ROLES_BY`.
+
+**Não mantenha lista fixa de permissões.** A versão anterior do comando tinha uma,
+e ela apontava para `students.add_aluno` e `teacher.add_professor` muito depois da
+renomeação — 12 permissões eram puladas em silêncio e o grupo `Students` ficava
+sem nenhuma.
 
 ### O que **não** está aqui: gestão de usuário
 
@@ -133,20 +200,32 @@ can_manage_user(actor, target_role)      # colunas Create e Delete
 editable_user_fields(actor, target)      # coluna Update
 ```
 
+`can_manage_user` trata `is_superuser` como Superadmin: uma conta criada por
+`createsuperuser` nasce com `role` no default e perderia acesso a tudo.
+
 ### Autorização não é mecanismo
 
 `CREATABLE_BY` e `EDITABLE_FIELDS` dizem **quem pode provocar** a mudança. Não
 dizem que a escrita acontece por `Model.objects.create()`.
 
 Em `Advising` e `CaseAssignment`, por exemplo, a autorização está declarada no
-model, mas quem executa é um método de manager — ver a parte 2 deste documento.
-A view faz sempre os dois passos:
+model, mas quem executa é um método de manager — ver a parte 2. A view faz sempre
+os dois passos:
 
 ```python
 if not Advising.can_be_created_by(request.user, teacher=prof):
     raise PermissionDenied
 Advising.objects.change_advisor(aluno, prof, term="2026.1")
 ```
+
+### Cuidado: `ModelForm` com `exclude`
+
+Um `ModelForm` declarado com `exclude` inclui **todo campo novo do model
+automaticamente**. Ao acrescentar `status`, `closed_by` e `closed_at` ao
+`TriageRecord`, os três entraram sozinhos no `TriageRecordForm` — e o aluno
+passaria a poder fechar a própria triagem pela tela.
+
+Ao adicionar campo de controle a um model, confira os forms que o usam.
 
 ### Checklist para uma model nova
 
@@ -159,10 +238,14 @@ Advising.objects.change_advisor(aluno, prof, term="2026.1")
    `super()`.
 5. Se a edição depender do estado da linha, sobrescreva `editable_fields_for`
    chamando `super()`.
+6. Se o model tiver muitos campos de conteúdo, derive os editáveis do `_meta` em
+   vez de listá-los.
 
-Existe um teste de cobertura que varre os oito apps e **falha se uma model nova
-não declarar regra**, com lista de exceções explícita (`CustomUser`, `Teacher`,
-`Student`). Se você adicionou uma model e o teste quebrou, ele está certo.
+Existe um teste de cobertura que varre os apps do projeto — `core`, `areas`,
+`teacher`, `students`, `patient`, `triage`, `documents`, `audit` — e **falha se
+uma model nova não declarar regra**, com lista de exceções explícita
+(`CustomUser`, `Teacher`, `Student`). Se você adicionou uma model e o teste
+quebrou, ele está certo.
 
 ---
 
@@ -271,7 +354,7 @@ Duas alternativas foram avaliadas e descartadas:
   outra, deixando duplicata. Só funciona com flag de reentrância — acoplamento em
   anel.
 - **Eliminar o ponteiro** e derivar `current_advisor` da linha aberta. Correto em
-  teoria, caro na prática: degrada os ~10 filtros da camada de permissões, que é
+  teoria, caro na prática: degrada os 8 filtros da camada de permissões, que é
   o coração do projeto.
 
 ### Onde a regra vale
