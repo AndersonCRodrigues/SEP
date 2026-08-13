@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from core.models import CustomUser
-from teacher.models import Professor
+from teacher.models import Teacher
 from areas.models import AreaActing
 import re
 
@@ -16,18 +16,23 @@ class VincularAlunoForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        from students.models import Aluno  
-        self.fields["aluno"].queryset = Aluno.objects.filter(orientador_atual__isnull=True)
+        from students.models import Student
+
+        self.fields["aluno"].queryset = Student.objects.filter(
+            current_advisor__isnull=True
+        )
 
     def clean_periodo(self):
         periodo = self.cleaned_data["periodo"]
         if not re.match(r"^\d{4}\.[12]$", periodo):
-            raise forms.ValidationError("Formato inválido. Use AAAA.1 ou AAAA.2 (ex: 2026.1).")
+            raise forms.ValidationError(
+                "Formato inválido. Use AAAA.1 ou AAAA.2 (ex: 2026.1)."
+            )
         return periodo
 
 
 class ProfessorCreationForm(UserCreationForm):
-    area_atuacao = forms.ModelChoiceField(
+    acting_area = forms.ModelChoiceField(
         queryset=AreaActing.objects.all(),
         label="Área de Atuação / Abordagem Teórica",
         empty_label="Selecione uma área...",
@@ -35,7 +40,7 @@ class ProfessorCreationForm(UserCreationForm):
     )
 
     class Meta:
-        model = Professor
+        model = Teacher
         fields = (
             "email",
             "nome_completo",
@@ -51,7 +56,7 @@ class ProfessorCreationForm(UserCreationForm):
             "cep",
             "matricula",
             "crp",
-            "area_atuacao",
+            "acting_area",
         )
 
     def __init__(self, *args, **kwargs):
@@ -61,7 +66,7 @@ class ProfessorCreationForm(UserCreationForm):
     def save(self, commit=True):
         professor = super().save(commit=False)
         professor.role = CustomUser.Role.PROFESSOR
-        professor.area_atuacao = self.cleaned_data.get("area_atuacao")
+        professor.acting_area = self.cleaned_data.get("acting_area")
         if commit:
             professor.save()
         return professor
@@ -81,6 +86,6 @@ class ProfessorCreationForm(UserCreationForm):
 
 class PerfilProfessorForm(forms.ModelForm):
     class Meta:
-        model = Professor
-        fields = ["area_atuacao"]
-        labels = {"area_atuacao": "Área de Atuação / Abordagem Teórica"}
+        model = Teacher
+        fields = ["acting_area"]
+        labels = {"acting_area": "Área de Atuação / Abordagem Teórica"}

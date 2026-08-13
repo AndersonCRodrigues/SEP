@@ -1,12 +1,24 @@
 import threading
 
-_thread_local = threading.local()
+_state = threading.local()
+
 
 def get_current_user():
-    return getattr(_thread_local, "user", None)
+    return getattr(_state, "user", None)
+
 
 def get_current_ip():
-    return getattr(_thread_local, "ip", None)
+    return getattr(_state, "ip", None)
+
+
+def client_ip(request):
+    if request is None:
+        return None
+    forwarded = request.META.get("HTTP_X_FORWARDED_FOR")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return request.META.get("REMOTE_ADDR")
+
 
 class AuditMiddleware:
     def __init__(self, get_response):
@@ -14,18 +26,10 @@ class AuditMiddleware:
 
     def __call__(self, request):
         user = getattr(request, "user", None)
-        
-        if user and user.is_authenticated:
-            _thread_local.user = request.user
-        else:
-            _thread_local.user = None
-            
-        _thread_local.ip = request.META.get("REMOTE_ADDR")
-
+        _state.user = user if user is not None and user.is_authenticated else None
+        _state.ip = client_ip(request)
         try:
-            response = self.get_response(request)
+            return self.get_response(request)
         finally:
-            _thread_local.user = None
-            _thread_local.ip = None
-
-        return response
+            _state.user = None
+            _state.ip = None

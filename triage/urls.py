@@ -3,4 +3,9 @@ from . import views
 
 
 urlpatterns = [
-    path("create/<int:patient_id>/", views.create_triage, name="create_triage",),]
+    path(
+        "create/<int:patient_id>/",
+        views.create_triage,
+        name="create_triage",
+    ),
+]

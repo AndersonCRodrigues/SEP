@@ -1,7 +1,7 @@
 - Builda e sobe o container
 docker compose up -d --build 
 - faz as migrations
-docker compose exec django-web python3 manage.py makemigrations core 
+docker compose exec django-web python3 manage.py makemigrations core areas teacher students patient screening documents 
 - migra a tabela
 docker compose exec django-web python3 manage.py migrate 
 - faz os usuarios em todas as roles

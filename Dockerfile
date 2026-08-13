@@ -23,7 +23,7 @@ RUN pip install --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt
 
 #Estagio de produção
-FROM python:3.12-slim
+FROM python:3.12-slim AS app
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
@@ -46,4 +46,16 @@ USER appuser
 
 EXPOSE 8000
 
-CMD ["sh", "-c", "python3 manage.py makemigrations core && python3 manage.py makemigrations areas && python3 manage.py makemigrations students && python3 manage.py makemigrations teacher && python3 manage.py migrate && python3 manage.py popular_users && python3 manage.py setup_roles && gunicorn --bind 0.0.0.0:8000 --workers 3 config.wsgi:application"]
+# popular_users roda uma vez: ele nao e idempotente -- a cada chamada gera um
+# email novo (sv1@, sv2@...) em vez de reaproveitar o usuario existente.
+CMD ["sh", "-c", "python3 manage.py makemigrations core areas teacher students patient documents audit triage && python3 manage.py migrate && python3 manage.py popular_users && python3 manage.py setup_roles && gunicorn --bind 0.0.0.0:8000 --workers 3 config.wsgi:application"]
+
+# Estagio do banco: a imagem oficial do Postgres nao traz o pg_cron, que e o
+# agendador usado para a retencao de 1 ano do log de seguranca.
+FROM postgres:16 AS db
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends postgresql-16-cron \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY init-pg-cron.sql /docker-entrypoint-initdb.d/10-pg-cron.sql

@@ -1,138 +1,110 @@
-from django.db.models.signals import post_delete, post_save, pre_save
-from django.dispatch import receiver
-from patient.models import Patient
-from triage.models import TriageRecord
-from .middleware import get_current_ip, get_current_user
-from .models import AuditLog
-
-
-AUDITED_MODELS = (
-    Patient,
-    TriageRecord,
+from django.apps import apps
+from django.contrib.auth.signals import (
+    user_logged_in,
+    user_logged_out,
+    user_login_failed,
 )
+from django.db.models.signals import m2m_changed, post_delete, post_save, pre_save
+from django.dispatch import receiver
+
+from core.models import CustomUser
+
+from .middleware import client_ip
+from .models import SecurityLog
+from .recording import diff, record
 
 
-def get_audit_actor():
-    user = get_current_user()
-
-    if user is None:
-        return None
-
-    if not getattr(user, "is_authenticated", False):
-        return None
-
-    return user
-
-
-def get_changed_fields(sender, previous_instance, current_instance):
-    changed_fields = []
-
-    for field in sender._meta.concrete_fields:
-        if field.primary_key:
-            continue
-
-        previous_value = getattr(
-            previous_instance,
-            field.attname,
-        )
-
-        current_value = getattr(
-            current_instance,
-            field.attname,
-        )
-
-        if previous_value != current_value:
-            changed_fields.append(field.name)
-
-    return changed_fields
-
-
-@receiver(pre_save, sender=Patient)
-@receiver(pre_save, sender=TriageRecord)
-def capture_previous_state(sender, instance, **kwargs):
-    if not instance.pk:
-        instance._audit_changed_fields = []
-        return
-
-    try:
-        previous_instance = sender.objects.get(
-            pk=instance.pk
-        )
-    except sender.DoesNotExist:
-        instance._audit_changed_fields = []
-        return
-
-    instance._audit_changed_fields = get_changed_fields(
-        sender,
-        previous_instance,
-        instance,
+@receiver(user_logged_in)
+def log_login(sender, request, user, **kwargs):
+    SecurityLog.objects.create(
+        user=user,
+        user_identifier=user.email,
+        action=SecurityLog.Action.LOGIN,
+        ip_address=client_ip(request),
     )
 
 
-@receiver(post_save, sender=Patient)
-@receiver(post_save, sender=TriageRecord)
-def create_or_update_audit_log(
-    sender,
-    instance,
-    created,
-    **kwargs,
-):
-    actor = get_audit_actor()
-    ip_address = get_current_ip()
+@receiver(user_logged_out)
+def log_logout(sender, request, user, **kwargs):
+    if user is None:
+        return
+    SecurityLog.objects.create(
+        user=user,
+        user_identifier=user.email,
+        action=SecurityLog.Action.LOGOUT,
+        ip_address=client_ip(request),
+    )
+
+
+@receiver(user_login_failed)
+def log_login_failed(sender, credentials, request=None, **kwargs):
+    SecurityLog.objects.create(
+        user=None,
+        user_identifier=(credentials or {}).get("username", "") or "",
+        action=SecurityLog.Action.LOGIN_FAILED,
+        ip_address=client_ip(request),
+    )
+
+
+def audited_models():
+    return [
+        model
+        for model in apps.get_models()
+        if not model._meta.app_config.name.startswith("django.")
+        and model._meta.app_label != "audit"
+    ]
+
+
+def capture_previous(sender, instance, **kwargs):
+    instance._audit_previous = (
+        sender._default_manager.filter(pk=instance.pk).first() if instance.pk else None
+    )
+
+
+def log_write(sender, instance, created, **kwargs):
+    changes = diff(getattr(instance, "_audit_previous", None), instance)
 
     if created:
-        action = AuditLog.Action.CREATE
+        record(SecurityLog.Action.CREATE, instance, changes)
+        return
 
-        changes = {
-            "created": True,
-        }
+    if not changes:
+        return
 
-    else:
-        changed_fields = getattr(
-            instance,
-            "_audit_changed_fields",
-            [],
+    action = (
+        SecurityLog.Action.ROLE_CHANGE
+        if "role" in changes
+        else SecurityLog.Action.UPDATE
+    )
+    record(action, instance, changes)
+
+
+def log_delete(sender, instance, **kwargs):
+    record(SecurityLog.Action.DELETE, instance)
+
+
+def log_permission_change(sender, instance, action, pk_set, **kwargs):
+    if action not in ("post_add", "post_remove", "post_clear"):
+        return
+    record(
+        SecurityLog.Action.PERMISSION_CHANGE,
+        instance,
+        {"action": action, "ids": sorted(pk_set) if pk_set else []},
+    )
+
+
+def connect():
+    for model in audited_models():
+        uid = model._meta.label_lower
+        pre_save.connect(
+            capture_previous, sender=model, dispatch_uid=f"audit_pre_{uid}"
         )
+        post_save.connect(log_write, sender=model, dispatch_uid=f"audit_post_{uid}")
+        post_delete.connect(log_delete, sender=model, dispatch_uid=f"audit_del_{uid}")
 
-        if not changed_fields:
-            return
-
-        action = AuditLog.Action.UPDATE
-
-        changes = {
-            field_name: {
-                "changed": True,
-            }
-            for field_name in changed_fields
-        }
-
-    AuditLog.objects.create(
-        actor=actor,
-        action=action,
-        model_name=sender.__name__,
-        object_id=str(instance.pk),
-        changes=changes,
-        ip_address=ip_address,
-    )
-
-    if hasattr(instance, "_audit_changed_fields"):
-        delattr(instance, "_audit_changed_fields")
-
-
-@receiver(post_delete, sender=Patient)
-@receiver(post_delete, sender=TriageRecord)
-def delete_audit_log(
-    sender,
-    instance,
-    **kwargs,
-):
-    AuditLog.objects.create(
-        actor=get_audit_actor(),
-        action=AuditLog.Action.DELETE,
-        model_name=sender.__name__,
-        object_id=str(instance.pk),
-        changes={
-            "deleted": True,
-        },
-        ip_address=get_current_ip(),
-    )
+    for through in (CustomUser.groups.through, CustomUser.user_permissions.through):
+        m2m_changed.connect(
+            log_permission_change,
+            sender=through,
+            dispatch_uid=f"audit_m2m_{through._meta.label_lower}",
+        )

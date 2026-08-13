@@ -217,4 +217,3 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
-__init__.py

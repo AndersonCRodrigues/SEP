@@ -1,11 +1,32 @@
+from django.conf import settings
 from django.db import models
 
+from core.models import CustomUser
+from core.permissions import BusinessRulesMixin, RoleScopedQuerySet
 from patient.models import Patient
-from students.models import Aluno
+from students.models import Student
+from triage.constants import TriageStatus
 from utils.fields import EncryptedTextField
 
+Role = CustomUser.Role
 
-class TriageRecord(models.Model):
+
+class TriageRecordQuerySet(RoleScopedQuerySet):
+    def visible_to(self, user):
+        if not user.is_authenticated:
+            return self.none()
+
+        role = user.role
+        if role == Role.SUPERVISOR:
+            return self
+        if role == Role.PROFESSOR:
+            return self.filter(student_author__current_advisor_id=user.pk)
+        if role == Role.ALUNO:
+            return self.filter(student_author_id=user.pk, status=TriageStatus.OPEN)
+        return self.none()
+
+
+class TriageRecord(BusinessRulesMixin, models.Model):
     class ArrivalMethod(models.TextChoices):
         SPONTANEOUS = "SPONTANEOUS", "Demanda espontânea"
         REFERRED = "REFERRED", "Encaminhado ou indicado"
@@ -18,7 +39,7 @@ class TriageRecord(models.Model):
     )
 
     student_author = models.ForeignKey(
-        Aluno,
+        Student,
         on_delete=models.PROTECT,
         related_name="authored_triage_records",
         verbose_name="Aluno autor",
@@ -155,6 +176,71 @@ class TriageRecord(models.Model):
         verbose_name="Data da triagem",
     )
 
+    status = models.CharField(
+        max_length=2,
+        choices=TriageStatus.choices,
+        default=TriageStatus.OPEN,
+        verbose_name="Situação",
+    )
+
+    closed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="closed_triage_records",
+        verbose_name="Fechada por",
+    )
+
+    closed_at = models.DateTimeField(null=True, blank=True, verbose_name="Fechada em")
+
+    objects = TriageRecordQuerySet.as_manager()
+
+    CONTROL_FIELDS = frozenset(
+        {
+            "id",
+            "patient",
+            "student_author",
+            "status",
+            "closed_by",
+            "closed_at",
+            "created_at",
+        }
+    )
+
+    CREATABLE_BY = (Role.ALUNO,)
+    DELETABLE_BY = ()
+
+    class Meta:
+        verbose_name = "Triagem"
+        verbose_name_plural = "Triagens"
+        ordering = ["-created_at"]
+
+    @classmethod
+    def ficha_fields(cls):
+        return tuple(
+            f.name
+            for f in cls._meta.concrete_fields
+            if f.name not in cls.CONTROL_FIELDS
+        )
+
+    @classmethod
+    def editable_fields_for_role(cls, role):
+        if role == Role.ALUNO:
+            return cls.ficha_fields()
+        if role == Role.SUPERVISOR:
+            return cls.ficha_fields() + ("status", "closed_by", "closed_at")
+        return ()
+
+    def editable_fields_for(self, user):
+        if user.is_authenticated and user.role == Role.ALUNO and not self.is_open:
+            return ()
+        return super().editable_fields_for(user)
+
+    @property
+    def is_open(self):
+        return self.status == TriageStatus.OPEN
+
     def get_iarv(self):
         relations = (
             "iarv_adult",
@@ -168,7 +254,6 @@ class TriageRecord(models.Model):
 
         return None
 
-
     def calculate_total_risk(self):
         iarv = self.get_iarv()
 
@@ -176,7 +261,6 @@ class TriageRecord(models.Model):
             return None
 
         return iarv.calculate_score()
-
 
     def get_risk_classification(self):
         iarv = self.get_iarv()
@@ -191,12 +275,63 @@ class TriageRecord(models.Model):
 
         super().save(*args, **kwargs)
 
-        if (
-            is_new
-            and self.patient.flow_status != Patient.FlowStatus.IN_TRIAGE
-        ):
+        if is_new and self.patient.flow_status != Patient.FlowStatus.IN_TRIAGE:
             self.patient.flow_status = Patient.FlowStatus.IN_TRIAGE
             self.patient.save(update_fields=["flow_status"])
 
     def __str__(self):
         return f"TriageRecord #{self.pk}"
+
+
+class TriageFeedbackQuerySet(RoleScopedQuerySet):
+    def visible_to(self, user):
+        if not user.is_authenticated:
+            return self.none()
+
+        role = user.role
+        if role == Role.SUPERVISOR:
+            return self
+        if role == Role.PROFESSOR:
+            return self.filter(triage__student_author__current_advisor_id=user.pk)
+        if role == Role.ALUNO:
+            return self.filter(triage__student_author_id=user.pk)
+        return self.none()
+
+
+class TriageFeedback(BusinessRulesMixin, models.Model):
+    triage = models.ForeignKey(
+        TriageRecord,
+        on_delete=models.PROTECT,
+        related_name="feedbacks",
+        verbose_name="Triagem",
+    )
+
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="triage_feedbacks",
+        verbose_name="Autor",
+    )
+
+    content = models.TextField(verbose_name="Parecer")
+
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Criado em")
+
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Atualizado em")
+
+    objects = TriageFeedbackQuerySet.as_manager()
+
+    CREATABLE_BY = (Role.SUPERVISOR, Role.PROFESSOR)
+    EDITABLE_FIELDS = {
+        Role.SUPERVISOR: ("content",),
+        Role.PROFESSOR: ("content",),
+    }
+    DELETABLE_BY = ()
+
+    class Meta:
+        verbose_name = "Feedback de triagem"
+        verbose_name_plural = "Feedbacks de triagem"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Feedback de {self.author.nome_completo} em {self.triage}"

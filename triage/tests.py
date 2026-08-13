@@ -1,7 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.test import SimpleTestCase, TestCase
 from patient.models import Patient
-from students.models import Aluno
+from students.models import Student
 
 from .forms import (
     IarvAdultForm,
@@ -217,6 +217,7 @@ class IarvCalculationTests(SimpleTestCase):
         iarv.calculate_score = lambda: 18
         self.assertEqual(iarv.get_classification(), "MAXIMUM")
 
+
 class TriageRecordRiskTests(SimpleTestCase):
     def test_calculate_total_risk_uses_related_iarv(self):
         triage_record = TriageRecord()
@@ -236,9 +237,7 @@ class TriageRecordRiskTests(SimpleTestCase):
 
         triage_record.get_iarv = lambda: None
 
-        self.assertIsNone(
-            triage_record.calculate_total_risk()
-        )
+        self.assertIsNone(triage_record.calculate_total_risk())
 
     def test_get_risk_classification_uses_related_iarv(self):
         triage_record = TriageRecord()
@@ -253,15 +252,13 @@ class TriageRecordRiskTests(SimpleTestCase):
             "MAXIMUM",
         )
 
+    def test_get_risk_classification_returns_none_without_iarv(self):
+        triage_record = TriageRecord()
 
-def test_get_risk_classification_returns_none_without_iarv(self):
-    triage_record = TriageRecord()
+        triage_record.get_iarv = lambda: None
 
-    triage_record.get_iarv = lambda: None
+        self.assertIsNone(triage_record.get_risk_classification())
 
-    self.assertIsNone(
-        triage_record.get_risk_classification()
-    )
 
 class IarvRoutingTests(SimpleTestCase):
     def test_child_form_is_selected_for_age_under_13(self):
@@ -325,6 +322,7 @@ class IarvRoutingTests(SimpleTestCase):
         ):
             get_iarv_form_class(patient)
 
+
 class TriageRecordSaveTests(TestCase):
     def setUp(self):
         self.patient = Patient.objects.create(
@@ -334,7 +332,7 @@ class TriageRecordSaveTests(TestCase):
             telefone="21999999999",
         )
 
-        self.student = Aluno.objects.create(
+        self.student = Student.objects.create(
             email="student.triage@test.com",
             nome_completo="Aluno Teste",
             cpf="52998224725",
@@ -379,9 +377,7 @@ class TriageRecordSaveTests(TestCase):
         self.patient.save(update_fields=["flow_status"])
 
         triage_record.summary_and_impressions = "Atualização da triagem."
-        triage_record.save(
-            update_fields=["summary_and_impressions"]
-        )
+        triage_record.save(update_fields=["summary_and_impressions"])
 
         self.patient.refresh_from_db()
 

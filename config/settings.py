@@ -1,3 +1,4 @@
+import base64
 import os
 from pathlib import Path
 from django.core.exceptions import ImproperlyConfigured
@@ -14,8 +15,16 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
 FIELD_ENCRYPTION_KEY = os.environ.get("FIELD_ENCRYPTION_KEY")
 if not FIELD_ENCRYPTION_KEY:
+    raise ImproperlyConfigured("FIELD_ENCRYPTION_KEY nao encontrada. Verifique o .env.")
+
+try:
+    if len(base64.urlsafe_b64decode(FIELD_ENCRYPTION_KEY)) != 32:
+        raise ValueError
+except Exception:
     raise ImproperlyConfigured(
-    "FIELD_ENCRYPTION_KEY nao encontrada. Verifique o .env."
+        "FIELD_ENCRYPTION_KEY invalida: precisa ser 32 bytes em base64 url-safe. "
+        'Gere com: python -c "from cryptography.fernet import Fernet; '
+        'print(Fernet.generate_key().decode())"'
     )
 
 
@@ -38,7 +47,7 @@ if _allowed_hosts_env:
         host.strip() for host in _allowed_hosts_env.split(",") if host.strip()
     ]
 else:
-    ALLOWED_HOSTS = ["localhost", "127.0.0.1",'host.docker.internal']
+    ALLOWED_HOSTS = ["localhost", "127.0.0.1", "host.docker.internal"]
 
 
 # Application definition
@@ -61,6 +70,7 @@ INSTALLED_APPS = [
     "localflavor",
     "areas",
     "triage",
+    "documents",
     "audit.apps.AuditConfig",
     "crispy_forms",
     "crispy_bootstrap5",
@@ -87,7 +97,7 @@ ROOT_URLCONF = "config.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR/'templates'],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -118,7 +128,6 @@ if db_engine and db_engine not in ENGINES_VALIDOS:
     )
 
 if db_engine:
-
     db_name = os.getenv("DJANGO_DATABASE_NAME")
     db_user = os.getenv("DJANGO_DATABASE_USER")
     db_password = os.getenv("DJANGO_DATABASE_PASSWORD")
@@ -153,7 +162,7 @@ if db_engine:
             "PORT": db_port,
         }
     }
-    
+
 else:
     DATABASES = {
         "default": {
@@ -161,7 +170,7 @@ else:
             "NAME": BASE_DIR / "db.sqlite3",
         }
     }
-    
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -191,8 +200,8 @@ USE_TZ = True
 STATIC_URL = "static/"
 
 AUTH_USER_MODEL = "core.CustomUser"
-LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'home_redirect'
+LOGIN_URL = "login"
+LOGIN_REDIRECT_URL = "home_redirect"
 
 MESSAGE_TAGS = {
     messages.DEBUG: "secondary",

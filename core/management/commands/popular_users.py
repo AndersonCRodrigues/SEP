@@ -1,76 +1,106 @@
-'''
+"""
 Refs.:
 https://docs.djangoproject.com/en/6.0/howto/custom-management-commands/
-'''
+"""
+
 import random
 import os
-from datetime import date
 from django.core.management.base import BaseCommand
 from django.core.exceptions import ValidationError
+from areas.models import AreaActing
 from core.models import CustomUser
 from core.utils import sincronizar_grupo
-from areas.models import AreaActing
-from teacher.models import Professor
-from students.models import Aluno
+from patient.models import Patient
+from students.models import Student
+from teacher.models import Teacher
+
+# Os usos de `random` levam `# nosec B311`: geram dados falsos de seed num comando
+# que so roda com NODE_ENV=dev, nunca material criptografico.
+
+MODEL_BY_ROLE = {
+    CustomUser.Role.PROFESSOR: Teacher,
+    CustomUser.Role.ALUNO: Student,
+    CustomUser.Role.PACIENTE: Patient,
+}
+
+DEFAULT_AREAS = [
+    "Esquizoanálise",
+    "TCC Adulto/Infantil",
+    "Fenomenológico-Existencial",
+    "Psicanálise",
+]
 
 
-def gerar_cpf_valido():
+def generate_valid_cpf():
     """Gera um CPF matematicamente válido para burlar a validação em ambiente de teste."""
-    cpf = [random.randint(0, 9) for _ in range(9)]
+    cpf = [random.randint(0, 9) for _ in range(9)]  # nosec B311
 
-    soma1 = sum(x * y for x, y in zip(cpf, range(10, 1, -1)))
-    d1 = 11 - (soma1 % 11)
-    d1 = 0 if d1 >= 10 else d1
-    cpf.append(d1)
+    first_sum = sum(x * y for x, y in zip(cpf, range(10, 1, -1)))
+    first_digit = 11 - (first_sum % 11)
+    first_digit = 0 if first_digit >= 10 else first_digit
+    cpf.append(first_digit)
 
-    soma2 = sum(x * y for x, y in zip(cpf, range(11, 1, -1)))
-    d2 = 11 - (soma2 % 11)
-    d2 = 0 if d2 >= 10 else d2
-    cpf.append(d2)
+    second_sum = sum(x * y for x, y in zip(cpf, range(11, 1, -1)))
+    second_digit = 11 - (second_sum % 11)
+    second_digit = 0 if second_digit >= 10 else second_digit
+    cpf.append(second_digit)
 
     return f"{cpf[0]}{cpf[1]}{cpf[2]}.{cpf[3]}{cpf[4]}{cpf[5]}.{cpf[6]}{cpf[7]}{cpf[8]}-{cpf[9]}{cpf[10]}"
 
 
 class Command(BaseCommand):
-    help = 'Popula o banco de dados com usuários de teste para as Roles selecionadas. Só roda se NODE_ENV=dev.'
+    help = "Popula o banco de dados com áreas de atuação e usuários de teste."
 
     def add_arguments(self, parser):
+        # Permite passar roles separadas por espaço. ex.: --roles PR AL
         parser.add_argument(
-            '--roles',
-            nargs='+',
+            "--roles",
+            nargs="+",
             type=str,
             choices=[role[0] for role in CustomUser.Role.choices],
-            help='Especifica quais roles criar. Valores aceitos: SUPERADMIN, SUPERVISOR, PROFESSOR, ADMIN, ALUNO.'
+            help="Especifica quais roles criar (SA SV PR AD AL PA). Se não for passado, cria uma de cada.",
         )
 
     def handle(self, *args, **options):
         if os.getenv("NODE_ENV") != "dev":
-            self.stdout.write(self.style.WARNING(
-                "NODE_ENV != 'dev' — comando ignorado (evita popular dados de teste em produção)."
-            ))
+            self.stdout.write(
+                self.style.WARNING(
+                    "popular_users só roda com NODE_ENV=dev. Nada foi criado."
+                )
+            )
             return
 
-        area_padrao, _ = AreaActing.objects.get_or_create(nome="Psicanálise")
+        areas = [
+            AreaActing.objects.get_or_create(nome=name)[0] for name in DEFAULT_AREAS
+        ]
+        self.stdout.write(
+            self.style.SUCCESS("Áreas de Atuação verificadas/criadas com sucesso!")
+        )
 
-        roles_selecionadas = options['roles']
-        if not roles_selecionadas:
-            roles_selecionadas = [role[0] for role in CustomUser.Role.choices]
+        selected_roles = options["roles"] or [
+            role[0] for role in CustomUser.Role.choices
+        ]
 
-        for role in roles_selecionadas:
-            prefixo = role.lower()
-            email = f"{prefixo}@teste.com"
-            contador = 1
+        for role in selected_roles:
+            prefix = role.lower()
+            email = f"{prefix}@teste.com"
+            counter = 1
 
             while CustomUser.objects.filter(email=email).exists():
-                email = f"{prefixo}{contador}@teste.com"
-                contador += 1
+                email = f"{prefix}{counter}@teste.com"
+                counter += 1
 
-            campos_base = dict(
+            model = MODEL_BY_ROLE.get(role, CustomUser)
+            extra_fields = {}
+            if model is Teacher:
+                extra_fields["acting_area"] = random.choice(areas)  # nosec B311
+
+            suffix = f" {counter}" if counter > 1 else ""
+            user = model(
                 email=email,
-                nome_completo=f"Usuario Teste {role} {contador if contador > 1 else ''}".strip(),
-                cpf=gerar_cpf_valido(),
+                nome_completo=f"Usuario Teste {role}{suffix}",
+                cpf=generate_valid_cpf(),
                 telefone="(99) 99999-9999",
-                data_nascimento=date(1995, 1, 1),
                 logradouro="Rua de Teste",
                 numero="0",
                 bairro="Centro",
@@ -78,35 +108,37 @@ class Command(BaseCommand):
                 estado="RJ",
                 cep="24900-000",
                 role=role,
+                **extra_fields,
             )
 
-            if role in (CustomUser.Role.PROFESSOR, CustomUser.Role.SUPERVISOR):
-                numero_crp = random.randint(10000, 99999)
-                user = Professor(
-                    **campos_base,
-                    crp=f"{numero_crp}/RJ-{role}",
-                    area_atuacao=area_padrao,
-                )
-            elif role == CustomUser.Role.ALUNO:
-                numero_aleatorio = random.randint(1000, 9999)
-                user = Aluno(**campos_base, matricula=f"2026{numero_aleatorio}")
-            elif role == CustomUser.Role.ADMINISTRATIVO:
-                numero_aleatorio = random.randint(1000, 9999)
-                user = CustomUser(**campos_base, matricula=f"2026{numero_aleatorio}")
-            else:
-                user = CustomUser(**campos_base)
-                if role == CustomUser.Role.SUPERADMIN:
-                    user.is_staff = True
-                    user.is_superuser = True
+            if role in (
+                CustomUser.Role.ALUNO,
+                CustomUser.Role.PROFESSOR,
+                CustomUser.Role.ADMINISTRATIVO,
+            ):
+                user.matricula = f"2026{random.randint(1000, 9999)}"  # nosec B311
 
-            user.set_password("Senha123!")
+            if role in (CustomUser.Role.PROFESSOR, CustomUser.Role.SUPERVISOR):
+                user.crp = f"{random.randint(10000, 99999)}/RJ-{role}"  # nosec B311
+
+            if role == CustomUser.Role.SUPERADMIN:
+                user.is_staff = True
+                user.is_superuser = True
+
+            user.set_password("SenhaForte123!")
 
             try:
                 user.full_clean()
                 user.save()
                 sincronizar_grupo(user)
-                self.stdout.write(self.style.SUCCESS(f"Usuário {role} ({email}) criado com sucesso!"))
+                self.stdout.write(
+                    self.style.SUCCESS(f"Usuário {role} ({email}) criado com sucesso!")
+                )
             except ValidationError as e:
-                self.stdout.write(self.style.ERROR(f"Erro de validação no usuário {role}: {e}"))
+                self.stdout.write(
+                    self.style.ERROR(f"Erro de validação no usuário {role}: {e}")
+                )
             except Exception as e:
-                self.stdout.write(self.style.ERROR(f"Erro inesperado no usuário {role}: {e}"))
+                self.stdout.write(
+                    self.style.ERROR(f"Erro inesperado no usuário {role}: {e}")
+                )
