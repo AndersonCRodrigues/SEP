@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
+from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.views.generic import ListView, TemplateView, CreateView, UpdateView
 from core.models import CustomUser
 from core.mixins import GroupRequiredMixin
@@ -52,7 +53,7 @@ class HomeSupervisorView(GroupRequiredMixin, TemplateView):
 
 @login_required
 def cadastrar_supervisor(request):
-    if not request.user.is_superuser:
+    if not request.user.has_perm("core.add_customuser"):
         raise PermissionDenied("Apenas o Superadmin pode cadastrar Supervisor.")
 
     if request.method == "POST":
@@ -75,16 +76,16 @@ class ListaAreasView(GroupRequiredMixin, ListView):
     context_object_name = "areas"
 
 
-class CriarAreaView(GroupRequiredMixin, CreateView):
-    required_group = "Supervisor"
+class CriarAreaView(PermissionRequiredMixin, CreateView):
+    permission_required = "areas.add_areaacting"
     model = AreaActing
     form_class = AreaAtuacaoForm
     template_name = "supervisor/area_form.html"
     success_url = reverse_lazy("supervisor:areas")
 
 
-class EditarAreaView(GroupRequiredMixin, UpdateView):
-    required_group = "Supervisor"
+class EditarAreaView(PermissionRequiredMixin, UpdateView):
+    permission_required = "areas.change_areaacting"
     model = AreaActing
     form_class = AreaAtuacaoForm
     template_name = "supervisor/area_form.html"

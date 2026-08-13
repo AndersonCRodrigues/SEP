@@ -66,7 +66,7 @@ class PerfilAdministrativoView(GroupRequiredMixin, UpdateView):
 
 @login_required
 def cadastrar_administrativo(request):
-    if not request.user.is_superuser:
+    if not request.user.has_perm("core.add_customuser"):
         raise PermissionDenied("Apenas o Superadmin pode cadastrar Administrativo.")
 
     if request.method == "POST":

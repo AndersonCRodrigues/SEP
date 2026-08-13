@@ -20,11 +20,7 @@ class HomeProfessorView(LoginRequiredMixin, TemplateView):
 
 @login_required
 def cadastrar_professor(request):
-    is_supervisor = (
-        request.user.groups.filter(name="Supervisor").exists()
-        or request.user.is_superuser
-    )
-    if not is_supervisor:
+    if not request.user.has_perm("teacher.add_teacher"):
         raise PermissionDenied("Apenas Supervisores podem cadastrar Professores.")
 
     if request.method == "POST":

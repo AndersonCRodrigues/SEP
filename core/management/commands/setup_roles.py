@@ -1,76 +1,83 @@
-from django.core.management.base import BaseCommand
+from django.apps import apps
 from django.contrib.auth.models import Group, Permission
+from django.core.management.base import BaseCommand
 from core.models import CustomUser
+from core.permissions import BusinessRulesMixin
+from core.user_management import MANAGEABLE_ROLES_BY
+from core.utils import MAPA_GRUPOS
 
+Role = CustomUser.Role
 
-MAPA_GRUPOS = {
-    CustomUser.Role.SUPERADMIN: "Superadmin",
-    CustomUser.Role.SUPERVISOR: "Supervisor",
-    CustomUser.Role.ADMINISTRATIVO: "Administration",
-    CustomUser.Role.PROFESSOR: "Professors",
-    CustomUser.Role.ALUNO: "Students",
+GERENCIAVEIS = {
+    Role.PROFESSOR: "teacher.Teacher",
+    Role.ALUNO: "students.Student",
+    Role.PACIENTE: "patient.Patient",
 }
 
-PERMISSOES_BASE = {
-    "Superadmin": [],
-    "Administration": [
-        "core.add_customuser",
-        "core.change_customuser",
-        "core.view_customuser",
-    ],
-    "Professors": [
-        "students.view_aluno",
-        "students.add_orientacao",
-        "students.view_orientacao",
-        "students.change_orientacao",
-        "teacher.change_professor",
-        "areas.view_areaacting",
-    ],
-    "Students": [
-        "students.view_orientacao",
-    ],
-    "Supervisor": [
-        "teacher.add_professor",
-        "teacher.view_professor",
-        "teacher.change_professor",
-        "students.add_aluno",
-        "students.view_aluno",
-        "students.change_aluno",
-        "students.add_orientacao",
-        "students.view_orientacao",
-        "students.change_orientacao",
-        "areas.add_areaacting",
-        "areas.change_areaacting",
-        "areas.view_areaacting",
-    ],
-}
+
+def _rotulo(model, acao):
+    return f"{model._meta.app_label}.{acao}_{model._meta.model_name}"
+
+
+def _le(model, role):
+    usuario = CustomUser(pk=0, role=role, is_superuser=role == Role.SUPERADMIN)
+    return not model.objects.visible_to(usuario).query.is_empty()
+
+
+def permissoes_por_role():
+    """Projeta as regras declaradas nos models sobre o sistema de Permission."""
+    por_role = {role: set() for role in MAPA_GRUPOS}
+
+    for model in apps.get_models():
+        if not issubclass(model, BusinessRulesMixin):
+            continue
+        for role in por_role:
+            if role in model.CREATABLE_BY:
+                por_role[role].add(_rotulo(model, "add"))
+            if model.editable_fields_for_role(role):
+                por_role[role].add(_rotulo(model, "change"))
+            if role in model.DELETABLE_BY:
+                por_role[role].add(_rotulo(model, "delete"))
+            if _le(model, role):
+                por_role[role].add(_rotulo(model, "view"))
+
+    for ator, alvos in MANAGEABLE_ROLES_BY.items():
+        for alvo in alvos:
+            model = apps.get_model(GERENCIAVEIS.get(alvo, "core.CustomUser"))
+            for acao in ("add", "change", "view"):
+                por_role[ator].add(_rotulo(model, acao))
+
+    return por_role
 
 
 class Command(BaseCommand):
-    help = "Cria os Django Groups mapeados pros perfis (exceto Paciente) com permissões base."
+    help = (
+        "Cria os Django Groups dos perfis e aplica as permissões declaradas nos models."
+    )
 
     def handle(self, *args, **options):
+        por_role = permissoes_por_role()
+
         for role, nome_grupo in MAPA_GRUPOS.items():
             grupo, criado = Group.objects.get_or_create(name=nome_grupo)
             status = "criado" if criado else "já existia"
             self.stdout.write(self.style.SUCCESS(f"Grupo '{nome_grupo}' {status}."))
 
-            permissoes_aplicadas = []
-            for codename_completo in PERMISSOES_BASE.get(nome_grupo, []):
-                app_label, codename = codename_completo.split(".")
+            aplicadas = []
+            for rotulo in sorted(por_role.get(role, ())):
+                app_label, codename = rotulo.split(".")
                 try:
-                    permissao = Permission.objects.get(
-                        content_type__app_label=app_label, codename=codename
-                    )
-                    permissoes_aplicadas.append(permissao)
-                except Permission.DoesNotExist:
-                    self.stdout.write(
-                        self.style.WARNING(
-                            f"  Permissão '{codename_completo}' não encontrada — pulando."
+                    aplicadas.append(
+                        Permission.objects.get(
+                            content_type__app_label=app_label, codename=codename
                         )
                     )
+                except Permission.DoesNotExist:
+                    self.stdout.write(
+                        self.style.WARNING(f"  '{rotulo}' não encontrada — pulando.")
+                    )
 
-            grupo.permissions.set(permissoes_aplicadas)
+            grupo.permissions.set(aplicadas)
             self.stdout.write(
-                f"  {len(permissoes_aplicadas)} permissões aplicadas em '{nome_grupo}'."
+                f"  {len(aplicadas)} permissões aplicadas em '{nome_grupo}'."
             )
