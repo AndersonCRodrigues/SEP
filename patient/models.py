@@ -1,10 +1,12 @@
 from django.conf import settings
 from django.db import models
+from django.utils import timezone
 from django.db.models import Q
 from areas.models import AreaActing
 from core.managers import CustomUserManager
 from core.models import CustomUser
 from core.permissions import BusinessRulesMixin, RoleScopedQuerySet
+from utils.fields import EncryptedTextField
 from screening.constants import ScreeningStatus
 from students.models import Student
 from teacher.models import Teacher
@@ -39,6 +41,18 @@ class PatientQuerySet(RoleScopedQuerySet):
 
 
 class Patient(BusinessRulesMixin, CustomUser):
+    class FlowStatus(models.TextChoices):
+        IN_TRIAGE = "IN_TRIAGE", "Em triagem"
+
+    flow_status = models.CharField(
+        max_length=30,
+        choices=FlowStatus.choices,
+        blank=True,
+        verbose_name="Status do fluxo",
+    )
+
+    medical_record = EncryptedTextField(blank=True, verbose_name="Prontuário")
+
     responsible_teachers = models.ManyToManyField(
         Teacher,
         blank=True,
@@ -69,6 +83,18 @@ class Patient(BusinessRulesMixin, CustomUser):
     class Meta:
         verbose_name = "Paciente"
         verbose_name_plural = "Pacientes"
+
+    @property
+    def current_age(self):
+        if not self.data_nascimento:
+            return None
+        hoje = timezone.localdate()
+        nascimento = self.data_nascimento
+        return (
+            hoje.year
+            - nascimento.year
+            - ((hoje.month, hoje.day) < (nascimento.month, nascimento.day))
+        )
 
     def save(self, *args, **kwargs):
         self.role = CustomUser.Role.PACIENTE

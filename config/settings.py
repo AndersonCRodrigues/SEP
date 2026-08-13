@@ -1,3 +1,4 @@
+import base64
 import os
 from pathlib import Path
 from django.core.exceptions import ImproperlyConfigured
@@ -11,6 +12,21 @@ load_dotenv(BASE_DIR / ".env")
 
 DEBUG = os.getenv("DJANGO_DEBUG", "True").lower() == "true"
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
+
+FIELD_ENCRYPTION_KEY = os.environ.get("FIELD_ENCRYPTION_KEY")
+if not FIELD_ENCRYPTION_KEY:
+    raise ImproperlyConfigured("FIELD_ENCRYPTION_KEY nao encontrada. Verifique o .env.")
+
+try:
+    if len(base64.urlsafe_b64decode(FIELD_ENCRYPTION_KEY)) != 32:
+        raise ValueError
+except Exception:
+    raise ImproperlyConfigured(
+        "FIELD_ENCRYPTION_KEY invalida: precisa ser 32 bytes em base64 url-safe. "
+        'Gere com: python -c "from cryptography.fernet import Fernet; '
+        'print(Fernet.generate_key().decode())"'
+    )
+
 
 if not SECRET_KEY:
     if DEBUG:
@@ -31,7 +47,6 @@ if _allowed_hosts_env:
         host.strip() for host in _allowed_hosts_env.split(",") if host.strip()
     ]
 else:
-    ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
     ALLOWED_HOSTS = ["localhost", "127.0.0.1", "host.docker.internal"]
 
 
@@ -47,7 +62,6 @@ INSTALLED_APPS = [
     "accounts",
     "core",
     "patient",
-    "screening",
     "teacher",
     "students",
     "supervisor",
@@ -55,8 +69,10 @@ INSTALLED_APPS = [
     "superadmin",
     "localflavor",
     "areas",
+    "screening",
+    "triage",
     "documents",
-    "audit",
+    "audit.apps.AuditConfig",
     "crispy_forms",
     "crispy_bootstrap5",
 ]

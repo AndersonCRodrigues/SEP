@@ -13,6 +13,9 @@ class CustomUser(AbstractUser):
     nome_completo = models.CharField(max_length=350, verbose_name="Nome Completo")
     cpf = BRCPFField(unique=True, verbose_name="CPF")
     telefone = models.CharField(max_length=20, verbose_name="Telefone")
+    data_nascimento = models.DateField(
+        null=True, blank=True, verbose_name="Data de nascimento"
+    )
 
     logradouro = models.CharField(max_length=200, verbose_name="Logradouro")
     numero = models.CharField(max_length=10, verbose_name="Número")
@@ -58,6 +61,7 @@ class CustomUser(AbstractUser):
         "nome_completo",
         "email",
         "cpf",
+        "data_nascimento",
         "role",
         "matricula",
         "crp",
