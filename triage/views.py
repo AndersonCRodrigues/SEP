@@ -11,6 +11,7 @@ from .forms import (
     TriageRecordForm,
 )
 
+
 def get_iarv_form_class(patient):
     age = patient.current_age
 
@@ -18,7 +19,7 @@ def get_iarv_form_class(patient):
         raise ValidationError(
             "A data de nascimento do paciente é obrigatória para selecionar o questionário IARV."
         )
-    
+
     if age < 13:
         return IarvChildForm
 
@@ -38,9 +39,7 @@ def create_triage(request, patient_id):
     try:
         student_author = Student.objects.get(pk=request.user.pk)
     except Student.DoesNotExist:
-        raise ValidationError(
-            "Apenas alunos podem criar uma ficha de triagem."
-        )
+        raise ValidationError("Apenas alunos podem criar uma ficha de triagem.")
 
     iarv_form_class = get_iarv_form_class(patient)
 
