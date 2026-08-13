@@ -252,13 +252,12 @@ class TriageRecordRiskTests(SimpleTestCase):
             "MAXIMUM",
         )
 
+    def test_get_risk_classification_returns_none_without_iarv(self):
+        triage_record = TriageRecord()
 
-def test_get_risk_classification_returns_none_without_iarv(self):
-    triage_record = TriageRecord()
+        triage_record.get_iarv = lambda: None
 
-    triage_record.get_iarv = lambda: None
-
-    self.assertIsNone(triage_record.get_risk_classification())
+        self.assertIsNone(triage_record.get_risk_classification())
 
 
 class IarvRoutingTests(SimpleTestCase):
