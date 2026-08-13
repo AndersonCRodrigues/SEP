@@ -8,7 +8,6 @@ from django.db.models.signals import m2m_changed, post_delete, post_save, pre_sa
 from django.dispatch import receiver
 
 from core.models import CustomUser
-from core.permissions import BusinessRulesMixin
 
 from .middleware import client_ip
 from .models import SecurityLog
@@ -51,8 +50,8 @@ def audited_models():
     return [
         model
         for model in apps.get_models()
-        if model is not SecurityLog
-        and issubclass(model, (BusinessRulesMixin, CustomUser))
+        if not model._meta.app_config.name.startswith("django.")
+        and model._meta.app_label != "audit"
     ]
 
 

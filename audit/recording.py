@@ -1,3 +1,4 @@
+from utils.fields import EncryptedFieldMixin
 from .middleware import get_current_ip, get_current_user
 from .models import SecurityLog
 
@@ -40,6 +41,10 @@ def _value(instance, field):
     return getattr(instance, field.attname)
 
 
+def _is_sensitive(field):
+    return isinstance(field, EncryptedFieldMixin) or field.name in SENSITIVE_FIELDS
+
+
 def auditable_fields(model):
     return [
         field
@@ -57,7 +62,7 @@ def diff(previous, instance):
         if previous is not None and before == after:
             continue
 
-        if field.name in SENSITIVE_FIELDS:
+        if _is_sensitive(field):
             changes[field.name] = {"changed": True}
         else:
             changes[field.name] = {"old": _plain(before), "new": _plain(after)}
