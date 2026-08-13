@@ -69,7 +69,6 @@ INSTALLED_APPS = [
     "superadmin",
     "localflavor",
     "areas",
-    "screening",
     "triage",
     "documents",
     "audit.apps.AuditConfig",

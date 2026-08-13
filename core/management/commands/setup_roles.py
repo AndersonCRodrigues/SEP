@@ -9,17 +9,20 @@ MAPA_GRUPOS = {
     CustomUser.Role.ADMINISTRATIVO: "Administration",
     CustomUser.Role.PROFESSOR: "Professors",
     CustomUser.Role.ALUNO: "Students",
-    
 }
 
 PERMISSOES_BASE = {
-    "Superadmin": [],  
+    "Superadmin": [],
     "Administration": [
-        "core.add_customuser", "core.change_customuser", "core.view_customuser",
+        "core.add_customuser",
+        "core.change_customuser",
+        "core.view_customuser",
     ],
     "Professors": [
         "students.view_aluno",
-        "students.add_orientacao", "students.view_orientacao", "students.change_orientacao",
+        "students.add_orientacao",
+        "students.view_orientacao",
+        "students.change_orientacao",
         "teacher.change_professor",
         "areas.view_areaacting",
     ],
@@ -27,10 +30,18 @@ PERMISSOES_BASE = {
         "students.view_orientacao",
     ],
     "Supervisor": [
-        "teacher.add_professor", "teacher.view_professor", "teacher.change_professor",
-        "students.add_aluno", "students.view_aluno", "students.change_aluno",
-        "students.add_orientacao", "students.view_orientacao", "students.change_orientacao",
-        "areas.add_areaacting", "areas.change_areaacting", "areas.view_areaacting",
+        "teacher.add_professor",
+        "teacher.view_professor",
+        "teacher.change_professor",
+        "students.add_aluno",
+        "students.view_aluno",
+        "students.change_aluno",
+        "students.add_orientacao",
+        "students.view_orientacao",
+        "students.change_orientacao",
+        "areas.add_areaacting",
+        "areas.change_areaacting",
+        "areas.view_areaacting",
     ],
 }
 
@@ -48,12 +59,18 @@ class Command(BaseCommand):
             for codename_completo in PERMISSOES_BASE.get(nome_grupo, []):
                 app_label, codename = codename_completo.split(".")
                 try:
-                    permissao = Permission.objects.get(content_type__app_label=app_label, codename=codename)
+                    permissao = Permission.objects.get(
+                        content_type__app_label=app_label, codename=codename
+                    )
                     permissoes_aplicadas.append(permissao)
                 except Permission.DoesNotExist:
-                    self.stdout.write(self.style.WARNING(
-                        f"  Permissão '{codename_completo}' não encontrada — pulando."
-                    ))
+                    self.stdout.write(
+                        self.style.WARNING(
+                            f"  Permissão '{codename_completo}' não encontrada — pulando."
+                        )
+                    )
 
             grupo.permissions.set(permissoes_aplicadas)
-            self.stdout.write(f"  {len(permissoes_aplicadas)} permissões aplicadas em '{nome_grupo}'.")
+            self.stdout.write(
+                f"  {len(permissoes_aplicadas)} permissões aplicadas em '{nome_grupo}'."
+            )

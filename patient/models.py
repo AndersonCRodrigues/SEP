@@ -7,7 +7,7 @@ from core.managers import CustomUserManager
 from core.models import CustomUser
 from core.permissions import BusinessRulesMixin, RoleScopedQuerySet
 from utils.fields import EncryptedTextField
-from screening.constants import ScreeningStatus
+from triage.constants import TriageStatus
 from students.models import Student
 from teacher.models import Teacher
 
@@ -31,8 +31,8 @@ class PatientQuerySet(RoleScopedQuerySet):
             return self.filter(
                 Q(responsible_students=user.pk, active_treatment=True)
                 | Q(
-                    screenings__student_id=user.pk,
-                    screenings__status=ScreeningStatus.OPEN,
+                    triage_records__student_author_id=user.pk,
+                    triage_records__status=TriageStatus.OPEN,
                 )
             ).distinct()
         if role == Role.PACIENTE:

@@ -2,11 +2,13 @@ from cryptography.fernet import Fernet, InvalidToken
 from django.conf import settings
 from django.db import models
 
+
 def get_fernet() -> Fernet:
     key = settings.FIELD_ENCRYPTION_KEY
     if isinstance(key, str):
         key = key.encode()
     return Fernet(key)
+
 
 class EncryptedFieldMixin:
     def get_internal_type(self):
@@ -25,15 +27,15 @@ class EncryptedFieldMixin:
         try:
             return get_fernet().decrypt(value.encode()).decode()
         except InvalidToken:
-            raise ValueError(
-                "Nao foi possivel descriptografar o campo."
-            )
-        
+            raise ValueError("Nao foi possivel descriptografar o campo.")
+
     def to_python(self, value):
         return value
 
+
 class EncryptedCharField(EncryptedFieldMixin, models.CharField):
     pass
+
 
 class EncryptedTextField(EncryptedFieldMixin, models.TextField):
     pass
