@@ -20,6 +20,13 @@ jobs:
         with:
           python-version: "3.12"
 
+      # Chave nova a cada execucao: o banco do CI e efemero e nada precisa ser
+      # decifrado entre rodadas, entao nao ha segredo a guardar nem a vazar.
+      - name: Gera chave de criptografia efemera
+        run: |
+          KEY=$(python -c "import base64, secrets; print(base64.urlsafe_b64encode(secrets.token_bytes(32)).decode())")
+          echo "FIELD_ENCRYPTION_KEY=$KEY" >> "$GITHUB_ENV"
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip

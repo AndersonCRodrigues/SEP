@@ -22,9 +22,15 @@ class EditarDadosPacienteView(GroupRequiredMixin, UpdateView):
     required_group = "Patient"
     model = CustomUser
     fields = [
-        "nome_completo", "telefone",
-        "logradouro", "numero", "complemento",
-        "bairro", "cidade", "estado", "cep",
+        "nome_completo",
+        "telefone",
+        "logradouro",
+        "numero",
+        "complemento",
+        "bairro",
+        "cidade",
+        "estado",
+        "cep",
     ]
     template_name = "patient/edit_data.html"
     success_url = reverse_lazy("patient:home")
