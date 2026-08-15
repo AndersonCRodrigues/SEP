@@ -36,4 +36,21 @@
         </div>
     </section>
 </div>
+
+<div class="col-12 col-md-6">
+    <section class="card h-100">
+        <div class="card-body">
+            <h2 class="h5 card-title">Lançar Horas</h2>
+            {% if alunos_vinculados %}
+            <form method="post" action="{% url 'teacher:lancar_horas' %}">
+                {% csrf_token %}
+                {{ form_horas.as_p }}
+                <button type="submit" class="btn btn-primary">Registrar Horas</button>
+            </form>
+            {% else %}
+            <p class="card-text text-body-secondary mb-0">Vincule um aluno antes de lançar horas.</p>
+            {% endif %}
+        </div>
+    </section>
+</div>
 {% endblock %}
