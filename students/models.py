@@ -8,6 +8,7 @@ from areas.models import AreaActing
 from core.models import CustomUser
 from core.permissions import BusinessRulesMixin, RoleScopedQuerySet
 from teacher.models import Teacher
+from decimal import Decimal
 
 Role = CustomUser.Role
 
@@ -324,7 +325,6 @@ class CaseAssignment(BusinessRulesMixin, models.Model):
         status = "ativa" if self.end_date is None else f"encerrada em {self.end_date}"
         return f"{self.student} encarregado de {self.patient} ({status})"
 
-
 class Attendance(BusinessRulesMixin, models.Model):
     student = models.ForeignKey(
         Student,
@@ -418,11 +418,11 @@ class PerformanceReview(BusinessRulesMixin, models.Model):
 
 
 class StudentActivity(BusinessRulesMixin, models.Model):
-    class Kind(models.TextChoices):
+    class ActivityType(models.TextChoices):
         SESSION = "AT", "Atendimento"
         SCREENING = "TR", "Triagem"
+        GROUP_SUPERVISION = "SG", "Supervisão em Grupo"
         RECORDS = "PR", "Prontuário"
-        OTHER = "OU", "Outra"
 
     student = models.ForeignKey(
         Student,
@@ -431,15 +431,21 @@ class StudentActivity(BusinessRulesMixin, models.Model):
         verbose_name="Aluno",
     )
 
-    date = models.DateField(verbose_name="Data")
+    date = models.DateField(default=timezone.now, verbose_name="Data")
 
-    kind = models.CharField(
+    activity_type = models.CharField(
         max_length=2,
-        choices=Kind.choices,
-        verbose_name="Tipo",
+        choices=ActivityType.choices,
+        verbose_name="Tipo de atividade",
     )
 
-    minutes = models.PositiveIntegerField(verbose_name="Minutos")
+    hours_worked = models.DecimalField(
+        max_digits=4,
+        decimal_places=2,
+        verbose_name="Horas trabalhadas",
+    )
+
+    notes = models.TextField(blank=True, verbose_name="Observação")
 
     appointment = models.ForeignKey(
         "patient.Appointment",
@@ -450,25 +456,24 @@ class StudentActivity(BusinessRulesMixin, models.Model):
         verbose_name="Agendamento de origem",
     )
 
-    registered_by = models.ForeignKey(
+    responsible_supervisor = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
+        on_delete=models.PROTECT,
+        limit_choices_to=Q(role__in=[Role.PROFESSOR, Role.SUPERVISOR]),
         related_name="registered_activities",
-        verbose_name="Registrada por",
+        verbose_name="Responsável pelo registro",
     )
 
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Criado em")
 
     objects = AdviseeScopedQuerySet.as_manager()
 
-    CREATABLE_BY = (Role.PROFESSOR, Role.ALUNO)
+    CREATABLE_BY = (Role.PROFESSOR, Role.SUPERVISOR)
     EDITABLE_FIELDS = {
-        Role.PROFESSOR: ("date", "kind", "minutes"),
-        Role.ALUNO: ("date", "kind", "minutes"),
+        Role.PROFESSOR: ("date", "activity_type", "hours_worked", "notes"),
+        Role.SUPERVISOR: ("date", "activity_type", "hours_worked", "notes"),
     }
-    DELETABLE_BY = (Role.PROFESSOR,)
+    DELETABLE_BY = (Role.PROFESSOR, Role.SUPERVISOR)
 
     class Meta:
         verbose_name = "Atividade de estágio"
@@ -488,9 +493,11 @@ class StudentActivity(BusinessRulesMixin, models.Model):
             return False
         if student is None:
             return False
-        if user.role == Role.ALUNO:
-            return student.pk == user.pk
-        return student.current_advisor_id == user.pk
+        if user.role == Role.SUPERVISOR:
+            return True
+        if user.role == Role.PROFESSOR:
+            return student.current_advisor_id == user.pk
+        return False
 
     def editable_fields_for(self, user):
         if self.appointment_id:
@@ -503,11 +510,11 @@ class StudentActivity(BusinessRulesMixin, models.Model):
         return super().can_be_deleted_by(user)
 
     @classmethod
-    def total_minutes_for(cls, student, start_date, end_date):
+    def total_hours_for(cls, student, start_date, end_date):
         total = cls.objects.filter(
             student=student, date__gte=start_date, date__lte=end_date
-        ).aggregate(total=Sum("minutes"))["total"]
-        return total or 0
+        ).aggregate(total=Sum("hours_worked"))["total"]
+        return total or Decimal("0")
 
     def __str__(self):
-        return f"{self.get_kind_display()} de {self.student} em {self.date} ({self.minutes} min)"
+        return f"{self.get_activity_type_display()} de {self.student} em {self.date} ({self.hours_worked}h)"
