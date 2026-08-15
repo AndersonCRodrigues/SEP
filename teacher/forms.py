@@ -97,14 +97,13 @@ class StudentActivityForm(forms.ModelForm):
         widgets = {"date": forms.DateInput(attrs={"type": "date"})}
 
     def __init__(self, *args, user=None, **kwargs):
-       
+        if user is None:
+            raise ValueError("StudentActivityForm requer o argumento 'user' (Teacher).")
         super().__init__(*args, **kwargs)
         self.user = user
         from students.models import Student
 
-        if user is None:
-            self.fields["student"].queryset = Student.objects.none()
-        elif user.role == CustomUser.Role.SUPERVISOR:
+        if user.role == CustomUser.Role.SUPERVISOR:
             self.fields["student"].queryset = Student.objects.filter(current_advisor__isnull=False)
         else:
             self.fields["student"].queryset = user.current_advisees.all()

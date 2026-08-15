@@ -2,13 +2,14 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.db import models, transaction
-from django.db.models import Q, Sum, UniqueConstraint
+from django.db.models import Q, Sum, UniqueConstraint, Value
 from django.utils import timezone
 from areas.models import AreaActing
 from core.models import CustomUser
 from core.permissions import BusinessRulesMixin, RoleScopedQuerySet
 from teacher.models import Teacher
 from decimal import Decimal
+from django.db.models.functions import Coalesce
 
 Role = CustomUser.Role
 
@@ -510,10 +511,9 @@ class StudentActivity(BusinessRulesMixin, models.Model):
 
     @classmethod
     def total_hours_for(cls, student, start_date, end_date):
-        total = cls.objects.filter(
-            student=student, date__gte=start_date, date__lte=end_date
-        ).aggregate(total=Sum("hours_worked"))["total"]
-        return total or Decimal("0")
-
+        return (
+            cls.objects.filter(student=student, date__gte=start_date, date__lte=end_date)
+            .aggregate(total=Coalesce(Sum("hours_worked"), Value(Decimal("0"))))["total"]
+        )
     def __str__(self):
         return f"{self.get_activity_type_display()} de {self.student} em {self.date} ({self.hours_worked}h)"
