@@ -374,7 +374,6 @@ class Attendance(BusinessRulesMixin, models.Model):
     def __str__(self):
         return f"{self.student} presente em {self.date}"
 
-
 class PerformanceReview(BusinessRulesMixin, models.Model):
     student = models.ForeignKey(
         Student,
