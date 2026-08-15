@@ -3,8 +3,8 @@ from django.contrib.auth.forms import UserCreationForm
 from core.models import CustomUser
 from teacher.models import Teacher
 from areas.models import AreaActing
+from students.models import StudentActivity
 import re
-
 
 class VincularAlunoForm(forms.Form):
     aluno = forms.ModelChoiceField(queryset=None, label="Aluno Disponível")
@@ -89,3 +89,29 @@ class PerfilProfessorForm(forms.ModelForm):
         model = Teacher
         fields = ["acting_area"]
         labels = {"acting_area": "Área de Atuação / Abordagem Teórica"}
+
+class StudentActivityForm(forms.ModelForm):
+    class Meta:
+        model = StudentActivity
+        fields = ["student", "date", "activity_type", "hours_worked", "notes"]
+        widgets = {"date": forms.DateInput(attrs={"type": "date"})}
+
+    def __init__(self, *args, user=None, **kwargs):
+       
+        super().__init__(*args, **kwargs)
+        self.user = user
+        from students.models import Student
+
+        if user is None:
+            self.fields["student"].queryset = Student.objects.none()
+        elif user.role == CustomUser.Role.SUPERVISOR:
+            self.fields["student"].queryset = Student.objects.filter(current_advisor__isnull=False)
+        else:
+            self.fields["student"].queryset = user.current_advisees.all()
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance.responsible_supervisor = self.user
+        if commit:
+            instance.save()
+        return instance
