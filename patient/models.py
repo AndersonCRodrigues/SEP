@@ -52,9 +52,9 @@ class PatientManager(CustomUserManager.from_queryset(PatientQuerySet)):
 
 class Patient(BusinessRulesMixin, CustomUser):
     class FlowStatus(models.TextChoices):
-        AWAITING_TRIAGE = 'AWAITING_TRIAGE'
+        AWAITING_TRIAGE = "AWAITING_TRIAGE", "Aguardando triagem"
         IN_TRIAGE = "IN_TRIAGE", "Em triagem"
-        REFERRED = 'REFERRED'
+        REFERRED = "REFERRED", "Encaminhado"
         
     social_name = models.CharField(
         max_length=300,
