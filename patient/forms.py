@@ -1,22 +1,22 @@
+from django import forms
 from django.contrib.auth.forms import UserCreationForm
+from django.utils import timezone
 from core.models import CustomUser
 from .models import Patient
-from django import forms
 
 
 class PacienteCreationForm(UserCreationForm):
-    
+
     data_nascimento = forms.DateField(
     label="Data de nascimento",
     widget=forms.DateInput(
-        attrs={"class": "form-control date-picker", "autocomplete": "off"},
+        attrs={"class": "date-picker", "autocomplete": "off"},
         format="%Y-%m-%d",
     ),
     input_formats=["%Y-%m-%d"],
 )
+
     class Meta:
-        # Patient, nao CustomUser: sem a linha filha da heranca multi-tabela o
-        # paciente nao existe para Patient.objects nem para as FKs que o apontam.
         model = Patient
         fields = (
             "email",
@@ -34,13 +34,20 @@ class PacienteCreationForm(UserCreationForm):
             "estado",
             "cep",
         )
-        
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.instance.role = CustomUser.Role.PACIENTE
-        self.fields.pop("password1",None)
-        self.fields.pop("password2",None)
+        self.fields.pop("password1", None)
+        self.fields.pop("password2", None)
+
+    def clean_data_nascimento(self):
+        data = self.cleaned_data.get("data_nascimento")
+        if data and data > timezone.now().date():
+            raise forms.ValidationError(
+                "Data de nascimento não pode ser uma data futura."
+            )
+        return data
 
     def save(self, commit=True):
         if not commit:
