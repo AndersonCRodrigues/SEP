@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.db import models
+from django.db import models,transaction
 from django.utils import timezone
 from django.db.models import Q
 from areas.models import AreaActing
@@ -10,6 +10,7 @@ from utils.fields import EncryptedTextField
 from triage.constants import TriageStatus
 from students.models import Student
 from teacher.models import Teacher
+from core.utils import generate_temporary_password,send_temporary_password_email
 
 Role = CustomUser.Role
 
@@ -40,9 +41,31 @@ class PatientQuerySet(RoleScopedQuerySet):
         return self.none()
 
 
+
+class PatientManager(CustomUserManager.from_queryset(PatientQuerySet)):
+    @transaction.atomic
+    def create_with_credentials(self,**patient_data):
+        temporary_password = generate_temporary_password()
+        patient = self.create_user(password=temporary_password,must_change_password=True,**patient_data)
+        send_temporary_password_email(patient,temporary_password)
+        return patient
+
 class Patient(BusinessRulesMixin, CustomUser):
     class FlowStatus(models.TextChoices):
+        AWAITING_TRIAGE = 'AWAITING_TRIAGE'
         IN_TRIAGE = "IN_TRIAGE", "Em triagem"
+        REFERRED = 'REFERRED'
+        
+    social_name = models.CharField(
+        max_length=300,
+        blank=True,
+        verbose_name="Nome social"
+    )
+    gender_identity = models.CharField(
+        max_length=150,
+        blank=True,
+        verbose_name="Identidade de gênero"
+    )
 
     flow_status = models.CharField(
         max_length=30,
@@ -67,9 +90,11 @@ class Patient(BusinessRulesMixin, CustomUser):
 
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Criado em")
 
-    objects = CustomUserManager.from_queryset(PatientQuerySet)()
+    objects = PatientManager()
 
-    REGISTRATION_FIELDS = ("nome_completo", "cpf") + CustomUser.ADDRESS_FIELDS
+    REGISTRATION_FIELDS = (
+        "nome_completo", "cpf","social_name","gender_identity"
+        ) + CustomUser.ADDRESS_FIELDS
 
     CREATABLE_BY = (Role.ADMINISTRATIVO, Role.ALUNO)
     EDITABLE_FIELDS = {
