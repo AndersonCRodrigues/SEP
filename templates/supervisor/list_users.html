@@ -6,9 +6,17 @@
 <header class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="h3 mb-0">Usuários Cadastrados</h1>
     <div class="d-flex flex-wrap gap-2">
-        <a href="{% url 'supervisor:register' %}" class="btn btn-primary btn-sm">
-            <i class="bi bi-person-plus"></i> Cadastrar novo usuário
-        </a>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{% url 'students:cadastrar' %}" class="btn btn-primary btn-sm">
+                <i class="bi bi-person-plus"></i> Cadastrar Aluno
+            </a>
+            <a href="{% url 'teacher:cadastrar' %}" class="btn btn-primary btn-sm">
+                <i class="bi bi-person-plus"></i> Cadastrar Professor
+            </a>
+            <a href="{% url 'supervisor:home' %}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left"></i> Voltar para a Home
+            </a>
+        </div>
         <a href="{% url 'supervisor:home' %}" class="btn btn-outline-secondary btn-sm">
             <i class="bi bi-arrow-left"></i> Voltar para a Home
         </a>
