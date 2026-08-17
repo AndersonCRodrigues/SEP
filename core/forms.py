@@ -97,6 +97,6 @@ class SupervisorCreationForm(UserCreationForm):
         role = self.cleaned_data["role"]
         if role != CustomUser.Role.SUPERVISOR:
             raise forms.ValidationError(
-                "Pelo admin, só é possível cadastrar Supervisor."
+                "Pelo Superadmin, só é possível cadastrar Supervisor."
             )
         return role
