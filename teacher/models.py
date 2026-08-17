@@ -16,7 +16,8 @@ class Teacher(CustomUser):
         verbose_name_plural = "Professores"
 
     def save(self, *args, **kwargs):
-        self.role = CustomUser.Role.PROFESSOR
+        if self.role not in (CustomUser.Role.PROFESSOR, CustomUser.Role.SUPERVISOR):
+            self.role = CustomUser.Role.PROFESSOR
         super().save(*args, **kwargs)
 
     def __str__(self):
