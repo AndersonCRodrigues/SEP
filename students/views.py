@@ -48,7 +48,7 @@ class PerfilAlunoView(GroupRequiredMixin, UpdateView):
         "cep",
     ]
     template_name = "student/perfil.html"
-    success_url = reverse_lazy("student:home")
+    success_url = reverse_lazy("students:home")
 
     def get_object(self, queryset=None):
         return get_object_or_404(Student, pk=self.request.user.pk)
