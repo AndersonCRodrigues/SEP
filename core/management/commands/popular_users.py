@@ -19,6 +19,7 @@ from teacher.models import Teacher
 
 MODEL_BY_ROLE = {
     CustomUser.Role.PROFESSOR: Teacher,
+    CustomUser.Role.SUPERVISOR: Teacher,
     CustomUser.Role.ALUNO: Student,
     CustomUser.Role.PACIENTE: Patient,
 }
@@ -125,7 +126,7 @@ class Command(BaseCommand):
                 user.is_staff = True
                 user.is_superuser = True
 
-            user.set_password("SenhaForte123!")
+            user.set_password("Senha123!")
 
             try:
                 user.full_clean()
