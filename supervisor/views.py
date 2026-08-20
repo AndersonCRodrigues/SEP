@@ -14,7 +14,7 @@ from areas.models import AreaActing
 from .forms import SupervisorCreationForm
 from areas.forms import AreaAtuacaoForm
 from core.utils import sincronizar_grupo
-
+from .utils import gerar_senha_temporaria, enviar_email_credenciais
 
 def usuarios_alunos_e_professores():
     """
@@ -59,15 +59,29 @@ def cadastrar_supervisor(request):
     if request.method == "POST":
         form = SupervisorCreationForm(request.POST)
         if form.is_valid():
-            user = form.save()
+            # 1. Pausa o salvamento no banco para gerarmos a senha
+            user = form.save(commit=False)
+            
+            # 2. Gera e criptografa a senha temporária
+            senha_temporaria = gerar_senha_temporaria()
+            user.set_password(senha_temporaria)
+            
+            # 3. Salva o usuário e os campos ManyToMany do formulário
+            user.save()
+            form.save_m2m() 
+            
+            # 4. Sincroniza os grupos
             sincronizar_grupo(user)
-            messages.success(request, "Supervisor cadastrado com sucesso!")
+            
+            # 5. Dispara o e-mail com as credenciais
+            enviar_email_credenciais(user, senha_temporaria)
+            
+            messages.success(request, f"Supervisor {user.nome_completo} cadastrado e e-mail enviado com sucesso!")
             return redirect("superadmin:painel")
     else:
         form = SupervisorCreationForm()
 
     return render(request, "supervisor/cadastro_supervisor.html", {"form": form})
-
 
 class ListaAreasView(GroupRequiredMixin, ListView):
     required_group = "Supervisor"
