@@ -26,7 +26,7 @@ jobs:
           --health-retries 5
 
     env:
-      DJANGO_SETTINGS_MODULE: config.settings.dev
+      DJANGO_SETTINGS_MODULE: config.settings.dev 
       NODE_ENV: dev
       DB_NAME: testdb
       DB_USER: admin
@@ -50,13 +50,6 @@ jobs:
         run: |
           python3 -m pip install --upgrade pip
           python3 -m pip install -r requirements.txt
-          python3 -m pip install black flake8  # Garante as ferramentas instaladas!
-
-      - name: Formatação (Black)
-        run: black --check .
-
-      - name: Linting (Flake8)
-        run: flake8 .
 
       - name: Ruff
         run: |
