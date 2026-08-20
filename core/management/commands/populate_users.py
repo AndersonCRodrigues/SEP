@@ -109,6 +109,7 @@ class Command(BaseCommand):
                     cpf=generate_valid_cpf(),
                     telefone="(99) 99999-9999",
                     logradouro="Rua de Teste",
+                    data_nascimento="1990-01-01",
                     numero="0",
                     bairro="Centro",
                     cidade="Maricá",
