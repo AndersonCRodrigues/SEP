@@ -2,16 +2,16 @@ from django.db import transaction
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.utils import timezone
+from decimal import Decimal
 
 from .models import Advising, CaseAssignment, Student, StudentActivity
 
-ACTIVITY_KIND_BY_APPOINTMENT_KIND = {
-    "TR": StudentActivity.Kind.SCREENING,
-    "SE": StudentActivity.Kind.SESSION,
+ACTIVITY_TYPE_BY_APPOINTMENT_KIND = {
+    "TR": StudentActivity.ActivityType.SCREENING,
+    "SE": StudentActivity.ActivityType.SESSION,
 }
 
 LINKED_FIELDS = ("current_advisor_id", "current_patient_id")
-
 
 @receiver(post_save, sender="patient.Appointment")
 def sync_student_activity(sender, instance, **kwargs):
@@ -28,11 +28,11 @@ def sync_student_activity(sender, instance, **kwargs):
         defaults={
             "student_id": instance.assigned_student_id,
             "date": timezone.localtime(instance.scheduled_at).date(),
-            "kind": ACTIVITY_KIND_BY_APPOINTMENT_KIND[instance.kind],
-            "minutes": instance.duration_minutes,
+            "activity_type": ACTIVITY_TYPE_BY_APPOINTMENT_KIND[instance.kind],
+            "hours_worked": Decimal(instance.duration_minutes) / Decimal(60),
+            "responsible_supervisor_id": instance.teacher_id,
         },
     )
-
 
 @receiver(pre_save, sender=Student)
 def capture_previous_links(sender, instance, **kwargs):
@@ -42,7 +42,6 @@ def capture_previous_links(sender, instance, **kwargs):
         else None
     )
     instance._previous_links = stored or dict.fromkeys(LINKED_FIELDS)
-
 
 @receiver(post_save, sender=Student)
 def sync_link_history(sender, instance, **kwargs):

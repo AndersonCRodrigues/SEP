@@ -12,6 +12,8 @@ from core.utils import sincronizar_grupo
 from django.core.exceptions import ValidationError
 from core.models import CustomUser
 from .forms import VincularAlunoForm
+from students.models import StudentActivity
+from .forms import StudentActivityForm
 
 
 class HomeProfessorView(LoginRequiredMixin, TemplateView):
@@ -61,23 +63,26 @@ class PainelProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView)
         from students.models import Student
 
         professor = get_object_or_404(Teacher, pk=self.request.user.pk)
-        context["alunos_vinculados"] = professor.current_advisees.all()
-        context["alunos_disponiveis"] = Student.objects.filter(
-            current_advisor__isnull=True
-        )
+
+        if professor.role == CustomUser.Role.SUPERVISOR:
+            context["alunos_vinculados"] = Student.objects.filter(current_advisor__isnull=False)
+        else:
+            context["alunos_vinculados"] = professor.current_advisees.all()
+
+        context["alunos_disponiveis"] = Student.objects.filter(current_advisor__isnull=True)
         context["form_vincular"] = VincularAlunoForm()
+        context["form_horas"] = StudentActivityForm(user=professor)
         return context
 
 
 @login_required
 def vincular_aluno(request):
-
-    is_professor = request.user.role in (
+    is_authorized = request.user.role in (
         CustomUser.Role.PROFESSOR,
         CustomUser.Role.SUPERVISOR,
     )
-    if not is_professor:
-        raise PermissionDenied("Apenas Professores podem vincular Alunos.")
+    if not is_authorized:
+        raise PermissionDenied("Apenas Professores e Supervisores podem vincular Alunos.")
 
     professor = get_object_or_404(Teacher, pk=request.user.pk)
 
@@ -88,12 +93,36 @@ def vincular_aluno(request):
             periodo = form.cleaned_data["periodo"]
             try:
                 Advising.objects.change_advisor(aluno, professor, term=periodo)
-                messages.success(
-                    request, f"{aluno.nome_completo} vinculado com sucesso!"
-                )
+                messages.success(request, f"{aluno.nome_completo} vinculado com sucesso!")
             except ValidationError as e:
                 messages.error(request, str(e))
         else:
             messages.error(request, "Corrija os erros do formulário de vínculo.")
+
+    return redirect("teacher:painel")
+
+
+@login_required
+def lancar_horas(request):
+    is_authorized = request.user.role in (
+        CustomUser.Role.PROFESSOR,
+        CustomUser.Role.SUPERVISOR,
+    )
+    if not is_authorized:
+        raise PermissionDenied("Apenas Professores e Supervisores podem lançar horas.")
+
+    if request.method == "POST":
+        professor = get_object_or_404(Teacher, pk=request.user.pk)
+        form = StudentActivityForm(request.POST, user=professor)
+        if form.is_valid():
+            student = form.cleaned_data["student"]
+
+            if not StudentActivity.can_be_created_by(request.user, student=student):
+                raise PermissionDenied("Este aluno não está sob sua orientação ativa.")
+
+            form.save()
+            messages.success(request, "Horas registradas com sucesso.")
+        else:
+            messages.error(request, "Corrija os erros do formulário de horas.")
 
     return redirect("teacher:painel")
