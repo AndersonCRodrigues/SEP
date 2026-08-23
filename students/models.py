@@ -44,10 +44,6 @@ class Student(CustomUser):
         verbose_name = "Aluno"
         verbose_name_plural = "Alunos"
 
-    @property
-    def acting_area(self):
-        return self.current_advisor.acting_area if self.current_advisor_id else None
-
     @classmethod
     def has_room_for(cls, patient, ignoring=None):
         ocupantes = cls.objects.filter(current_patient=patient)
@@ -55,20 +51,28 @@ class Student(CustomUser):
             ocupantes = ocupantes.exclude(pk=ignoring.pk)
         return ocupantes.count() < cls.MAX_STUDENTS_PER_PATIENT
 
+    @property
+    def acting_area(self):
+        caso = self.case_history.filter(end_date__isnull=True).first()
+        return caso.acting_area if caso else None
+
+    @property
+    def default_acting_area(self):
+        if not self.current_advisor_id:
+            return None
+        areas = list(self.current_advisor.acting_areas.all()[:2])
+        return areas[0] if len(areas) == 1 else None
+
     def clean(self):
         super().clean()
         if self.current_patient_id is None:
             return
 
         if not Student.has_room_for(self.current_patient_id, ignoring=self):
-            raise ValidationError(
-                {
-                    "current_patient": (
-                        f"Este paciente já tem {self.MAX_STUDENTS_PER_PATIENT} "
-                        "alunos responsáveis."
-                    )
-                }
-            )
+            raise ValidationError({"current_patient": f"Este paciente já tem {self.MAX_STUDENTS_PER_PATIENT} alunos responsáveis."})
+        
+        if self.current_patient_id and not (getattr(self, "_case_area", None) or self.default_acting_area):
+            raise ValidationError({"current_patient": "Escolha a área: o orientador atua em mais de uma."})
 
     def save(self, *args, **kwargs):
         self.role = CustomUser.Role.ALUNO
@@ -259,27 +263,23 @@ class CaseAssignmentManager(models.Manager.from_queryset(AdviseeScopedQuerySet))
 
 
 class CaseAssignment(BusinessRulesMixin, models.Model):
+    acting_area = models.ForeignKey(
+    AreaActing,
+    on_delete=models.PROTECT,
+    related_name="case_assignments",
+    verbose_name="Área de atuação",
+    )
     student = models.ForeignKey(
         Student,
         on_delete=models.PROTECT,
         related_name="case_history",
         verbose_name="Aluno",
     )
-
     patient = models.ForeignKey(
         "patient.Patient",
         on_delete=models.PROTECT,
         related_name="assignment_history",
         verbose_name="Paciente",
-    )
-
-    acting_area = models.ForeignKey(
-        AreaActing,
-        null=True,
-        blank=True,
-        on_delete=models.PROTECT,
-        related_name="case_assignments",
-        verbose_name="Área de atuação",
     )
 
     start_date = models.DateField(auto_now_add=True, verbose_name="Data de início")
@@ -289,7 +289,7 @@ class CaseAssignment(BusinessRulesMixin, models.Model):
 
     CREATABLE_BY = (Role.SUPERVISOR, Role.PROFESSOR)
     EDITABLE_FIELDS = {
-        Role.SUPERVISOR: ("end_date",),
+        Role.SUPERVISOR: ("end_date", "acting_area"),
         Role.PROFESSOR: ("end_date",),
     }
     DELETABLE_BY = ()
