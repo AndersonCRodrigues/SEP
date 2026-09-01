@@ -1,5 +1,7 @@
 from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 from core import views as core_views
 
 urlpatterns = [
@@ -14,4 +16,4 @@ urlpatterns = [
     path("superadmin/", include("superadmin.urls")),
     path("patient/", include("patient.urls")),
     path("triage/", include("triage.urls")),
-]
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
