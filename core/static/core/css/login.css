@@ -1,8 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
 
-/*
-   RESET
-    */
+/* Reset */
 
 *, *::before, *::after {
   margin: 0;
@@ -10,9 +8,7 @@
   box-sizing: border-box;
 }
 
-/* ==============================================
-   DESKTOP LAYOUT
-   ============================================== */
+/* Desktop */
 
 body {
   font-family: 'Nunito', sans-serif;
@@ -26,7 +22,7 @@ body {
   overflow: hidden;
 }
 
-/* Card principal */
+
 .login-card {
   background: #FDF8F8;
   border-radius: 35px;
@@ -40,7 +36,7 @@ body {
   overflow: hidden;
 }
 
-/* Marca d'água do card (desktop) — mix-blend-mode multiplica sobre o fundo claro */
+/* Watermark (desktop) */
 .watermark {
   position: absolute;
   width: 173.4%;
@@ -64,7 +60,7 @@ body {
   padding-top: 70px;
 }
 
-/* Cabeçalho da marca  */
+
 .header-group {
   display: flex;
   align-items: center;
@@ -95,9 +91,7 @@ body {
   margin-bottom: 15px;
 }
 
-/* ==============================================
-   FORMULÁRIO
-   ============================================== */
+/* Formulário */
 
 form {
   width: 360px;
@@ -135,8 +129,7 @@ form {
   border-color: #6D1D20;
 }
 
-/* Remove o ícone de revelar senha nativo dos navegadores (como o Edge)
-   que estava se sobrepondo ao nosso ícone customizado SVG */
+/* Oculta ícone nativo de revelar senha (Edge/Chrome) */
 input[type="password"]::-ms-reveal,
 input[type="password"]::-ms-clear {
   display: none;
@@ -204,9 +197,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
   background-color: #5a1619;
 }
 
-/* ==============================================
-   ERROS DO DJANGO
-   ============================================== */
+/* Erros de validação */
 
 .errorlist {
   list-style: none;
@@ -228,11 +219,9 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
   margin-bottom: 15px;
 }
 
-/* ==============================================
-   IMAGENS E ÍCONES SECUNDÁRIOS (DESKTOP)
-   ============================================== */
+/* Ícones e logos (desktop) */
 
-/* Ícone de acessibilidade em Libras */
+
 .icon-azul {
   position: absolute;
   bottom: 25px;
@@ -243,7 +232,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
   z-index: 1;
 }
 
-/* Logo rodapé fora do card */
+
 .footer-logo {
   position: absolute;
   bottom: 30px;
@@ -251,23 +240,19 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
   height: auto;
 }
 
-/* ==============================================
-   RESPONSIVIDADE — MOBILE (≤ 768px)
-   ============================================== */
+/* Responsivo — Mobile e Tablet (≤ 1024px) */
 
-/* Oculta elementos exclusivos do desktop no mobile */
+
 @media (min-width: 1025px) {
   .d-none-desktop { display: none !important; }
 }
 
 @media (max-width: 1024px) {
 
-  /* Oculta elementos exclusivos do desktop */
+
   .d-none-mobile { display: none !important; }
 
-  /* --- Body ---
-   * Frame Figma: 402 × 874px | background: #6D1D20
-   */
+
   body {
     display: flex !important;
     flex-direction: column !important;
@@ -278,29 +263,21 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
     min-height: 100vh;
   }
 
-  /* ... restante das utilities ... */
 
-  /* --- Marca d'água de fundo (mobile) ---
-   * A imagem ocupa 100% da largura da tela (100vw)
-   * Isso elimina qualquer "linha reta" nas laterais em celulares maiores
-   */
+
+  /* Watermark (mobile) */
   .watermark-mobile {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
-    height: auto; /* Mantém a proporção natural */
+    height: auto;
     opacity: 1;
     pointer-events: none;
     z-index: 0;
   }
 
-  /* --- Header de boas-vindas (mobile) ---
-   * Figma: card começa em top: 341px → header tem 341px de altura
-   * Back arrow: left 18px, top 30px → padding-top: 30px, padding-left: 18px
-   * "Olá!":           left 33px, top 142px — font 48px / weight 600
-   * "Bem vindo!":     left 33px, top 190px — font 20px / weight 300
-   */
+
   .mobile-header {
     position: relative;
     z-index: 1;
@@ -313,7 +290,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
     align-items: flex-start;
   }
 
-  /* Back arrow: width 36px, height 36px, left 18px, top 30px */
+
   .back-arrow {
     display: flex;
     align-items: center;
@@ -321,7 +298,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
     height: 36px;
   }
 
-  /* "Olá!": top 142px — seta termina em ~66px (30 + 36) → gap = 76px */
+
   .mobile-greeting-title {
     margin-top: 76px;
     margin-left: 15px;
@@ -333,7 +310,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
     letter-spacing: 0;
   }
 
-  /* "Bem vindo de volta!": top 190px (logo abaixo do Olá! com line-height 58) */
+
   .mobile-greeting-subtitle {
     margin-left: 15px;
     font-family: 'Museo Sans', 'Nunito', sans-serif;
@@ -343,9 +320,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
     line-height: 24px;
   }
 
-  /* --- Card de login (mobile) ---
-   
-   */
+
   .login-card {
     width: 100%;
     height: auto;
@@ -359,18 +334,14 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
     z-index: 2;
   }
 
-  /* Conteúdo interno do card
-  
-   */
+
   .content-wrapper {
     height: auto;
     padding: 44px 33px 0 33px;
     align-items: flex-start;
   }
 
-  /* "Acesse sua conta"
-   
-   */
+
   .mobile-card-title {
     font-family: 'Museo Sans', 'Nunito', sans-serif;
     color: #6D1D20;
@@ -380,29 +351,23 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
     margin-bottom: 0;
   }
 
-  /* --- Formulário (mobile) ---
-  
-   */
+
   form {
     width: 100%;
     margin-top: 31px;
   }
 
-  /* Reset margin-bottom para controle manual com seletor + */
+
   .input-group {
     margin-bottom: 0;
   }
 
-  /* Espaçamento entre email e senha
 
-   */
   .input-group + .input-group {
     margin-top: 32px;
   }
 
-  /* Campo de entrada
 
-   */
   .form-input {
     height: 51px;
     border-radius: 34px;
@@ -412,8 +377,6 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
     padding: 0 20px;
   }
 
-  /* "Esqueceu sua senha?"
-   */
 
   .forgot-link-container {
     margin-top: 3px;
