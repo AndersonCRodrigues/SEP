@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.backends import ModelBackend
 from django.db.models import Q
+from .fields import only_digits
 
 UserModel = get_user_model()
 
@@ -10,10 +11,14 @@ class EmailOUMatricula(ModelBackend):
         if username is None:
             return None
 
+        identificador = Q(email__iexact=username) | Q(matricula__iexact=username)
+
+        digitos = only_digits(username)
+        if digitos:
+            identificador |= Q(cpf=digitos)
+
         try:
-            user = UserModel.objects.get(
-                Q(email__iexact=username) | Q(matricula__iexact=username)
-            )
+            user = UserModel.objects.get(identificador)
         except UserModel.DoesNotExist:
             return None
 

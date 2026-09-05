@@ -2,16 +2,17 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
-from localflavor.br.models import BRCPFField, BRStateField, BRPostalCodeField
+from localflavor.br.models import BRStateField, BRPostalCodeField
+from .fields import DigitsBRCPFField, only_digits
 from .managers import CustomUserManager
 
 
 class CustomUser(AbstractUser):
     username = None
-    email = models.EmailField(_("Adicionar email"), unique=True)
+    email = models.EmailField(_("Adicionar email"), unique=True, null=True, blank=True)
 
     nome_completo = models.CharField(max_length=350, verbose_name="Nome Completo")
-    cpf = BRCPFField(unique=True, verbose_name="CPF")
+    cpf = DigitsBRCPFField(unique=True, verbose_name="CPF")
     telefone = models.CharField(max_length=20, verbose_name="Telefone")
     data_nascimento = models.DateField(
         null=True, blank=True, verbose_name="Data de nascimento"
@@ -69,6 +70,9 @@ class CustomUser(AbstractUser):
 
     def clean(self):
         super().clean()
+        if not self.email:
+            self.email = None
+
         if (
             self.role in (self.Role.ALUNO, self.Role.ADMINISTRATIVO)
             and not self.matricula
@@ -80,8 +84,14 @@ class CustomUser(AbstractUser):
         if self.role in (self.Role.PROFESSOR, self.Role.SUPERVISOR) and not self.crp:
             raise ValidationError({"crp": "Professor/Supervisor precisa ter o CRP."})
 
+    def save(self, *args, **kwargs):
+        if not self.email:
+            self.email = None
+        self.cpf = only_digits(self.cpf)
+        super().save(*args, **kwargs)
+
     def __str__(self):
-        return f"{self.nome_completo} / {self.email}"
+        return f"{self.nome_completo} / {self.email or self.cpf}"
 
     class Meta:
         verbose_name = "Usuário"

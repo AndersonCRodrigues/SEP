@@ -26,7 +26,7 @@ PERSONAL_FIELDS = (
 
 
 class LoginEmailOuMatriculaForm(AuthenticationForm):
-    username = forms.CharField(label="Email ou Matrícula")
+    username = forms.CharField(label="Email, Matrícula ou CPF")
 
 
 class CustomUserCreationForm(UserCreationForm):
