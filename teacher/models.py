@@ -1,9 +1,17 @@
 from django.db import models
 from areas.models import AreaActing
 from core.models import CustomUser
-from core.permissions import BusinessRulesMixin
+from core.permissions import BusinessRulesMixin, RoleScopedQuerySet
 
 Role = CustomUser.Role
+
+
+class ProfessorAreaQuerySet(RoleScopedQuerySet):
+    def visible_to(self, user):
+        if not user.is_authenticated:
+            return self.none()
+        return self
+
 
 class Teacher(CustomUser):
     acting_area = models.ForeignKey(
@@ -26,6 +34,7 @@ class Teacher(CustomUser):
     def __str__(self):
         return f"{self.nome_completo} ({self.acting_area})"
 
+
 class ProfessorArea(BusinessRulesMixin, models.Model):
     professor = models.ForeignKey(
         Teacher,
@@ -38,8 +47,10 @@ class ProfessorArea(BusinessRulesMixin, models.Model):
         AreaActing,
         on_delete=models.PROTECT,
         related_name="professor_areas",
-        verbose_name="Area of acting",
+        verbose_name="Área de atuação",
     )
+
+    objects = ProfessorAreaQuerySet.as_manager()
 
     CREATABLE_BY = (Role.SUPERVISOR,)
     EDITABLE_FIELDS = {
