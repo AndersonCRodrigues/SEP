@@ -223,26 +223,53 @@ class RoomQuerySet(RoleScopedQuerySet):
             return self.none()
         return self
 
+    def usable(self):
+        return self.filter(status=Room.Status.ACTIVE)
+
 
 class Room(BusinessRulesMixin, models.Model):
+    class Status(models.TextChoices):
+        ACTIVE = "AT", "Ativa"
+        MAINTENANCE = "MA", "Em manutenção"
+        INACTIVE = "IN", "Inativa"
+
+    class RoomType(models.TextChoices):
+        CHILD = "IF", "Infantil"
+        ADULT = "AD", "Adulta"
+
     name = models.CharField(max_length=100, unique=True, verbose_name="Nome")
 
-    active = models.BooleanField(default=True, verbose_name="Ativa")
+    room_type = models.CharField(
+        max_length=2,
+        choices=RoomType.choices,
+        default=RoomType.ADULT,
+        verbose_name="Tipo de sala",
+    )
+
+    status = models.CharField(
+        max_length=2,
+        choices=Status.choices,
+        default=Status.ACTIVE,
+        verbose_name="Situação",
+    )
 
     objects = RoomQuerySet.as_manager()
 
     CREATABLE_BY = (Role.ADMINISTRATIVO,)
-    EDITABLE_FIELDS = {Role.ADMINISTRATIVO: ("name", "active")}
-    # Appointment.room usa PROTECT: desativar pelo campo `active`, nao apagar.
-    DELETABLE_BY = ()
+    EDITABLE_FIELDS = {Role.ADMINISTRATIVO: ("name", "room_type", "status")}
+    DELETABLE_BY = (Role.ADMINISTRATIVO,)
 
     class Meta:
         verbose_name = "Sala"
         verbose_name_plural = "Salas"
         ordering = ["name"]
 
+    @property
+    def is_usable(self):
+        return self.status == self.Status.ACTIVE
+
     def __str__(self):
-        return self.name
+        return f"{self.name} ({self.get_room_type_display()})"
 
 
 class AppointmentQuerySet(RoleScopedQuerySet):
@@ -294,7 +321,7 @@ class Appointment(BusinessRulesMixin, models.Model):
         Room,
         null=True,
         blank=True,
-        on_delete=models.PROTECT,
+        on_delete=models.SET_NULL,
         related_name="appointments",
         verbose_name="Sala",
     )
