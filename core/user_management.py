@@ -29,16 +29,23 @@ def can_manage_user(actor, target_role):
     return target_role in MANAGEABLE_ROLES_BY.get(role, ())
 
 
+def _campos_do_alvo(target):
+    """A fase do estagio e campo do Student, fora de ALL_EDITABLE_FIELDS."""
+    if target.role == Role.ALUNO:
+        return CustomUser.ALL_EDITABLE_FIELDS + ("stage",)
+    return CustomUser.ALL_EDITABLE_FIELDS
+
+
 def editable_user_fields(actor, target):
     """Coluna Update: campos que o `actor` pode gravar no usuario `target`."""
     if not actor.is_authenticated:
         return ()
 
     if actor.is_superuser or actor.role == Role.SUPERADMIN:
-        return CustomUser.ALL_EDITABLE_FIELDS
+        return _campos_do_alvo(target)
 
     if actor.role == Role.SUPERVISOR and target.role in (Role.PROFESSOR, Role.ALUNO):
-        return CustomUser.ALL_EDITABLE_FIELDS
+        return _campos_do_alvo(target)
 
     if actor.role == Role.PACIENTE and target.pk == actor.pk:
         return CustomUser.ADDRESS_FIELDS

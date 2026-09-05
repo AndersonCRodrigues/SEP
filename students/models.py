@@ -20,6 +20,17 @@ def current_term(today=None):
 
 
 class Student(CustomUser):
+    class Stage(models.TextChoices):
+        TRIAGE = "TR", "Triagem"
+        TREATMENT = "AT", "Atendimento"
+
+    stage = models.CharField(
+        max_length=2,
+        choices=Stage.choices,
+        default=Stage.TRIAGE,
+        verbose_name="Fase do estágio",
+    )
+
     current_advisor = models.ForeignKey(
         Teacher,
         null=True,
@@ -43,6 +54,10 @@ class Student(CustomUser):
     class Meta:
         verbose_name = "Aluno"
         verbose_name_plural = "Alunos"
+
+    @property
+    def in_triage(self):
+        return self.stage == self.Stage.TRIAGE
 
     @property
     def acting_area(self):
@@ -326,6 +341,7 @@ class CaseAssignment(BusinessRulesMixin, models.Model):
         status = "ativa" if self.end_date is None else f"encerrada em {self.end_date}"
         return f"{self.student} encarregado de {self.patient} ({status})"
 
+
 class Attendance(BusinessRulesMixin, models.Model):
     student = models.ForeignKey(
         Student,
@@ -374,6 +390,7 @@ class Attendance(BusinessRulesMixin, models.Model):
 
     def __str__(self):
         return f"{self.student} presente em {self.date}"
+
 
 class PerformanceReview(BusinessRulesMixin, models.Model):
     student = models.ForeignKey(
@@ -511,9 +528,9 @@ class StudentActivity(BusinessRulesMixin, models.Model):
 
     @classmethod
     def total_hours_for(cls, student, start_date, end_date):
-        return (
-            cls.objects.filter(student=student, date__gte=start_date, date__lte=end_date)
-            .aggregate(total=Coalesce(Sum("hours_worked"), Value(Decimal("0"))))["total"]
-        )
+        return cls.objects.filter(
+            student=student, date__gte=start_date, date__lte=end_date
+        ).aggregate(total=Coalesce(Sum("hours_worked"), Value(Decimal("0"))))["total"]
+
     def __str__(self):
         return f"{self.get_activity_type_display()} de {self.student} em {self.date} ({self.hours_worked}h)"

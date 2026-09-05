@@ -514,6 +514,16 @@ class Appointment(BusinessRulesMixin, models.Model):
 
     def clean(self):
         super().clean()
+
+        if (
+            self.kind == self.Kind.SESSION
+            and self.assigned_student_id
+            and self.assigned_student.in_triage
+        ):
+            raise ValidationError(
+                {"assigned_student": "Aluno em fase de triagem não faz atendimento."}
+            )
+
         if not (self.room_id and self.scheduled_at and self.patient_id):
             return
 
