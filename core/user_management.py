@@ -47,6 +47,10 @@ def editable_user_fields(actor, target):
     if actor.role == Role.SUPERVISOR and target.role in (Role.PROFESSOR, Role.ALUNO):
         return _campos_do_alvo(target)
 
+    if actor.role == Role.PROFESSOR and target.role == Role.ALUNO:
+        orientando = getattr(target, "current_advisor_id", None) == actor.pk
+        return ("stage",) if orientando else ()
+
     if actor.role == Role.PACIENTE and target.pk == actor.pk:
         return CustomUser.ADDRESS_FIELDS
 
