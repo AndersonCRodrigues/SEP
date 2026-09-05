@@ -365,3 +365,80 @@ independentes, sem ponteiro correspondente, e se escrevem normalmente. A exceç�
 parcial é `StudentActivity`: linhas com `appointment` preenchido são mantidas por
 signal e não aceitam edição manual, pelo mesmo motivo de fundo — quem manda nelas
 é o agendamento.
+
+---
+
+## 3. As horas do aluno
+
+### Duas dimensões, não uma
+
+`StudentActivity` responde a duas perguntas diferentes sobre a mesma hora, e elas
+são ortogonais:
+
+- `activity_type` — **o que** foi feito: triagem, atendimento, supervisão em grupo,
+  prontuário.
+- `category` — **como** a hora foi ganha: `PARTICIPATION` (o aluno foi) ou
+  `EXECUTION` (o aluno realizou).
+
+Colapsar as duas num campo só perderia informação: "triagem" não diz se o paciente
+apareceu, e "participação" não diz do que o aluno participou. Um relatório de
+estágio precisa das duas, e provavelmente vai somar cada uma sob um teto diferente.
+
+### A regra do negócio
+
+O aluno ganha hora por comparecer, mesmo que o paciente falte — foi ao serviço,
+ficou à disposição. E ganha hora adicional por atender de fato. Daí o mapa:
+
+| `Appointment.status`  | Participação | Realização |
+| --------------------- | ------------ | ---------- |
+| `ATTENDED`            | sim          | sim        |
+| `PATIENT_NO_SHOW`     | sim          | não        |
+| `STUDENT_NO_SHOW`     | não          | não        |
+| `CANCELLED`           | não          | não        |
+| `SCHEDULED`           | não          | não        |
+
+A participação vale `StudentActivity.PARTICIPATION_HOURS` — valor fixo, porque não
+depende da duração da sessão que não aconteceu. A realização vale
+`duration_minutes / 60`, o tempo efetivo.
+
+### Um agendamento, até duas linhas
+
+Por isso a constraint é sobre o par, não sobre o agendamento sozinho:
+
+```python
+UniqueConstraint(
+    fields=["appointment", "category"],
+    condition=Q(appointment__isnull=False),
+    name="one_activity_per_appointment_category",
+)
+```
+
+Com `fields=["appointment"]` a segunda linha seria rejeitada pelo banco. A
+condição parcial preserva o lançamento manual, que tem `appointment` nulo e não
+disputa unicidade.
+
+### O signal reconcilia, não acumula
+
+`sync_student_activity` roda em todo `post_save` de `Appointment` e recalcula o
+conjunto inteiro de linhas devidas — cria o que falta, atualiza o que mudou,
+apaga o que deixou de ser devido. É idempotente: salvar o mesmo agendamento três
+vezes não gera hora a mais.
+
+O caso que exige o `delete` explícito é a correção de desfecho. Um agendamento
+marcado como realizado por engano e depois corrigido para falta do paciente tem de
+perder a linha de realização e **manter** a de participação — apagar tudo e
+recriar seria mais simples, mas trocaria o `id` da linha que continua válida.
+
+### Quem responde pela hora
+
+`responsible_supervisor` é obrigatório com `PROTECT`: toda hora lançada tem alguém
+que responde por ela. O agendamento nem sempre tem professor alocado, então o
+signal cai no orientador do aluno (`current_advisor`). Sem nenhum dos dois não há
+hora — o registro seria órfão, e o banco recusaria de todo jeito.
+
+### Somar
+
+`total_hours_for(student, start_date, end_date, category=None)` soma o período; sem
+`category` soma tudo, com `category` soma só aquela fatia. O `Coalesce` devolve
+`Decimal("0")` quando não há atividade, para quem chama não precisar tratar `None`.
+
