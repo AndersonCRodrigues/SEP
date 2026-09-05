@@ -69,14 +69,20 @@ class Patient(BusinessRulesMixin, CustomUser):
 
     objects = CustomUserManager.from_queryset(PatientQuerySet)()
 
-    REGISTRATION_FIELDS = ("nome_completo", "cpf") + CustomUser.ADDRESS_FIELDS
+    REGISTRATION_FIELDS = (
+        "nome_completo",
+        "cpf",
+        "data_nascimento",
+    ) + CustomUser.ADDRESS_FIELDS
+    COMPLETION_FIELDS = ("data_nascimento",) + CustomUser.ADDRESS_FIELDS
 
-    CREATABLE_BY = (Role.ADMINISTRATIVO, Role.ALUNO)
+    CREATABLE_BY = (Role.ADMINISTRATIVO,)
     EDITABLE_FIELDS = {
         Role.SUPERVISOR: ("responsible_teachers",),
         Role.PROFESSOR: ("responsible_teachers",),
         Role.ADMINISTRATIVO: REGISTRATION_FIELDS,
-        Role.PACIENTE: CustomUser.ADDRESS_FIELDS,
+        Role.ALUNO: COMPLETION_FIELDS,
+        Role.PACIENTE: COMPLETION_FIELDS,
     }
     DELETABLE_BY = ()
 
