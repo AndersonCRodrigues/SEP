@@ -5,9 +5,12 @@ from django.utils.translation import gettext_lazy as _
 from localflavor.br.models import BRStateField, BRPostalCodeField
 from .fields import DigitsBRCPFField, only_digits
 from .managers import CustomUserManager
+from .permissions import Role as UserRole
 
 
 class CustomUser(AbstractUser):
+    Role = UserRole
+
     username = None
     email = models.EmailField(_("Adicionar email"), unique=True, null=True, blank=True)
 
@@ -27,14 +30,6 @@ class CustomUser(AbstractUser):
     cidade = models.CharField(max_length=100, verbose_name="Cidade")
     estado = BRStateField(verbose_name="Estado")
     cep = BRPostalCodeField(verbose_name="CEP")
-
-    class Role(models.TextChoices):
-        SUPERADMIN = "SA"
-        SUPERVISOR = "SV"
-        PROFESSOR = "PR"
-        ADMINISTRATIVO = "AD"
-        ALUNO = "AL"
-        PACIENTE = "PA"
 
     role = models.CharField(
         max_length=2, choices=Role.choices, default=Role.ALUNO, verbose_name="Cargo"

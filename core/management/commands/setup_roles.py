@@ -32,11 +32,11 @@ def permissoes_por_role():
         if not issubclass(model, BusinessRulesMixin):
             continue
         for role in por_role:
-            if role in model.CREATABLE_BY:
+            if model.creatable_by_role(role):
                 por_role[role].add(_rotulo(model, "add"))
             if model.editable_fields_for_role(role):
                 por_role[role].add(_rotulo(model, "change"))
-            if role in model.DELETABLE_BY:
+            if model.deletable_by_role(role):
                 por_role[role].add(_rotulo(model, "delete"))
             if _le(model, role):
                 por_role[role].add(_rotulo(model, "view"))

@@ -8,11 +8,35 @@ Permission do Django:
   2. linha  -- "Professor: pacientes de seus alunos"   -> visible_to()
   3. campo  -- "Paciente: Update Endereco/telefone"    -> EDITABLE_FIELDS
 
-Este modulo cobre os niveis 2 e 3. Nao importa nada de core.models de proposito:
-CustomUser precisa importar daqui, e o caminho inverso criaria ciclo.
+Este modulo cobre os niveis 2 e 3. Role mora aqui, e nao em core.models, porque
+CustomUser precisa importar daqui e o caminho inverso criaria ciclo.
 """
 
 from django.db import models
+
+
+class Role(models.TextChoices):
+    SUPERADMIN = "SA"
+    SUPERVISOR = "SV"
+    PROFESSOR = "PR"
+    ADMINISTRATIVO = "AD"
+    ALUNO = "AL"
+    PACIENTE = "PA"
+
+
+INHERITS = {Role.SUPERVISOR: Role.PROFESSOR}
+"""Papeis que acumulam os poderes de outro. Ler: o Supervisor faz tudo que o
+Professor faz, e mais o que declarar em nome proprio."""
+
+
+def roles_for(role):
+    """O papel seguido dos que ele herda, do mais especifico ao mais generico."""
+    cadeia = [role]
+    enquanto = INHERITS.get(role)
+    while enquanto is not None and enquanto not in cadeia:
+        cadeia.append(enquanto)
+        enquanto = INHERITS.get(enquanto)
+    return tuple(cadeia)
 
 
 class RoleScopedQuerySet(models.QuerySet):
@@ -31,6 +55,9 @@ class BusinessRulesMixin:
     EDITABLE_FIELDS -- {papel: (campos gravaveis)}; papel ausente nao edita nada
     DELETABLE_BY    -- papeis que podem apagar; vazio significa ninguem, que e
                        o default da matriz para todo model de conteudo
+
+    Declare sempre pelo papel mais restrito: quem herda dele recebe junto, por
+    INHERITS. Declarar o papel herdeiro tambem so faz sentido para ampliar.
     """
 
     CREATABLE_BY = ()
@@ -38,14 +65,27 @@ class BusinessRulesMixin:
     DELETABLE_BY = ()
 
     @classmethod
+    def creatable_by_role(cls, role):
+        return any(papel in cls.CREATABLE_BY for papel in roles_for(role))
+
+    @classmethod
+    def deletable_by_role(cls, role):
+        return any(papel in cls.DELETABLE_BY for papel in roles_for(role))
+
+    @classmethod
     def editable_fields_for_role(cls, role):
-        return tuple(cls.EDITABLE_FIELDS.get(role, ()))
+        campos = []
+        for papel in roles_for(role):
+            for campo in cls.EDITABLE_FIELDS.get(papel, ()):
+                if campo not in campos:
+                    campos.append(campo)
+        return tuple(campos)
 
     @classmethod
     def can_be_created_by(cls, user, **context):
         if not user.is_authenticated:
             return False
-        return user.role in cls.CREATABLE_BY
+        return cls.creatable_by_role(user.role)
 
     def editable_fields_for(self, user):
         """
@@ -64,4 +104,4 @@ class BusinessRulesMixin:
     def can_be_deleted_by(self, user):
         if not user.is_authenticated:
             return False
-        return user.role in self.DELETABLE_BY
+        return self.deletable_by_role(user.role)
