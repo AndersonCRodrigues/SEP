@@ -1,4 +1,6 @@
 from .base import *
+import os
+from django.core.exceptions import ImproperlyConfigured
 
 DEBUG = False
 
