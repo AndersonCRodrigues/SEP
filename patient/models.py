@@ -79,7 +79,6 @@ class Patient(BusinessRulesMixin, CustomUser):
 
     CREATABLE_BY = (Role.ADMINISTRATIVO,)
     EDITABLE_FIELDS = {
-        Role.SUPERVISOR: ("responsible_teachers",),
         Role.PROFESSOR: ("responsible_teachers",),
         Role.ADMINISTRATIVO: REGISTRATION_FIELDS,
         Role.ALUNO: COMPLETION_FIELDS,

@@ -1,6 +1,5 @@
 from django.conf import settings
 from django.db import models
-
 from core.models import CustomUser
 from core.permissions import BusinessRulesMixin, RoleScopedQuerySet
 from patient.models import Patient
@@ -321,11 +320,8 @@ class TriageFeedback(BusinessRulesMixin, models.Model):
 
     objects = TriageFeedbackQuerySet.as_manager()
 
-    CREATABLE_BY = (Role.SUPERVISOR, Role.PROFESSOR)
-    EDITABLE_FIELDS = {
-        Role.SUPERVISOR: ("content",),
-        Role.PROFESSOR: ("content",),
-    }
+    CREATABLE_BY = (Role.PROFESSOR,)
+    EDITABLE_FIELDS = {Role.PROFESSOR: ("content",)}
     DELETABLE_BY = ()
 
     class Meta:

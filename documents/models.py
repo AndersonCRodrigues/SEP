@@ -99,7 +99,7 @@ class AttendanceCertificate(BaseCertificate):
 
     EDITABLE_FIELDS = {
         role: BaseCertificate.DOCUMENT_FIELDS + ("kind", "appointment")
-        for role in (Role.SUPERVISOR, Role.PROFESSOR, Role.ADMINISTRATIVO)
+        for role in (Role.PROFESSOR, Role.ADMINISTRATIVO)
     }
 
     class Meta(BaseCertificate.Meta):
@@ -146,7 +146,7 @@ class InternshipDeclaration(BaseCertificate):
     EDITABLE_FIELDS = {
         role: BaseCertificate.DOCUMENT_FIELDS
         + ("start_date", "end_date", "total_minutes")
-        for role in (Role.SUPERVISOR, Role.PROFESSOR, Role.ADMINISTRATIVO)
+        for role in (Role.PROFESSOR, Role.ADMINISTRATIVO)
     }
 
     class Meta(BaseCertificate.Meta):
