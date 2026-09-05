@@ -78,6 +78,54 @@ não é orientando dele, mesmo que `EDITABLE_FIELDS` liste o papel `PROFESSOR`.
 | Ele pode alterar esta linha? | `obj.can_be_changed_by(user)` |
 | Ele pode apagar esta linha? | `obj.can_be_deleted_by(user)` |
 
+### Papéis que herdam de outro
+
+"Supervisor pode fazer tudo que o Professor faz" é regra do negócio, e estava
+escrita à mão em cada model — quando estava. O resultado mensurável: o Supervisor
+tinha **37** permissões e o Professor, **40**. Nove pontos em que o mais graduado
+podia menos, porque alguém esqueceu de repetir a linha.
+
+A herança agora é declarada uma vez, em `core/permissions.py`:
+
+```python
+INHERITS = {Role.SUPERVISOR: Role.PROFESSOR}
+```
+
+`roles_for(role)` devolve a cadeia (`SUPERVISOR` → `PROFESSOR`), e as três
+consultas do mixin percorrem ela: `creatable_by_role`, `deletable_by_role` e
+`editable_fields_for_role`. Os campos são **união**, não substituição — declarar o
+papel herdeiro serve para ampliar, nunca para reduzir. `Advising` usa isso: o
+Professor fecha (`end_date`), o Supervisor também troca `teacher` e `term`.
+
+**Declare sempre pelo papel mais restrito.** Escrever
+`CREATABLE_BY = (Role.PROFESSOR,)` já contempla o Supervisor. Repetir os dois é
+ruído que volta a divergir no próximo campo novo.
+
+Duas coisas a herança **não** alcança, de propósito:
+
+- **`visible_to()`** vive no queryset, fora do mixin. Cada um tem seu ramo
+  `if role == Role.SUPERVISOR: return self`, que é mais largo que o do Professor —
+  filtro de linha não se compõe por união de forma segura.
+- **O teto por linha.** `can_be_created_by` com contexto continua sendo escrito à
+  mão, porque a restrição do Professor é dele, não do cargo acima:
+
+  ```python
+  def can_reach_student(user, student):
+      if student is None:
+          return False
+      if user.role == Role.PROFESSOR:
+          return student.current_advisor_id == user.pk
+      return True
+  ```
+
+  O Professor alcança os próprios orientandos; o Supervisor alcança qualquer aluno.
+  Herdar esse `if` daria ao Supervisor um teto que ele não tem — ele não orienta
+  ninguém, e passaria a não poder criar nada.
+
+`setup_roles` consulta pelos métodos do mixin, nunca pelas tuplas cruas. Ler
+`role in model.CREATABLE_BY` direto ignora a herança e devolve o Supervisor ao
+estado anterior, em silêncio.
+
 ### Quando a regra depende do contexto
 
 `can_be_created_by` aceita `**context` justamente para isso. O professor só pode
