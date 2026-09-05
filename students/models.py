@@ -19,6 +19,15 @@ def current_term(today=None):
     return f"{today.year}.{1 if today.month <= 6 else 2}"
 
 
+def can_reach_student(user, student):
+    """O teto do Professor sao os proprios orientandos; quem herda dele nao tem teto."""
+    if student is None:
+        return False
+    if user.role == Role.PROFESSOR:
+        return student.current_advisor_id == user.pk
+    return True
+
+
 class Student(CustomUser):
     class Stage(models.TextChoices):
         TRIAGE = "TR", "Triagem"
@@ -175,7 +184,7 @@ class Advising(BusinessRulesMixin, models.Model):
 
     objects = AdvisingManager()
 
-    CREATABLE_BY = (Role.SUPERVISOR, Role.PROFESSOR)
+    CREATABLE_BY = (Role.PROFESSOR,)
     EDITABLE_FIELDS = {
         Role.SUPERVISOR: ("teacher", "term", "end_date"),
         Role.PROFESSOR: ("end_date",),
@@ -302,11 +311,8 @@ class CaseAssignment(BusinessRulesMixin, models.Model):
 
     objects = CaseAssignmentManager()
 
-    CREATABLE_BY = (Role.SUPERVISOR, Role.PROFESSOR)
-    EDITABLE_FIELDS = {
-        Role.SUPERVISOR: ("end_date",),
-        Role.PROFESSOR: ("end_date",),
-    }
+    CREATABLE_BY = (Role.PROFESSOR,)
+    EDITABLE_FIELDS = {Role.PROFESSOR: ("end_date",)}
     DELETABLE_BY = ()
 
     class Meta:
@@ -325,9 +331,7 @@ class CaseAssignment(BusinessRulesMixin, models.Model):
     def can_be_created_by(cls, user, student=None, **context):
         if not super().can_be_created_by(user):
             return False
-        if user.role == Role.PROFESSOR:
-            return student is not None and student.current_advisor_id == user.pk
-        return True
+        return can_reach_student(user, student)
 
     def save(self, *args, **kwargs):
         if not getattr(self, "_from_sync", False):
@@ -386,7 +390,7 @@ class Attendance(BusinessRulesMixin, models.Model):
     def can_be_created_by(cls, user, student=None, **context):
         if not super().can_be_created_by(user):
             return False
-        return student is not None and student.current_advisor_id == user.pk
+        return can_reach_student(user, student)
 
     def __str__(self):
         return f"{self.student} presente em {self.date}"
@@ -428,7 +432,7 @@ class PerformanceReview(BusinessRulesMixin, models.Model):
     def can_be_created_by(cls, user, student=None, **context):
         if not super().can_be_created_by(user):
             return False
-        return student is not None and student.current_advisor_id == user.pk
+        return can_reach_student(user, student)
 
     def __str__(self):
         return f"Avaliação de {self.student} por {self.teacher}"
@@ -498,12 +502,11 @@ class StudentActivity(BusinessRulesMixin, models.Model):
 
     objects = AdviseeScopedQuerySet.as_manager()
 
-    CREATABLE_BY = (Role.PROFESSOR, Role.SUPERVISOR)
+    CREATABLE_BY = (Role.PROFESSOR,)
     EDITABLE_FIELDS = {
-        Role.PROFESSOR: ("date", "activity_type", "category", "hours_worked", "notes"),
-        Role.SUPERVISOR: ("date", "activity_type", "category", "hours_worked", "notes"),
+        Role.PROFESSOR: ("date", "activity_type", "category", "hours_worked", "notes")
     }
-    DELETABLE_BY = (Role.PROFESSOR, Role.SUPERVISOR)
+    DELETABLE_BY = (Role.PROFESSOR,)
 
     class Meta:
         verbose_name = "Atividade de estágio"
@@ -521,13 +524,7 @@ class StudentActivity(BusinessRulesMixin, models.Model):
     def can_be_created_by(cls, user, student=None, **context):
         if not super().can_be_created_by(user):
             return False
-        if student is None:
-            return False
-        if user.role == Role.SUPERVISOR:
-            return True
-        if user.role == Role.PROFESSOR:
-            return student.current_advisor_id == user.pk
-        return False
+        return can_reach_student(user, student)
 
     def editable_fields_for(self, user):
         if self.appointment_id:
