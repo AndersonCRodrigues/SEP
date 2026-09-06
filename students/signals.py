@@ -4,18 +4,18 @@ from django.dispatch import receiver
 from django.utils import timezone
 from decimal import Decimal
 
-from .models import Advising, CaseAssignment, Student, StudentActivity
+from .models import Advising, Student, StudentActivity
 
 ACTIVITY_TYPE_BY_APPOINTMENT_KIND = {
     "TR": StudentActivity.ActivityType.SCREENING,
     "SE": StudentActivity.ActivityType.SESSION,
 }
 
-LINKED_FIELDS = ("current_advisor_id", "current_patient_id")
+LINKED_FIELDS = ("current_advisor_id",)
+
 
 @receiver(post_save, sender="patient.Appointment")
 def sync_student_activity(sender, instance, **kwargs):
-    """Participacao conta pela ida do aluno; realizacao so quando o paciente veio."""
     Category = StudentActivity.Category
 
     compareceu = instance.status in (
@@ -53,6 +53,7 @@ def sync_student_activity(sender, instance, **kwargs):
                 defaults={**comum, "hours_worked": horas},
             )
 
+
 @receiver(pre_save, sender=Student)
 def capture_previous_links(sender, instance, **kwargs):
     stored = (
@@ -61,6 +62,7 @@ def capture_previous_links(sender, instance, **kwargs):
         else None
     )
     instance._previous_links = stored or dict.fromkeys(LINKED_FIELDS)
+
 
 @receiver(post_save, sender=Student)
 def sync_link_history(sender, instance, **kwargs):
@@ -71,9 +73,6 @@ def sync_link_history(sender, instance, **kwargs):
     del instance._previous_links
     term = instance.__dict__.pop("_advising_term", None)
 
-    with transaction.atomic():
-        if previous["current_advisor_id"] != instance.current_advisor_id:
+    if previous["current_advisor_id"] != instance.current_advisor_id:
+        with transaction.atomic():
             Advising.objects.sync_from_student(instance, term=term)
-
-        if previous["current_patient_id"] != instance.current_patient_id:
-            CaseAssignment.objects.sync_from_student(instance)

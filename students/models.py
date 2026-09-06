@@ -19,8 +19,14 @@ def current_term(today=None):
     return f"{today.year}.{1 if today.month <= 6 else 2}"
 
 
+def with_open_case(prefix="", **lookups):
+    caminho = f"{prefix}assignment_history"
+    filtros = {f"{caminho}__end_date__isnull": True}
+    filtros.update({f"{caminho}__{campo}": valor for campo, valor in lookups.items()})
+    return Q(**filtros)
+
+
 def can_reach_student(user, student):
-    """O teto do Professor sao os proprios orientandos; quem herda dele nao tem teto."""
     if student is None:
         return False
     if user.role == Role.PROFESSOR:
@@ -49,17 +55,6 @@ class Student(CustomUser):
         verbose_name="Orientador atual",
     )
 
-    current_patient = models.ForeignKey(
-        "patient.Patient",
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
-        related_name="responsible_students",
-        verbose_name="Paciente atual",
-    )
-
-    MAX_STUDENTS_PER_PATIENT = 2
-
     class Meta:
         verbose_name = "Aluno"
         verbose_name_plural = "Alunos"
@@ -72,27 +67,9 @@ class Student(CustomUser):
     def acting_area(self):
         return self.current_advisor.acting_area if self.current_advisor_id else None
 
-    @classmethod
-    def has_room_for(cls, patient, ignoring=None):
-        ocupantes = cls.objects.filter(current_patient=patient)
-        if ignoring is not None and ignoring.pk:
-            ocupantes = ocupantes.exclude(pk=ignoring.pk)
-        return ocupantes.count() < cls.MAX_STUDENTS_PER_PATIENT
-
-    def clean(self):
-        super().clean()
-        if self.current_patient_id is None:
-            return
-
-        if not Student.has_room_for(self.current_patient_id, ignoring=self):
-            raise ValidationError(
-                {
-                    "current_patient": (
-                        f"Este paciente já tem {self.MAX_STUDENTS_PER_PATIENT} "
-                        "alunos responsáveis."
-                    )
-                }
-            )
+    @property
+    def open_cases(self):
+        return self.case_history.filter(end_date__isnull=True)
 
     def save(self, *args, **kwargs):
         self.role = CustomUser.Role.ALUNO
@@ -238,50 +215,31 @@ class AdviseeScopedQuerySet(RoleScopedQuerySet):
         return self.none()
 
 
-class CaseAssignmentManager(models.Manager.from_queryset(AdviseeScopedQuerySet)):
+class CaseAssignmentQuerySet(AdviseeScopedQuerySet):
+    def open(self):
+        return self.filter(end_date__isnull=True)
+
+
+class CaseAssignmentManager(models.Manager.from_queryset(CaseAssignmentQuerySet)):
     @transaction.atomic
-    def sync_from_student(self, student):
-        open_row = (
-            self.select_for_update()
-            .filter(student=student, end_date__isnull=True)
-            .first()
-        )
-        if open_row:
-            open_row.end_date = timezone.now().date()
-            open_row._from_sync = True
-            open_row.save(update_fields=["end_date"])
-
-        if student.current_patient_id is None:
-            return None
-
-        row = self.model(
+    def assign(self, student, patient, acting_area=None):
+        caso = self.model(
             student=student,
-            patient_id=student.current_patient_id,
-            acting_area=student.acting_area,
+            patient=patient,
+            acting_area=acting_area or student.acting_area,
         )
-        row._from_sync = True
-        row.save()
-
-        row.patient.advance_to(row.patient.FlowStatus.IN_TREATMENT)
-        return row
+        caso.save()
+        patient.advance_to(patient.FlowStatus.IN_TREATMENT)
+        return caso
 
     @transaction.atomic
-    def change_patient(self, student, new_patient):
-        if student.current_patient_id == getattr(new_patient, "pk", None):
-            raise ValidationError("O aluno ja esta encarregado deste paciente.")
+    def release(self, case):
+        if case.end_date is not None:
+            raise ValidationError("Este caso já está encerrado.")
 
-        if new_patient is not None and not Student.has_room_for(
-            new_patient, ignoring=student
-        ):
-            raise ValidationError(
-                f"Este paciente ja tem {Student.MAX_STUDENTS_PER_PATIENT} "
-                "alunos responsaveis."
-            )
-
-        student.current_patient = new_patient
-        student.save(update_fields=["current_patient"])
-
-        return self.filter(student=student, end_date__isnull=True).first()
+        case.end_date = timezone.now().date()
+        case.save(update_fields=["end_date"])
+        return case
 
 
 class CaseAssignment(BusinessRulesMixin, models.Model):
@@ -313,6 +271,8 @@ class CaseAssignment(BusinessRulesMixin, models.Model):
 
     objects = CaseAssignmentManager()
 
+    MAX_STUDENTS_PER_PATIENT = 2
+
     CREATABLE_BY = (Role.PROFESSOR,)
     EDITABLE_FIELDS = {Role.PROFESSOR: ("end_date",)}
     DELETABLE_BY = ()
@@ -323,9 +283,9 @@ class CaseAssignment(BusinessRulesMixin, models.Model):
         ordering = ["-start_date"]
         constraints = [
             UniqueConstraint(
-                fields=["student"],
+                fields=["student", "patient"],
                 condition=Q(end_date__isnull=True),
-                name="student_with_at_most_one_active_case",
+                name="one_open_case_per_student_and_patient",
             )
         ]
 
@@ -335,12 +295,31 @@ class CaseAssignment(BusinessRulesMixin, models.Model):
             return False
         return can_reach_student(user, student)
 
-    def save(self, *args, **kwargs):
-        if not getattr(self, "_from_sync", False):
-            raise ValueError(
-                "Histórico é derivado: mova Student.current_patient "
-                "(CaseAssignment.objects.change_patient)."
+    def clean(self):
+        super().clean()
+        if self.end_date is not None:
+            return
+
+        abertos = CaseAssignment.objects.open().filter(patient_id=self.patient_id)
+        if self.pk:
+            abertos = abertos.exclude(pk=self.pk)
+
+        if abertos.filter(student_id=self.student_id).exists():
+            raise ValidationError({"student": "Este aluno já atende este paciente."})
+
+        if abertos.count() >= self.MAX_STUDENTS_PER_PATIENT:
+            raise ValidationError(
+                {
+                    "patient": (
+                        f"Este paciente já tem {self.MAX_STUDENTS_PER_PATIENT} "
+                        "alunos responsáveis."
+                    )
+                }
             )
+
+    def save(self, *args, **kwargs):
+        if self._state.adding and self.end_date is None:
+            self.clean()
         super().save(*args, **kwargs)
 
     def __str__(self):
