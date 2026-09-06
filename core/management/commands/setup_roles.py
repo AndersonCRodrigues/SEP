@@ -20,8 +20,7 @@ def _rotulo(model, acao):
 
 
 def _le(model, role):
-    usuario = CustomUser(pk=0, role=role, is_superuser=role == Role.SUPERADMIN)
-    return not model.objects.visible_to(usuario).query.is_empty()
+    return model.objects.readable_by_role(role)
 
 
 def permissoes_por_role():
