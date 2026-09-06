@@ -4,9 +4,9 @@ from django.db.models import F, Q
 from areas.models import AreaActing
 from core.models import CustomUser
 from core.permissions import ALL, BusinessRulesMixin, RoleScopedQuerySet
-from patient.models import Patient
+from patient.models import Patient, with_open_case
 from scheduling.models import Appointment
-from students.models import Student, with_open_case
+from students.models import Student
 
 Role = CustomUser.Role
 

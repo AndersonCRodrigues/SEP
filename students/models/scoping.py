@@ -11,13 +11,6 @@ def current_term(today=None):
     return f"{today.year}.{1 if today.month <= 6 else 2}"
 
 
-def with_open_case(prefix="", **lookups):
-    caminho = f"{prefix}assignment_history"
-    filtros = {f"{caminho}__end_date__isnull": True}
-    filtros.update({f"{caminho}__{campo}": valor for campo, valor in lookups.items()})
-    return Q(**filtros)
-
-
 def can_reach_student(user, student):
     if student is None:
         return False

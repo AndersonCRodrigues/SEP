@@ -4,8 +4,7 @@ from django.db.models import Q
 from areas.models import AreaActing
 from core.models import CustomUser
 from core.permissions import ALL, BusinessRulesMixin, RoleScopedQuerySet
-from students.models import Student, with_open_case
-from .patient import Patient
+from .patient import Patient, with_open_case
 
 Role = CustomUser.Role
 
@@ -27,7 +26,7 @@ class ProgressNote(BusinessRulesMixin, models.Model):
     )
 
     student = models.ForeignKey(
-        Student,
+        "students.Student",
         on_delete=models.PROTECT,
         related_name="progress_notes",
         verbose_name="Aluno responsável",

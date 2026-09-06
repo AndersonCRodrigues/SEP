@@ -5,12 +5,19 @@ from django.utils import timezone
 from core.managers import CustomUserManager
 from core.models import CustomUser
 from core.permissions import ALL, BusinessRulesMixin, RoleScopedQuerySet
-from students.models import with_open_case
 from teacher.models import Teacher
-from triage.constants import VISIBLE_TO_AUTHOR
+from core.constants import VISIBLE_TO_AUTHOR
 from utils.fields import EncryptedTextField
 
 Role = CustomUser.Role
+
+
+def with_open_case(prefix="", **lookups):
+    """Q sobre Patient: caso aberto, filtrado pelo aluno ou pelo orientador dele."""
+    caminho = f"{prefix}assignment_history"
+    filtros = {f"{caminho}__end_date__isnull": True}
+    filtros.update({f"{caminho}__{campo}": valor for campo, valor in lookups.items()})
+    return Q(**filtros)
 
 
 class PatientQuerySet(RoleScopedQuerySet):
