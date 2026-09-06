@@ -8,7 +8,7 @@ from core.managers import CustomUserManager
 from core.models import CustomUser
 from core.permissions import BusinessRulesMixin, RoleScopedQuerySet
 from utils.fields import EncryptedTextField
-from triage.constants import TriageStatus
+from triage.constants import VISIBLE_TO_AUTHOR
 from students.models import Student
 from teacher.models import Teacher
 
@@ -30,10 +30,13 @@ class PatientQuerySet(RoleScopedQuerySet):
             ).distinct()
         if role == Role.ALUNO:
             return self.filter(
-                Q(responsible_students=user.pk, active_treatment=True)
+                Q(
+                    responsible_students=user.pk,
+                    flow_status=Patient.FlowStatus.IN_TREATMENT,
+                )
                 | Q(
                     triage_records__student_author_id=user.pk,
-                    triage_records__status=TriageStatus.OPEN,
+                    triage_records__status__in=VISIBLE_TO_AUTHOR,
                 )
             ).distinct()
         if role == Role.PACIENTE:
@@ -44,6 +47,10 @@ class PatientQuerySet(RoleScopedQuerySet):
 class Patient(BusinessRulesMixin, CustomUser):
     class FlowStatus(models.TextChoices):
         IN_TRIAGE = "IN_TRIAGE", "Em triagem"
+        AWAITING_REVIEW = "AWAITING_REVIEW", "Aguardando parecer"
+        REFERRED = "REFERRED", "Encaminhado ao professor"
+        IN_TREATMENT = "IN_TREATMENT", "Em atendimento"
+        DISCHARGED = "DISCHARGED", "Alta"
 
     flow_status = models.CharField(
         max_length=30,
@@ -52,6 +59,27 @@ class Patient(BusinessRulesMixin, CustomUser):
         verbose_name="Status do fluxo",
     )
 
+    ALLOWED_TRANSITIONS = {
+        "": (FlowStatus.IN_TRIAGE, FlowStatus.IN_TREATMENT),
+        FlowStatus.IN_TRIAGE: (
+            FlowStatus.AWAITING_REVIEW,
+            FlowStatus.REFERRED,
+            FlowStatus.DISCHARGED,
+        ),
+        FlowStatus.AWAITING_REVIEW: (
+            FlowStatus.IN_TRIAGE,
+            FlowStatus.REFERRED,
+            FlowStatus.DISCHARGED,
+        ),
+        FlowStatus.REFERRED: (
+            FlowStatus.IN_TRIAGE,
+            FlowStatus.IN_TREATMENT,
+            FlowStatus.DISCHARGED,
+        ),
+        FlowStatus.IN_TREATMENT: (FlowStatus.DISCHARGED,),
+        FlowStatus.DISCHARGED: (FlowStatus.IN_TRIAGE,),
+    }
+
     medical_record = EncryptedTextField(blank=True, verbose_name="Prontuário")
 
     responsible_teachers = models.ManyToManyField(
@@ -59,11 +87,6 @@ class Patient(BusinessRulesMixin, CustomUser):
         blank=True,
         related_name="referred_patients",
         verbose_name="Professores responsáveis",
-    )
-
-    active_treatment = models.BooleanField(
-        default=True,
-        verbose_name="Em atendimento ativo",
     )
 
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Criado em")
@@ -101,6 +124,25 @@ class Patient(BusinessRulesMixin, CustomUser):
             - nascimento.year
             - ((hoje.month, hoje.day) < (nascimento.month, nascimento.day))
         )
+
+    @property
+    def active_treatment(self):
+        return self.flow_status == self.FlowStatus.IN_TREATMENT
+
+    def advance_to(self, new_status):
+        if new_status == self.flow_status:
+            return False
+
+        if new_status not in self.ALLOWED_TRANSITIONS.get(self.flow_status, ()):
+            atual = self.get_flow_status_display() or "sem fluxo"
+            destino = self.FlowStatus(new_status).label
+            raise ValidationError(
+                {"flow_status": f"Não é possível ir de {atual} para {destino}."}
+            )
+
+        self.flow_status = new_status
+        self.save(update_fields=["flow_status"])
+        return True
 
     def save(self, *args, **kwargs):
         self.role = CustomUser.Role.PACIENTE

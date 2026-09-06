@@ -261,6 +261,8 @@ class CaseAssignmentManager(models.Manager.from_queryset(AdviseeScopedQuerySet))
         )
         row._from_sync = True
         row.save()
+
+        row.patient.advance_to(row.patient.FlowStatus.IN_TREATMENT)
         return row
 
     @transaction.atomic
