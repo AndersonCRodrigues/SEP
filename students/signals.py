@@ -14,7 +14,7 @@ ACTIVITY_TYPE_BY_APPOINTMENT_KIND = {
 LINKED_FIELDS = ("current_advisor_id",)
 
 
-@receiver(post_save, sender="patient.Appointment")
+@receiver(post_save, sender="scheduling.Appointment")
 def sync_student_activity(sender, instance, **kwargs):
     Category = StudentActivity.Category
 

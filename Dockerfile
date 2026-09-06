@@ -48,7 +48,7 @@ EXPOSE 8000
 
 # popular_users roda uma vez: ele nao e idempotente -- a cada chamada gera um
 # email novo (sv1@, sv2@...) em vez de reaproveitar o usuario existente.
-CMD ["sh", "-c", "python3 manage.py makemigrations core areas teacher students patient documents audit triage && python3 manage.py migrate && python3 manage.py popular_users && python3 manage.py setup_roles && gunicorn --bind 0.0.0.0:8000 --workers 3 config.wsgi:application"]
+CMD ["sh", "-c", "python3 manage.py makemigrations core areas teacher students patient scheduling documents audit triage && python3 manage.py migrate && python3 manage.py popular_users && python3 manage.py setup_roles && gunicorn --bind 0.0.0.0:8000 --workers 3 config.wsgi:application"]
 
 # Estagio do banco: a imagem oficial do Postgres nao traz o pg_cron, que e o
 # agendador usado para a retencao de 1 ano do log de seguranca.

@@ -6,7 +6,7 @@ from core.models import CustomUser
 from core.permissions import ALL, BusinessRulesMixin, RoleScopedQuerySet
 from students.models import Student
 from teacher.models import Teacher
-from .patient import Patient
+from patient.models import Patient
 from .room import Room, RoomBooking
 
 Role = CustomUser.Role

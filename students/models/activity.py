@@ -47,7 +47,7 @@ class StudentActivity(AdviseeRecord):
     notes = models.TextField(blank=True, verbose_name="Observação")
 
     appointment = models.ForeignKey(
-        "patient.Appointment",
+        "scheduling.Appointment",
         null=True,
         blank=True,
         on_delete=models.SET_NULL,

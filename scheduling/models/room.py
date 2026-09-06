@@ -5,7 +5,7 @@ from django.utils import timezone
 from core.models import CustomUser
 from core.permissions import ALL, ANY, BusinessRulesMixin, RoleScopedQuerySet
 from students.models import Student
-from .patient import Patient
+from patient.models import Patient
 
 Role = CustomUser.Role
 
