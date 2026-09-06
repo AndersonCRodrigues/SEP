@@ -34,15 +34,19 @@ O nível 1 é preenchido a partir dos outros dois — ver *Projeção sobre o
 Toda model de conteúdo declara quatro coisas — três constantes e um queryset:
 
 ```python
+class RoomQuerySet(RoleScopedQuerySet):
+    VISIBLE_TO = {ANY: ALL}
+
+
 class Room(BusinessRulesMixin, models.Model):
     name = models.CharField(max_length=100, unique=True)
-    active = models.BooleanField(default=True)
+    status = models.CharField(max_length=2, choices=Status.choices)
 
-    objects = RoomQuerySet.as_manager()      # traz visible_to()
+    objects = RoomQuerySet.as_manager()
 
     CREATABLE_BY = (Role.ADMINISTRATIVO,)
-    EDITABLE_FIELDS = {Role.ADMINISTRATIVO: ("name", "active")}
-    DELETABLE_BY = ()
+    EDITABLE_FIELDS = {Role.ADMINISTRATIVO: ("name", "room_type", "status")}
+    DELETABLE_BY = (Role.ADMINISTRATIVO,)
 ```
 
 - **`CREATABLE_BY`** — papéis que podem criar.
@@ -53,7 +57,12 @@ class Room(BusinessRulesMixin, models.Model):
   se apaga, encerra-se. Abrem exceção `AreaActing`, `Attendance`,
   `PerformanceReview` e `StudentActivity` — e nesta última só as linhas lançadas
   à mão, nunca as geradas por signal.
-- **`visible_to(user)`** — no `QuerySet`, define quais linhas o usuário enxerga.
+- **`VISIBLE_TO`** — no `QuerySet`, `{papel: ALL | callable(user) -> Q}`. Papel
+  ausente não enxerga nada. `ANY` como chave atende quem não tem entrada própria —
+  é o "todo autenticado lê" de `AreaActing`, `Room` e `ProfessorArea`.
+
+As quatro são **declarações**, não código. Nenhuma delas tem `if` de papel: quem
+resolve papel é o `BusinessRulesMixin` e o `RoleScopedQuerySet`, num lugar só.
 
 ### Como elas se combinam
 
@@ -101,11 +110,14 @@ Professor fecha (`end_date`), o Supervisor também troca `teacher` e `term`.
 `CREATABLE_BY = (Role.PROFESSOR,)` já contempla o Supervisor. Repetir os dois é
 ruído que volta a divergir no próximo campo novo.
 
-Duas coisas a herança **não** alcança, de propósito:
+A herança vale para `VISIBLE_TO` também, mas ali ela quase nunca dispara: o
+Supervisor lê **tudo**, não o mesmo que o Professor, então cada queryset declara
+`Role.SUPERVISOR: ALL` explicitamente. E é bom que declare — o log de auditoria é
+o único que **não** dá nada a ele, e um `SUPERVISOR: ALL` embutido na base abriria
+a trilha inteira sem ninguém pedir.
 
-- **`visible_to()`** vive no queryset, fora do mixin. Cada um tem seu ramo
-  `if role == Role.SUPERVISOR: return self`, que é mais largo que o do Professor —
-  filtro de linha não se compõe por união de forma segura.
+Uma coisa a herança **não** alcança, de propósito:
+
 - **O teto por linha.** `can_be_created_by` com contexto continua sendo escrito à
   mão, porque a restrição do Professor é dele, não do cargo acima:
 
@@ -219,9 +231,11 @@ if role in model.DELETABLE_BY:            → delete_<model>
 if _le(model, role):                      → view_<model>
 ```
 
-O `view_` sai de uma sondagem do próprio `visible_to`: monta o queryset para o
-papel e checa `query.is_empty()`. Não toca no banco — só inspeciona a query.
-As permissões de gestão de usuário saem de `MANAGEABLE_ROLES_BY`.
+O `view_` sai de `readable_by_role()`, que lê o `VISIBLE_TO` direto. Antes era
+uma sondagem: o comando fabricava um `CustomUser(pk=0)` falso, montava o queryset
+e checava `query.is_empty()`. Funcionava, mas dependia de a consulta ficar vazia
+para concluir que o papel não lê — frágil. As permissões de gestão de usuário saem
+de `MANAGEABLE_ROLES_BY`.
 
 **Não mantenha lista fixa de permissões.** A versão anterior do comando tinha uma,
 e ela apontava para `students.add_aluno` e `teacher.add_professor` muito depois da
@@ -278,8 +292,9 @@ Ao adicionar campo de controle a um model, confira os forms que o usam.
 ### Checklist para uma model nova
 
 1. Herde `BusinessRulesMixin` **antes** de `models.Model`.
-2. Crie um `QuerySet` herdando `RoleScopedQuerySet` e implemente `visible_to`.
-   O `visible_to` da base levanta `NotImplementedError` — não existe default.
+2. Crie um `QuerySet` herdando `RoleScopedQuerySet` e declare `VISIBLE_TO`.
+   Deixar vazio levanta `NotImplementedError` — não existe default silencioso.
+   Não escreva `visible_to()`: a base resolve papel, herança e `distinct()`.
 3. Declare as três constantes. `DELETABLE_BY = ()` até que alguém peça o
    contrário.
 4. Se a criação depender de contexto, sobrescreva `can_be_created_by` chamando
