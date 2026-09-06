@@ -19,6 +19,7 @@ from teacher.models import Teacher
 
 MODEL_BY_ROLE = {
     CustomUser.Role.PROFESSOR: Teacher,
+    CustomUser.Role.SUPERVISOR: Teacher,
     CustomUser.Role.ALUNO: Student,
     CustomUser.Role.PACIENTE: Patient,
 }

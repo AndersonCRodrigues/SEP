@@ -32,11 +32,12 @@ class VincularAlunoForm(forms.Form):
 
 
 class ProfessorCreationForm(UserCreationForm):
+    # Teacher.acting_area e NOT NULL: opcional aqui passava a validacao e
+    # estourava IntegrityError no save.
     acting_area = forms.ModelChoiceField(
         queryset=AreaActing.objects.all(),
         label="Área de Atuação / Abordagem Teórica",
         empty_label="Selecione uma área...",
-        required=False,
     )
 
     class Meta:

@@ -32,6 +32,7 @@ class LoginEmailOuMatriculaForm(AuthenticationForm):
 class CustomUserCreationForm(UserCreationForm):
     MODEL_BY_ROLE = {
         CustomUser.Role.PROFESSOR: Teacher,
+        CustomUser.Role.SUPERVISOR: Teacher,
         CustomUser.Role.ALUNO: Student,
         CustomUser.Role.PACIENTE: Patient,
     }
@@ -41,11 +42,18 @@ class CustomUserCreationForm(UserCreationForm):
         CustomUser.Role.PROFESSOR,
     )
 
+    # O Supervisor tem area propria e supervisiona todas: o alcance vem das
+    # permissoes, nao da ausencia de area.
+    ROLES_REQUIRING_AREA = (
+        CustomUser.Role.PROFESSOR,
+        CustomUser.Role.SUPERVISOR,
+    )
+
     acting_area = forms.ModelChoiceField(
         queryset=AreaActing.objects.all(),
         required=False,
         label="Área de atuação",
-        help_text="Obrigatório para Professor Responsável.",
+        help_text="Obrigatório para Professor e Supervisor.",
     )
 
     class Meta:
@@ -63,9 +71,9 @@ class CustomUserCreationForm(UserCreationForm):
                 "matricula", "Matrícula é obrigatória para Aluno e Professor."
             )
 
-        if role == CustomUser.Role.PROFESSOR and not cleaned_data.get("acting_area"):
+        if role in self.ROLES_REQUIRING_AREA and not cleaned_data.get("acting_area"):
             self.add_error(
-                "acting_area", "Professor Responsável precisa de área de atuação."
+                "acting_area", "Professor e Supervisor precisam de área de atuação."
             )
 
         return cleaned_data
@@ -77,26 +85,3 @@ class CustomUserCreationForm(UserCreationForm):
             if model is Teacher:
                 self.instance.acting_area = self.cleaned_data.get("acting_area")
         super()._post_clean()
-
-
-class SupervisorCreationForm(UserCreationForm):
-    class Meta:
-        model = CustomUser
-        fields = PERSONAL_FIELDS
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["role"].choices = [
-            (value, label)
-            for value, label in CustomUser.Role.choices
-            if value == CustomUser.Role.SUPERVISOR
-        ]
-        self.initial["role"] = CustomUser.Role.SUPERVISOR
-
-    def clean_role(self):
-        role = self.cleaned_data["role"]
-        if role != CustomUser.Role.SUPERVISOR:
-            raise forms.ValidationError(
-                "Pelo admin, só é possível cadastrar Supervisor."
-            )
-        return role
