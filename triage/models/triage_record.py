@@ -1,10 +1,11 @@
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import models
 from core.models import CustomUser
 from core.permissions import BusinessRulesMixin, RoleScopedQuerySet
 from patient.models import Patient
 from students.models import Student
-from triage.constants import TriageStatus
+from triage.constants import VISIBLE_TO_AUTHOR, TriageStatus
 from utils.fields import EncryptedTextField
 
 Role = CustomUser.Role
@@ -21,8 +22,16 @@ class TriageRecordQuerySet(RoleScopedQuerySet):
         if role == Role.PROFESSOR:
             return self.filter(student_author__current_advisor_id=user.pk)
         if role == Role.ALUNO:
-            return self.filter(student_author_id=user.pk, status=TriageStatus.OPEN)
+            return self.filter(student_author_id=user.pk, status__in=VISIBLE_TO_AUTHOR)
         return self.none()
+
+
+FLOW_BY_TRIAGE_STATUS = {
+    TriageStatus.OPEN: Patient.FlowStatus.IN_TRIAGE,
+    TriageStatus.SUBMITTED: Patient.FlowStatus.AWAITING_REVIEW,
+    TriageStatus.CLOSED: Patient.FlowStatus.DISCHARGED,
+    TriageStatus.REFERRED: Patient.FlowStatus.REFERRED,
+}
 
 
 class TriageRecord(BusinessRulesMixin, models.Model):
@@ -269,14 +278,29 @@ class TriageRecord(BusinessRulesMixin, models.Model):
 
         return iarv.get_classification()
 
+    def submit(self, student):
+        """O aluno declara a ficha pronta e a manda para o supervisor avaliar."""
+        if self.status != TriageStatus.OPEN:
+            raise ValidationError("Só uma triagem aberta pode ser enviada.")
+        if student.pk != self.student_author_id:
+            raise ValidationError("Só o autor envia a própria triagem.")
+
+        self.status = TriageStatus.SUBMITTED
+        self.save(update_fields=["status"])
+
     def save(self, *args, **kwargs):
-        is_new = self._state.adding
+        anterior = (
+            None
+            if self._state.adding
+            else TriageRecord.objects.filter(pk=self.pk)
+            .values_list("status", flat=True)
+            .first()
+        )
 
         super().save(*args, **kwargs)
 
-        if is_new and self.patient.flow_status != Patient.FlowStatus.IN_TRIAGE:
-            self.patient.flow_status = Patient.FlowStatus.IN_TRIAGE
-            self.patient.save(update_fields=["flow_status"])
+        if self.status != anterior:
+            self.patient.advance_to(FLOW_BY_TRIAGE_STATUS[self.status])
 
     def __str__(self):
         return f"TriageRecord #{self.pk}"
