@@ -456,7 +456,8 @@ O par aberto é único no banco. O teto de dois alunos por paciente não cabe em
 mais fraco que a constraint, e é o melhor disponível.
 
 **A consulta canônica.** "Quem este aluno atende" deixou de ser um atributo e
-virou join. Para não escrever o mesmo join em seis lugares:
+virou join. Para não escrever o mesmo join em seis lugares, `patient/models/patient.py`
+expõe:
 
 ```python
 def with_open_case(prefix="", **lookups):
@@ -465,6 +466,10 @@ def with_open_case(prefix="", **lookups):
     filtros.update({f"{caminho}__{campo}": valor for campo, valor in lookups.items()})
     return Q(**filtros)
 ```
+
+Ela nasceu em `students/`, mas monta um `Q` sobre caminhos do **Patient**
+(`assignment_history` é o reverso no paciente) e não era usada uma única vez dentro
+de `students` — mudou para o app de quem a usa.
 
 Usada nas quatro `visible_to` que dependiam de `responsible_students` — o acessor
 reverso que sumiu junto com a FK — mais `ProgressNote` e os dois documentos. Toda
