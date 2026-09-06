@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.db import models
+from django.db import models, transaction
 from django.utils import timezone
 from django.db.models import Q
 from areas.models import AreaActing
@@ -9,7 +9,7 @@ from core.models import CustomUser
 from core.permissions import BusinessRulesMixin, RoleScopedQuerySet
 from utils.fields import EncryptedTextField
 from triage.constants import VISIBLE_TO_AUTHOR
-from students.models import Student
+from students.models import Student, with_open_case
 from teacher.models import Teacher
 
 Role = CustomUser.Role
@@ -25,15 +25,12 @@ class PatientQuerySet(RoleScopedQuerySet):
             return self
         if role == Role.PROFESSOR:
             return self.filter(
-                Q(responsible_students__current_advisor_id=user.pk)
+                with_open_case(student__current_advisor_id=user.pk)
                 | Q(responsible_teachers=user.pk)
             ).distinct()
         if role == Role.ALUNO:
             return self.filter(
-                Q(
-                    responsible_students=user.pk,
-                    flow_status=Patient.FlowStatus.IN_TREATMENT,
-                )
+                with_open_case(student_id=user.pk)
                 | Q(
                     triage_records__student_author_id=user.pk,
                     triage_records__status__in=VISIBLE_TO_AUTHOR,
@@ -129,6 +126,11 @@ class Patient(BusinessRulesMixin, CustomUser):
     def active_treatment(self):
         return self.flow_status == self.FlowStatus.IN_TREATMENT
 
+    def is_treated_by(self, student):
+        return self.assignment_history.filter(
+            student_id=student.pk, end_date__isnull=True
+        ).exists()
+
     def advance_to(self, new_status):
         if new_status == self.flow_status:
             return False
@@ -140,8 +142,14 @@ class Patient(BusinessRulesMixin, CustomUser):
                 {"flow_status": f"Não é possível ir de {atual} para {destino}."}
             )
 
-        self.flow_status = new_status
-        self.save(update_fields=["flow_status"])
+        with transaction.atomic():
+            self.flow_status = new_status
+            self.save(update_fields=["flow_status"])
+
+            if new_status == self.FlowStatus.DISCHARGED:
+                self.assignment_history.filter(end_date__isnull=True).update(
+                    end_date=timezone.localdate()
+                )
         return True
 
     def save(self, *args, **kwargs):
@@ -163,7 +171,7 @@ class ProgressNoteQuerySet(RoleScopedQuerySet):
         if role == Role.PROFESSOR:
             return self.filter(student__current_advisor_id=user.pk)
         if role == Role.ALUNO:
-            return self.filter(patient__responsible_students=user.pk)
+            return self.filter(with_open_case("patient__", student_id=user.pk))
         return self.none()
 
 
@@ -235,10 +243,7 @@ class ProgressNote(BusinessRulesMixin, models.Model):
         if user.role == Role.ALUNO:
             if patient is None:
                 return False
-            return (
-                patient.active_treatment
-                and patient.responsible_students.filter(pk=user.pk).exists()
-            )
+            return patient.active_treatment and patient.is_treated_by(user)
         return True
 
     def editable_fields_for(self, user):

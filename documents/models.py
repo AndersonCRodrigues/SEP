@@ -5,7 +5,7 @@ from areas.models import AreaActing
 from core.models import CustomUser
 from core.permissions import BusinessRulesMixin, RoleScopedQuerySet
 from patient.models import Appointment, Patient
-from students.models import Student
+from students.models import Student, with_open_case
 
 Role = CustomUser.Role
 
@@ -46,11 +46,11 @@ class AttendanceCertificateQuerySet(RoleScopedQuerySet):
             return self
         if role == Role.PROFESSOR:
             return self.filter(
-                Q(patient__responsible_students__current_advisor_id=user.pk)
+                with_open_case("patient__", student__current_advisor_id=user.pk)
                 | Q(patient__responsible_teachers=user.pk)
             ).distinct()
         if role == Role.ALUNO:
-            return self.filter(patient__responsible_students=user.pk)
+            return self.filter(with_open_case("patient__", student_id=user.pk))
         if role == Role.PACIENTE:
             return self.filter(patient_id=user.pk)
         return self.none()
