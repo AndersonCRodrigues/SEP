@@ -1,5 +1,3 @@
-"""Evolução clínica: o que o aluno escreve depois de cada sessão."""
-
 from django.conf import settings
 from django.db import models
 from areas.models import AreaActing

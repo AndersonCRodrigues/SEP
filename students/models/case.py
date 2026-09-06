@@ -1,5 +1,3 @@
-"""Designação de caso: quem atende quem, e desde quando."""
-
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.db.models import Q, UniqueConstraint

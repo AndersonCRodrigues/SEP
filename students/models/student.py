@@ -1,5 +1,3 @@
-"""O aluno e a fase do estágio."""
-
 from django.db import models
 from core.models import CustomUser
 from teacher.models import Teacher

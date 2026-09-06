@@ -1,5 +1,3 @@
-"""Carga horária: participação e realização, lançadas à mão ou por signal."""
-
 from decimal import Decimal
 from django.conf import settings
 from django.db import models
@@ -7,14 +5,12 @@ from django.db.models import Q, Sum, UniqueConstraint, Value
 from django.db.models.functions import Coalesce
 from django.utils import timezone
 from core.models import CustomUser
-from core.permissions import BusinessRulesMixin
-from .scoping import AdviseeScopedQuerySet, can_reach_student
-from .student import Student
+from .base import AdviseeRecord
 
 Role = CustomUser.Role
 
 
-class StudentActivity(BusinessRulesMixin, models.Model):
+class StudentActivity(AdviseeRecord):
     PARTICIPATION_HOURS = Decimal("1.00")
 
     class Category(models.TextChoices):
@@ -26,13 +22,6 @@ class StudentActivity(BusinessRulesMixin, models.Model):
         SCREENING = "TR", "Triagem"
         GROUP_SUPERVISION = "SG", "Supervisão em Grupo"
         RECORDS = "PR", "Prontuário"
-
-    student = models.ForeignKey(
-        Student,
-        on_delete=models.PROTECT,
-        related_name="activities",
-        verbose_name="Aluno",
-    )
 
     date = models.DateField(default=timezone.now, verbose_name="Data")
 
@@ -74,17 +63,11 @@ class StudentActivity(BusinessRulesMixin, models.Model):
         verbose_name="Responsável pelo registro",
     )
 
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Criado em")
-
-    objects = AdviseeScopedQuerySet.as_manager()
-
-    CREATABLE_BY = (Role.PROFESSOR,)
     EDITABLE_FIELDS = {
         Role.PROFESSOR: ("date", "activity_type", "category", "hours_worked", "notes")
     }
-    DELETABLE_BY = (Role.PROFESSOR,)
 
-    class Meta:
+    class Meta(AdviseeRecord.Meta):
         verbose_name = "Atividade de estágio"
         verbose_name_plural = "Atividades de estágio"
         ordering = ["-date"]
@@ -95,12 +78,6 @@ class StudentActivity(BusinessRulesMixin, models.Model):
                 name="one_activity_per_appointment_category",
             )
         ]
-
-    @classmethod
-    def can_be_created_by(cls, user, student=None, **context):
-        if not super().can_be_created_by(user):
-            return False
-        return can_reach_student(user, student)
 
     def editable_fields_for(self, user):
         if self.appointment_id:

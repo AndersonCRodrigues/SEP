@@ -1,5 +1,3 @@
-"""Recortes de linha que mais de uma model do app reaproveita."""
-
 from django.db.models import Q
 from django.utils import timezone
 from core.models import CustomUser

@@ -1,5 +1,3 @@
-"""O paciente e seu lugar no fluxo do serviço."""
-
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.db.models import Q

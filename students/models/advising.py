@@ -1,5 +1,3 @@
-"""Orientação: o único par ponteiro/histórico que sobrou no projeto."""
-
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.db import models, transaction
