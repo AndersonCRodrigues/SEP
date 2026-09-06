@@ -1,31 +1,25 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.db.models import Q
 
 from core.models import CustomUser
-from core.permissions import BusinessRulesMixin, RoleScopedQuerySet
-from triage.constants import TriageStatus
+from core.permissions import ALL, BusinessRulesMixin, RoleScopedQuerySet
+from triage.constants import VISIBLE_TO_AUTHOR
 
 Role = CustomUser.Role
 
 
 class IarvQuerySet(RoleScopedQuerySet):
-    def visible_to(self, user):
-        if not user.is_authenticated:
-            return self.none()
-
-        role = user.role
-        if role == Role.SUPERVISOR:
-            return self
-        if role == Role.PROFESSOR:
-            return self.filter(
-                triage_record__student_author__current_advisor_id=user.pk
-            )
-        if role == Role.ALUNO:
-            return self.filter(
-                triage_record__student_author_id=user.pk,
-                triage_record__status=TriageStatus.OPEN,
-            )
-        return self.none()
+    VISIBLE_TO = {
+        Role.SUPERVISOR: ALL,
+        Role.PROFESSOR: lambda u: Q(
+            triage_record__student_author__current_advisor_id=u.pk
+        ),
+        Role.ALUNO: lambda u: Q(
+            triage_record__student_author_id=u.pk,
+            triage_record__status__in=VISIBLE_TO_AUTHOR,
+        ),
+    }
 
 
 class RiskScale(models.IntegerChoices):
