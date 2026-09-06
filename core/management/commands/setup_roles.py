@@ -21,7 +21,10 @@ def _rotulo(model, acao):
 
 def _le(model, role):
     usuario = CustomUser(pk=0, role=role, is_superuser=role == Role.SUPERADMIN)
-    return not model.objects.visible_to(usuario).query.is_empty()
+    try:
+        return not model.objects.visible_to(usuario).query.is_empty()
+    except AttributeError:
+        return False
 
 
 def permissoes_por_role():
