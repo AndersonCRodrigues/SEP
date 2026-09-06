@@ -303,12 +303,16 @@ quebrou, ele está certo.
 
 Duas informações no banco dizem a mesma coisa:
 
-- **O ponteiro** — `Student.current_advisor`, `Student.current_patient`.
-- **A linha aberta** — o `Advising` / `CaseAssignment` com `end_date IS NULL`.
+- **O ponteiro** — `Student.current_advisor`.
+- **A linha aberta** — o `Advising` com `end_date IS NULL`.
 
 Se as duas puderem ser escritas independentemente, elas divergem. Já divergiam:
 gravar `student.current_advisor = prof` direto trocava o orientador **sem deixar
 rastro nenhum** no histórico. Só os métodos de manager registravam.
+
+Vale para **um** vínculo por vez. Onde o aluno acumula vínculos simultâneos não há
+ponteiro possível, e a regra não se aplica — ver *"Quando não há ponteiro"*,
+adiante.
 
 ### A regra
 
@@ -327,7 +331,7 @@ Em `students/signals.py`, dois receptores em `Student`:
 save()
   │
   ├─ pre_save  ── capture_previous_links()
-  │               lê current_advisor_id e current_patient_id do banco
+  │               lê current_advisor_id do banco
   │
   ├─ [ o UPDATE acontece ]
   │
@@ -365,33 +369,28 @@ deixaria o histórico dizendo uma coisa e o ponteiro outra.
 | Quero… | Faça |
 |---|---|
 | Trocar o orientador | `Advising.objects.change_advisor(aluno, prof, term="2026.1")` |
-| Trocar o paciente | `CaseAssignment.objects.change_patient(aluno, paciente)` |
 | Encerrar sem substituir | passe `None` como segundo argumento |
 | Corrigir o período | não há caminho; encerre e reabra |
-| Consultar o vínculo atual | `aluno.current_advisor` / `aluno.current_patient` |
-| Consultar o histórico | `aluno.advising_history` / `aluno.case_history` |
+| Consultar o vínculo atual | `aluno.current_advisor` |
+| Consultar o histórico | `aluno.advising_history` |
 
 O `term` é opcional em `change_advisor`. Omitido, `current_term()` deriva do mês
 (≤ 6 → `.1`, senão `.2`). Informado, ele viaja até o signal por
 `student._advising_term`.
 
-Os métodos de manager continuam existindo porque guardam o que só eles sabem: as
-validações de negócio (não redesignar o mesmo, respeitar o limite de 2 alunos por
-paciente) e o `term` explícito. **Eles não escrevem o histórico** — só movem o
-ponteiro e deixam o signal registrar.
+`change_advisor` existe porque guarda o que só ele sabe: recusar redesignar o
+mesmo professor, e o `term` explícito. **Ele não escreve o histórico** — só move o
+ponteiro e deixa o signal registrar.
 
-### Duas invariantes ficam no banco
+### A invariante fica no banco
 
 ```sql
 CREATE UNIQUE INDEX student_with_at_most_one_active_advising
   ON students_advising (student_id) WHERE (end_date IS NULL);
-
-CREATE UNIQUE INDEX student_with_at_most_one_active_case
-  ON students_caseassignment (student_id) WHERE (end_date IS NULL);
 ```
 
-São índices parciais, não constraints — é como o Django materializa
-`UniqueConstraint(condition=...)`. Por isso não aparecem em `pg_constraint`.
+É índice parcial, não constraint — é como o Django materializa
+`UniqueConstraint(condition=...)`. Por isso não aparece em `pg_constraint`.
 
 ### Por que não o contrário
 
@@ -407,12 +406,60 @@ Duas alternativas foram avaliadas e descartadas:
 
 ### Onde a regra vale
 
-Só em `Advising` e `CaseAssignment` — são os dois pares ponteiro/histórico.
-`Attendance`, `PerformanceReview` e `StudentActivity` são registros
-independentes, sem ponteiro correspondente, e se escrevem normalmente. A exceção
-parcial é `StudentActivity`: linhas com `appointment` preenchido são mantidas por
-signal e não aceitam edição manual, pelo mesmo motivo de fundo — quem manda nelas
-é o agendamento.
+Só em `Advising` — é o único par ponteiro/histórico que sobrou. `Attendance`,
+`PerformanceReview` e `StudentActivity` são registros independentes, sem ponteiro
+correspondente, e se escrevem normalmente. A exceção parcial é `StudentActivity`:
+linhas com `appointment` preenchido são mantidas por signal e não aceitam edição
+manual, pelo mesmo motivo de fundo — quem manda nelas é o agendamento.
+
+### Quando não há ponteiro
+
+`CaseAssignment` seguia esta regra e **deixou de seguir**, porque o aluno passou a
+atender vários pacientes ao mesmo tempo. Uma FK guarda um valor; N vínculos
+simultâneos não cabem nela. Sem ponteiro não há o que derivar — a tabela virou a
+própria fonte da verdade, e com isso caíram o `_from_sync`, o signal e a constraint
+de um caso por aluno.
+
+O que entrou no lugar:
+
+```python
+CaseAssignment.objects.assign(aluno, paciente)   # abre e poe o paciente em atendimento
+CaseAssignment.objects.release(caso)             # fecha (end_date = hoje)
+aluno.open_cases                                 # os casos abertos deste aluno
+```
+
+Duas invariantes, cada uma no seu lugar:
+
+```sql
+CREATE UNIQUE INDEX one_open_case_per_student_and_patient
+  ON students_caseassignment (student_id, patient_id) WHERE (end_date IS NULL);
+```
+
+O par aberto é único no banco. O teto de dois alunos por paciente não cabe em
+índice — "no máximo 2 linhas por paciente" não é unicidade — então mora em
+`CaseAssignment.clean()`, chamado pelo `save()` quando a linha nasce aberta. É
+mais fraco que a constraint, e é o melhor disponível.
+
+**A consulta canônica.** "Quem este aluno atende" deixou de ser um atributo e
+virou join. Para não escrever o mesmo join em seis lugares:
+
+```python
+def with_open_case(prefix="", **lookups):
+    caminho = f"{prefix}assignment_history"
+    filtros = {f"{caminho}__end_date__isnull": True}
+    filtros.update({f"{caminho}__{campo}": valor for campo, valor in lookups.items()})
+    return Q(**filtros)
+```
+
+Usada nas quatro `visible_to` que dependiam de `responsible_students` — o acessor
+reverso que sumiu junto com a FK — mais `ProgressNote` e os dois documentos. Toda
+condição vai num único `Q`, para o ORM prendê-las à mesma linha do join; separá-las
+em `filter()` encadeados casaria com linhas diferentes e vazaria acesso.
+
+**Alta encerra o vínculo.** `Patient.advance_to(DISCHARGED)` fecha os casos abertos
+do paciente. Sem isso `open_cases` mentiria, e o aluno continuaria enxergando um
+paciente que recebeu alta. O contrário não vale: encerrar o caso de um aluno não dá
+alta — o paciente pode ser reatribuído.
 
 ---
 
@@ -561,12 +608,13 @@ Ninguém escreve `flow_status` à mão. Dois pontos o movem:
 - **`TriageRecord.save()`** compara o `status` gravado com o do banco e, só quando
   mudou, sincroniza o paciente por `FLOW_BY_TRIAGE_STATUS`. A comparação importa:
   sem ela, qualquer `save()` da ficha reempurraria o paciente para trás.
-- **`CaseAssignmentManager.sync_from_student()`** põe em `IN_TREATMENT` ao abrir o
-  caso. Designar o aluno **é** o que inicia o atendimento.
+- **`CaseAssignment.objects.assign()`** põe em `IN_TREATMENT` ao abrir o caso.
+  Designar o aluno **é** o que inicia o atendimento.
 
-A alta continua sendo chamada explícita. Encerrar o caso de um aluno não dá alta —
-o paciente pode ser reatribuído, e confundir as duas coisas apagaria tratamento em
-curso por efeito colateral.
+A alta continua sendo chamada explícita, e é a única transição com efeito colateral:
+`advance_to(DISCHARGED)` fecha os casos abertos do paciente. O contrário não vale —
+encerrar o caso de um aluno não dá alta, porque o paciente pode ser reatribuído, e
+confundir as duas coisas apagaria tratamento em curso por efeito colateral.
 
 ### O envio da triagem
 
