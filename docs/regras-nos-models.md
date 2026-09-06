@@ -490,3 +490,96 @@ hora — o registro seria órfão, e o banco recusaria de todo jeito.
 `category` soma tudo, com `category` soma só aquela fatia. O `Coalesce` devolve
 `Decimal("0")` quando não há atividade, para quem chama não precisar tratar `None`.
 
+---
+
+## 4. O fluxo do paciente
+
+### Uma fonte de verdade, não três
+
+Antes desta seção o projeto respondia "onde este paciente está?" de três lugares
+que podiam discordar: `Patient.flow_status` (que só tinha `IN_TRIAGE`),
+`Patient.active_treatment` (booleano, `default=True`) e `TriageRecord.status`.
+Um paciente recém-cadastrado, que nunca passou por triagem, já nascia
+"em atendimento ativo" — e era esse booleano que decidia o que o aluno enxergava.
+
+Hoje `flow_status` manda, e `active_treatment` derivou dele:
+
+```python
+@property
+def active_treatment(self):
+    return self.flow_status == self.FlowStatus.IN_TREATMENT
+```
+
+### Os cinco estados
+
+| Estado | Entra quando |
+|---|---|
+| *(vazio)* | Administrativo cadastrou; ainda fora do fluxo |
+| `IN_TRIAGE` | Aluno abriu a triagem |
+| `AWAITING_REVIEW` | Aluno **enviou** a ficha (`TriageStatus.SUBMITTED`) |
+| `REFERRED` | Supervisor encaminhou ao professor da área |
+| `IN_TREATMENT` | Professor designou o aluno que vai atender |
+| `DISCHARGED` | Alta, ou triagem fechada sem encaminhamento |
+
+O estado vazio é deliberado: cadastrar não é entrar no fluxo. Quem tenta tratá-lo
+como um sexto estado acaba escrevendo `flow_status or IN_TRIAGE` espalhado.
+
+### A transição é evento, não campo
+
+`flow_status` não está no `EDITABLE_FIELDS` de **ninguém** — há um teste que trava
+se alguém o adicionar. Mover só acontece por `advance_to()`, que consulta o mapa:
+
+```python
+ALLOWED_TRANSITIONS = {
+    "":               (IN_TRIAGE, IN_TREATMENT),
+    IN_TRIAGE:        (AWAITING_REVIEW, REFERRED, DISCHARGED),
+    AWAITING_REVIEW:  (IN_TRIAGE, REFERRED, DISCHARGED),
+    REFERRED:         (IN_TRIAGE, IN_TREATMENT, DISCHARGED),
+    IN_TREATMENT:     (DISCHARGED,),
+    DISCHARGED:       (IN_TRIAGE,),
+}
+```
+
+Três escolhas que não são óbvias:
+
+- **`AWAITING_REVIEW → IN_TRIAGE`** existe porque o supervisor devolve a ficha com
+  parecer para o aluno corrigir. É o "envia para os Alunos" da regra do negócio.
+- **`DISCHARGED → IN_TRIAGE`** existe porque paciente volta ao serviço. É a única
+  saída da alta — reabrir direto em atendimento pularia a triagem.
+- **`"" → IN_TREATMENT`** é o buraco consciente: dá para designar um aluno a um
+  paciente que nunca foi triado. O model sempre permitiu e esta seção não fechou;
+  fechar é decisão de produto, não refatoração.
+
+`advance_to` devolve `False` quando o paciente já está no destino — chamar de novo
+não é erro nem escrita. Salto ilegal levanta `ValidationError` com os dois rótulos
+em português: *"Não é possível ir de Em atendimento para Encaminhado ao professor."*
+
+### Quem dirige
+
+Ninguém escreve `flow_status` à mão. Dois pontos o movem:
+
+- **`TriageRecord.save()`** compara o `status` gravado com o do banco e, só quando
+  mudou, sincroniza o paciente por `FLOW_BY_TRIAGE_STATUS`. A comparação importa:
+  sem ela, qualquer `save()` da ficha reempurraria o paciente para trás.
+- **`CaseAssignmentManager.sync_from_student()`** põe em `IN_TREATMENT` ao abrir o
+  caso. Designar o aluno **é** o que inicia o atendimento.
+
+A alta continua sendo chamada explícita. Encerrar o caso de um aluno não dá alta —
+o paciente pode ser reatribuído, e confundir as duas coisas apagaria tratamento em
+curso por efeito colateral.
+
+### O envio da triagem
+
+`TriageStatus` ganhou `SUBMITTED`. O aluno edita enquanto `OPEN` e chama
+`submit()`, que recusa ficha já enviada e recusa quem não é o autor. A partir daí
+`editable_fields_for` devolve `()` para ele — mas ele **continua lendo**:
+
+```python
+VISIBLE_TO_AUTHOR = (TriageStatus.OPEN, TriageStatus.SUBMITTED)
+```
+
+Sem isso o aluno perderia a ficha de vista no instante em que a enviasse, e o
+feedback do supervisor chegaria sobre um documento que ele não pode mais abrir.
+`TriageRecordQuerySet.visible_to` e `PatientQuerySet.visible_to` usam a mesma
+constante, para não divergirem.
+
