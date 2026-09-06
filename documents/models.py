@@ -3,7 +3,7 @@ from django.db import models
 from django.db.models import F, Q
 from areas.models import AreaActing
 from core.models import CustomUser
-from core.permissions import BusinessRulesMixin, RoleScopedQuerySet
+from core.permissions import ALL, BusinessRulesMixin, RoleScopedQuerySet
 from patient.models import Appointment, Patient
 from students.models import Student, with_open_case
 
@@ -37,23 +37,16 @@ class BaseCertificate(BusinessRulesMixin, models.Model):
 
 
 class AttendanceCertificateQuerySet(RoleScopedQuerySet):
-    def visible_to(self, user):
-        if not user.is_authenticated:
-            return self.none()
-
-        role = user.role
-        if role in (Role.SUPERVISOR, Role.ADMINISTRATIVO):
-            return self
-        if role == Role.PROFESSOR:
-            return self.filter(
-                with_open_case("patient__", student__current_advisor_id=user.pk)
-                | Q(patient__responsible_teachers=user.pk)
-            ).distinct()
-        if role == Role.ALUNO:
-            return self.filter(with_open_case("patient__", student_id=user.pk))
-        if role == Role.PACIENTE:
-            return self.filter(patient_id=user.pk)
-        return self.none()
+    VISIBLE_TO = {
+        Role.SUPERVISOR: ALL,
+        Role.ADMINISTRATIVO: ALL,
+        Role.PROFESSOR: lambda u: (
+            with_open_case("patient__", student__current_advisor_id=u.pk)
+            | Q(patient__responsible_teachers=u.pk)
+        ),
+        Role.ALUNO: lambda u: with_open_case("patient__", student_id=u.pk),
+        Role.PACIENTE: lambda u: Q(patient_id=u.pk),
+    }
 
 
 class AttendanceCertificate(BaseCertificate):
@@ -111,18 +104,12 @@ class AttendanceCertificate(BaseCertificate):
 
 
 class InternshipDeclarationQuerySet(RoleScopedQuerySet):
-    def visible_to(self, user):
-        if not user.is_authenticated:
-            return self.none()
-
-        role = user.role
-        if role in (Role.SUPERVISOR, Role.ADMINISTRATIVO):
-            return self
-        if role == Role.PROFESSOR:
-            return self.filter(student__current_advisor_id=user.pk)
-        if role == Role.ALUNO:
-            return self.filter(student_id=user.pk)
-        return self.none()
+    VISIBLE_TO = {
+        Role.SUPERVISOR: ALL,
+        Role.ADMINISTRATIVO: ALL,
+        Role.PROFESSOR: lambda u: Q(student__current_advisor_id=u.pk),
+        Role.ALUNO: lambda u: Q(student_id=u.pk),
+    }
 
 
 class InternshipDeclaration(BaseCertificate):

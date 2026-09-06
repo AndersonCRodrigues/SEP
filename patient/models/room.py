@@ -3,7 +3,7 @@ from django.db import models
 from django.db.models import Q
 from django.utils import timezone
 from core.models import CustomUser
-from core.permissions import BusinessRulesMixin, RoleScopedQuerySet
+from core.permissions import ALL, ANY, BusinessRulesMixin, RoleScopedQuerySet
 from students.models import Student
 from .patient import Patient
 
@@ -11,10 +11,7 @@ Role = CustomUser.Role
 
 
 class RoomQuerySet(RoleScopedQuerySet):
-    def visible_to(self, user):
-        if not user.is_authenticated:
-            return self.none()
-        return self
+    VISIBLE_TO = {ANY: ALL}
 
     def usable(self):
         return self.filter(status=Room.Status.ACTIVE)
@@ -66,20 +63,13 @@ class Room(BusinessRulesMixin, models.Model):
 
 
 class RoomBookingQuerySet(RoleScopedQuerySet):
-    def visible_to(self, user):
-        if not user.is_authenticated:
-            return self.none()
-
-        role = user.role
-        if role in (Role.SUPERVISOR, Role.ADMINISTRATIVO):
-            return self
-        if role == Role.PROFESSOR:
-            return self.filter(student__current_advisor_id=user.pk)
-        if role == Role.ALUNO:
-            return self.filter(student_id=user.pk)
-        if role == Role.PACIENTE:
-            return self.filter(patient_id=user.pk)
-        return self.none()
+    VISIBLE_TO = {
+        Role.SUPERVISOR: ALL,
+        Role.ADMINISTRATIVO: ALL,
+        Role.PROFESSOR: lambda u: Q(student__current_advisor_id=u.pk),
+        Role.ALUNO: lambda u: Q(student_id=u.pk),
+        Role.PACIENTE: lambda u: Q(patient_id=u.pk),
+    }
 
     def open(self):
         return self.filter(end_date__isnull=True)

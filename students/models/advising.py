@@ -4,7 +4,7 @@ from django.db import models, transaction
 from django.db.models import Q, UniqueConstraint
 from django.utils import timezone
 from core.models import CustomUser
-from core.permissions import BusinessRulesMixin, RoleScopedQuerySet
+from core.permissions import ALL, BusinessRulesMixin, RoleScopedQuerySet
 from teacher.models import Teacher
 from .scoping import current_term
 from .student import Student
@@ -13,18 +13,11 @@ Role = CustomUser.Role
 
 
 class AdvisingQuerySet(RoleScopedQuerySet):
-    def visible_to(self, user):
-        if not user.is_authenticated:
-            return self.none()
-
-        role = user.role
-        if role == Role.SUPERVISOR:
-            return self
-        if role == Role.PROFESSOR:
-            return self.filter(teacher_id=user.pk)
-        if role == Role.ALUNO:
-            return self.filter(student_id=user.pk)
-        return self.none()
+    VISIBLE_TO = {
+        Role.SUPERVISOR: ALL,
+        Role.PROFESSOR: lambda u: Q(teacher_id=u.pk),
+        Role.ALUNO: lambda u: Q(student_id=u.pk),
+    }
 
 
 class AdvisingManager(models.Manager.from_queryset(AdvisingQuerySet)):

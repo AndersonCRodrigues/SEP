@@ -39,11 +39,53 @@ def roles_for(role):
     return tuple(cadeia)
 
 
+ALL = "ALL"
+"""Valor de VISIBLE_TO: o papel enxerga o queryset inteiro."""
+
+ANY = "ANY"
+"""Chave de VISIBLE_TO: vale para qualquer usuario autenticado."""
+
+
+def effective_role(user):
+    """Superusuario responde como Superadmin, tenha o role que tiver."""
+    return Role.SUPERADMIN if user.is_superuser else user.role
+
+
 class RoleScopedQuerySet(models.QuerySet):
+    """
+    Recorte por linha, declarado em VISIBLE_TO:
+
+        {papel: ALL | callable(user) -> Q}
+
+    Papel ausente nao enxerga nada. ANY como chave atende quem nao tem entrada
+    propria. A cadeia de INHERITS vale aqui tambem, mas quase todo queryset
+    declara o Supervisor explicitamente -- ele le mais que o Professor, nao o
+    mesmo, e onde nao le (o log de auditoria) o silencio e proposital.
+    """
+
+    VISIBLE_TO = {}
+
+    def scope_for(self, role):
+        if not self.VISIBLE_TO:
+            raise NotImplementedError(f"Declare VISIBLE_TO em {type(self).__name__}.")
+        for papel in roles_for(role):
+            if papel in self.VISIBLE_TO:
+                return self.VISIBLE_TO[papel]
+        return self.VISIBLE_TO.get(ANY)
+
+    def readable_by_role(self, role):
+        return self.scope_for(role) is not None
+
     def visible_to(self, user):
-        raise NotImplementedError(
-            "Defina visible_to() na subclasse de RoleScopedQuerySet."
-        )
+        if not user.is_authenticated:
+            return self.none()
+
+        escopo = self.scope_for(effective_role(user))
+        if escopo is None:
+            return self.none()
+        if escopo is ALL:
+            return self
+        return self.filter(escopo(user)).distinct()
 
 
 class BusinessRulesMixin:

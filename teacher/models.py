@@ -1,16 +1,13 @@
 from django.db import models
 from areas.models import AreaActing
 from core.models import CustomUser
-from core.permissions import BusinessRulesMixin, RoleScopedQuerySet
+from core.permissions import ALL, ANY, BusinessRulesMixin, RoleScopedQuerySet
 
 Role = CustomUser.Role
 
 
 class ProfessorAreaQuerySet(RoleScopedQuerySet):
-    def visible_to(self, user):
-        if not user.is_authenticated:
-            return self.none()
-        return self
+    VISIBLE_TO = {ANY: ALL}
 
 
 class Teacher(CustomUser):

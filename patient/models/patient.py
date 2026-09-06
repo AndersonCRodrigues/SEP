@@ -4,7 +4,7 @@ from django.db.models import Q
 from django.utils import timezone
 from core.managers import CustomUserManager
 from core.models import CustomUser
-from core.permissions import BusinessRulesMixin, RoleScopedQuerySet
+from core.permissions import ALL, BusinessRulesMixin, RoleScopedQuerySet
 from students.models import with_open_case
 from teacher.models import Teacher
 from triage.constants import VISIBLE_TO_AUTHOR
@@ -14,29 +14,22 @@ Role = CustomUser.Role
 
 
 class PatientQuerySet(RoleScopedQuerySet):
-    def visible_to(self, user):
-        if not user.is_authenticated:
-            return self.none()
-
-        role = user.role
-        if role in (Role.SUPERVISOR, Role.ADMINISTRATIVO):
-            return self
-        if role == Role.PROFESSOR:
-            return self.filter(
-                with_open_case(student__current_advisor_id=user.pk)
-                | Q(responsible_teachers=user.pk)
-            ).distinct()
-        if role == Role.ALUNO:
-            return self.filter(
-                with_open_case(student_id=user.pk)
-                | Q(
-                    triage_records__student_author_id=user.pk,
-                    triage_records__status__in=VISIBLE_TO_AUTHOR,
-                )
-            ).distinct()
-        if role == Role.PACIENTE:
-            return self.filter(pk=user.pk)
-        return self.none()
+    VISIBLE_TO = {
+        Role.SUPERVISOR: ALL,
+        Role.ADMINISTRATIVO: ALL,
+        Role.PROFESSOR: lambda u: (
+            with_open_case(student__current_advisor_id=u.pk)
+            | Q(responsible_teachers=u.pk)
+        ),
+        Role.ALUNO: lambda u: (
+            with_open_case(student_id=u.pk)
+            | Q(
+                triage_records__student_author_id=u.pk,
+                triage_records__status__in=VISIBLE_TO_AUTHOR,
+            )
+        ),
+        Role.PACIENTE: lambda u: Q(pk=u.pk),
+    }
 
 
 class Patient(BusinessRulesMixin, CustomUser):

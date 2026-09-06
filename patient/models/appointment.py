@@ -3,7 +3,7 @@ from django.db import models
 from django.db.models import Q
 from django.utils import timezone
 from core.models import CustomUser
-from core.permissions import BusinessRulesMixin, RoleScopedQuerySet
+from core.permissions import ALL, BusinessRulesMixin, RoleScopedQuerySet
 from students.models import Student
 from teacher.models import Teacher
 from .patient import Patient
@@ -13,22 +13,15 @@ Role = CustomUser.Role
 
 
 class AppointmentQuerySet(RoleScopedQuerySet):
-    def visible_to(self, user):
-        if not user.is_authenticated:
-            return self.none()
-
-        role = user.role
-        if role in (Role.SUPERVISOR, Role.ADMINISTRATIVO):
-            return self
-        if role == Role.PROFESSOR:
-            return self.filter(
-                Q(teacher_id=user.pk) | Q(assigned_student__current_advisor_id=user.pk)
-            ).distinct()
-        if role == Role.ALUNO:
-            return self.filter(assigned_student_id=user.pk)
-        if role == Role.PACIENTE:
-            return self.filter(patient_id=user.pk)
-        return self.none()
+    VISIBLE_TO = {
+        Role.SUPERVISOR: ALL,
+        Role.ADMINISTRATIVO: ALL,
+        Role.PROFESSOR: lambda u: (
+            Q(teacher_id=u.pk) | Q(assigned_student__current_advisor_id=u.pk)
+        ),
+        Role.ALUNO: lambda u: Q(assigned_student_id=u.pk),
+        Role.PACIENTE: lambda u: Q(patient_id=u.pk),
+    }
 
 
 class Appointment(BusinessRulesMixin, models.Model):

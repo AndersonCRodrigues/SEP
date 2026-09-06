@@ -1,8 +1,9 @@
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import Q
 from core.models import CustomUser
-from core.permissions import BusinessRulesMixin, RoleScopedQuerySet
+from core.permissions import ALL, BusinessRulesMixin, RoleScopedQuerySet
 from patient.models import Patient
 from students.models import Student
 from triage.constants import VISIBLE_TO_AUTHOR, TriageStatus
@@ -12,18 +13,11 @@ Role = CustomUser.Role
 
 
 class TriageRecordQuerySet(RoleScopedQuerySet):
-    def visible_to(self, user):
-        if not user.is_authenticated:
-            return self.none()
-
-        role = user.role
-        if role == Role.SUPERVISOR:
-            return self
-        if role == Role.PROFESSOR:
-            return self.filter(student_author__current_advisor_id=user.pk)
-        if role == Role.ALUNO:
-            return self.filter(student_author_id=user.pk, status__in=VISIBLE_TO_AUTHOR)
-        return self.none()
+    VISIBLE_TO = {
+        Role.SUPERVISOR: ALL,
+        Role.PROFESSOR: lambda u: Q(student_author__current_advisor_id=u.pk),
+        Role.ALUNO: lambda u: Q(student_author_id=u.pk, status__in=VISIBLE_TO_AUTHOR),
+    }
 
 
 FLOW_BY_TRIAGE_STATUS = {
@@ -279,7 +273,6 @@ class TriageRecord(BusinessRulesMixin, models.Model):
         return iarv.get_classification()
 
     def submit(self, student):
-        """O aluno declara a ficha pronta e a manda para o supervisor avaliar."""
         if self.status != TriageStatus.OPEN:
             raise ValidationError("Só uma triagem aberta pode ser enviada.")
         if student.pk != self.student_author_id:
@@ -307,18 +300,11 @@ class TriageRecord(BusinessRulesMixin, models.Model):
 
 
 class TriageFeedbackQuerySet(RoleScopedQuerySet):
-    def visible_to(self, user):
-        if not user.is_authenticated:
-            return self.none()
-
-        role = user.role
-        if role == Role.SUPERVISOR:
-            return self
-        if role == Role.PROFESSOR:
-            return self.filter(triage__student_author__current_advisor_id=user.pk)
-        if role == Role.ALUNO:
-            return self.filter(triage__student_author_id=user.pk)
-        return self.none()
+    VISIBLE_TO = {
+        Role.SUPERVISOR: ALL,
+        Role.PROFESSOR: lambda u: Q(triage__student_author__current_advisor_id=u.pk),
+        Role.ALUNO: lambda u: Q(triage__student_author_id=u.pk),
+    }
 
 
 class TriageFeedback(BusinessRulesMixin, models.Model):

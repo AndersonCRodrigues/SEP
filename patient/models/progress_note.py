@@ -1,8 +1,9 @@
 from django.conf import settings
 from django.db import models
+from django.db.models import Q
 from areas.models import AreaActing
 from core.models import CustomUser
-from core.permissions import BusinessRulesMixin, RoleScopedQuerySet
+from core.permissions import ALL, BusinessRulesMixin, RoleScopedQuerySet
 from students.models import Student, with_open_case
 from .patient import Patient
 
@@ -10,18 +11,11 @@ Role = CustomUser.Role
 
 
 class ProgressNoteQuerySet(RoleScopedQuerySet):
-    def visible_to(self, user):
-        if not user.is_authenticated:
-            return self.none()
-
-        role = user.role
-        if role == Role.SUPERVISOR:
-            return self
-        if role == Role.PROFESSOR:
-            return self.filter(student__current_advisor_id=user.pk)
-        if role == Role.ALUNO:
-            return self.filter(with_open_case("patient__", student_id=user.pk))
-        return self.none()
+    VISIBLE_TO = {
+        Role.SUPERVISOR: ALL,
+        Role.PROFESSOR: lambda u: Q(student__current_advisor_id=u.pk),
+        Role.ALUNO: lambda u: with_open_case("patient__", student_id=u.pk),
+    }
 
 
 class ProgressNote(BusinessRulesMixin, models.Model):
