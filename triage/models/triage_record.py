@@ -6,7 +6,7 @@ from core.models import CustomUser
 from core.permissions import ALL, BusinessRulesMixin, RoleScopedQuerySet
 from patient.models import Patient
 from students.models import Student
-from triage.constants import VISIBLE_TO_AUTHOR, TriageStatus
+from core.constants import VISIBLE_TO_AUTHOR, TriageStatus
 from utils.fields import EncryptedTextField
 
 Role = CustomUser.Role

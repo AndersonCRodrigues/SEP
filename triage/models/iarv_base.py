@@ -4,7 +4,7 @@ from django.db.models import Q
 
 from core.models import CustomUser
 from core.permissions import ALL, BusinessRulesMixin, RoleScopedQuerySet
-from triage.constants import VISIBLE_TO_AUTHOR
+from core.constants import VISIBLE_TO_AUTHOR
 
 Role = CustomUser.Role
 
