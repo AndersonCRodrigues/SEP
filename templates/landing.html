@@ -1,0 +1,27 @@
+{% extends "base_auth.html" %}
+{% load static %}
+
+{% block title %}SEP — Serviço-Escola de Psicologia{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'core/css/landing.css' %}?v=9">
+{% endblock %}
+
+{% block content %}
+
+  <div class="landing-center">
+    <img
+      src="{% static 'core/images/univassouras-leading.png' %}"
+      alt="Univassouras"
+      class="landing-logo"
+    >
+
+    <div class="landing-texts">
+      <p class="landing-welcome">Bem Vindo</p>
+      <p class="landing-subtitle">Serviço-Escola de<br>Psicologia</p>
+    </div>
+  </div>
+
+  <a href="{% url 'login' %}" class="landing-btn">Entrar</a>
+
+{% endblock %}

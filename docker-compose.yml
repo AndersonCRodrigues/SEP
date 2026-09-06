@@ -52,6 +52,11 @@ services:
       DATABASE_PORT: ${DJANGO_DATABASE_PORT}
     env_file:
       - .env
+    volumes:
+      - ./templates:/app/templates      # hot-reload de templates sem rebuild
+      - ./core/static:/app/core/static  # hot-reload de arquivos estáticos originais
+      - staticfiles_data:/app/staticfiles # Persiste os arquivos estáticos processados
 
 volumes:
   postgres_data:
+  staticfiles_data:

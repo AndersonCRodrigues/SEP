@@ -1,0 +1,121 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap');
+
+/* Reset */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  font-family: 'Museo Sans', 'Nunito', sans-serif;
+  background-color: #6D1D20;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 30px 0;
+}
+
+/* Bloco central: logo + textos */
+.landing-center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 20px;
+}
+
+/* Logo */
+.landing-logo {
+  width: 280px;
+  height: auto;
+  display: block;
+}
+
+/* Textos */
+.landing-texts {
+  text-align: center;
+}
+
+.landing-welcome {
+  font-family: 'Museo Sans', 'Nunito', sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: #FFFFFF;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.landing-subtitle {
+  font-family: 'Museo Sans', 'Nunito', sans-serif;
+  font-size: 18px;
+  font-weight: 300;
+  color: #FFFFFF;
+  line-height: 1.2;
+  margin-top: 2px;
+}
+
+/* Botão Entrar */
+.landing-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 360px;
+  height: 58px;
+  background-color: #FDF8F8;
+  color: #6D1D20;
+  font-family: 'Museo Sans', 'Nunito', sans-serif;
+  font-size: 22px;
+  font-weight: 600;
+  border: none;
+  border-radius: 30px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-bottom: 110px; /* Desceu o botão um pouco */
+}
+
+.landing-btn:hover {
+  background-color: #e8e0df;
+  color: #6D1D20;
+}
+
+/* Desktop (≥ 768px) — proporções mais harmônicas e elegantes para PC */
+@media (min-width: 768px) {
+  body {
+    padding: 60px 40px 0;
+  }
+
+  .landing-center {
+    gap: 32px;
+  }
+
+  .landing-logo {
+    width: 320px;
+  }
+
+  .landing-welcome {
+    font-size: 32px;
+  }
+
+  .landing-subtitle {
+    font-size: 20px;
+    margin-top: 4px;
+  }
+
+  .landing-btn {
+    width: 100%;
+    max-width: 400px;
+    height: 62px;
+    font-size: 24px;
+    margin-bottom: 110px;
+  }
+}

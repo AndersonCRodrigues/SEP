@@ -1,49 +1,124 @@
-{% extends "base.html" %}
+{% extends "base_auth.html" %}
+{% load static %}
 
-{% block title %}Login{% endblock %}
+{% block title %}Login — SEP{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'core/css/login.css' %}">
+{% endblock %}
 
 {% block content %}
-<h1>Login</h1>
 
-<form method="post">
-    {% csrf_token %}
-    {{ form.non_field_errors }}
-    <p>
-        {{ form.username.label_tag }}
-        {{ form.username }}
-        {{ form.username.errors }}
-    </p>
-    <p>
-        {{ form.password.label_tag }}
-        <span style="display: inline-flex; align-items: center; gap: 4px;">
-            {{ form.password }}
-            <button type="button" id="toggle-senha" aria-label="Mostrar senha" class="btn p-0 border-0 bg-transparent d-inline-flex align-items-center">
-                <svg id="icone-olho-fechado" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
-                    <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a18.9 18.9 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-                    <line x1="1" y1="1" x2="23" y2="23"></line>
-                </svg>
-                <svg id="icone-olho-aberto" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"></path>
-                    <circle cx="12" cy="12" r="3"></circle>
-                </svg>
-            </button>
-        </span>
-        {{ form.password.errors }}
-    </p>
-    <button type="submit" class="btn btn-primary">Entrar</button>
-</form>
+<img src="{% static 'core/images/univassouras_vertical.png' %}" class="watermark-mobile d-none-desktop" alt="" aria-hidden="true">
+
+<div class="mobile-header d-none-desktop">
+  <a href="#" class="back-arrow" aria-label="Voltar">
+    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+  </a>
+  <h1 class="mobile-greeting-title">Olá!</h1>
+  <p class="mobile-greeting-subtitle">Bem vindo de volta!</p>
+</div>
+
+<img src="{% static 'core/images/logo_branca.png' %}" alt="Univassouras" class="footer-logo d-none-mobile">
+
+<div class="login-card">
+ 
+  <img src="{% static 'core/images/watermark.png' %}" alt="" class="watermark d-none-mobile" aria-hidden="true">
+
+  <div class="content-wrapper">
+   
+    <h2 class="mobile-card-title d-none-desktop">Acesse sua conta</h2>
+
+    <div class="header-group d-none-mobile">
+      <div class="sep-text">SEP</div>
+      <div class="subtitle-text">Serviço-Escola<br>de Psicologia</div>
+    </div>
+
+    <div class="welcome-text d-none-mobile">Bem-vindo de volta!</div>
+
+    {% if form.non_field_errors %}
+      <div class="non-field-errors" role="alert">
+        {{ form.non_field_errors }}
+      </div>
+    {% endif %}
+
+    <form method="post" novalidate>
+      {% csrf_token %}
+
+      <div class="input-group">
+        <input
+          type="text"
+          id="id_username"
+          name="{{ form.username.html_name }}"
+          class="form-input"
+          placeholder="Email ou Matrícula"
+          autocomplete="username"
+          {% if form.username.value %}value="{{ form.username.value }}"{% endif %}
+        />
+        {% if form.username.errors %}
+          <ul class="errorlist" role="alert">
+            {% for e in form.username.errors %}<li>{{ e }}</li>{% endfor %}
+          </ul>
+        {% endif %}
+      </div>
+
+      <div class="input-group">
+        <input
+          type="password"
+          id="id_password"
+          name="{{ form.password.html_name }}"
+          class="form-input"
+          placeholder="Senha"
+          autocomplete="current-password"
+          style="padding-right: 40px;"
+        />
+        <button type="button" id="toggle-senha" class="toggle-password" aria-label="Mostrar/ocultar senha">
+          <svg id="icone-olho-aberto" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#A59C97" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+          <svg id="icone-olho-fechado" style="display:none" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#A59C97" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+            <line x1="1" y1="1" x2="23" y2="23"></line>
+          </svg>
+        </button>
+        {% if form.password.errors %}
+          <ul class="errorlist" role="alert">
+            {% for e in form.password.errors %}<li>{{ e }}</li>{% endfor %}
+          </ul>
+        {% endif %}
+      </div>
+
+      <div class="forgot-link-container">
+        <a href="#" class="forgot-link">Esqueceu sua senha?</a>
+      </div>
+
+      <div class="btn-container">
+        <button type="submit" class="btn-entrar">Entrar</button>
+      </div>
+    </form>
+  </div>
+
+  <img src="{% static 'core/images/icon_azul.png' %}" alt="Acessibilidade em Libras" class="icon-azul d-none-mobile">
+</div>
 
 <script>
-    document.getElementById("toggle-senha").addEventListener("click", function () {
-        const campoSenha = document.getElementById("id_password");
-        const olhoAberto = document.getElementById("icone-olho-aberto");
-        const olhoFechado = document.getElementById("icone-olho-fechado");
-        const ehSenha = campoSenha.type === "password";
+  
+  document.addEventListener('DOMContentLoaded', () => {
+    const btnToggle = document.getElementById('toggle-senha');
+    const inputPassword = document.getElementById('id_password');
+    const iconEyeOpen = document.getElementById('icone-olho-aberto');
+    const iconEyeClosed = document.getElementById('icone-olho-fechado');
 
-        campoSenha.type = ehSenha ? "text" : "password";
-        olhoFechado.style.display = ehSenha ? "none" : "inline";
-        olhoAberto.style.display = ehSenha ? "inline" : "none";
-        this.setAttribute("aria-label", ehSenha ? "Ocultar senha" : "Mostrar senha");
-    });
+    if (btnToggle && inputPassword) {
+      btnToggle.addEventListener('click', () => {
+        const isPasswordHidden = inputPassword.type === 'password';
+        
+        inputPassword.type = isPasswordHidden ? 'text' : 'password';
+        iconEyeOpen.style.display = isPasswordHidden ? 'none' : 'inline';
+        iconEyeClosed.style.display = isPasswordHidden ? 'inline' : 'none';
+      });
+    }
+  });
 </script>
 {% endblock %}
