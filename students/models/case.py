@@ -114,9 +114,13 @@ class CaseAssignment(BusinessRulesMixin, models.Model):
             )
 
     def save(self, *args, **kwargs):
-        if self._state.adding and self.end_date is None:
+        if not (self._state.adding and self.end_date is None):
+            return super().save(*args, **kwargs)
+
+        with transaction.atomic():
+            CustomUser.objects.select_for_update().filter(pk=self.patient_id).first()
             self.clean()
-        super().save(*args, **kwargs)
+            return super().save(*args, **kwargs)
 
     def __str__(self):
         status = "ativa" if self.end_date is None else f"encerrada em {self.end_date}"

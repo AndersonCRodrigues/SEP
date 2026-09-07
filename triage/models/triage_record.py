@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.db import models
+from django.db import models, transaction
 from django.db.models import Q
 from core.models import CustomUser
 from core.permissions import ALL, BusinessRulesMixin, RoleScopedQuerySet
@@ -290,10 +290,13 @@ class TriageRecord(BusinessRulesMixin, models.Model):
             .first()
         )
 
-        super().save(*args, **kwargs)
+        with transaction.atomic():
+            super().save(*args, **kwargs)
 
-        if self.status != anterior:
-            self.patient.advance_to(FLOW_BY_TRIAGE_STATUS[self.status])
+            if self.status != anterior:
+                paciente = Patient.objects.select_for_update().get(pk=self.patient_id)
+                paciente.advance_to(FLOW_BY_TRIAGE_STATUS[self.status])
+                self.patient = paciente
 
     def __str__(self):
         return f"TriageRecord #{self.pk}"

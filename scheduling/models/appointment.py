@@ -145,6 +145,9 @@ class Appointment(BusinessRulesMixin, models.Model):
                 {"assigned_student": "Aluno em fase de triagem não faz atendimento."}
             )
 
+        if self.room_id and not self.room.is_usable:
+            raise ValidationError({"room": "Sala indisponível para agendamento."})
+
         if not (self.room_id and self.scheduled_at and self.patient_id):
             return
 
