@@ -22,9 +22,11 @@ class Teacher(CustomUser):
         verbose_name = "Professor"
         verbose_name_plural = "Professores"
 
-    def save(self, *args, **kwargs):
+    def enforce_role(self):
         if self.role not in (CustomUser.Role.PROFESSOR, CustomUser.Role.SUPERVISOR):
             self.role = CustomUser.Role.PROFESSOR
+
+    def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         ProfessorArea.objects.get_or_create(professor=self, area=self.acting_area)
 

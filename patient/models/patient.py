@@ -13,7 +13,6 @@ Role = CustomUser.Role
 
 
 def with_open_case(prefix="", **lookups):
-    """Q sobre Patient: caso aberto, filtrado pelo aluno ou pelo orientador dele."""
     caminho = f"{prefix}assignment_history"
     filtros = {f"{caminho}__end_date__isnull": True}
     filtros.update({f"{caminho}__{campo}": valor for campo, valor in lookups.items()})
@@ -150,9 +149,8 @@ class Patient(BusinessRulesMixin, CustomUser):
                 )
         return True
 
-    def save(self, *args, **kwargs):
+    def enforce_role(self):
         self.role = CustomUser.Role.PACIENTE
-        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.nome_completo

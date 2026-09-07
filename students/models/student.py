@@ -40,9 +40,8 @@ class Student(CustomUser):
     def open_cases(self):
         return self.case_history.filter(end_date__isnull=True)
 
-    def save(self, *args, **kwargs):
+    def enforce_role(self):
         self.role = CustomUser.Role.ALUNO
-        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.nome_completo

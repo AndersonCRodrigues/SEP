@@ -8,14 +8,14 @@ UserModel = get_user_model()
 
 class EmailOUMatricula(ModelBackend):
     def authenticate(self, request, username=None, password=None, **kwargs):
-        if username is None:
+        if not username:
             return None
 
         identificador = Q(email__iexact=username) | Q(matricula__iexact=username)
 
         digitos = only_digits(username)
         if digitos:
-            identificador |= Q(cpf=digitos)
+            identificador |= Q(cpf=digitos, role=UserModel.Role.PACIENTE)
 
         try:
             user = UserModel.objects.get(identificador)

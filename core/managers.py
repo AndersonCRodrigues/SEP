@@ -1,11 +1,16 @@
 from django.contrib.auth.base_user import BaseUserManager
 from django.utils.translation import gettext_lazy as _
 
+from .permissions import Role
+
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, email=None, password=None, **extra_fields):
-        if not email and not extra_fields.get("cpf"):
-            raise ValueError(_("Informe e-mail ou CPF."))
+        if extra_fields.get("role") == Role.PACIENTE:
+            if not email and not extra_fields.get("cpf"):
+                raise ValueError(_("Paciente precisa de e-mail ou CPF."))
+        elif not email:
+            raise ValueError(_("Funcionário precisa de e-mail."))
         email = self.normalize_email(email) if email else None
         user = self.model(email=email, **extra_fields)
         user.set_password(password)

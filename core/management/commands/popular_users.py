@@ -32,8 +32,14 @@ DEFAULT_AREAS = [
 ]
 
 
+def matricula_livre():
+    n = CustomUser.objects.exclude(matricula__isnull=True).count() + 1
+    while CustomUser.objects.filter(matricula=f"2026{n:04d}").exists():
+        n += 1
+    return f"2026{n:04d}"
+
+
 def generate_valid_cpf():
-    """Gera um CPF matematicamente válido para burlar a validação em ambiente de teste."""
     cpf = [random.randint(0, 9) for _ in range(9)]  # nosec B311
 
     first_sum = sum(x * y for x, y in zip(cpf, range(10, 1, -1)))
@@ -117,7 +123,7 @@ class Command(BaseCommand):
                 CustomUser.Role.PROFESSOR,
                 CustomUser.Role.ADMINISTRATIVO,
             ):
-                user.matricula = f"2026{random.randint(1000, 9999)}"  # nosec B311
+                user.matricula = matricula_livre()
 
             if role in (CustomUser.Role.PROFESSOR, CustomUser.Role.SUPERVISOR):
                 user.crp = f"{random.randint(10000, 99999)}/RJ-{role}"  # nosec B311

@@ -26,7 +26,7 @@ PERSONAL_FIELDS = (
 
 
 class LoginEmailOuMatriculaForm(AuthenticationForm):
-    username = forms.CharField(label="Email, Matrícula ou CPF")
+    username = forms.CharField(label="Email ou Matrícula (Paciente: CPF)")
 
 
 class CustomUserCreationForm(UserCreationForm):
@@ -42,8 +42,6 @@ class CustomUserCreationForm(UserCreationForm):
         CustomUser.Role.PROFESSOR,
     )
 
-    # O Supervisor tem area propria e supervisiona todas: o alcance vem das
-    # permissoes, nao da ausencia de area.
     ROLES_REQUIRING_AREA = (
         CustomUser.Role.PROFESSOR,
         CustomUser.Role.SUPERVISOR,

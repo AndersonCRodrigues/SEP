@@ -35,7 +35,9 @@ class CustomUser(AbstractUser):
         max_length=2, choices=Role.choices, default=Role.ALUNO, verbose_name="Cargo"
     )
 
-    matricula = models.CharField(max_length=20, blank=True, verbose_name="Matricula")
+    matricula = models.CharField(
+        max_length=20, unique=True, null=True, blank=True, verbose_name="Matricula"
+    )
     crp = models.CharField(max_length=15, blank=True, verbose_name="CRP")
 
     USERNAME_FIELD = "email"
@@ -63,10 +65,21 @@ class CustomUser(AbstractUser):
         "crp",
     ) + ADDRESS_FIELDS
 
+    def enforce_role(self):
+        """Subclasse de heranca multi-tabela fixa o proprio papel."""
+
     def clean(self):
+        self.enforce_role()
         super().clean()
         if not self.email:
             self.email = None
+        if not self.matricula:
+            self.matricula = None
+
+        if self.role != self.Role.PACIENTE and not self.email:
+            raise ValidationError(
+                {"email": "Funcionário precisa de e-mail para acessar o sistema."}
+            )
 
         if (
             self.role in (self.Role.ALUNO, self.Role.ADMINISTRATIVO)
@@ -80,8 +93,11 @@ class CustomUser(AbstractUser):
             raise ValidationError({"crp": "Professor/Supervisor precisa ter o CRP."})
 
     def save(self, *args, **kwargs):
+        self.enforce_role()
         if not self.email:
             self.email = None
+        if not self.matricula:
+            self.matricula = None
         self.cpf = only_digits(self.cpf)
         super().save(*args, **kwargs)
 
