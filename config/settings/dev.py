@@ -1,4 +1,4 @@
-from .base import *
+from .base import DEBUG, SECRET_KEY, ALLOWED_HOSTS
 
 DEBUG = True
 
