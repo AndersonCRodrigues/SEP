@@ -1,61 +1,33 @@
+from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import UniqueConstraint
 from areas.models import AreaActing
 from core.models import CustomUser
-from core.permissions import BusinessRulesMixin
 
-Role = CustomUser.Role
-
-class Teacher(CustomUser):
-    acting_area = models.ForeignKey(
-        AreaActing,
-        on_delete=models.PROTECT,
-        related_name="teachers",
-        verbose_name="Área de atuação principal",
-    )
+class TeacherArea(models.Model):
+    teacher = models.ForeignKey("teacher.Teacher", on_delete=models.CASCADE, related_name="area_links")
+    area = models.ForeignKey(AreaActing, on_delete=models.PROTECT, related_name="teacher_links")
 
     class Meta:
-        verbose_name = "Professor"
-        verbose_name_plural = "Professores"
-
-    def save(self, *args, **kwargs):
-        if self.role not in (CustomUser.Role.PROFESSOR, CustomUser.Role.SUPERVISOR):
-            self.role = CustomUser.Role.PROFESSOR
-        super().save(*args, **kwargs)
-        ProfessorArea.objects.get_or_create(professor=self, area=self.acting_area)
-
-    def __str__(self):
-        return f"{self.nome_completo} ({self.acting_area})"
-
-class ProfessorArea(BusinessRulesMixin, models.Model):
-    professor = models.ForeignKey(
-        Teacher,
-        on_delete=models.CASCADE,
-        related_name="professor_areas",
-        verbose_name="Professor",
-    )
-
-    area = models.ForeignKey(
-        AreaActing,
-        on_delete=models.PROTECT,
-        related_name="professor_areas",
-        verbose_name="Area of acting",
-    )
-
-    CREATABLE_BY = (Role.SUPERVISOR,)
-    EDITABLE_FIELDS = {
-        Role.SUPERVISOR: ("professor", "area"),
-    }
-    DELETABLE_BY = (Role.SUPERVISOR,)
-
-    class Meta:
-        verbose_name = "Professor Area"
-        verbose_name_plural = "Professor Areas"
+        verbose_name = "Atuação do professor"
+        verbose_name_plural = "Atuações do professor"
         constraints = [
-            models.UniqueConstraint(
-                fields=["professor", "area"],
-                name="unique_professor_area",
-            ),
+            UniqueConstraint(fields=["teacher", "area"], name="teacher_area_unica")
         ]
 
+class Teacher(CustomUser):
+    acting_areas = models.ManyToManyField(
+        AreaActing,
+        through=TeacherArea,
+        related_name="teachers",
+        verbose_name="Áreas de atuação",
+    )
+
+    def clean(self):
+        super().clean()
+        if self.pk and not self.acting_areas.exists():
+            raise ValidationError({"acting_areas": "Professor precisa de ao menos uma área de atuação."})
+
     def __str__(self):
-        return f"{self.professor} - {self.area}"
+        areas = ", ".join(a.nome for a in self.acting_areas.all())
+        return f"{self.nome_completo} ({areas})" if areas else self.nome_completo

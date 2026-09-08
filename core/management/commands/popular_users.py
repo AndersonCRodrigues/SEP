@@ -92,9 +92,7 @@ class Command(BaseCommand):
 
             model = MODEL_BY_ROLE.get(role, CustomUser)
             extra_fields = {}
-            if model is Teacher:
-                extra_fields["acting_area"] = random.choice(areas)  # nosec B311
-
+            
             suffix = f" {counter}" if counter > 1 else ""
             user = model(
                 email=email,
@@ -130,6 +128,10 @@ class Command(BaseCommand):
             try:
                 user.full_clean()
                 user.save()
+                if isinstance(user, Teacher):
+                    # Associa de 1 a 2 áreas aleatórias ao professor criado
+                    areas_escolhidas = random.sample(areas, k=random.randint(1, 2))
+                    user.acting_areas.set(areas_escolhidas)
                 sincronizar_grupo(user)
                 self.stdout.write(
                     self.style.SUCCESS(f"Usuário {role} ({email}) criado com sucesso!")

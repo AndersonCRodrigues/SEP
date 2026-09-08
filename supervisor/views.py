@@ -24,7 +24,7 @@ def usuarios_alunos_e_professores():
     alunos = Student.objects.filter(role=CustomUser.Role.ALUNO)
     professores = Teacher.objects.filter(
         role__in=[CustomUser.Role.PROFESSOR, CustomUser.Role.SUPERVISOR]
-    )
+    ).prefetch_related('acting_areas')
     return sorted(chain(alunos, professores), key=lambda u: u.nome_completo)
 
 
