@@ -1,4 +1,4 @@
-from .base import DEBUG, SECRET_KEY, ALLOWED_HOSTS
+from .base import SECRET_KEY, ALLOWED_HOSTS
 import os
 from django.core.exceptions import ImproperlyConfigured
 
