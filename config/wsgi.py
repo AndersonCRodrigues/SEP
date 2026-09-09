@@ -10,7 +10,8 @@ https://docs.djangoproject.com/en/6.0/howto/deployment/wsgi/
 import os
 
 from django.core.wsgi import get_wsgi_application
-ambiente = os.getenv('NODE_ENV', 'dev')
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', f'config.settings.{ambiente}')
+
+ambiente = os.getenv("NODE_ENV", "dev")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", f"config.settings.{ambiente}")
 
 application = get_wsgi_application()

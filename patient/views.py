@@ -39,6 +39,7 @@ class EditarDadosPacienteView(GroupRequiredMixin, UpdateView):
         # o paciente só pode editar o próprio cadastro
         return self.request.user
 
+
 def enviar_email(request):
     if request.method == "POST":
         pass

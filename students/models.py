@@ -69,10 +69,18 @@ class Student(CustomUser):
             return
 
         if not Student.has_room_for(self.current_patient_id, ignoring=self):
-            raise ValidationError({"current_patient": f"Este paciente já tem {self.MAX_STUDENTS_PER_PATIENT} alunos responsáveis."})
-        
-        if self.current_patient_id and not (getattr(self, "_case_area", None) or self.default_acting_area):
-            raise ValidationError({"current_patient": "Escolha a área: o orientador atua em mais de uma."})
+            raise ValidationError(
+                {
+                    "current_patient": f"Este paciente já tem {self.MAX_STUDENTS_PER_PATIENT} alunos responsáveis."
+                }
+            )
+
+        if self.current_patient_id and not (
+            getattr(self, "_case_area", None) or self.default_acting_area
+        ):
+            raise ValidationError(
+                {"current_patient": "Escolha a área: o orientador atua em mais de uma."}
+            )
 
     def save(self, *args, **kwargs):
         self.role = CustomUser.Role.ALUNO
@@ -264,10 +272,10 @@ class CaseAssignmentManager(models.Manager.from_queryset(AdviseeScopedQuerySet))
 
 class CaseAssignment(BusinessRulesMixin, models.Model):
     acting_area = models.ForeignKey(
-    AreaActing,
-    on_delete=models.PROTECT,
-    related_name="case_assignments",
-    verbose_name="Área de atuação",
+        AreaActing,
+        on_delete=models.PROTECT,
+        related_name="case_assignments",
+        verbose_name="Área de atuação",
     )
     student = models.ForeignKey(
         Student,
@@ -326,6 +334,7 @@ class CaseAssignment(BusinessRulesMixin, models.Model):
         status = "ativa" if self.end_date is None else f"encerrada em {self.end_date}"
         return f"{self.student} encarregado de {self.patient} ({status})"
 
+
 class Attendance(BusinessRulesMixin, models.Model):
     student = models.ForeignKey(
         Student,
@@ -374,6 +383,7 @@ class Attendance(BusinessRulesMixin, models.Model):
 
     def __str__(self):
         return f"{self.student} presente em {self.date}"
+
 
 class PerformanceReview(BusinessRulesMixin, models.Model):
     student = models.ForeignKey(
@@ -511,9 +521,9 @@ class StudentActivity(BusinessRulesMixin, models.Model):
 
     @classmethod
     def total_hours_for(cls, student, start_date, end_date):
-        return (
-            cls.objects.filter(student=student, date__gte=start_date, date__lte=end_date)
-            .aggregate(total=Coalesce(Sum("hours_worked"), Value(Decimal("0"))))["total"]
-        )
+        return cls.objects.filter(
+            student=student, date__gte=start_date, date__lte=end_date
+        ).aggregate(total=Coalesce(Sum("hours_worked"), Value(Decimal("0"))))["total"]
+
     def __str__(self):
         return f"{self.get_activity_type_display()} de {self.student} em {self.date} ({self.hours_worked}h)"

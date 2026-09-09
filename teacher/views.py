@@ -65,11 +65,15 @@ class PainelProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView)
         professor = get_object_or_404(Teacher, pk=self.request.user.pk)
 
         if professor.role == CustomUser.Role.SUPERVISOR:
-            context["alunos_vinculados"] = Student.objects.filter(current_advisor__isnull=False)
+            context["alunos_vinculados"] = Student.objects.filter(
+                current_advisor__isnull=False
+            )
         else:
             context["alunos_vinculados"] = professor.current_advisees.all()
 
-        context["alunos_disponiveis"] = Student.objects.filter(current_advisor__isnull=True)
+        context["alunos_disponiveis"] = Student.objects.filter(
+            current_advisor__isnull=True
+        )
         context["form_vincular"] = VincularAlunoForm()
         context["form_horas"] = StudentActivityForm(user=professor)
         return context
@@ -82,7 +86,9 @@ def vincular_aluno(request):
         CustomUser.Role.SUPERVISOR,
     )
     if not is_authorized:
-        raise PermissionDenied("Apenas Professores e Supervisores podem vincular Alunos.")
+        raise PermissionDenied(
+            "Apenas Professores e Supervisores podem vincular Alunos."
+        )
 
     professor = get_object_or_404(Teacher, pk=request.user.pk)
 
@@ -93,7 +99,9 @@ def vincular_aluno(request):
             periodo = form.cleaned_data["periodo"]
             try:
                 Advising.objects.change_advisor(aluno, professor, term=periodo)
-                messages.success(request, f"{aluno.nome_completo} vinculado com sucesso!")
+                messages.success(
+                    request, f"{aluno.nome_completo} vinculado com sucesso!"
+                )
             except ValidationError as e:
                 messages.error(request, str(e))
         else:

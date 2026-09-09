@@ -6,6 +6,7 @@ from areas.models import AreaActing
 from students.models import StudentActivity
 import re
 
+
 class VincularAlunoForm(forms.Form):
     aluno = forms.ModelChoiceField(queryset=None, label="Aluno Disponível")
     periodo = forms.CharField(
@@ -86,11 +87,12 @@ class ProfessorCreationForm(UserCreationForm):
 class PerfilProfessorForm(forms.ModelForm):
     class Meta:
         model = Teacher
-        fields = ["acting_areas"] 
+        fields = ["acting_areas"]
         labels = {"acting_areas": "Áreas de Atuação / Abordagens Teóricas"}
         widgets = {
             "acting_areas": forms.CheckboxSelectMultiple(),
         }
+
 
 class StudentActivityForm(forms.ModelForm):
     class Meta:
@@ -106,7 +108,9 @@ class StudentActivityForm(forms.ModelForm):
         from students.models import Student
 
         if user.role == CustomUser.Role.SUPERVISOR:
-            self.fields["student"].queryset = Student.objects.filter(current_advisor__isnull=False)
+            self.fields["student"].queryset = Student.objects.filter(
+                current_advisor__isnull=False
+            )
         else:
             self.fields["student"].queryset = user.current_advisees.all()
 
