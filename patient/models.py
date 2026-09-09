@@ -1,16 +1,17 @@
 from django.conf import settings
-from django.db import models,transaction
-from django.utils import timezone
+from django.db import models, transaction
 from django.db.models import Q
+from django.utils import timezone
+
 from areas.models import AreaActing
 from core.managers import CustomUserManager
 from core.models import CustomUser
 from core.permissions import BusinessRulesMixin, RoleScopedQuerySet
-from utils.fields import EncryptedTextField
-from triage.constants import TriageStatus
+from core.utils import generate_temporary_password, send_temporary_password_email
 from students.models import Student
 from teacher.models import Teacher
-from core.utils import generate_temporary_password,send_temporary_password_email
+from triage.constants import TriageStatus
+from utils.fields import EncryptedTextField
 
 Role = CustomUser.Role
 
@@ -41,35 +42,40 @@ class PatientQuerySet(RoleScopedQuerySet):
         return self.none()
 
 
-
 class PatientManager(CustomUserManager.from_queryset(PatientQuerySet)):
     @transaction.atomic
-    def create_with_credentials(self,**patient_data):
+    def create_with_credentials(self, usuario_responsavel=None, **patient_data):
         temporary_password = generate_temporary_password()
-        patient = self.create_user(password=temporary_password,must_change_password=True,**patient_data)
-        send_temporary_password_email(patient,temporary_password)
+        patient = self.create_user(
+            password=temporary_password,
+            must_change_password=True,
+            **patient_data,
+        )
+     
+        send_temporary_password_email(
+            patient, temporary_password, usuario_responsavel=usuario_responsavel
+        )
         return patient
+
 
 class Patient(BusinessRulesMixin, CustomUser):
     class FlowStatus(models.TextChoices):
         AWAITING_TRIAGE = "AWAITING_TRIAGE", "Aguardando triagem"
         IN_TRIAGE = "IN_TRIAGE", "Em triagem"
         REFERRED = "REFERRED", "Encaminhado"
-        
+
     social_name = models.CharField(
-        max_length=300,
-        blank=True,
-        verbose_name="Nome social"
+        max_length=300, blank=True, verbose_name="Nome social"
     )
     gender_identity = models.CharField(
-        max_length=150,
-        blank=True,
-        verbose_name="Identidade de gênero"
+        max_length=150, blank=True, verbose_name="Identidade de gênero"
     )
 
+    
     flow_status = models.CharField(
         max_length=30,
         choices=FlowStatus.choices,
+        default=FlowStatus.AWAITING_TRIAGE,
         blank=True,
         verbose_name="Status do fluxo",
     )
@@ -93,8 +99,11 @@ class Patient(BusinessRulesMixin, CustomUser):
     objects = PatientManager()
 
     REGISTRATION_FIELDS = (
-        "nome_completo", "cpf","social_name","gender_identity"
-        ) + CustomUser.ADDRESS_FIELDS
+        "nome_completo",
+        "cpf",
+        "social_name",
+        "gender_identity",
+    ) + CustomUser.ADDRESS_FIELDS
 
     CREATABLE_BY = (Role.ADMINISTRATIVO, Role.ALUNO)
     EDITABLE_FIELDS = {
@@ -120,6 +129,11 @@ class Patient(BusinessRulesMixin, CustomUser):
             - nascimento.year
             - ((hoje.month, hoje.day) < (nascimento.month, nascimento.day))
         )
+
+    
+    @property
+    def idade_atual(self):
+        return self.current_age
 
     def save(self, *args, **kwargs):
         self.role = CustomUser.Role.PACIENTE
@@ -252,7 +266,6 @@ class Room(BusinessRulesMixin, models.Model):
 
     CREATABLE_BY = (Role.ADMINISTRATIVO,)
     EDITABLE_FIELDS = {Role.ADMINISTRATIVO: ("name", "active")}
-    # Appointment.room usa PROTECT: desativar pelo campo `active`, nao apagar.
     DELETABLE_BY = ()
 
     class Meta:
@@ -274,7 +287,8 @@ class AppointmentQuerySet(RoleScopedQuerySet):
             return self
         if role == Role.PROFESSOR:
             return self.filter(
-                Q(teacher_id=user.pk) | Q(assigned_student__current_advisor_id=user.pk)
+                Q(teacher_id=user.pk)
+                | Q(assigned_student__current_advisor_id=user.pk)
             ).distinct()
         if role == Role.ALUNO:
             return self.filter(assigned_student_id=user.pk)
