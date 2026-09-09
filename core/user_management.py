@@ -29,6 +29,13 @@ def can_manage_user(actor, target_role):
     return target_role in MANAGEABLE_ROLES_BY.get(role, ())
 
 
+def target_fields(target):
+    campos = CustomUser.ALL_EDITABLE_FIELDS
+    if target.role == Role.PROFESSOR:
+        campos += ("acting_areas",)
+    return campos
+
+
 def editable_user_fields(actor, target):
     """Coluna Update: campos que o `actor` pode gravar no usuario `target`."""
     if not actor.is_authenticated:

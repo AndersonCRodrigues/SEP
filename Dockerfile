@@ -40,15 +40,19 @@ WORKDIR /app
 COPY --from=builder /usr/local/lib/python3.12/site-packages/ /usr/local/lib/python3.12/site-packages/
 COPY --from=builder /usr/local/bin/ /usr/local/bin/
 # Copia o código da sua aplicação já atribuindo as permissões ao usuuário appuser
+# Copia o código da sua aplicação já atribuindo as permissões ao usuário appuser
 COPY --chown=appuser:appuser . .
-#Troca para o user
+
+# Dá permissão de execução ao script ANTES de mudar para o appuser
+RUN chmod +x /app/entrypoint.sh
+
+# Troca para o user
 USER appuser
 
 EXPOSE 8000
 
-# popular_users roda uma vez: ele nao e idempotente -- a cada chamada gera um
-# email novo (sv1@, sv2@...) em vez de reaproveitar o usuario existente.
-CMD ["sh", "-c", "python3 manage.py makemigrations core areas teacher students patient documents audit triage && python3 manage.py migrate && python3 manage.py popular_users && python3 manage.py setup_roles && gunicorn --bind 0.0.0.0:8000 --workers 3 config.wsgi:application"]
+# Troca o CMD antigo pelo ENTRYPOINT apontando para o script
+ENTRYPOINT ["/app/entrypoint.sh"]
 
 # Estagio do banco: a imagem oficial do Postgres nao traz o pg_cron, que e o
 # agendador usado para a retencao de 1 ano do log de seguranca.

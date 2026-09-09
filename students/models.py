@@ -2,12 +2,14 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.db import models, transaction
-from django.db.models import Q, Sum, UniqueConstraint
+from django.db.models import Q, Sum, UniqueConstraint, Value
 from django.utils import timezone
 from areas.models import AreaActing
 from core.models import CustomUser
 from core.permissions import BusinessRulesMixin, RoleScopedQuerySet
 from teacher.models import Teacher
+from decimal import Decimal
+from django.db.models.functions import Coalesce
 
 Role = CustomUser.Role
 
@@ -42,16 +44,24 @@ class Student(CustomUser):
         verbose_name = "Aluno"
         verbose_name_plural = "Alunos"
 
-    @property
-    def acting_area(self):
-        return self.current_advisor.acting_area if self.current_advisor_id else None
-
     @classmethod
     def has_room_for(cls, patient, ignoring=None):
         ocupantes = cls.objects.filter(current_patient=patient)
         if ignoring is not None and ignoring.pk:
             ocupantes = ocupantes.exclude(pk=ignoring.pk)
         return ocupantes.count() < cls.MAX_STUDENTS_PER_PATIENT
+
+    @property
+    def acting_area(self):
+        caso = self.case_history.filter(end_date__isnull=True).first()
+        return caso.acting_area if caso else None
+
+    @property
+    def default_acting_area(self):
+        if not self.current_advisor_id:
+            return None
+        areas = list(self.current_advisor.acting_areas.all()[:2])
+        return areas[0] if len(areas) == 1 else None
 
     def clean(self):
         super().clean()
@@ -61,11 +71,15 @@ class Student(CustomUser):
         if not Student.has_room_for(self.current_patient_id, ignoring=self):
             raise ValidationError(
                 {
-                    "current_patient": (
-                        f"Este paciente já tem {self.MAX_STUDENTS_PER_PATIENT} "
-                        "alunos responsáveis."
-                    )
+                    "current_patient": f"Este paciente já tem {self.MAX_STUDENTS_PER_PATIENT} alunos responsáveis."
                 }
+            )
+
+        if self.current_patient_id and not (
+            getattr(self, "_case_area", None) or self.default_acting_area
+        ):
+            raise ValidationError(
+                {"current_patient": "Escolha a área: o orientador atua em mais de uma."}
             )
 
     def save(self, *args, **kwargs):
@@ -257,27 +271,23 @@ class CaseAssignmentManager(models.Manager.from_queryset(AdviseeScopedQuerySet))
 
 
 class CaseAssignment(BusinessRulesMixin, models.Model):
+    acting_area = models.ForeignKey(
+        AreaActing,
+        on_delete=models.PROTECT,
+        related_name="case_assignments",
+        verbose_name="Área de atuação",
+    )
     student = models.ForeignKey(
         Student,
         on_delete=models.PROTECT,
         related_name="case_history",
         verbose_name="Aluno",
     )
-
     patient = models.ForeignKey(
         "patient.Patient",
         on_delete=models.PROTECT,
         related_name="assignment_history",
         verbose_name="Paciente",
-    )
-
-    acting_area = models.ForeignKey(
-        AreaActing,
-        null=True,
-        blank=True,
-        on_delete=models.PROTECT,
-        related_name="case_assignments",
-        verbose_name="Área de atuação",
     )
 
     start_date = models.DateField(auto_now_add=True, verbose_name="Data de início")
@@ -287,7 +297,7 @@ class CaseAssignment(BusinessRulesMixin, models.Model):
 
     CREATABLE_BY = (Role.SUPERVISOR, Role.PROFESSOR)
     EDITABLE_FIELDS = {
-        Role.SUPERVISOR: ("end_date",),
+        Role.SUPERVISOR: ("end_date", "acting_area"),
         Role.PROFESSOR: ("end_date",),
     }
     DELETABLE_BY = ()
@@ -418,11 +428,11 @@ class PerformanceReview(BusinessRulesMixin, models.Model):
 
 
 class StudentActivity(BusinessRulesMixin, models.Model):
-    class Kind(models.TextChoices):
+    class ActivityType(models.TextChoices):
         SESSION = "AT", "Atendimento"
         SCREENING = "TR", "Triagem"
+        GROUP_SUPERVISION = "SG", "Supervisão em Grupo"
         RECORDS = "PR", "Prontuário"
-        OTHER = "OU", "Outra"
 
     student = models.ForeignKey(
         Student,
@@ -431,15 +441,21 @@ class StudentActivity(BusinessRulesMixin, models.Model):
         verbose_name="Aluno",
     )
 
-    date = models.DateField(verbose_name="Data")
+    date = models.DateField(default=timezone.now, verbose_name="Data")
 
-    kind = models.CharField(
+    activity_type = models.CharField(
         max_length=2,
-        choices=Kind.choices,
-        verbose_name="Tipo",
+        choices=ActivityType.choices,
+        verbose_name="Tipo de atividade",
     )
 
-    minutes = models.PositiveIntegerField(verbose_name="Minutos")
+    hours_worked = models.DecimalField(
+        max_digits=4,
+        decimal_places=2,
+        verbose_name="Horas trabalhadas",
+    )
+
+    notes = models.TextField(blank=True, verbose_name="Observação")
 
     appointment = models.ForeignKey(
         "patient.Appointment",
@@ -450,25 +466,24 @@ class StudentActivity(BusinessRulesMixin, models.Model):
         verbose_name="Agendamento de origem",
     )
 
-    registered_by = models.ForeignKey(
+    responsible_supervisor = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
+        on_delete=models.PROTECT,
+        limit_choices_to=Q(role__in=[Role.PROFESSOR, Role.SUPERVISOR]),
         related_name="registered_activities",
-        verbose_name="Registrada por",
+        verbose_name="Responsável pelo registro",
     )
 
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Criado em")
 
     objects = AdviseeScopedQuerySet.as_manager()
 
-    CREATABLE_BY = (Role.PROFESSOR, Role.ALUNO)
+    CREATABLE_BY = (Role.PROFESSOR, Role.SUPERVISOR)
     EDITABLE_FIELDS = {
-        Role.PROFESSOR: ("date", "kind", "minutes"),
-        Role.ALUNO: ("date", "kind", "minutes"),
+        Role.PROFESSOR: ("date", "activity_type", "hours_worked", "notes"),
+        Role.SUPERVISOR: ("date", "activity_type", "hours_worked", "notes"),
     }
-    DELETABLE_BY = (Role.PROFESSOR,)
+    DELETABLE_BY = (Role.PROFESSOR, Role.SUPERVISOR)
 
     class Meta:
         verbose_name = "Atividade de estágio"
@@ -488,9 +503,11 @@ class StudentActivity(BusinessRulesMixin, models.Model):
             return False
         if student is None:
             return False
-        if user.role == Role.ALUNO:
-            return student.pk == user.pk
-        return student.current_advisor_id == user.pk
+        if user.role == Role.SUPERVISOR:
+            return True
+        if user.role == Role.PROFESSOR:
+            return student.current_advisor_id == user.pk
+        return False
 
     def editable_fields_for(self, user):
         if self.appointment_id:
@@ -503,11 +520,10 @@ class StudentActivity(BusinessRulesMixin, models.Model):
         return super().can_be_deleted_by(user)
 
     @classmethod
-    def total_minutes_for(cls, student, start_date, end_date):
-        total = cls.objects.filter(
+    def total_hours_for(cls, student, start_date, end_date):
+        return cls.objects.filter(
             student=student, date__gte=start_date, date__lte=end_date
-        ).aggregate(total=Sum("minutes"))["total"]
-        return total or 0
+        ).aggregate(total=Coalesce(Sum("hours_worked"), Value(Decimal("0"))))["total"]
 
     def __str__(self):
-        return f"{self.get_kind_display()} de {self.student} em {self.date} ({self.minutes} min)"
+        return f"{self.get_activity_type_display()} de {self.student} em {self.date} ({self.hours_worked}h)"

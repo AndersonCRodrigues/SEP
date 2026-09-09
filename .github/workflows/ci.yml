@@ -9,9 +9,30 @@ on:
 jobs:
   quality-check:
     runs-on: ubuntu-latest
+    
+    services:
+      db:
+        image: postgres:16
+        env:
+          POSTGRES_USER: admin
+          POSTGRES_PASSWORD: adminpassword
+          POSTGRES_DB: testdb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     env:
-      DJANGO_SETTINGS_MODULE: config.settings
+      DJANGO_SETTINGS_MODULE: config.settings.dev 
+      NODE_ENV: dev
+      DB_NAME: testdb
+      DB_USER: admin
+      DB_PASSWORD: adminpassword
+      DB_HOST: localhost
+      DB_PORT: 5432
 
     steps:
       - uses: actions/checkout@v4
@@ -20,17 +41,15 @@ jobs:
         with:
           python-version: "3.12"
 
-      # Chave nova a cada execucao: o banco do CI e efemero e nada precisa ser
-      # decifrado entre rodadas, entao nao ha segredo a guardar nem a vazar.
       - name: Gera chave de criptografia efemera
         run: |
-          KEY=$(python -c "import base64, secrets; print(base64.urlsafe_b64encode(secrets.token_bytes(32)).decode())")
+          KEY=$(python3 -c "import base64, secrets; print(base64.urlsafe_b64encode(secrets.token_bytes(32)).decode())")
           echo "FIELD_ENCRYPTION_KEY=$KEY" >> "$GITHUB_ENV"
 
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          python3 -m pip install --upgrade pip
+          python3 -m pip install -r requirements.txt
 
       - name: Ruff
         run: |
@@ -44,6 +63,9 @@ jobs:
       - name: Bandit
         run: |
           bandit -r . -x tests,.venv
+
+      - name: Executar Migrações
+        run: python3 manage.py migrate
 
       - name: Pytest
         run: |
