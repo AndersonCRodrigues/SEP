@@ -3,14 +3,12 @@ import os
 from pathlib import Path
 from django.core.exceptions import ImproperlyConfigured
 from django.contrib.messages import constants as messages
-
 from dotenv import load_dotenv
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 load_dotenv(BASE_DIR / ".env")
 
-DEBUG = os.getenv("DJANGO_DEBUG", "True").lower() == "true"
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
 FIELD_ENCRYPTION_KEY = os.environ.get("FIELD_ENCRYPTION_KEY")
@@ -26,31 +24,6 @@ except Exception:
         'Gere com: python -c "from cryptography.fernet import Fernet; '
         'print(Fernet.generate_key().decode())"'
     )
-
-
-if not SECRET_KEY:
-    if DEBUG:
-        SECRET_KEY = os.getenv(
-            "DJANGO_SECRET_KEY", "django-insecure-development-only-key"
-        )
-    else:
-        raise RuntimeError(
-            "DJANGO_SECRET_KEY must be set when DEBUG=False. "
-            "Configure it using environment variables."
-        )
-
-
-_allowed_hosts_env = os.getenv("DJANGO_ALLOWED_HOSTS", "")
-
-if _allowed_hosts_env:
-    ALLOWED_HOSTS = [
-        host.strip() for host in _allowed_hosts_env.split(",") if host.strip()
-    ]
-else:
-    ALLOWED_HOSTS = ["localhost", "127.0.0.1", "host.docker.internal"]
-
-
-# Application definition
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -112,9 +85,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
-# Database
-# https://docs.djangoproject.com/en/6.0/ref/settings/#databases
-
 ENGINES_VALIDOS = {
     "django.db.backends.sqlite3",
     "django.db.backends.postgresql",
@@ -163,7 +133,6 @@ if db_engine:
             "PORT": db_port,
         }
     }
-
 else:
     DATABASES = {
         "default": {
@@ -172,32 +141,19 @@ else:
         }
     }
 
-
 AUTH_PASSWORD_VALIDATORS = [
     {
-        "NAME": (
-            "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
-        ),
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
     },
-    {
-        "NAME": ("django.contrib.auth.password_validation.MinimumLengthValidator"),
-    },
-    {
-        "NAME": ("django.contrib.auth.password_validation.CommonPasswordValidator"),
-    },
-    {
-        "NAME": ("django.contrib.auth.password_validation.NumericPasswordValidator"),
-    },
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
 LANGUAGE_CODE = "en-us"
-
 TIME_ZONE = "UTC"
-
 USE_I18N = True
-
 USE_TZ = True
-
 STATIC_URL = "static/"
 
 AUTH_USER_MODEL = "core.CustomUser"
@@ -214,3 +170,32 @@ MESSAGE_TAGS = {
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
+
+# Republicacao explicita da API deste modulo (PEP 8 permite wildcard import
+# quando o modulo de origem declara __all__). Isso evita que "import os",
+# "Path", "base64" etc. vazem para dev.py/prod.py via `from .base import *`
+# e restringe o wildcard só ao que é de fato uma Django setting.
+__all__ = [
+    "BASE_DIR",
+    "SECRET_KEY",
+    "FIELD_ENCRYPTION_KEY",
+    "INSTALLED_APPS",
+    "MIDDLEWARE",
+    "AUTHENTICATION_BACKENDS",
+    "ROOT_URLCONF",
+    "TEMPLATES",
+    "WSGI_APPLICATION",
+    "DATABASES",
+    "AUTH_PASSWORD_VALIDATORS",
+    "LANGUAGE_CODE",
+    "TIME_ZONE",
+    "USE_I18N",
+    "USE_TZ",
+    "STATIC_URL",
+    "AUTH_USER_MODEL",
+    "LOGIN_URL",
+    "LOGIN_REDIRECT_URL",
+    "MESSAGE_TAGS",
+    "CRISPY_ALLOWED_TEMPLATE_PACKS",
+    "CRISPY_TEMPLATE_PACK",
+]

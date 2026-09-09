@@ -29,11 +29,14 @@ def can_manage_user(actor, target_role):
     return target_role in MANAGEABLE_ROLES_BY.get(role, ())
 
 
-def _campos_do_alvo(target):
-    """A fase do estagio e campo do Student, fora de ALL_EDITABLE_FIELDS."""
+def target_fields(target):
+    """Campos que so existem na subclasse, fora de ALL_EDITABLE_FIELDS."""
+    campos = CustomUser.ALL_EDITABLE_FIELDS
     if target.role == Role.ALUNO:
-        return CustomUser.ALL_EDITABLE_FIELDS + ("stage",)
-    return CustomUser.ALL_EDITABLE_FIELDS
+        campos += ("stage",)
+    if target.role in (Role.PROFESSOR, Role.SUPERVISOR):
+        campos += ("acting_areas",)
+    return campos
 
 
 def editable_user_fields(actor, target):
@@ -42,10 +45,10 @@ def editable_user_fields(actor, target):
         return ()
 
     if actor.is_superuser or actor.role == Role.SUPERADMIN:
-        return _campos_do_alvo(target)
+        return target_fields(target)
 
     if actor.role == Role.SUPERVISOR and target.role in (Role.PROFESSOR, Role.ALUNO):
-        return _campos_do_alvo(target)
+        return target_fields(target)
 
     if actor.role == Role.PROFESSOR and target.role == Role.ALUNO:
         orientando = getattr(target, "current_advisor_id", None) == actor.pk

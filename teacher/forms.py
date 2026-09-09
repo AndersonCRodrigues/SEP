@@ -33,12 +33,12 @@ class VincularAlunoForm(forms.Form):
 
 
 class ProfessorCreationForm(UserCreationForm):
-    # Teacher.acting_area e NOT NULL: opcional aqui passava a validacao e
-    # estourava IntegrityError no save.
-    acting_area = forms.ModelChoiceField(
+    # Teacher.clean() exige ao menos uma area: opcional aqui passava a
+    # validacao e so estourava depois.
+    acting_areas = forms.ModelMultipleChoiceField(
         queryset=AreaActing.objects.all(),
-        label="Área de Atuação / Abordagem Teórica",
-        empty_label="Selecione uma área...",
+        widget=forms.CheckboxSelectMultiple,
+        label="Áreas de Atuação / Abordagem Teórica",
     )
 
     class Meta:
@@ -58,7 +58,7 @@ class ProfessorCreationForm(UserCreationForm):
             "cep",
             "matricula",
             "crp",
-            "acting_area",
+            "acting_areas",
         )
 
     def __init__(self, *args, **kwargs):
@@ -68,9 +68,9 @@ class ProfessorCreationForm(UserCreationForm):
     def save(self, commit=True):
         professor = super().save(commit=False)
         professor.role = CustomUser.Role.PROFESSOR
-        professor.acting_area = self.cleaned_data.get("acting_area")
         if commit:
             professor.save()
+            professor.acting_areas.set(self.cleaned_data["acting_areas"])
         return professor
 
     def clean_matricula(self):
@@ -89,8 +89,11 @@ class ProfessorCreationForm(UserCreationForm):
 class PerfilProfessorForm(forms.ModelForm):
     class Meta:
         model = Teacher
-        fields = ["acting_area"]
-        labels = {"acting_area": "Área de Atuação / Abordagem Teórica"}
+        fields = ["acting_areas"]
+        labels = {"acting_areas": "Áreas de Atuação / Abordagens Teóricas"}
+        widgets = {
+            "acting_areas": forms.CheckboxSelectMultiple(),
+        }
 
 
 class StudentActivityForm(forms.ModelForm):

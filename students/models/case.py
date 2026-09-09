@@ -19,11 +19,13 @@ class CaseAssignmentQuerySet(AdviseeScopedQuerySet):
 class CaseAssignmentManager(models.Manager.from_queryset(CaseAssignmentQuerySet)):
     @transaction.atomic
     def assign(self, student, patient, acting_area=None):
-        caso = self.model(
-            student=student,
-            patient=patient,
-            acting_area=acting_area or student.acting_area,
-        )
+        area = acting_area or student.default_acting_area
+        if area is None:
+            raise ValidationError(
+                {"acting_area": "Escolha a área: o orientador atua em mais de uma."}
+            )
+
+        caso = self.model(student=student, patient=patient, acting_area=area)
         caso.save()
         patient.advance_to(patient.FlowStatus.IN_TREATMENT)
         return caso
@@ -55,8 +57,6 @@ class CaseAssignment(BusinessRulesMixin, models.Model):
 
     acting_area = models.ForeignKey(
         AreaActing,
-        null=True,
-        blank=True,
         on_delete=models.PROTECT,
         related_name="case_assignments",
         verbose_name="Área de atuação",
@@ -70,7 +70,10 @@ class CaseAssignment(BusinessRulesMixin, models.Model):
     MAX_STUDENTS_PER_PATIENT = 2
 
     CREATABLE_BY = (Role.PROFESSOR,)
-    EDITABLE_FIELDS = {Role.PROFESSOR: ("end_date",)}
+    EDITABLE_FIELDS = {
+        Role.PROFESSOR: ("end_date",),
+        Role.SUPERVISOR: ("acting_area",),
+    }
     DELETABLE_BY = ()
 
     class Meta:

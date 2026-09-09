@@ -42,21 +42,24 @@ class CustomUserCreationForm(UserCreationForm):
         CustomUser.Role.PROFESSOR,
     )
 
+    # O Supervisor tem area propria e supervisiona todas: o alcance vem das
+    # permissoes, nao da ausencia de area.
     ROLES_REQUIRING_AREA = (
         CustomUser.Role.PROFESSOR,
         CustomUser.Role.SUPERVISOR,
     )
 
-    acting_area = forms.ModelChoiceField(
+    acting_areas = forms.ModelMultipleChoiceField(
         queryset=AreaActing.objects.all(),
         required=False,
-        label="Área de atuação",
+        label="Áreas de atuação",
         help_text="Obrigatório para Professor e Supervisor.",
+        widget=forms.CheckboxSelectMultiple,
     )
 
     class Meta:
         model = CustomUser
-        fields = PERSONAL_FIELDS
+        fields = PERSONAL_FIELDS + ("acting_areas",)
 
     def clean(self):
         cleaned_data = super().clean()
@@ -69,9 +72,10 @@ class CustomUserCreationForm(UserCreationForm):
                 "matricula", "Matrícula é obrigatória para Aluno e Professor."
             )
 
-        if role in self.ROLES_REQUIRING_AREA and not cleaned_data.get("acting_area"):
+        if role in self.ROLES_REQUIRING_AREA and not cleaned_data.get("acting_areas"):
             self.add_error(
-                "acting_area", "Professor e Supervisor precisam de área de atuação."
+                "acting_areas",
+                "Professor e Supervisor precisam de pelo menos uma área de atuação.",
             )
 
         return cleaned_data
@@ -80,6 +84,34 @@ class CustomUserCreationForm(UserCreationForm):
         model = self.MODEL_BY_ROLE.get(self.cleaned_data.get("role"))
         if model is not None:
             self.instance = model()
-            if model is Teacher:
-                self.instance.acting_area = self.cleaned_data.get("acting_area")
+
         super()._post_clean()
+
+    def save(self, commit=True):
+        user = super().save(commit=commit)
+        if commit and isinstance(user, Teacher):
+            user.acting_areas.set(self.cleaned_data["acting_areas"])
+        return user
+
+
+class SupervisorCreationForm(UserCreationForm):
+    class Meta:
+        model = CustomUser
+        fields = PERSONAL_FIELDS
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["role"].choices = [
+            (value, label)
+            for value, label in CustomUser.Role.choices
+            if value == CustomUser.Role.SUPERVISOR
+        ]
+        self.initial["role"] = CustomUser.Role.SUPERVISOR
+
+    def clean_role(self):
+        role = self.cleaned_data["role"]
+        if role != CustomUser.Role.SUPERVISOR:
+            raise forms.ValidationError(
+                "Pelo admin, só é possível cadastrar Supervisor."
+            )
+        return role

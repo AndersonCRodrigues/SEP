@@ -33,12 +33,22 @@ class Student(CustomUser):
         return self.stage == self.Stage.TRIAGE
 
     @property
-    def acting_area(self):
-        return self.current_advisor.acting_area if self.current_advisor_id else None
-
-    @property
     def open_cases(self):
         return self.case_history.filter(end_date__isnull=True)
+
+    @property
+    def acting_area(self):
+        """A area em que o aluno atua vem do caso aberto, nao do orientador."""
+        caso = self.open_cases.first()
+        return caso.acting_area if caso else None
+
+    @property
+    def default_acting_area(self):
+        """So resolve sozinho quando o orientador atua numa area unica."""
+        if not self.current_advisor_id:
+            return None
+        areas = list(self.current_advisor.acting_areas.all()[:2])
+        return areas[0] if len(areas) == 1 else None
 
     def enforce_role(self):
         self.role = CustomUser.Role.ALUNO
