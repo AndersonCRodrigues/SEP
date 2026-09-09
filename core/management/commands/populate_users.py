@@ -21,7 +21,11 @@ from teacher.models import Teacher
 MODEL_BY_ROLE = {
     
     CustomUser.Role.PROFESSOR: Teacher,
+
     CustomUser.Role.SUPERVISOR: Teacher,  
+
+    CustomUser.Role.SUPERVISOR: Teacher,
+
     CustomUser.Role.ALUNO: Student,
     CustomUser.Role.PACIENTE: Patient,
 
@@ -33,6 +37,14 @@ DEFAULT_AREAS = [
     "Fenomenológico-Existencial",
     "Psicanálise",
 ]
+
+
+def matricula_livre():
+    """Sequencial: o seed roda a cada boot e matricula agora e unique."""
+    n = CustomUser.objects.exclude(matricula__isnull=True).count() + 1
+    while CustomUser.objects.filter(matricula=f"2026{n:04d}").exists():
+        n += 1
+    return f"2026{n:04d}"
 
 
 def generate_valid_cpf():
@@ -126,7 +138,7 @@ class Command(BaseCommand):
                     CustomUser.Role.PROFESSOR,
                     CustomUser.Role.ADMINISTRATIVO,
                 ):
-                    user.matricula = f"2026{random.randint(1000, 9999)}"  # nosec B311
+                    user.matricula = matricula_livre()
 
                 if role in (CustomUser.Role.PROFESSOR, CustomUser.Role.SUPERVISOR):
                     user.crp = f"{random.randint(10000, 99999)}/RJ-{role}"  # nosec B311
@@ -141,7 +153,8 @@ class Command(BaseCommand):
                     user.full_clean()
                     user.save()
                     if isinstance(user, Teacher):
-                        areas_escolhidas = random.sample(areas, k=random.randint(1, 2))
+                        quantas = random.randint(1, 2)  # nosec B311
+                        areas_escolhidas = random.sample(areas, k=quantas)  # nosec B311
                         user.acting_areas.set(areas_escolhidas)
                     sincronizar_grupo(user)
                     self.stdout.write(

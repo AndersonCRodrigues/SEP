@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.utils import timezone
+from core.fields import only_digits
 from core.models import CustomUser
 from .models import Patient
 
@@ -38,6 +39,7 @@ class PacienteCreationForm(UserCreationForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.instance.role = CustomUser.Role.PACIENTE
+
         self.fields.pop("password1", None)
         self.fields.pop("password2", None)
 
@@ -60,3 +62,5 @@ class PacienteCreationForm(UserCreationForm):
             for field in self.Meta.fields
         }
         return Patient.objects.create_with_credentials(**cleaned)
+
+

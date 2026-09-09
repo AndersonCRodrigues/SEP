@@ -33,8 +33,11 @@ class SupervisorCreationForm(ProfessorCreationForm):
 
         if commit:
             supervisor.save()
+
             # 2. Garante o salvamento das ManyToMany (acting_areas) herdadas de ProfessorCreationForm
             if "acting_areas" in self.cleaned_data:
                 supervisor.acting_areas.set(self.cleaned_data["acting_areas"])
 
+                return supervisor
+            supervisor.acting_areas.set(self.cleaned_data["acting_areas"])
         return supervisor

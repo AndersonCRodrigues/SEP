@@ -26,12 +26,13 @@ PERSONAL_FIELDS = (
 
 
 class LoginEmailOuMatriculaForm(AuthenticationForm):
-    username = forms.CharField(label="Email ou Matrícula")
+    username = forms.CharField(label="Email ou Matrícula (Paciente: CPF)")
 
 
 class CustomUserCreationForm(UserCreationForm):
     MODEL_BY_ROLE = {
         CustomUser.Role.PROFESSOR: Teacher,
+        CustomUser.Role.SUPERVISOR: Teacher,
         CustomUser.Role.ALUNO: Student,
         CustomUser.Role.PACIENTE: Patient,
     }
@@ -41,11 +42,18 @@ class CustomUserCreationForm(UserCreationForm):
         CustomUser.Role.PROFESSOR,
     )
 
+    # O Supervisor tem area propria e supervisiona todas: o alcance vem das
+    # permissoes, nao da ausencia de area.
+    ROLES_REQUIRING_AREA = (
+        CustomUser.Role.PROFESSOR,
+        CustomUser.Role.SUPERVISOR,
+    )
+
     acting_areas = forms.ModelMultipleChoiceField(
         queryset=AreaActing.objects.all(),
         required=False,
         label="Áreas de atuação",
-        help_text="Obrigatório para Professor Responsável.",
+        help_text="Obrigatório para Professor e Supervisor.",
         widget=forms.CheckboxSelectMultiple,
     )
 
@@ -64,9 +72,10 @@ class CustomUserCreationForm(UserCreationForm):
                 "matricula", "Matrícula é obrigatória para Aluno e Professor."
             )
 
-        if role == CustomUser.Role.PROFESSOR and not cleaned_data.get("acting_areas"):
+        if role in self.ROLES_REQUIRING_AREA and not cleaned_data.get("acting_areas"):
             self.add_error(
-                "acting_areas", "Professor precisa de pelo menos uma área de atuação."
+                "acting_areas",
+                "Professor e Supervisor precisam de pelo menos uma área de atuação.",
             )
 
         return cleaned_data
