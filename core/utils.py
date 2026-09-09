@@ -36,7 +36,7 @@ def generate_temporary_password(length=12):
 def send_temporary_password_email(
     user, temporary_password, usuario_responsavel=None
 ):
-    """Envia a senha temporária por e-mail e registra o log de auditoria (US-1.4)."""
+    
     target_user = usuario_responsavel or user
 
     try:
