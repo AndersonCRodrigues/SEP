@@ -44,6 +44,12 @@ class TeacherArea(BusinessRulesMixin, models.Model):
         return f"{self.teacher} - {self.area}"
 
 
+    def save(self, *args, **kwargs):
+        if self.role not in (CustomUser.Role.PROFESSOR, CustomUser.Role.SUPERVISOR):
+            self.role = CustomUser.Role.PROFESSOR
+        super().save(*args, **kwargs)
+
+
 class Teacher(CustomUser):
     acting_areas = models.ManyToManyField(
         AreaActing,
@@ -66,6 +72,7 @@ class Teacher(CustomUser):
             raise ValidationError(
                 {"acting_areas": "Professor precisa de ao menos uma área de atuação."}
             )
+
 
     def __str__(self):
         areas = ", ".join(a.nome for a in self.acting_areas.all())

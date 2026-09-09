@@ -2,7 +2,7 @@ from itertools import chain
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect,get_object_or_404
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.views.generic import ListView, TemplateView, CreateView, UpdateView
@@ -15,6 +15,7 @@ from .forms import SupervisorCreationForm
 from areas.forms import AreaAtuacaoForm
 from core.utils import sincronizar_grupo
 from .utils import gerar_senha_temporaria, enviar_email_credenciais
+from teacher.forms import PerfilProfessorForm
 
 
 def usuarios_alunos_e_professores():
@@ -109,3 +110,27 @@ class EditarAreaView(PermissionRequiredMixin, UpdateView):
     form_class = AreaAtuacaoForm
     template_name = "supervisor/area_form.html"
     success_url = reverse_lazy("supervisor:areas")
+
+
+class PerfilSupervisorView(GroupRequiredMixin, UpdateView):
+    required_group = "Supervisor"
+    model = Teacher
+    form_class = PerfilProfessorForm
+    template_name = "supervisor/perfil.html"
+    success_url = reverse_lazy("supervisor:home")
+
+    def get_object(self, queryset=None):
+        user = self.request.user
+        
+        try:
+            return Teacher.objects.get(pk=user.pk)
+        except Teacher.DoesNotExist:
+            teacher = Teacher(customuser_ptr_id=user.pk)
+            teacher.__dict__.update(user.__dict__)
+            teacher.role = CustomUser.Role.SUPERVISOR
+            teacher.save()
+            return teacher
+
+    def form_valid(self, form):
+        messages.success(self.request, "Perfil atualizado com sucesso!")
+        return super().form_valid(form)

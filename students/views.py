@@ -12,7 +12,7 @@ from core.mixins import GroupRequiredMixin
 
 
 class HomeEstudanteView(LoginRequiredMixin, TemplateView):
-    template_name = "student/home_student.html"
+    template_name = "student/home.html"
 
 
 @login_required
@@ -48,7 +48,7 @@ class PerfilAlunoView(GroupRequiredMixin, UpdateView):
         "cep",
     ]
     template_name = "student/perfil.html"
-    success_url = reverse_lazy("students:perfil")
+    success_url = reverse_lazy("students:home")
 
     def get_object(self, queryset=None):
         return get_object_or_404(Student, pk=self.request.user.pk)

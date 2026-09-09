@@ -14,4 +14,5 @@ urlpatterns = [
     path("superadmin/", include("superadmin.urls")),
     path("patient/", include("patient.urls")),
     path("triage/", include("triage.urls")),
+    path("trocar-senha/",core_views.ForcePasswordChangeView.as_view(),name="force_password_change",),
 ]

@@ -33,7 +33,7 @@ class ProgressNote(BusinessRulesMixin, models.Model):
     )
 
     acting_area = models.ForeignKey(
-        AreaActing,
+        "areas.AreaActing",
         null=True,
         blank=True,
         on_delete=models.PROTECT,
@@ -60,9 +60,13 @@ class ProgressNote(BusinessRulesMixin, models.Model):
         verbose_name="Confirmado em",
     )
 
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Criado em")
+    created_at = models.DateTimeField(
+        auto_now_add=True, verbose_name="Criado em"
+    )
 
-    updated_at = models.DateTimeField(auto_now=True, verbose_name="Atualizado em")
+    updated_at = models.DateTimeField(
+        auto_now=True, verbose_name="Atualizado em"
+    )
 
     objects = ProgressNoteQuerySet.as_manager()
 

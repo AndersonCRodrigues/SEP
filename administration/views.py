@@ -1,28 +1,36 @@
-from django.shortcuts import render, redirect
+from core.mixins import GroupRequiredMixin
+from core.models import CustomUser
+from core.utils import sincronizar_grupo
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.exceptions import PermissionDenied
+from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView, UpdateView
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from core.mixins import GroupRequiredMixin
-from .forms import AdministrativoCreationForm
-from core.utils import sincronizar_grupo
-from core.models import CustomUser
 from patient.forms import PacienteCreationForm
+
+from .forms import AdministrativoCreationForm
 
 
 @login_required
 def cadastrar_paciente(request):
     is_administrativo = (
-        request.user.is_superuser or request.user.role == CustomUser.Role.ADMINISTRATIVO
+        request.user.is_superuser
+        or request.user.role == CustomUser.Role.ADMINISTRATIVO
     )
     if not is_administrativo:
-        raise PermissionDenied("Apenas o Administrativo pode cadastrar Paciente.")
+        raise PermissionDenied(
+            "Apenas o Administrativo pode cadastrar Paciente."
+        )
 
     if request.method == "POST":
         form = PacienteCreationForm(request.POST)
         if form.is_valid():
+            # Injeta o usuário logado no formulário para a auditoria no SecurityLog
+            if hasattr(form, "created_by_user"):
+                form.created_by_user = request.user
+
             user = form.save()
             sincronizar_grupo(user)
             messages.success(request, "Paciente cadastrado com sucesso!")
@@ -30,10 +38,14 @@ def cadastrar_paciente(request):
     else:
         form = PacienteCreationForm()
 
-    return render(request, "administration/cadastrar_paciente.html", {"form": form})
+    return render(
+        request, "administration/cadastrar_paciente.html", {"form": form}
+    )
 
 
-class PainelAdministracaoView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+class PainelAdministracaoView(
+    LoginRequiredMixin, UserPassesTestMixin, TemplateView
+):
     template_name = "administration/administration_panel.html"
 
     def test_func(self):
@@ -67,7 +79,9 @@ class PerfilAdministrativoView(GroupRequiredMixin, UpdateView):
 @login_required
 def cadastrar_administrativo(request):
     if not request.user.has_perm("core.add_customuser"):
-        raise PermissionDenied("Apenas o Superadmin pode cadastrar Administrativo.")
+        raise PermissionDenied(
+            "Apenas o Superadmin pode cadastrar Administrativo."
+        )
 
     if request.method == "POST":
         form = AdministrativoCreationForm(request.POST)
