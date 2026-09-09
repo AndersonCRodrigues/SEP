@@ -8,6 +8,7 @@ from core.permissions import ALL, BusinessRulesMixin, RoleScopedQuerySet
 from teacher.models import Teacher
 from core.constants import VISIBLE_TO_AUTHOR
 from utils.fields import EncryptedTextField
+from core.utils import generate_temporary_password, send_temporary_password_email
 
 Role = CustomUser.Role
 
@@ -15,7 +16,9 @@ Role = CustomUser.Role
 def with_open_case(prefix="", **lookups):
     caminho = f"{prefix}assignment_history"
     filtros = {f"{caminho}__end_date__isnull": True}
-    filtros.update({f"{caminho}__{campo}": valor for campo, valor in lookups.items()})
+    filtros.update(
+        {f"{caminho}__{campo}": valor for campo, valor in lookups.items()}
+    )
     return Q(**filtros)
 
 
@@ -38,6 +41,28 @@ class PatientQuerySet(RoleScopedQuerySet):
     }
 
 
+# Manager customizado estendendo o CustomUserManager mantido do merge
+class PatientManager(CustomUserManager):
+
+    def create_with_credentials(
+        self, raw_data, created_by_user=None, commit=True
+    ):
+        senha_temporaria = generate_temporary_password()
+
+        paciente = self.model(**raw_data)
+        paciente.set_password(senha_temporaria)
+
+        if commit:
+            paciente.save()
+            send_temporary_password_email(
+                user=paciente,
+                temporary_password=senha_temporaria,
+                usuario_responsavel=created_by_user,
+            )
+
+        return paciente
+
+
 class Patient(BusinessRulesMixin, CustomUser):
     class FlowStatus(models.TextChoices):
         IN_TRIAGE = "IN_TRIAGE", "Em triagem"
@@ -51,6 +76,18 @@ class Patient(BusinessRulesMixin, CustomUser):
         choices=FlowStatus.choices,
         blank=True,
         verbose_name="Status do fluxo",
+    )
+    social_name = models.CharField(
+        max_length=150,
+        blank=True,
+        null=True,
+        verbose_name="Nome social",
+    )
+    gender_identity = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+        verbose_name="Identidade de gênero",
     )
 
     ALLOWED_TRANSITIONS = {
@@ -83,14 +120,19 @@ class Patient(BusinessRulesMixin, CustomUser):
         verbose_name="Professores responsáveis",
     )
 
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Criado em")
+    created_at = models.DateTimeField(
+        auto_now_add=True, verbose_name="Criado em"
+    )
 
-    objects = CustomUserManager.from_queryset(PatientQuerySet)()
+    # Usa o PatientManager preservando o PatientQuerySet do merge
+    objects = PatientManager.from_queryset(PatientQuerySet)()
 
     REGISTRATION_FIELDS = (
         "nome_completo",
         "cpf",
         "data_nascimento",
+        "social_name",
+        "gender_identity",
     ) + CustomUser.ADDRESS_FIELDS
     COMPLETION_FIELDS = ("data_nascimento",) + CustomUser.ADDRESS_FIELDS
 
@@ -107,8 +149,9 @@ class Patient(BusinessRulesMixin, CustomUser):
         verbose_name = "Paciente"
         verbose_name_plural = "Pacientes"
 
+    # US-5.2: Cálculo dinâmico da idade atual
     @property
-    def current_age(self):
+    def idade_atual(self):
         if not self.data_nascimento:
             return None
         hoje = timezone.localdate()
@@ -118,6 +161,11 @@ class Patient(BusinessRulesMixin, CustomUser):
             - nascimento.year
             - ((hoje.month, hoje.day) < (nascimento.month, nascimento.day))
         )
+
+    # Alias mantido do código mesclado do outro dev
+    @property
+    def current_age(self):
+        return self.idade_atual
 
     @property
     def active_treatment(self):
@@ -132,7 +180,9 @@ class Patient(BusinessRulesMixin, CustomUser):
         if new_status == self.flow_status:
             return False
 
-        if new_status not in self.ALLOWED_TRANSITIONS.get(self.flow_status, ()):
+        if new_status not in self.ALLOWED_TRANSITIONS.get(
+            self.flow_status, ()
+        ):
             atual = self.get_flow_status_display() or "sem fluxo"
             destino = self.FlowStatus(new_status).label
             raise ValidationError(
