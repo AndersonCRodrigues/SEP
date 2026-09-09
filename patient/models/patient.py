@@ -65,15 +65,17 @@ class PatientManager(CustomUserManager):
 
 class Patient(BusinessRulesMixin, CustomUser):
     class FlowStatus(models.TextChoices):
-        IN_TRIAGE = "IN_TRIAGE", "Em triagem"
+        AWAITING_TRIAGE = "AGUARDANDO_TRIAGEM", "Aguardando triagem"
+        IN_TRIAGE = "EM_TRIAGEM", "Em triagem"
+        REFERRED = "ENCAMINHADO", "Encaminhado"
         AWAITING_REVIEW = "AWAITING_REVIEW", "Aguardando parecer"
-        REFERRED = "REFERRED", "Encaminhado ao professor"
         IN_TREATMENT = "IN_TREATMENT", "Em atendimento"
         DISCHARGED = "DISCHARGED", "Alta"
 
     flow_status = models.CharField(
         max_length=30,
         choices=FlowStatus.choices,
+        default=FlowStatus.AWAITING_TRIAGE,
         blank=True,
         verbose_name="Status do fluxo",
     )
@@ -91,7 +93,12 @@ class Patient(BusinessRulesMixin, CustomUser):
     )
 
     ALLOWED_TRANSITIONS = {
-        "": (FlowStatus.IN_TRIAGE, FlowStatus.IN_TREATMENT),
+        "": (FlowStatus.AWAITING_TRIAGE, FlowStatus.IN_TRIAGE, FlowStatus.IN_TREATMENT),
+        FlowStatus.AWAITING_TRIAGE: (
+            FlowStatus.IN_TRIAGE,
+            FlowStatus.REFERRED,
+            FlowStatus.DISCHARGED,
+        ),
         FlowStatus.IN_TRIAGE: (
             FlowStatus.AWAITING_REVIEW,
             FlowStatus.REFERRED,
@@ -108,8 +115,10 @@ class Patient(BusinessRulesMixin, CustomUser):
             FlowStatus.DISCHARGED,
         ),
         FlowStatus.IN_TREATMENT: (FlowStatus.DISCHARGED,),
-        FlowStatus.DISCHARGED: (FlowStatus.IN_TRIAGE,),
+        FlowStatus.DISCHARGED: (FlowStatus.AWAITING_TRIAGE, FlowStatus.IN_TRIAGE),
     }
+
+    # ... [demais atributos e métodos continuam iguais] ...
 
     medical_record = EncryptedTextField(blank=True, verbose_name="Prontuário")
 
