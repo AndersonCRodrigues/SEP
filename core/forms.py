@@ -75,9 +75,9 @@ class CustomUserCreationForm(UserCreationForm):
         model = self.MODEL_BY_ROLE.get(self.cleaned_data.get("role"))
         if model is not None:
             self.instance = model()
-            
+
         super()._post_clean()
-    
+
     def save(self, commit=True):
         user = super().save(commit=commit)
         if commit and isinstance(user, Teacher):

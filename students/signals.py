@@ -13,6 +13,7 @@ ACTIVITY_TYPE_BY_APPOINTMENT_KIND = {
 
 LINKED_FIELDS = ("current_advisor_id", "current_patient_id")
 
+
 @receiver(post_save, sender="patient.Appointment")
 def sync_student_activity(sender, instance, **kwargs):
     counts = (
@@ -34,6 +35,7 @@ def sync_student_activity(sender, instance, **kwargs):
         },
     )
 
+
 @receiver(pre_save, sender=Student)
 def capture_previous_links(sender, instance, **kwargs):
     stored = (
@@ -42,6 +44,7 @@ def capture_previous_links(sender, instance, **kwargs):
         else None
     )
     instance._previous_links = stored or dict.fromkeys(LINKED_FIELDS)
+
 
 @receiver(post_save, sender=Student)
 def sync_link_history(sender, instance, **kwargs):
