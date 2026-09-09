@@ -1,6 +1,9 @@
 from django.contrib import admin
-from .models import Teacher
+from .models import Teacher,TeacherArea
 
+class TeacherAreaInline(admin.TabularInline):
+    model = TeacherArea
+    extra = 1
 
 @admin.register(Teacher)
 class TeacherAdmin(admin.ModelAdmin):
@@ -8,4 +11,4 @@ class TeacherAdmin(admin.ModelAdmin):
 
     search_fields = ("nome_completo", "email", "cpf")
 
-    filter_horizontal = ("acting_areas",)
+    inlines = [TeacherAreaInline]
