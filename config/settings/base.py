@@ -167,3 +167,32 @@ MESSAGE_TAGS = {
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
+
+# Republicacao explicita da API deste modulo (PEP 8 permite wildcard import
+# quando o modulo de origem declara __all__). Isso evita que "import os",
+# "Path", "base64" etc. vazem para dev.py/prod.py via `from .base import *`
+# e restringe o wildcard só ao que é de fato uma Django setting.
+__all__ = [
+    "BASE_DIR",
+    "SECRET_KEY",
+    "FIELD_ENCRYPTION_KEY",
+    "INSTALLED_APPS",
+    "MIDDLEWARE",
+    "AUTHENTICATION_BACKENDS",
+    "ROOT_URLCONF",
+    "TEMPLATES",
+    "WSGI_APPLICATION",
+    "DATABASES",
+    "AUTH_PASSWORD_VALIDATORS",
+    "LANGUAGE_CODE",
+    "TIME_ZONE",
+    "USE_I18N",
+    "USE_TZ",
+    "STATIC_URL",
+    "AUTH_USER_MODEL",
+    "LOGIN_URL",
+    "LOGIN_REDIRECT_URL",
+    "MESSAGE_TAGS",
+    "CRISPY_ALLOWED_TEMPLATE_PACKS",
+    "CRISPY_TEMPLATE_PACK",
+]
