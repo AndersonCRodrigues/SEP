@@ -19,9 +19,12 @@ from teacher.models import Teacher
 
 # Dicionário que mapeia a Role para o Modelo específico do banco de dados
 MODEL_BY_ROLE = {
+    
     CustomUser.Role.PROFESSOR: Teacher,
+    CustomUser.Role.SUPERVISOR: Teacher,  
     CustomUser.Role.ALUNO: Student,
     CustomUser.Role.PACIENTE: Patient,
+
 }
 
 DEFAULT_AREAS = [
@@ -131,8 +134,8 @@ class Command(BaseCommand):
                 if role == CustomUser.Role.SUPERADMIN:
                     user.is_staff = True
                     user.is_superuser = True
-
-                user.set_password("SenhaForte123!")
+                # POR FAVOR NÃO ALTERAR
+                user.set_password("Senha123!")
 
                 try:
                     user.full_clean()
