@@ -27,8 +27,14 @@ class SupervisorCreationForm(ProfessorCreationForm):
         return role
 
     def save(self, commit=True):
-        supervisor = super().save(commit=False)
+        # 1. Chama o save da classe pai (UserCreationForm/ModelForm) sem salvar no banco ainda
+        supervisor = super(ProfessorCreationForm, self).save(commit=False)
         supervisor.role = Teacher.Role.SUPERVISOR
+
         if commit:
             supervisor.save()
+            # 2. Garante o salvamento das ManyToMany (acting_areas) herdadas de ProfessorCreationForm
+            if "acting_areas" in self.cleaned_data:
+                supervisor.acting_areas.set(self.cleaned_data["acting_areas"])
+
         return supervisor
