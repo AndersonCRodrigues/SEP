@@ -33,6 +33,8 @@ class VincularAlunoForm(forms.Form):
 
 
 class ProfessorCreationForm(UserCreationForm):
+    # Teacher.clean() exige ao menos uma area: opcional aqui passava a
+    # validacao e so estourava depois.
     acting_areas = forms.ModelMultipleChoiceField(
         queryset=AreaActing.objects.all(),
         widget=forms.CheckboxSelectMultiple,

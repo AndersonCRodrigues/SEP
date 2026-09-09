@@ -26,13 +26,16 @@ jobs:
           --health-retries 5
 
     env:
-      DJANGO_SETTINGS_MODULE: config.settings.dev 
+      DJANGO_SETTINGS_MODULE: config.settings.dev
       NODE_ENV: dev
-      DB_NAME: testdb
-      DB_USER: admin
-      DB_PASSWORD: adminpassword
-      DB_HOST: localhost
-      DB_PORT: 5432
+      # Os nomes tem de bater com os que config/settings/base.py le, senao o
+      # settings cai no sqlite e o servico de Postgres acima fica sem uso.
+      DJANGO_DATABASE_ENGINE: django.db.backends.postgresql
+      DJANGO_DATABASE_NAME: testdb
+      DJANGO_DATABASE_USER: admin
+      DJANGO_DATABASE_PASSWORD: adminpassword
+      DJANGO_DATABASE_HOST: localhost
+      DJANGO_DATABASE_PORT: 5432
 
     steps:
       - uses: actions/checkout@v4
@@ -64,8 +67,13 @@ jobs:
         run: |
           bandit -r . -x tests,.venv
 
+      # As migrations nao sao versionadas: sem gerar antes, o migrate quebra em
+      # "Dependency on app with no migrations: core".
       - name: Executar Migrações
-        run: python3 manage.py migrate
+        run: |
+          python3 manage.py makemigrations
+          python3 manage.py migrate
+          python3 manage.py migrate --check
 
       - name: Pytest
         run: |

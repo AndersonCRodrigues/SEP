@@ -12,4 +12,5 @@ class SupervisorCreationForm(ProfessorCreationForm):
         supervisor.role = CustomUser.Role.SUPERVISOR
         if commit:
             supervisor.save()
+            supervisor.acting_areas.set(self.cleaned_data["acting_areas"])
         return supervisor

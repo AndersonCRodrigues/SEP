@@ -51,7 +51,6 @@ USER appuser
 
 EXPOSE 8000
 
-# Troca o CMD antigo pelo ENTRYPOINT apontando para o script
 ENTRYPOINT ["/app/entrypoint.sh"]
 
 # Estagio do banco: a imagem oficial do Postgres nao traz o pg_cron, que e o

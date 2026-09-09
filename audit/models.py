@@ -5,18 +5,13 @@ from django.db import models
 from django.utils import timezone
 
 from core.models import CustomUser
-from core.permissions import BusinessRulesMixin, RoleScopedQuerySet
+from core.permissions import ALL, BusinessRulesMixin, RoleScopedQuerySet
 
 Role = CustomUser.Role
 
 
 class SecurityLogQuerySet(RoleScopedQuerySet):
-    def visible_to(self, user):
-        if not user.is_authenticated:
-            return self.none()
-        if user.is_superuser or user.role == Role.SUPERADMIN:
-            return self
-        return self.none()
+    VISIBLE_TO = {Role.SUPERADMIN: ALL}
 
     def expired(self):
         limit = timezone.now() - timedelta(days=SecurityLog.RETENTION_DAYS)

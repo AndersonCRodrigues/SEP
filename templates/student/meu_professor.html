@@ -16,7 +16,7 @@
             <div class="card-body">
                 {% if professor %}
                 <p class="mb-1"><strong>Nome:</strong> {{ professor.nome_completo }}</p>
-                <p class="mb-0"><strong>Área de Atuação:</strong> {{ professor.acting_area.nome }}</p>
+                <p class="mb-0"><strong>Área de Atuação:</strong> {% for area in professor.acting_areas.all %}{{ area.nome }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
                 {% else %}
                 <p class="card-text text-body-secondary mb-0">
                     Você ainda não foi vinculado a um Professor.

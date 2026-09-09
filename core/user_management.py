@@ -30,8 +30,11 @@ def can_manage_user(actor, target_role):
 
 
 def target_fields(target):
+    """Campos que so existem na subclasse, fora de ALL_EDITABLE_FIELDS."""
     campos = CustomUser.ALL_EDITABLE_FIELDS
-    if target.role == Role.PROFESSOR:
+    if target.role == Role.ALUNO:
+        campos += ("stage",)
+    if target.role in (Role.PROFESSOR, Role.SUPERVISOR):
         campos += ("acting_areas",)
     return campos
 
@@ -42,10 +45,14 @@ def editable_user_fields(actor, target):
         return ()
 
     if actor.is_superuser or actor.role == Role.SUPERADMIN:
-        return CustomUser.ALL_EDITABLE_FIELDS
+        return target_fields(target)
 
     if actor.role == Role.SUPERVISOR and target.role in (Role.PROFESSOR, Role.ALUNO):
-        return CustomUser.ALL_EDITABLE_FIELDS
+        return target_fields(target)
+
+    if actor.role == Role.PROFESSOR and target.role == Role.ALUNO:
+        orientando = getattr(target, "current_advisor_id", None) == actor.pk
+        return ("stage",) if orientando else ()
 
     if actor.role == Role.PACIENTE and target.pk == actor.pk:
         return CustomUser.ADDRESS_FIELDS

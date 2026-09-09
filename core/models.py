@@ -2,16 +2,20 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
-from localflavor.br.models import BRCPFField, BRStateField, BRPostalCodeField
+from localflavor.br.models import BRStateField, BRPostalCodeField
+from .fields import DigitsBRCPFField, only_digits
 from .managers import CustomUserManager
+from .permissions import Role as UserRole
 
 
 class CustomUser(AbstractUser):
+    Role = UserRole
+
     username = None
-    email = models.EmailField(_("Adicionar email"), unique=True)
+    email = models.EmailField(_("Adicionar email"), unique=True, null=True, blank=True)
 
     nome_completo = models.CharField(max_length=350, verbose_name="Nome Completo")
-    cpf = BRCPFField(unique=True, verbose_name="CPF")
+    cpf = DigitsBRCPFField(unique=True, verbose_name="CPF")
     telefone = models.CharField(max_length=20, verbose_name="Telefone")
     data_nascimento = models.DateField(
         null=True, blank=True, verbose_name="Data de nascimento"
@@ -27,19 +31,13 @@ class CustomUser(AbstractUser):
     estado = BRStateField(verbose_name="Estado")
     cep = BRPostalCodeField(verbose_name="CEP")
 
-    class Role(models.TextChoices):
-        SUPERADMIN = "SA"
-        SUPERVISOR = "SV"
-        PROFESSOR = "PR"
-        ADMINISTRATIVO = "AD"
-        ALUNO = "AL"
-        PACIENTE = "PA"
-
     role = models.CharField(
         max_length=2, choices=Role.choices, default=Role.ALUNO, verbose_name="Cargo"
     )
 
-    matricula = models.CharField(max_length=20, blank=True, verbose_name="Matricula")
+    matricula = models.CharField(
+        max_length=20, unique=True, null=True, blank=True, verbose_name="Matricula"
+    )
     crp = models.CharField(max_length=15, blank=True, verbose_name="CRP")
 
     USERNAME_FIELD = "email"
@@ -67,8 +65,22 @@ class CustomUser(AbstractUser):
         "crp",
     ) + ADDRESS_FIELDS
 
+    def enforce_role(self):
+        """Subclasse de heranca multi-tabela fixa o proprio papel."""
+
     def clean(self):
+        self.enforce_role()
         super().clean()
+        if not self.email:
+            self.email = None
+        if not self.matricula:
+            self.matricula = None
+
+        if self.role != self.Role.PACIENTE and not self.email:
+            raise ValidationError(
+                {"email": "Funcionário precisa de e-mail para acessar o sistema."}
+            )
+
         if (
             self.role in (self.Role.ALUNO, self.Role.ADMINISTRATIVO)
             and not self.matricula
@@ -80,8 +92,17 @@ class CustomUser(AbstractUser):
         if self.role in (self.Role.PROFESSOR, self.Role.SUPERVISOR) and not self.crp:
             raise ValidationError({"crp": "Professor/Supervisor precisa ter o CRP."})
 
+    def save(self, *args, **kwargs):
+        self.enforce_role()
+        if not self.email:
+            self.email = None
+        if not self.matricula:
+            self.matricula = None
+        self.cpf = only_digits(self.cpf)
+        super().save(*args, **kwargs)
+
     def __str__(self):
-        return f"{self.nome_completo} / {self.email}"
+        return f"{self.nome_completo} / {self.email or self.cpf}"
 
     class Meta:
         verbose_name = "Usuário"

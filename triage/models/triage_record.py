@@ -1,29 +1,31 @@
 from django.conf import settings
-from django.db import models
-
+from django.core.exceptions import ValidationError
+from django.db import models, transaction
+from django.db.models import Q
 from core.models import CustomUser
-from core.permissions import BusinessRulesMixin, RoleScopedQuerySet
+from core.permissions import ALL, BusinessRulesMixin, RoleScopedQuerySet
 from patient.models import Patient
 from students.models import Student
-from triage.constants import TriageStatus
+from core.constants import VISIBLE_TO_AUTHOR, TriageStatus
 from utils.fields import EncryptedTextField
 
 Role = CustomUser.Role
 
 
 class TriageRecordQuerySet(RoleScopedQuerySet):
-    def visible_to(self, user):
-        if not user.is_authenticated:
-            return self.none()
+    VISIBLE_TO = {
+        Role.SUPERVISOR: ALL,
+        Role.PROFESSOR: lambda u: Q(student_author__current_advisor_id=u.pk),
+        Role.ALUNO: lambda u: Q(student_author_id=u.pk, status__in=VISIBLE_TO_AUTHOR),
+    }
 
-        role = user.role
-        if role == Role.SUPERVISOR:
-            return self
-        if role == Role.PROFESSOR:
-            return self.filter(student_author__current_advisor_id=user.pk)
-        if role == Role.ALUNO:
-            return self.filter(student_author_id=user.pk, status=TriageStatus.OPEN)
-        return self.none()
+
+FLOW_BY_TRIAGE_STATUS = {
+    TriageStatus.OPEN: Patient.FlowStatus.IN_TRIAGE,
+    TriageStatus.SUBMITTED: Patient.FlowStatus.AWAITING_REVIEW,
+    TriageStatus.CLOSED: Patient.FlowStatus.DISCHARGED,
+    TriageStatus.REFERRED: Patient.FlowStatus.REFERRED,
+}
 
 
 class TriageRecord(BusinessRulesMixin, models.Model):
@@ -270,32 +272,42 @@ class TriageRecord(BusinessRulesMixin, models.Model):
 
         return iarv.get_classification()
 
+    def submit(self, student):
+        if self.status != TriageStatus.OPEN:
+            raise ValidationError("Só uma triagem aberta pode ser enviada.")
+        if student.pk != self.student_author_id:
+            raise ValidationError("Só o autor envia a própria triagem.")
+
+        self.status = TriageStatus.SUBMITTED
+        self.save(update_fields=["status"])
+
     def save(self, *args, **kwargs):
-        is_new = self._state.adding
+        anterior = (
+            None
+            if self._state.adding
+            else TriageRecord.objects.filter(pk=self.pk)
+            .values_list("status", flat=True)
+            .first()
+        )
 
-        super().save(*args, **kwargs)
+        with transaction.atomic():
+            super().save(*args, **kwargs)
 
-        if is_new and self.patient.flow_status != Patient.FlowStatus.IN_TRIAGE:
-            self.patient.flow_status = Patient.FlowStatus.IN_TRIAGE
-            self.patient.save(update_fields=["flow_status"])
+            if self.status != anterior:
+                paciente = Patient.objects.select_for_update().get(pk=self.patient_id)
+                paciente.advance_to(FLOW_BY_TRIAGE_STATUS[self.status])
+                self.patient = paciente
 
     def __str__(self):
         return f"TriageRecord #{self.pk}"
 
 
 class TriageFeedbackQuerySet(RoleScopedQuerySet):
-    def visible_to(self, user):
-        if not user.is_authenticated:
-            return self.none()
-
-        role = user.role
-        if role == Role.SUPERVISOR:
-            return self
-        if role == Role.PROFESSOR:
-            return self.filter(triage__student_author__current_advisor_id=user.pk)
-        if role == Role.ALUNO:
-            return self.filter(triage__student_author_id=user.pk)
-        return self.none()
+    VISIBLE_TO = {
+        Role.SUPERVISOR: ALL,
+        Role.PROFESSOR: lambda u: Q(triage__student_author__current_advisor_id=u.pk),
+        Role.ALUNO: lambda u: Q(triage__student_author_id=u.pk),
+    }
 
 
 class TriageFeedback(BusinessRulesMixin, models.Model):
@@ -321,11 +333,8 @@ class TriageFeedback(BusinessRulesMixin, models.Model):
 
     objects = TriageFeedbackQuerySet.as_manager()
 
-    CREATABLE_BY = (Role.SUPERVISOR, Role.PROFESSOR)
-    EDITABLE_FIELDS = {
-        Role.SUPERVISOR: ("content",),
-        Role.PROFESSOR: ("content",),
-    }
+    CREATABLE_BY = (Role.PROFESSOR,)
+    EDITABLE_FIELDS = {Role.PROFESSOR: ("content",)}
     DELETABLE_BY = ()
 
     class Meta:
