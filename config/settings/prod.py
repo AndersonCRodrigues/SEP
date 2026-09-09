@@ -1,7 +1,7 @@
-from .base import SECRET_KEY, ALLOWED_HOSTS
+from .base import *
 import os
 from django.core.exceptions import ImproperlyConfigured
-
+#Debug = False na produção
 DEBUG = False
 
 if not SECRET_KEY:
