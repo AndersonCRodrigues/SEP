@@ -32,10 +32,15 @@
 
         <div class="collapse navbar-collapse" id="navbarContent">
 
-          <!-- NAVEGACAO PRINCIPAL: itens de menu variam por role, definidos em cada template -->
-          <ul class="navbar-nav me-auto">
-            {% block main_nav %}{% endblock %}
-          </ul>
+          <!-- NAVEGACAO PRINCIPAL: por padrao, mantem a sidebar antiga (_sidebar.html)
+               funcionando para toda tela ja existente. Quando uma tela for migrada
+               pro novo layout horizontal, ela sobrescreve este bloco com seu proprio
+               menu, sem precisar do _sidebar.html. -->
+          <div class="me-auto">
+            {% block main_nav %}
+            {% include "partials/_sidebar.html" %}
+            {% endblock %}
+          </div>
 
           <!-- Icones/acoes de usuario, canto direito -->
           <ul class="navbar-nav align-items-lg-center gap-2">
