@@ -15,11 +15,11 @@ HOME_BY_ROLE = {
 
 
 def custom_permission_denied_view(request, exception):
-    
-    #Chamado automaticamente pelo Django sempre que uma view levanta PermissionDenied (403), em qualquer app.
-    
     if not request.user.is_authenticated:
         return redirect("login")
+
+    if request.user.is_superuser:
+        return redirect("superadmin:home")
 
     home_url_name = HOME_BY_ROLE.get(request.user.role, "login")
     return redirect(home_url_name)
