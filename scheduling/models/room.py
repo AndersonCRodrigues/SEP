@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q
@@ -8,6 +10,8 @@ from students.models import Student
 from patient.models import Patient
 
 Role = CustomUser.Role
+
+DURACAO_RESERVA = timedelta(hours=1)
 
 
 class RoomQuerySet(RoleScopedQuerySet):
@@ -74,6 +78,28 @@ class RoomBookingQuerySet(RoleScopedQuerySet):
     def open(self):
         return self.filter(end_date__isnull=True)
 
+    def occupying(self, momento):
+        """Reservas em curso no instante dado.
+
+        A reserva dura uma hora fixa, entao ela ocupa a sala de start_time ate
+        start_time + 1h. A janela pode atravessar a meia-noite, e ai a parte
+        anterior pertence ao dia da semana de ontem.
+        """
+        inicio = momento - DURACAO_RESERVA
+
+        if inicio.date() == momento.date():
+            janela = Q(
+                weekday=momento.weekday(),
+                start_time__gt=inicio.time(),
+                start_time__lte=momento.time(),
+            )
+        else:
+            janela = Q(weekday=momento.weekday(), start_time__lte=momento.time()) | Q(
+                weekday=inicio.weekday(), start_time__gt=inicio.time()
+            )
+
+        return self.open().filter(janela)
+
 
 class RoomBookingManager(models.Manager.from_queryset(RoomBookingQuerySet)):
     def open_for(self, room_id, weekday, start_time):
@@ -90,6 +116,8 @@ class RoomBookingManager(models.Manager.from_queryset(RoomBookingQuerySet)):
 
 
 class RoomBooking(BusinessRulesMixin, models.Model):
+    DURATION = DURACAO_RESERVA
+
     class Weekday(models.IntegerChoices):
         MONDAY = 0, "Segunda-feira"
         TUESDAY = 1, "Terça-feira"
