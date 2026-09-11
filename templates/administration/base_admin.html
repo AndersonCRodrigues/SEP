@@ -1,0 +1,83 @@
+{% load static %}
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Administrativo{% endblock %} | SEP Maricá</title>
+    {% block extra_head %}{% endblock %}
+  </head>
+
+  <body>
+    {% with current=request.resolver_match.url_name %}
+    <header class="site-header">
+      <a class="brand" href="{% url 'administration:home' %}">
+        <span class="brand-name">SEP Maricá</span>
+        <span class="brand-institution">Universidade de Vassouras</span>
+      </a>
+
+      <nav class="main-nav" aria-label="Navegação principal">
+        <ul>
+          <li>
+            <a
+              href="{% url 'administration:home' %}"
+              {% if current == 'home' %}aria-current="page"{% endif %}
+            >Página inicial</a>
+          </li>
+          <li>
+            <a
+              href="{% url 'administration:pacientes' %}"
+              {% if current == 'pacientes' %}aria-current="page"{% endif %}
+            >Pacientes</a>
+          </li>
+          <li>
+            <a
+              href="{% url 'administration:agenda' %}"
+              {% if current == 'agenda' %}aria-current="page"{% endif %}
+            >Agenda</a>
+          </li>
+          <li>
+            <a
+              href="{% url 'administration:salas' %}"
+              {% if current == 'salas' %}aria-current="page"{% endif %}
+            >Salas</a>
+          </li>
+          <li>
+            <a
+              href="{% url 'administration:declaracoes' %}"
+              {% if current == 'declaracoes' %}aria-current="page"{% endif %}
+            >Declarações</a>
+          </li>
+          <li>
+            <a
+              href="{% url 'administration:atestados' %}"
+              {% if current == 'atestados' %}aria-current="page"{% endif %}
+            >Atestados</a>
+          </li>
+        </ul>
+      </nav>
+
+      {# No destination defined by the cards yet: buttons wait for an action. #}
+      <div class="header-actions">
+        <button type="button" class="header-action" aria-label="Mensagens">
+          <span aria-hidden="true">✉</span>
+        </button>
+        <button type="button" class="header-action" aria-label="Notificações">
+          <span aria-hidden="true">🔔</span>
+        </button>
+        <button type="button" class="header-action" aria-label="Minha conta">
+          <span aria-hidden="true">👤</span>
+        </button>
+      </div>
+    </header>
+    {% endwith %}
+
+    <main class="content">{% block content %}{% endblock %}</main>
+
+    <footer class="site-footer">
+      <p>Univassouras</p>
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+  </body>
+</html>
