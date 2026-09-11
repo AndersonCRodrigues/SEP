@@ -1,0 +1,3 @@
+# entrypoint.sh e executado pelo Docker: com CRLF o shebang vira "#!/bin/sh\r"
+# e o container morre com "no such file or directory".
+*.sh text eol=lf
