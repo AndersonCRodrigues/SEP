@@ -1,83 +1,85 @@
-{% load static %}
-<!doctype html>
-<html lang="pt-br">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{% block title %}Administrativo{% endblock %} | SEP Maricá</title>
-    {% block extra_head %}{% endblock %}
-  </head>
+{% extends "base.html" %}
 
-  <body>
-    {% with current=request.resolver_match.url_name %}
-    <header class="site-header">
-      <a class="brand" href="{% url 'administration:home' %}">
-        <span class="brand-name">SEP Maricá</span>
-        <span class="brand-institution">Universidade de Vassouras</span>
-      </a>
+{% block title_suffix %} | SEP Maricá{% endblock %}
 
-      <nav class="main-nav" aria-label="Navegação principal">
-        <ul>
-          <li>
-            <a
-              href="{% url 'administration:home' %}"
-              {% if current == 'home' %}aria-current="page"{% endif %}
-            >Página inicial</a>
-          </li>
-          <li>
-            <a
-              href="{% url 'administration:pacientes' %}"
-              {% if current == 'pacientes' %}aria-current="page"{% endif %}
-            >Pacientes</a>
-          </li>
-          <li>
-            <a
-              href="{% url 'administration:agenda' %}"
-              {% if current == 'agenda' %}aria-current="page"{% endif %}
-            >Agenda</a>
-          </li>
-          <li>
-            <a
-              href="{% url 'administration:salas' %}"
-              {% if current == 'salas' %}aria-current="page"{% endif %}
-            >Salas</a>
-          </li>
-          <li>
-            <a
-              href="{% url 'administration:declaracoes' %}"
-              {% if current == 'declaracoes' %}aria-current="page"{% endif %}
-            >Declarações</a>
-          </li>
-          <li>
-            <a
-              href="{% url 'administration:atestados' %}"
-              {% if current == 'atestados' %}aria-current="page"{% endif %}
-            >Atestados</a>
-          </li>
-        </ul>
-      </nav>
+{% block brand %}
+<a class="navbar-brand brand" href="{% url 'administration:home' %}">
+  <span class="brand-name">SEP Maricá</span>
+  <span class="brand-institution">Universidade de Vassouras</span>
+</a>
+{% endblock %}
 
-      {# No destination defined by the cards yet: buttons wait for an action. #}
-      <div class="header-actions">
-        <button type="button" class="header-action" aria-label="Mensagens">
-          <span aria-hidden="true">✉</span>
-        </button>
-        <button type="button" class="header-action" aria-label="Notificações">
-          <span aria-hidden="true">🔔</span>
-        </button>
-        <button type="button" class="header-action" aria-label="Minha conta">
-          <span aria-hidden="true">👤</span>
-        </button>
-      </div>
-    </header>
-    {% endwith %}
+{% block main_nav %}
+{% with current=request.resolver_match.url_name %}
+<nav class="main-nav" aria-label="Navegação principal">
+  <ul class="navbar-nav">
+    <li class="nav-item">
+      <a
+        class="nav-link"
+        href="{% url 'administration:home' %}"
+        {% if current == 'home' %}aria-current="page"{% endif %}
+      >Página inicial</a>
+    </li>
+    <li class="nav-item">
+      <a
+        class="nav-link"
+        href="{% url 'administration:pacientes' %}"
+        {% if current == 'pacientes' %}aria-current="page"{% endif %}
+      >Pacientes</a>
+    </li>
+    <li class="nav-item">
+      <a
+        class="nav-link"
+        href="{% url 'administration:agenda' %}"
+        {% if current == 'agenda' %}aria-current="page"{% endif %}
+      >Agenda</a>
+    </li>
+    <li class="nav-item">
+      <a
+        class="nav-link"
+        href="{% url 'administration:salas' %}"
+        {% if current == 'salas' %}aria-current="page"{% endif %}
+      >Salas</a>
+    </li>
+    <li class="nav-item">
+      <a
+        class="nav-link"
+        href="{% url 'administration:declaracoes' %}"
+        {% if current == 'declaracoes' %}aria-current="page"{% endif %}
+      >Declarações</a>
+    </li>
+    <li class="nav-item">
+      <a
+        class="nav-link"
+        href="{% url 'administration:atestados' %}"
+        {% if current == 'atestados' %}aria-current="page"{% endif %}
+      >Atestados</a>
+    </li>
+  </ul>
+</nav>
+{% endwith %}
+{% endblock %}
 
-    <main class="content">{% block content %}{% endblock %}</main>
+{% block user_actions %}
+{# No destination defined by the cards yet: buttons wait for an action. #}
+<div class="header-actions">
+  <button type="button" class="header-action" aria-label="Mensagens">
+    <span aria-hidden="true">✉</span>
+  </button>
+  <button type="button" class="header-action" aria-label="Notificações">
+    <span aria-hidden="true">🔔</span>
+  </button>
+  <button type="button" class="header-action" aria-label="Minha conta">
+    <span aria-hidden="true">👤</span>
+  </button>
+</div>
+{% endblock %}
 
-    <footer class="site-footer">
-      <p>Univassouras</p>
-    </footer>
+{# As telas do Administrativo desenham o proprio titulo, sem trilha nem h1 fixo. #}
+{% block page_header %}{% endblock %}
 
-    {% block extra_js %}{% endblock %}
-  </body>
-</html>
+{% block footer %}
+<footer class="site-footer">
+  <p>Univassouras</p>
+</footer>
+{% endblock %}
