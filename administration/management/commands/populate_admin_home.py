@@ -4,7 +4,7 @@ from django.core.management.base import BaseCommand
 from django.utils import timezone
 from areas.models import AreaActing
 from core.models import CustomUser
-from documents.models import AttendanceCertificate
+from documents.models import AttendanceCertificate, InternshipDeclaration
 from patient.models import Patient
 from scheduling.models import Appointment, Room, RoomBooking
 from students.models import CaseAssignment, Student
@@ -16,6 +16,8 @@ UNUSABLE_ROOMS = (Room.Status.MAINTENANCE, Room.Status.INACTIVE)
 OCCUPIED_ROOMS = 5
 APPOINTMENTS_TODAY = 18
 CERTIFICATES_TODAY = 6
+PENDING_DECLARATIONS = 2
+INTERNSHIP_DECLARATIONS = 2
 DAYS_WITH_SCHEDULE = (3, 7, 12, 16, 19, 23, 27)
 
 # Dias vizinhos com situacoes variadas: e o que a Agenda mostra no desenho.
@@ -88,11 +90,13 @@ class Command(BaseCommand):
         self.schedule(rooms, students, patients, teacher, now)
         self.schedule_week(rooms, students, patients, teacher, now)
         self.issue(patients, administrative, area, today)
+        self.request_declarations(patients, students, administrative, area, today)
         self.spread_over_time(now)
 
         self.summarize(today, now)
 
     def clear(self):
+        InternshipDeclaration.objects.all().delete()
         AttendanceCertificate.objects.all().delete()
         Appointment.objects.all().delete()
         RoomBooking.objects.all().delete()
@@ -238,11 +242,45 @@ class Command(BaseCommand):
                     else AttendanceCertificate.Kind.MEDICAL_CERTIFICATE
                 ),
                 content="Compareceu ao atendimento no Serviço Escola de Psicologia.",
+                status=AttendanceCertificate.Status.ISSUED,
                 issued_at=today,
                 issued_by=administrative,
                 acting_area=area,
             )
         self.stdout.write(f"{CERTIFICATES_TODAY} atestados emitidos hoje.")
+
+    def request_declarations(self, patients, students, administrative, area, today):
+        """A tela de Declaracoes mistura emitidas e pendentes, de paciente e de
+        aluno: sem isso metade dos estados nao apareceria."""
+        for number in range(PENDING_DECLARATIONS):
+            AttendanceCertificate.objects.create(
+                patient=patients[number % len(patients)],
+                kind=AttendanceCertificate.Kind.DECLARATION,
+                content="Aguardando emissão da declaração de comparecimento.",
+                acting_area=area,
+            )
+
+        for number, student in enumerate(students[:INTERNSHIP_DECLARATIONS]):
+            issued = number == 0
+            InternshipDeclaration.objects.create(
+                student=student,
+                content="Horas de estágio cumpridas no período.",
+                start_date=today - timedelta(days=30),
+                end_date=today,
+                total_minutes=60 * 40,
+                status=(
+                    InternshipDeclaration.Status.ISSUED
+                    if issued
+                    else InternshipDeclaration.Status.PENDING
+                ),
+                issued_at=today if issued else None,
+                issued_by=administrative if issued else None,
+            )
+
+        self.stdout.write(
+            f"{PENDING_DECLARATIONS} declaracoes pendentes de paciente e "
+            f"{INTERNSHIP_DECLARATIONS} de estagio."
+        )
 
     def spread_over_time(self, now):
         for number, appointment in enumerate(Appointment.objects.order_by("id")):
@@ -272,7 +310,16 @@ class Command(BaseCommand):
             "  Atendimentos hoje     : "
             f"{Appointment.objects.filter(scheduled_at__date=today).count()}"
         )
-        self.stdout.write("  Declarações pendentes : 0  (sem modelo ainda)")
+        pending = (
+            AttendanceCertificate.objects.filter(
+                kind=AttendanceCertificate.Kind.DECLARATION,
+                status=AttendanceCertificate.Status.PENDING,
+            ).count()
+            + InternshipDeclaration.objects.filter(
+                status=InternshipDeclaration.Status.PENDING
+            ).count()
+        )
+        self.stdout.write(f"  Declarações pendentes : {pending}")
         self.stdout.write(
             "  Atestados emitidos    : "
             f"{AttendanceCertificate.objects.filter(issued_at=today).count()}"
