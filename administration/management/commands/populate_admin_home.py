@@ -11,6 +11,8 @@ from students.models import CaseAssignment, Student
 from teacher.models import Teacher
 
 ROOMS = 7
+# Sem elas a tela de salas nunca mostraria o laranja nem o cinza.
+UNUSABLE_ROOMS = (Room.Status.MAINTENANCE, Room.Status.INACTIVE)
 OCCUPIED_ROOMS = 5
 APPOINTMENTS_TODAY = 18
 CERTIFICATES_TODAY = 6
@@ -116,6 +118,8 @@ class Command(BaseCommand):
         return students, patients
 
     def create_rooms(self):
+        """As salas fora de uso entram depois das utilizaveis e ficam fora da
+        lista devolvida, para os indicadores da home seguirem sobre 7 salas."""
         rooms = [
             Room.objects.create(
                 name=f"Sala {number}",
@@ -125,7 +129,12 @@ class Command(BaseCommand):
             )
             for number in range(1, ROOMS + 1)
         ]
-        self.stdout.write(f"{len(rooms)} salas criadas.")
+        for number, status in enumerate(UNUSABLE_ROOMS, start=ROOMS + 1):
+            Room.objects.create(name=f"Sala {number}", status=status)
+
+        self.stdout.write(
+            f"{len(rooms)} salas utilizaveis e {len(UNUSABLE_ROOMS)} fora de uso."
+        )
         return rooms
 
     def book(self, rooms, students, patients, now):
@@ -164,7 +173,9 @@ class Command(BaseCommand):
                 patient=patients[number % len(patients)],
                 assigned_student=students[number % len(students)],
                 teacher=teacher,
-                room=rooms[number % len(rooms)],
+                # So nas salas reservadas: assim a ocupacao da home continua
+                # sendo 5 das 7 salas, como no desenho.
+                room=rooms[number % OCCUPIED_ROOMS],
                 kind=(
                     Appointment.Kind.SESSION
                     if number % 3
