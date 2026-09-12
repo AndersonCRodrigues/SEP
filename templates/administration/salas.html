@@ -1,8 +1,32 @@
 {% extends "administration/base_admin.html" %}
+{% load components %}
 
 {% block title %}Salas{% endblock %}
 
 {% block content %}
-<h1>Salas</h1>
-<p>Em construção.</p>
+<h1 class="rooms-banner">Status das salas</h1>
+
+{% section class="rooms" %}
+{% if rooms_error %}
+{% include "components/error_state.html" with message=rooms_error retry_url=request.path %}
+{% else %}
+<ul class="rooms-grid">
+  {% for card in rooms %}
+  <li class="room room-{{ card.state }}">
+    {# O estado ja esta na classe do item: o glifo e a cor da porta saem dali. #}
+    <span class="room-icon" aria-hidden="true"></span>
+    <h2 class="room-name">
+      {{ card.room.name }}{% if card.activity %}<span class="room-activity">({{ card.activity }})</span>{% endif %}
+    </h2>
+    <p class="room-type">{{ card.room.get_room_type_display }}</p>
+    {% include "components/badge.html" with label=card.label level=card.level %}
+  </li>
+  {% empty %}
+  <li class="rooms-empty">
+    {% include "components/empty_state.html" with message="Nenhuma sala cadastrada." %}
+  </li>
+  {% endfor %}
+</ul>
+{% endif %}
+{% endsection %}
 {% endblock %}

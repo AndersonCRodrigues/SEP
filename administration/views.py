@@ -5,6 +5,7 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
+from django.db import DatabaseError
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views.generic import TemplateView, UpdateView
@@ -16,6 +17,7 @@ from core.models import CustomUser
 from documents.models import AttendanceCertificate
 from patient.forms import PacienteCreationForm
 from scheduling.models import Appointment, Room, RoomBooking
+from scheduling.occupancy import busy_until, running_appointments
 
 MONTH_NAMES = [
     "Janeiro",
@@ -262,6 +264,47 @@ class ScheduleView(AdministrativeOnly, TemplateView):
 class RoomsView(AdministrativeOnly, TemplateView):
     template_name = "administration/salas.html"
 
+    UNAVAILABLE = "Não foi possível consultar as salas agora."
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+
+        try:
+            rooms = list(Room.objects.visible_to(user))
+            running = running_appointments(user)
+            busy = busy_until(user, running=running)
+        except DatabaseError:
+            return context | {"rooms": [], "rooms_error": self.UNAVAILABLE}
+
+        context["rooms"] = [self.as_card(room, busy, running) for room in rooms]
+        return context
+
+    @staticmethod
+    def as_card(room, busy, running):
+        """A situacao da sala vem antes da ocupacao: sala em manutencao nao
+        esta disponivel nem que ninguem a tenha reservado."""
+        if room.status == Room.Status.MAINTENANCE:
+            state, label, level = "maintenance", room.get_status_display(), "warning"
+        elif room.status == Room.Status.INACTIVE:
+            state, label, level = "inactive", room.get_status_display(), "secondary"
+        elif room.pk in busy:
+            state = "occupied"
+            label = f"Ocupada até {busy[room.pk]:%H:%M}"
+            level = "danger"
+        else:
+            state, label, level = "available", "Disponível", "success"
+
+        return {
+            "room": room,
+            "state": state,
+            "label": label,
+            "level": level,
+            "activity": (
+                running[room.pk].get_kind_display() if room.pk in running else None
+            ),
+        }
+
 
 class DeclarationsView(AdministrativeOnly, TemplateView):
     template_name = "administration/declaracoes.html"
@@ -287,17 +330,8 @@ class AdministrativeHomeView(AdministrativeOnly, TemplateView):
         return context
 
     def operational_summary(self, user, today):
-        occupied = (
-            RoomBooking.objects.visible_to(user)
-            .occupying(timezone.localtime())
-            .filter(room__isnull=False)
-            .values("room")
-            .distinct()
-            .count()
-        )
-
         return {
-            "occupied_rooms": occupied,
+            "occupied_rooms": len(busy_until(user)),
             "total_rooms": Room.objects.visible_to(user).usable().count(),
             "appointments_today": (
                 Appointment.objects.visible_to(user)
