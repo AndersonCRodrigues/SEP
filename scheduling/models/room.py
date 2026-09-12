@@ -11,7 +11,7 @@ from patient.models import Patient
 
 Role = CustomUser.Role
 
-DURACAO_RESERVA = timedelta(hours=1)
+BOOKING_DURATION = timedelta(hours=1)
 
 
 class RoomQuerySet(RoleScopedQuerySet):
@@ -78,27 +78,27 @@ class RoomBookingQuerySet(RoleScopedQuerySet):
     def open(self):
         return self.filter(end_date__isnull=True)
 
-    def occupying(self, momento):
+    def occupying(self, instant):
         """Reservas em curso no instante dado.
 
         A reserva dura uma hora fixa, entao ela ocupa a sala de start_time ate
         start_time + 1h. A janela pode atravessar a meia-noite, e ai a parte
         anterior pertence ao dia da semana de ontem.
         """
-        inicio = momento - DURACAO_RESERVA
+        start = instant - BOOKING_DURATION
 
-        if inicio.date() == momento.date():
-            janela = Q(
-                weekday=momento.weekday(),
-                start_time__gt=inicio.time(),
-                start_time__lte=momento.time(),
+        if start.date() == instant.date():
+            window = Q(
+                weekday=instant.weekday(),
+                start_time__gt=start.time(),
+                start_time__lte=instant.time(),
             )
         else:
-            janela = Q(weekday=momento.weekday(), start_time__lte=momento.time()) | Q(
-                weekday=inicio.weekday(), start_time__gt=inicio.time()
+            window = Q(weekday=instant.weekday(), start_time__lte=instant.time()) | Q(
+                weekday=start.weekday(), start_time__gt=start.time()
             )
 
-        return self.open().filter(janela)
+        return self.open().filter(window)
 
 
 class RoomBookingManager(models.Manager.from_queryset(RoomBookingQuerySet)):
@@ -116,7 +116,7 @@ class RoomBookingManager(models.Manager.from_queryset(RoomBookingQuerySet)):
 
 
 class RoomBooking(BusinessRulesMixin, models.Model):
-    DURATION = DURACAO_RESERVA
+    DURATION = BOOKING_DURATION
 
     class Weekday(models.IntegerChoices):
         MONDAY = 0, "Segunda-feira"

@@ -27,11 +27,11 @@ class AppointmentQuerySet(RoleScopedQuerySet):
 class Appointment(BusinessRulesMixin, models.Model):
     class Kind(models.TextChoices):
         SCREENING = "TR", "Triagem"
-        SESSION = "SE", "Sessão"
+        SESSION = "SE", "Consulta"
 
     class Status(models.TextChoices):
         SCHEDULED = "AG", "Agendado"
-        ATTENDED = "RE", "Realizado"
+        ATTENDED = "RE", "Concluído"
         PATIENT_NO_SHOW = "FP", "Falta do paciente"
         STUDENT_NO_SHOW = "FA", "Falta do aluno"
         CANCELLED = "CA", "Cancelado"
@@ -152,12 +152,12 @@ class Appointment(BusinessRulesMixin, models.Model):
             return
 
         local = timezone.localtime(self.scheduled_at)
-        reserva = RoomBooking.objects.open_for(
+        booking = RoomBooking.objects.open_for(
             self.room_id, local.weekday(), local.time()
         )
-        if reserva and reserva.patient_id != self.patient_id:
+        if booking and booking.patient_id != self.patient_id:
             raise ValidationError(
-                {"room": f"Sala reservada para {reserva.patient} neste horário."}
+                {"room": f"Sala reservada para {booking.patient} neste horário."}
             )
 
     def __str__(self):
