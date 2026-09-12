@@ -16,13 +16,25 @@ APPOINTMENTS_TODAY = 18
 CERTIFICATES_TODAY = 6
 DAYS_WITH_SCHEDULE = (3, 7, 12, 16, 19, 23, 27)
 
+# Dias vizinhos com situacoes variadas: e o que a Agenda mostra no desenho.
+# O minuto 30 mantem esses horarios fora dos usados pelos outros agendamentos,
+# que so ocupam o minuto cheio.
+WEEK_SCHEDULE = (
+    (-1, 14, Appointment.Status.ATTENDED),
+    (-1, 15, Appointment.Status.PATIENT_NO_SHOW),
+    (-2, 10, Appointment.Status.ATTENDED),
+    (-3, 16, Appointment.Status.CANCELLED),
+    (1, 9, Appointment.Status.SCHEDULED),
+    (1, 10, Appointment.Status.SCHEDULED),
+)
+
 HOURS_BETWEEN_ACTIVITIES = 9
 
 
 class Command(BaseCommand):
     help = (
-        "Cria salas, reservas, atendimentos e atestados para a "
-        "página inicial do Administrativo."
+        "Cria salas, reservas, atendimentos e atestados para as "
+        "telas do Administrativo."
     )
 
     def add_arguments(self, parser):
@@ -72,6 +84,7 @@ class Command(BaseCommand):
         self.book(rooms, students, patients, now)
         self.release(rooms, students[0], patients[0], today)
         self.schedule(rooms, students, patients, teacher, now)
+        self.schedule_week(rooms, students, patients, teacher, now)
         self.issue(patients, administrative, area, today)
         self.spread_over_time(now)
 
@@ -185,6 +198,24 @@ class Command(BaseCommand):
             )
             created += 1
         self.stdout.write(f"{created} agendamentos espalhados pelo mês (calendário).")
+
+    def schedule_week(self, rooms, students, patients, teacher, now):
+        for number, (offset, hour, status) in enumerate(WEEK_SCHEDULE):
+            when = (now + timedelta(days=offset)).replace(
+                hour=hour, minute=30, second=0, microsecond=0
+            )
+            Appointment.objects.create(
+                patient=patients[number % len(patients)],
+                assigned_student=students[number % len(students)],
+                teacher=teacher,
+                room=rooms[number % len(rooms)],
+                status=status,
+                scheduled_at=when,
+                duration_minutes=50,
+            )
+        self.stdout.write(
+            f"{len(WEEK_SCHEDULE)} atendimentos nos dias vizinhos (agenda da semana)."
+        )
 
     def issue(self, patients, administrative, area, today):
         for number in range(CERTIFICATES_TODAY):
