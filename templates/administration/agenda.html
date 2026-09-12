@@ -1,8 +1,111 @@
 {% extends "administration/base_admin.html" %}
+{% load components %}
 
 {% block title %}Agenda{% endblock %}
 
 {% block content %}
-<h1>Agenda</h1>
-<p>Em construção.</p>
+<div class="schedule-header">
+  <h1>{{ heading }}{% if period_dates %} &middot; {{ period_dates }}{% endif %}</h1>
+
+  {# No route creates an appointment yet: the button waits for one. #}
+  <button type="button" class="new-appointment">+ Novo agendamento</button>
+</div>
+
+{% section title="Filtros" %}
+<form class="schedule-filters" method="get" action="">
+  <p class="filter">
+    <label for="filter-period">Período</label>
+    <select id="filter-period" name="periodo">
+      {% for value, period in periods.items %}
+      <option value="{{ value }}" {% if value == selected_period %}selected{% endif %}>
+        {{ period.label }}
+      </option>
+      {% endfor %}
+    </select>
+  </p>
+
+  <p class="filter">
+    <label for="filter-status">Situação</label>
+    <select id="filter-status" name="situacao">
+      <option value="">Todas</option>
+      {% for value, label in statuses %}
+      <option value="{{ value }}" {% if value == selected_status %}selected{% endif %}>
+        {{ label }}
+      </option>
+      {% endfor %}
+    </select>
+  </p>
+
+  <p class="filter">
+    <label for="filter-kind">Tipo</label>
+    <select id="filter-kind" name="tipo">
+      <option value="">Todos</option>
+      {% for value, label in kinds %}
+      <option value="{{ value }}" {% if value == selected_kind %}selected{% endif %}>
+        {{ label }}
+      </option>
+      {% endfor %}
+    </select>
+  </p>
+
+  <p class="filter">
+    <label for="filter-room">Sala</label>
+    <select id="filter-room" name="sala">
+      <option value="">Todas</option>
+      {% for room in rooms %}
+      <option value="{{ room.pk }}" {% if room.pk == selected_room %}selected{% endif %}>
+        {{ room.name }}
+      </option>
+      {% endfor %}
+    </select>
+  </p>
+
+  <button type="submit">Filtrar</button>
+</form>
+{% endsection %}
+
+{% data_table columns=column_labels label="Agendamentos" %}
+{% for event in events %}
+<tr class="event">
+  <td class="event-time">{{ event.day_label }} - {{ event.time|date:"H:i" }}</td>
+  <td class="event-room">{{ event.appointment.room.name|default:"—" }}</td>
+  <td class="event-attendant">{{ event.attendant|default:"—" }}</td>
+  <td class="event-status">
+    {% include "components/badge.html" with label=event.appointment.get_status_display level=event.status_level %}
+  </td>
+</tr>
+<tr class="event-detail">
+  <td colspan="{{ column_labels|length }}">
+    <details>
+      <summary>Detalhes do atendimento</summary>
+      <dl>
+        <dt>Paciente</dt>
+        <dd>{{ event.appointment.patient }}</dd>
+
+        <dt>Tipo</dt>
+        <dd>{{ event.appointment.get_kind_display }}</dd>
+
+        <dt>Aluno que atende</dt>
+        <dd>{{ event.appointment.assigned_student|default:"Não atribuído" }}</dd>
+
+        <dt>Professor responsável</dt>
+        <dd>{{ event.appointment.teacher|default:"Não atribuído" }}</dd>
+
+        <dt>Duração</dt>
+        <dd>{{ event.appointment.duration_minutes }} minutos</dd>
+
+        <dt>Observações</dt>
+        <dd>{{ event.appointment.notes|default:"—" }}</dd>
+      </dl>
+    </details>
+  </td>
+</tr>
+{% empty %}
+<tr class="event-empty">
+  <td colspan="{{ column_labels|length }}">
+    {% include "components/empty_state.html" with message="Nenhum agendamento para este filtro." %}
+  </td>
+</tr>
+{% endfor %}
+{% enddata_table %}
 {% endblock %}
