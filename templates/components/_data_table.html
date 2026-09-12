@@ -1,0 +1,10 @@
+<table class="data-table table"{% if label %} aria-label="{{ label }}"{% endif %}>
+    <thead>
+        <tr>
+            {% for column in columns %}<th scope="col">{{ column }}</th>{% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {{ body }}
+    </tbody>
+</table>
