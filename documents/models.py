@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import F, Q
 from areas.models import AreaActing
@@ -11,23 +12,39 @@ from students.models import Student
 Role = CustomUser.Role
 
 
+class CertificateStatus(models.TextChoices):
+    PENDING = "PE", "Pendente"
+    ISSUED = "EM", "Emitida"
+
+
 class BaseCertificate(BusinessRulesMixin, models.Model):
+    Status = CertificateStatus
+
     content = models.TextField(verbose_name="Conteúdo")
+
+    status = models.CharField(
+        max_length=2,
+        choices=CertificateStatus.choices,
+        default=CertificateStatus.PENDING,
+        verbose_name="Situação",
+    )
 
     issued_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
         on_delete=models.PROTECT,
         related_name="%(class)s_set",
         verbose_name="Emitido por",
     )
 
-    issued_at = models.DateField(verbose_name="Data de emissão")
+    issued_at = models.DateField(null=True, blank=True, verbose_name="Data de emissão")
 
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Criado em")
 
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Atualizado em")
 
-    DOCUMENT_FIELDS = ("content", "issued_at")
+    DOCUMENT_FIELDS = ("content", "issued_at", "status")
 
     CREATABLE_BY = (Role.ADMINISTRATIVO,)
     DELETABLE_BY = ()
@@ -35,6 +52,27 @@ class BaseCertificate(BusinessRulesMixin, models.Model):
     class Meta:
         abstract = True
         ordering = ["-issued_at"]
+        constraints = [
+            models.CheckConstraint(
+                condition=Q(status=CertificateStatus.PENDING)
+                | Q(issued_at__isnull=False, issued_by__isnull=False),
+                name="%(class)s_issued_has_date_and_author",
+            )
+        ]
+
+    def clean(self):
+        """Pendente ainda nao foi emitido; emitido diz quando e por quem."""
+        super().clean()
+        if self.status != CertificateStatus.ISSUED:
+            return
+
+        missing = {}
+        if not self.issued_at:
+            missing["issued_at"] = "Documento emitido precisa da data de emissão."
+        if not self.issued_by_id:
+            missing["issued_by"] = "Documento emitido precisa de quem o emitiu."
+        if missing:
+            raise ValidationError(missing)
 
 
 class AttendanceCertificateQuerySet(RoleScopedQuerySet):
@@ -140,7 +178,7 @@ class InternshipDeclaration(BaseCertificate):
     class Meta(BaseCertificate.Meta):
         verbose_name = "Declaração de estágio"
         verbose_name_plural = "Declarações de estágio"
-        constraints = [
+        constraints = BaseCertificate.Meta.constraints + [
             models.CheckConstraint(
                 condition=Q(end_date__gte=F("start_date")),
                 name="internship_period_is_ordered",
