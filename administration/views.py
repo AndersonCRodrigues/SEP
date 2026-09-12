@@ -14,7 +14,7 @@ from core.mixins import GroupRequiredMixin
 from .forms import AdministrativoCreationForm
 from core.utils import sincronizar_grupo
 from core.models import CustomUser
-from documents.models import AttendanceCertificate
+from documents.models import AttendanceCertificate, InternshipDeclaration
 from patient.forms import PacienteCreationForm
 from scheduling.models import Appointment, Room, RoomBooking
 from scheduling.occupancy import busy_until, running_appointments
@@ -309,6 +309,69 @@ class RoomsView(AdministrativeOnly, TemplateView):
 class DeclarationsView(AdministrativeOnly, TemplateView):
     template_name = "administration/declaracoes.html"
 
+    COLUMN_LABELS = ("Nome:", "Tipo:", "Referente a:", "Situação:")
+    UNAVAILABLE = "Não foi possível consultar as declarações agora."
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["column_labels"] = self.COLUMN_LABELS
+
+        try:
+            context["declarations"] = self.listed(self.request.user)
+        except DatabaseError:
+            context.update({"declarations": [], "declarations_error": self.UNAVAILABLE})
+
+        return context
+
+    def listed(self, user):
+        """Uma lista so a partir dos dois documentos: o do paciente e o do aluno.
+        Atestado e outro card, entao fica de fora."""
+        rows = [
+            self.as_row(
+                document,
+                "Paciente",
+                document.patient,
+                f"Comparecimento — {self.reference(document):%d/%m/%Y}",
+            )
+            for document in AttendanceCertificate.objects.visible_to(user)
+            .filter(kind=AttendanceCertificate.Kind.DECLARATION)
+            .select_related("patient")
+        ]
+
+        rows += [
+            self.as_row(
+                document,
+                "Aluno",
+                document.student,
+                f"Estágio — {document.start_date:%d/%m/%Y} a "
+                f"{document.end_date:%d/%m/%Y}",
+            )
+            for document in InternshipDeclaration.objects.visible_to(
+                user
+            ).select_related("student")
+        ]
+
+        rows.sort(key=lambda row: row["when"], reverse=True)
+        return rows
+
+    @staticmethod
+    def reference(document):
+        """Pendente ainda nao tem data de emissao: vale quando foi pedido."""
+        return document.issued_at or timezone.localdate(document.created_at)
+
+    @classmethod
+    def as_row(cls, document, person_kind, person, subject):
+        return {
+            "name": str(person),
+            "person_kind": person_kind,
+            "subject": subject,
+            "label": document.get_status_display(),
+            "level": (
+                "success" if document.status == document.Status.ISSUED else "danger"
+            ),
+            "when": cls.reference(document),
+        }
+
 
 class CertificatesView(AdministrativeOnly, TemplateView):
     template_name = "administration/atestados.html"
@@ -338,8 +401,17 @@ class AdministrativeHomeView(AdministrativeOnly, TemplateView):
                 .filter(scheduled_at__date=today)
                 .count()
             ),
-            # TODO: documents has no pending status yet; the hook stays here.
-            "pending_declarations": 0,
+            "pending_declarations": (
+                AttendanceCertificate.objects.visible_to(user)
+                .filter(
+                    kind=AttendanceCertificate.Kind.DECLARATION,
+                    status=AttendanceCertificate.Status.PENDING,
+                )
+                .count()
+                + InternshipDeclaration.objects.visible_to(user)
+                .filter(status=InternshipDeclaration.Status.PENDING)
+                .count()
+            ),
             "certificates_issued": (
                 AttendanceCertificate.objects.visible_to(user)
                 .filter(issued_at=today)

@@ -1,8 +1,36 @@
 {% extends "administration/base_admin.html" %}
+{% load components %}
 
 {% block title %}Declarações{% endblock %}
 
 {% block content %}
-<h1>Declarações</h1>
-<p>Em construção.</p>
+<div class="declarations-header">
+  <h1>Declarações de comparecimento</h1>
+
+  {# No route generates a declaration yet: the button waits for one. #}
+  <button type="button" class="new-declaration">+ Gerar declaração</button>
+</div>
+
+{% if declarations_error %}
+{% include "components/error_state.html" with message=declarations_error retry_url=request.path %}
+{% else %}
+{% data_table columns=column_labels label="Declarações de comparecimento" %}
+{% for row in declarations %}
+<tr class="declaration">
+  <td class="declaration-name">{{ row.name }}</td>
+  <td class="declaration-person">{{ row.person_kind }}</td>
+  <td class="declaration-subject">{{ row.subject }}</td>
+  <td class="declaration-status">
+    {% include "components/badge.html" with label=row.label level=row.level %}
+  </td>
+</tr>
+{% empty %}
+<tr class="declaration-empty">
+  <td colspan="{{ column_labels|length }}">
+    {% include "components/empty_state.html" with message="Nenhuma declaração registrada." %}
+  </td>
+</tr>
+{% endfor %}
+{% enddata_table %}
+{% endif %}
 {% endblock %}
