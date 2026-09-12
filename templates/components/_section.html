@@ -1,4 +1,4 @@
-<section class="mb-4">
-    {% if title %}<h2 class="h5">{{ title }}</h2>{% endif %}
+<section class="mb-4{% if class %} {{ class }}{% endif %}"{% if title and id %} aria-labelledby="{{ id }}"{% endif %}>
+    {% if title %}<h2 class="h5"{% if id %} id="{{ id }}"{% endif %}>{{ title }}</h2>{% endif %}
     {{ body }}
 </section>
