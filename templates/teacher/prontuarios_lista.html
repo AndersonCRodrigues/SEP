@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Prontuários e Evolução | Sistema SEP{% endblock %}
+
+{% block breadcrumbs %}
+  <li class="breadcrumb-item"><a href="{% url 'home_redirect' %}">Página inicial</a></li>
+  <li class="breadcrumb-item active" aria-current="page">Prontuários e Evolução</li>
+{% endblock %}
+
+{% block page_title %}Prontuários e Evolução{% endblock %}
+
+{% block content %}
+<!-- Card de Busca -->
+<section class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-12 col-md-8">
+                <label for="busca-prontuario" class="form-label">Buscar por paciente ou aluno responsável</label>
+                <input
+                    type="text"
+                    id="busca-prontuario"
+                    name="q"
+                    class="form-control"
+                    value="{{ termo_busca }}"
+                    placeholder="Digite o nome..."
+                >
+            </div>
+            <div class="col-12 col-md-4 d-grid">
+                <button type="submit" class="btn btn-outline-secondary">
+                    <i class="bi bi-search"></i> Buscar
+                </button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<!-- Card da Tabela -->
+<section class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col">Pacientes</th>
+                        <th scope="col">Aluno responsável</th>
+                        <th scope="col">Última evolução</th>
+                        <th scope="col" class="text-end">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for linha in linhas %}
+                    <tr>
+                        <td>{{ linha.nota.patient.nome_completo }} <span class="text-body-secondary small">#{{ linha.nota.patient.pk }}</span></td>
+                        <td>{{ linha.nota.student.nome_completo }}</td>
+                        <td>Atualizado em {{ linha.nota.created_at|date:"d/m/Y H:i" }}</td>
+                        <td class="text-end">
+                            <a
+                                href="{% url 'teacher:prontuario_detalhe' linha.nota.pk %}"
+                                class="btn btn-sm {% if linha.atrasada %}btn-danger{% else %}btn-success{% endif %}"
+                            >
+                                {% if linha.atrasada %}Pendente{% else %}Revisar{% endif %}
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center py-4 border-0">
+                            <!-- Injeção do componente de estado vazio -->
+                            {% include "components/empty_state.html" with message="Nenhuma evolução encontrada." %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% endblock %}

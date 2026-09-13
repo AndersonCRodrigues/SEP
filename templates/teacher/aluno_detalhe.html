@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}{{ aluno.nome_completo }} | Sistema SEP{% endblock %}
+
+{% block breadcrumbs %}
+    <li class="breadcrumb-item"><a href="{% url 'home_redirect' %}">Página inicial</a></li>
+    <!-- Adicionado um passo intermediário na trilha para voltar à lista geral -->
+    <li class="breadcrumb-item"><a href="{% url 'teacher:alunos' %}">Meus Alunos</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{ aluno.nome_completo }}</li>
+{% endblock %}
+
+{% block page_title %}{{ aluno.nome_completo }}{% endblock %}
+
+{% block page_actions %}
+    <a href="{% url 'teacher:alunos' %}" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left"></i> Voltar para Alunos
+    </a>
+{% endblock %}
+
+{% block content %}
+<div class="row g-3">
+    <!-- Dados do aluno -->
+    <div class="col-12 col-lg-4">
+        <section class="card h-100">
+            <div class="card-body">
+                <h2 class="h5 card-title mb-3">Dados do aluno</h2>
+                <p class="mb-1"><strong>Matrícula:</strong> {{ aluno.matricula|default:"—" }}</p>
+                <p class="mb-1"><strong>Curso e período:</strong> {{ aluno.curso_periodo|default:"—" }}</p>
+                <p class="mb-1"><strong>Fase do estágio:</strong> {{ aluno.get_stage_display }}</p>
+                <p class="mb-0"><strong>E-mail:</strong> {{ aluno.email|default:"—" }}</p>
+            </div>
+        </section>
+    </div>
+
+    <!-- Histórico e Casos -->
+    <div class="col-12 col-lg-8">
+        <section class="card mb-3">
+            <div class="card-body">
+                <h2 class="h5 card-title mb-3">Pacientes sob orientação (casos abertos)</h2>
+                
+                {% if casos_abertos %}
+                    <ul class="list-group list-group-flush">
+                        {% for caso in casos_abertos %}
+                        <li class="list-group-item px-0 d-flex justify-content-between">
+                            <span>{{ caso.patient.nome_completo }}</span>
+                            <span class="text-body-secondary">{{ caso.acting_area.nome }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <!-- Injeção do componente de estado vazio -->
+                    {% include "components/empty_state.html" with message="Nenhum caso aberto no momento." %}
+                {% endif %}
+            </div>
+        </section>
+
+        <section class="card h-100">
+            <div class="card-body">
+                <h2 class="h5 card-title mb-3">Histórico de casos encerrados</h2>
+                
+                {% if casos_encerrados %}
+                    <ul class="list-group list-group-flush">
+                        {% for caso in casos_encerrados %}
+                        <li class="list-group-item px-0 d-flex justify-content-between">
+                            <span>{{ caso.patient.nome_completo }}</span>
+                            <span class="text-body-secondary">Encerrado em {{ caso.end_date }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <!-- Injeção do componente de estado vazio -->
+                    {% include "components/empty_state.html" with message="Nenhum caso encerrado ainda." %}
+                {% endif %}
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}
