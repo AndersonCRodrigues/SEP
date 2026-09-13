@@ -61,7 +61,6 @@ class BaseCertificate(BusinessRulesMixin, models.Model):
         ]
 
     def clean(self):
-        """Pendente ainda nao foi emitido; emitido diz quando e por quem."""
         super().clean()
         if self.status != CertificateStatus.ISSUED:
             return

@@ -13,7 +13,6 @@
 <ul class="rooms-grid">
   {% for card in rooms %}
   <li class="room room-{{ card.state }}">
-    {# O estado ja esta na classe do item: o glifo e a cor da porta saem dali. #}
     <span class="room-icon" aria-hidden="true"></span>
     <h2 class="room-name">
       {{ card.room.name }}{% if card.activity %}<span class="room-activity">({{ card.activity }})</span>{% endif %}

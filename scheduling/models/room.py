@@ -79,12 +79,6 @@ class RoomBookingQuerySet(RoleScopedQuerySet):
         return self.filter(end_date__isnull=True)
 
     def occupying(self, instant):
-        """Reservas em curso no instante dado.
-
-        A reserva dura uma hora fixa, entao ela ocupa a sala de start_time ate
-        start_time + 1h. A janela pode atravessar a meia-noite, e ai a parte
-        anterior pertence ao dia da semana de ontem.
-        """
         start = instant - BOOKING_DURATION
 
         if start.date() == instant.date():

@@ -11,7 +11,6 @@ from students.models import CaseAssignment, Student
 from teacher.models import Teacher
 
 ROOMS = 7
-# Sem elas a tela de salas nunca mostraria o laranja nem o cinza.
 UNUSABLE_ROOMS = (Room.Status.MAINTENANCE, Room.Status.INACTIVE)
 OCCUPIED_ROOMS = 5
 APPOINTMENTS_TODAY = 18
@@ -20,9 +19,6 @@ PENDING_DECLARATIONS = 2
 INTERNSHIP_DECLARATIONS = 2
 DAYS_WITH_SCHEDULE = (3, 7, 12, 16, 19, 23, 27)
 
-# Dias vizinhos com situacoes variadas: e o que a Agenda mostra no desenho.
-# O minuto 30 mantem esses horarios fora dos usados pelos outros agendamentos,
-# que so ocupam o minuto cheio.
 WEEK_SCHEDULE = (
     (-1, 14, Appointment.Status.ATTENDED),
     (-1, 15, Appointment.Status.PATIENT_NO_SHOW),
@@ -122,8 +118,6 @@ class Command(BaseCommand):
         return students, patients
 
     def create_rooms(self):
-        """As salas fora de uso entram depois das utilizaveis e ficam fora da
-        lista devolvida, para os indicadores da home seguirem sobre 7 salas."""
         rooms = [
             Room.objects.create(
                 name=f"Sala {number}",
@@ -177,8 +171,6 @@ class Command(BaseCommand):
                 patient=patients[number % len(patients)],
                 assigned_student=students[number % len(students)],
                 teacher=teacher,
-                # So nas salas reservadas: assim a ocupacao da home continua
-                # sendo 5 das 7 salas, como no desenho.
                 room=rooms[number % OCCUPIED_ROOMS],
                 kind=(
                     Appointment.Kind.SESSION
@@ -250,8 +242,6 @@ class Command(BaseCommand):
         self.stdout.write(f"{CERTIFICATES_TODAY} atestados emitidos hoje.")
 
     def request_declarations(self, patients, students, administrative, area, today):
-        """A tela de Declaracoes mistura emitidas e pendentes, de paciente e de
-        aluno: sem isso metade dos estados nao apareceria."""
         for number in range(PENDING_DECLARATIONS):
             AttendanceCertificate.objects.create(
                 patient=patients[number % len(patients)],
