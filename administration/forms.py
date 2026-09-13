@@ -53,12 +53,6 @@ class AppointmentDateField(forms.ModelChoiceField):
 
 
 class MedicalCertificateForm(forms.Form):
-    """A data do atendimento nao e digitada: ela sai da lista de atendimentos
-    daquela pessoa. Assim nao ha como emitir atestado para data inexistente, e
-    a escolha fora da lista e recusada pelo proprio campo."""
-
-    # LANGUAGE_CODE e en-us: sem declarar as mensagens, o Django avisaria o
-    # usuario em ingles.
     person = forms.ChoiceField(
         label="Nome do paciente ou aluno",
         choices=(),
@@ -93,6 +87,8 @@ class MedicalCertificateForm(forms.Form):
         self.fields["appointment"].queryset = self.appointments_for(
             self.data.get("person"), user
         )
+        if self.data.get("person"):
+            self.fields["appointment"].empty_label = "Escolha a data do atendimento"
 
     @staticmethod
     def person_choices(user):
@@ -106,8 +102,6 @@ class MedicalCertificateForm(forms.Form):
                 for person in Patient.objects.visible_to(user)
             ]
             + [
-                # Student nao tem escopo declarado como o Patient; esta tela e
-                # so do Administrativo, que enxerga todos de qualquer forma.
                 (f"{STUDENT}:{person.pk}", str(person))
                 for person in Student.objects.all()
             ]
@@ -115,13 +109,14 @@ class MedicalCertificateForm(forms.Form):
 
     @staticmethod
     def appointments_for(person, user):
-        """So atendimento que ja aconteceu gera atestado de comparecimento."""
         kind, _, identifier = (person or "").partition(":")
         if not (user and identifier.isdigit()):
             return Appointment.objects.none()
 
-        attended = Appointment.objects.visible_to(user).filter(
-            status=Appointment.Status.ATTENDED
+        attended = (
+            Appointment.objects.visible_to(user)
+            .filter(status=Appointment.Status.ATTENDED)
+            .order_by("-scheduled_at")
         )
         if kind == PATIENT:
             return attended.filter(patient_id=identifier)

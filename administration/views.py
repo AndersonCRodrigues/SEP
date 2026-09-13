@@ -6,9 +6,10 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db import DatabaseError
-from django.urls import reverse_lazy
+from django.http import JsonResponse
+from django.urls import reverse, reverse_lazy
 from django.utils import timezone
-from django.views.generic import FormView, TemplateView, UpdateView
+from django.views.generic import FormView, TemplateView, UpdateView, View
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from core.mixins import GroupRequiredMixin
 from .forms import AdministrativoCreationForm, MedicalCertificateForm
@@ -61,8 +62,6 @@ STATUS_LEVELS = {
 
 
 def day_label(day, today):
-    """O desenho nomeia o dia em relacao a hoje, e so cai na data quando a
-    semana nao basta para identificar o dia."""
     difference = (day - today).days
     if difference == 0:
         return "Hoje"
@@ -109,8 +108,6 @@ def cadastrar_paciente(request):
 
 
 class AdministrativeOnly(LoginRequiredMixin, UserPassesTestMixin):
-    """The whole administrative area answers only to the Administrativo."""
-
     def test_func(self):
         return (
             self.request.user.is_superuser
@@ -226,7 +223,6 @@ class ScheduleView(AdministrativeOnly, TemplateView):
         }
 
     def chosen(self, parameter, allowed):
-        """Query string e entrada do usuario: valor fora da lista nao filtra."""
         value = self.request.GET.get(parameter, "")
         return value if value in allowed else ""
 
@@ -282,8 +278,6 @@ class RoomsView(AdministrativeOnly, TemplateView):
 
     @staticmethod
     def as_card(room, busy, running):
-        """A situacao da sala vem antes da ocupacao: sala em manutencao nao
-        esta disponivel nem que ninguem a tenha reservado."""
         if room.status == Room.Status.MAINTENANCE:
             state, label, level = "maintenance", room.get_status_display(), "warning"
         elif room.status == Room.Status.INACTIVE:
@@ -324,8 +318,6 @@ class DeclarationsView(AdministrativeOnly, TemplateView):
         return context
 
     def listed(self, user):
-        """Uma lista so a partir dos dois documentos: o do paciente e o do aluno.
-        Atestado e outro card, entao fica de fora."""
         rows = [
             self.as_row(
                 document,
@@ -356,7 +348,6 @@ class DeclarationsView(AdministrativeOnly, TemplateView):
 
     @staticmethod
     def reference(document):
-        """Pendente ainda nao tem data de emissao: vale quando foi pedido."""
         return document.issued_at or timezone.localdate(document.created_at)
 
     @classmethod
@@ -373,24 +364,26 @@ class DeclarationsView(AdministrativeOnly, TemplateView):
         }
 
 
-class CertificatesView(AdministrativeOnly, FormView):
+class CanIssueCertificates(AdministrativeOnly):
+    def test_func(self):
+        return super().test_func() and AttendanceCertificate.can_be_created_by(
+            self.request.user
+        )
+
+
+class CertificatesView(CanIssueCertificates, FormView):
     template_name = "administration/atestados.html"
     form_class = MedicalCertificateForm
     success_url = reverse_lazy("administration:atestados")
 
     RECENT_SHOWN = 5
 
-    def test_func(self):
-        """Alem da area, quem emite sai da matriz declarada no proprio model."""
-        return super().test_func() and AttendanceCertificate.can_be_created_by(
-            self.request.user
-        )
-
     def get_form_kwargs(self):
         return super().get_form_kwargs() | {"user": self.request.user}
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context["appointments_url"] = reverse("administration:atestados_atendimentos")
         context["recent"] = [
             {"name": str(document.person), "issued_at": document.issued_at}
             for document in AttendanceCertificate.objects.visible_to(self.request.user)
@@ -398,7 +391,8 @@ class CertificatesView(AdministrativeOnly, FormView):
                 kind=AttendanceCertificate.Kind.MEDICAL_CERTIFICATE,
                 status=AttendanceCertificate.Status.ISSUED,
             )
-            .select_related("patient", "student")[: self.RECENT_SHOWN]
+            .select_related("patient", "student")
+            .order_by("-issued_at", "-created_at")[: self.RECENT_SHOWN]
         ]
         return context
 
@@ -406,6 +400,25 @@ class CertificatesView(AdministrativeOnly, FormView):
         certificate = form.issue(self.request.user)
         messages.success(self.request, f"Atestado de {certificate.person} emitido.")
         return super().form_valid(form)
+
+
+class CertificateAppointmentsView(CanIssueCertificates, View):
+    def get(self, request):
+        field = MedicalCertificateForm.base_fields["appointment"]
+        appointments = MedicalCertificateForm.appointments_for(
+            request.GET.get("person"), request.user
+        )
+        return JsonResponse(
+            {
+                "appointments": [
+                    {
+                        "id": appointment.pk,
+                        "label": field.label_from_instance(appointment),
+                    }
+                    for appointment in appointments
+                ]
+            }
+        )
 
 
 class AdministrativeHomeView(AdministrativeOnly, TemplateView):
@@ -451,8 +464,6 @@ class AdministrativeHomeView(AdministrativeOnly, TemplateView):
         }
 
     def recent_activities(self, user):
-        """Built from the business models, not from SecurityLog: the audit trail
-        belongs to the Superadmin and the Administrativo cannot see it."""
         items = []
 
         for appointment in (
@@ -475,7 +486,7 @@ class AdministrativeHomeView(AdministrativeOnly, TemplateView):
         for document in (
             AttendanceCertificate.objects.visible_to(user)
             .select_related("patient", "student")
-            .order_by("-issued_at")[: self.ACTIVITIES_SHOWN]
+            .order_by("-issued_at", "-created_at")[: self.ACTIVITIES_SHOWN]
         ):
             items.append(
                 {
@@ -502,14 +513,11 @@ class AdministrativeHomeView(AdministrativeOnly, TemplateView):
                 }
             )
 
-        # Sorting by date alone ties everything that happened on the same day,
-        # and the tie falls back to insertion order: one source takes the list.
         items.sort(key=lambda item: item["when"], reverse=True)
         return items[: self.ACTIVITIES_SHOWN]
 
     @staticmethod
     def as_instant(day):
-        """RoomBooking.end_date is a date; the rest are datetimes."""
         return timezone.make_aware(datetime.combine(day, time.min))
 
     def calendar_context(self, user, today):
@@ -547,7 +555,6 @@ class AdministrativeHomeView(AdministrativeOnly, TemplateView):
         }
 
     def displayed_month(self, today):
-        """Query string is user input: it cannot bring the page down."""
         try:
             year = int(self.request.GET.get("ano", today.year))
             month = int(self.request.GET.get("mes", today.month))

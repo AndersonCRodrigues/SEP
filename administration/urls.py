@@ -14,4 +14,9 @@ urlpatterns = [
     path("salas/", views.RoomsView.as_view(), name="salas"),
     path("declaracoes/", views.DeclarationsView.as_view(), name="declaracoes"),
     path("atestados/", views.CertificatesView.as_view(), name="atestados"),
+    path(
+        "atestados/atendimentos/",
+        views.CertificateAppointmentsView.as_view(),
+        name="atestados_atendimentos",
+    ),
 ]

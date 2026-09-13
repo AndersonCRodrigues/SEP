@@ -8,7 +8,6 @@
 
 <div class="certificates">
   {% section class="certificate-form" %}
-  {# O PDF em si ainda nao e gerado: o botao emite o atestado. #}
   {% include "components/form.html" with form=form submit_label="Gerar atestado em PDF" %}
   {% endsection %}
 
@@ -29,4 +28,51 @@
   </ul>
   {% endsection %}
 </div>
+{% endblock %}
+
+{% block extra_js %}
+{{ appointments_url|json_script:"appointments-url" }}
+<script>
+  (function () {
+    const person = document.getElementById("id_person");
+    const appointment = document.getElementById("id_appointment");
+    if (!person || !appointment) return;
+
+    const url = JSON.parse(document.getElementById("appointments-url").textContent);
+
+    function fill(placeholder, items) {
+      appointment.replaceChildren(new Option(placeholder, ""));
+      items.forEach(function (item) {
+        appointment.add(new Option(item.label, item.id));
+      });
+    }
+
+    person.addEventListener("change", function () {
+      if (!person.value) {
+        fill("Escolha a pessoa para ver os atendimentos", []);
+        return;
+      }
+
+      fill("Carregando atendimentos...", []);
+      fetch(url + "?" + new URLSearchParams({ person: person.value }), {
+        headers: { Accept: "application/json" },
+      })
+        .then(function (response) {
+          if (!response.ok) throw new Error(response.status);
+          return response.json();
+        })
+        .then(function (data) {
+          fill(
+            data.appointments.length
+              ? "Escolha a data do atendimento"
+              : "Nenhum atendimento realizado para esta pessoa",
+            data.appointments
+          );
+        })
+        .catch(function () {
+          fill("Não foi possível carregar os atendimentos", []);
+        });
+    });
+  })();
+</script>
 {% endblock %}
