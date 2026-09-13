@@ -16,6 +16,7 @@
 <body class="d-flex flex-column min-vh-100">
 
   <!-- HEADER ESTRUTURAL: marca + navegacao principal + acoes de usuario, tudo na mesma barra -->
+  {% block site_header %}
   <header>
     <nav class="navbar navbar-expand-lg bg-dark" data-bs-theme="dark">
       <div class="container-fluid">
@@ -84,6 +85,7 @@
       </div>
     </nav>
   </header>
+  {% endblock %}
 
   <!-- AREA DE CONTEUDO -->
   <main class="container-fluid flex-grow-1 py-3">
