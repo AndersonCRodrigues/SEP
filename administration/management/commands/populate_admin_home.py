@@ -277,9 +277,19 @@ class Command(BaseCommand):
                 issued_by=administrative if issued else None,
             )
 
+        AttendanceCertificate.objects.create(
+            student=students[0],
+            kind=AttendanceCertificate.Kind.MEDICAL_CERTIFICATE,
+            content="Compareceu ao atendimento no Serviço Escola de Psicologia.",
+            status=AttendanceCertificate.Status.ISSUED,
+            issued_at=today,
+            issued_by=administrative,
+            acting_area=area,
+        )
+
         self.stdout.write(
-            f"{PENDING_DECLARATIONS} declaracoes pendentes de paciente e "
-            f"{INTERNSHIP_DECLARATIONS} de estagio."
+            f"{PENDING_DECLARATIONS} declaracoes pendentes de paciente, "
+            f"{INTERNSHIP_DECLARATIONS} de estagio e 1 atestado de aluno."
         )
 
     def spread_over_time(self, now):
