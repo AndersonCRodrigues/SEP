@@ -82,8 +82,11 @@ class AttendanceCertificateQuerySet(RoleScopedQuerySet):
         Role.PROFESSOR: lambda u: (
             with_open_case("patient__", student__current_advisor_id=u.pk)
             | Q(patient__responsible_teachers=u.pk)
+            | Q(student__current_advisor_id=u.pk)
         ),
-        Role.ALUNO: lambda u: with_open_case("patient__", student_id=u.pk),
+        Role.ALUNO: lambda u: (
+            with_open_case("patient__", student_id=u.pk) | Q(student_id=u.pk)
+        ),
         Role.PACIENTE: lambda u: Q(patient_id=u.pk),
     }
 
@@ -97,9 +100,20 @@ class AttendanceCertificate(BaseCertificate):
 
     patient = models.ForeignKey(
         Patient,
+        null=True,
+        blank=True,
         on_delete=models.PROTECT,
         related_name="certificates",
         verbose_name="Paciente",
+    )
+
+    student = models.ForeignKey(
+        Student,
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name="certificates",
+        verbose_name="Aluno",
     )
 
     appointment = models.ForeignKey(
@@ -137,9 +151,27 @@ class AttendanceCertificate(BaseCertificate):
     class Meta(BaseCertificate.Meta):
         verbose_name = "Declaração de comparecimento"
         verbose_name_plural = "Declarações de comparecimento"
+        constraints = BaseCertificate.Meta.constraints + [
+            models.CheckConstraint(
+                condition=Q(patient__isnull=False, student__isnull=True)
+                | Q(patient__isnull=True, student__isnull=False),
+                name="certificate_belongs_to_one_person",
+            )
+        ]
+
+    @property
+    def person(self):
+        return self.patient or self.student
+
+    def clean(self):
+        super().clean()
+        if bool(self.patient_id) == bool(self.student_id):
+            raise ValidationError(
+                "Informe o paciente ou o aluno, e exatamente um dos dois."
+            )
 
     def __str__(self):
-        return f"{self.get_kind_display()} de {self.patient} ({self.issued_at})"
+        return f"{self.get_kind_display()} de {self.person} ({self.issued_at})"
 
 
 class InternshipDeclarationQuerySet(RoleScopedQuerySet):
