@@ -1,8 +1,10 @@
 import re
+import unicodedata
 
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.utils import timezone
+from django.utils.html import format_html
 from localflavor.br.br_states import STATE_CHOICES
 from localflavor.br.forms import BRCPFField
 from core.fields import format_cep, only_digits
@@ -12,6 +14,7 @@ from documents.models import AttendanceCertificate
 from patient.models import Patient
 from scheduling.models import Appointment
 from students.models import Student
+from utils.masking import mask_cpf
 
 PATIENT = "patient"
 STUDENT = "student"
@@ -59,13 +62,42 @@ class AppointmentDateField(forms.ModelChoiceField):
         return f"{timezone.localtime(appointment.scheduled_at):%d/%m/%Y às %H:%M}"
 
 
+class PersonFilterSelect(forms.Select):
+    def render(self, name, value, attrs=None, renderer=None):
+        attrs = {**(attrs or {}), "size": 8, "aria-label": "Pessoas encontradas"}
+        field_id = attrs.get("id", f"id_{name}")
+        return format_html(
+            '<span class="person-picker">'
+            '<input type="search" id="{}" class="person-filter" autocomplete="off" '
+            'placeholder="Digite para filtrar pelo nome">'
+            "{}"
+            '<span id="{}" class="person-filter-status" aria-live="polite"></span>'
+            "</span>",
+            f"{field_id}_filter",
+            super().render(name, value, attrs, renderer),
+            f"{field_id}_status",
+        )
+
+    def id_for_label(self, id_):
+        return f"{id_}_filter" if id_ else id_
+
+
+def sort_key(text):
+    return "".join(
+        character
+        for character in unicodedata.normalize("NFD", text.lower())
+        if not unicodedata.combining(character)
+    )
+
+
 class MedicalCertificateForm(forms.Form):
     person = forms.ChoiceField(
         label="Nome do paciente ou aluno",
         choices=(),
+        widget=PersonFilterSelect,
         error_messages={
             "required": "Escolha o paciente ou o aluno.",
-            "invalid_choice": "Escolha um paciente ou aluno válido.",
+            "invalid_choice": "Escolha um paciente ou aluno da lista.",
         },
     )
 
@@ -90,29 +122,36 @@ class MedicalCertificateForm(forms.Form):
     def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.user = user
-        self.fields["person"].choices = self.person_choices(user)
         self.fields["appointment"].queryset = self.appointments_for(
             self.data.get("person"), user
         )
         if self.data.get("person"):
             self.fields["appointment"].empty_label = "Escolha a data do atendimento"
 
-    @staticmethod
-    def person_choices(user):
-        if user is None:
-            return [("", "---------")]
+        self.fields["person"].choices = self.person_choices(user)
 
+    @staticmethod
+    def people(user):
         return (
-            [("", "---------")]
-            + [
-                (f"{PATIENT}:{person.pk}", str(person))
-                for person in Patient.objects.visible_to(user)
-            ]
-            + [
-                (f"{STUDENT}:{person.pk}", str(person))
-                for person in Student.objects.all()
-            ]
+            (PATIENT, "Paciente", Patient.objects.visible_to(user)),
+            (STUDENT, "Aluno", Student.objects.all()),
         )
+
+    @classmethod
+    def person_choices(cls, user):
+        if user is None:
+            return []
+
+        people = [
+            (f"{kind}:{person.pk}", person.get_full_name(), kind_label, person.cpf)
+            for kind, kind_label, queryset in cls.people(user)
+            for person in queryset
+        ]
+        people.sort(key=lambda item: sort_key(item[1]))
+        return [
+            (value, f"{name} ({kind_label}) - CPF: {mask_cpf(cpf)}")
+            for value, name, kind_label, cpf in people
+        ]
 
     @staticmethod
     def appointments_for(person, user):
@@ -131,25 +170,21 @@ class MedicalCertificateForm(forms.Form):
             return attended.filter(assigned_student_id=identifier)
         return Appointment.objects.none()
 
-    @staticmethod
-    def resolve(person):
+    @classmethod
+    def resolve(cls, person, user):
         kind, _, identifier = (person or "").partition(":")
-        model = {PATIENT: Patient, STUDENT: Student}.get(kind)
-        if model is None or not identifier.isdigit():
+        if user is None or not identifier.isdigit():
             return None
 
-        found = model.objects.filter(pk=identifier).first()
-        return (kind, found) if found else None
-
-    def clean_person(self):
-        person = self.cleaned_data["person"]
-        if self.resolve(person) is None:
-            raise forms.ValidationError("Escolha um paciente ou aluno válido.")
-        return person
+        for people_kind, _, queryset in cls.people(user):
+            if people_kind == kind:
+                found = queryset.filter(pk=identifier).first()
+                return (kind, found) if found else None
+        return None
 
     def issue(self, issued_by):
         appointment = self.cleaned_data["appointment"]
-        kind, person = self.resolve(self.cleaned_data["person"])
+        kind, person = self.resolve(self.cleaned_data["person"], self.user)
         when = timezone.localtime(appointment.scheduled_at)
 
         content = (
