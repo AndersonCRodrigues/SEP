@@ -22,7 +22,7 @@ def enviar_email_credenciais(user, senha_temporaria, usuario_responsavel=None):
     """
     link_portal = os.getenv("PORTAL_PACIENTE_URL", "URL_NAO_CONFIGURADA")
 
-    mensagem = f"Olá {user.nome_completo}, seu cadastro foi realizado. Sua senha temporária é: {senha_temporaria}. Acesse o portal do paciente em {link_portal}."
+    mensagem = f"Olá {user.get_full_name()}, seu cadastro foi realizado. Sua senha temporária é: {senha_temporaria}. Acesse o portal do paciente em {link_portal}."
 
     try:
         send_mail(

@@ -110,13 +110,14 @@ class Command(BaseCommand):
 
                 model = MODEL_BY_ROLE.get(role, CustomUser)
 
-                suffix = f" {counter}" if counter > 1 else ""
+                suffix = f" {chr(64 + counter)}" if counter > 1 else ""
 
                 user = model(
                     email=email,
-                    nome_completo=f"Usuario Teste {role}{suffix}".strip(),
+                    first_name="Usuario",
+                    last_name=f"Teste {role}{suffix}".strip(),
                     cpf=generate_valid_cpf(),
-                    telefone="(99) 99999-9999",
+                    telefone="99999999999",
                     logradouro="Rua de Teste",
                     data_nascimento="1990-01-01",
                     numero="0",

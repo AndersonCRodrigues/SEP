@@ -113,7 +113,7 @@ def vincular_aluno(request):
             try:
                 Advising.objects.change_advisor(aluno, professor, term=periodo)
                 messages.success(
-                    request, f"{aluno.nome_completo} vinculado com sucesso!"
+                    request, f"{aluno.get_full_name()} vinculado com sucesso!"
                 )
             except ValidationError as e:
                 messages.error(request, str(e))

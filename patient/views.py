@@ -23,7 +23,8 @@ class EditarDadosPacienteView(GroupRequiredMixin, UpdateView):
     required_group = "Patient"
     model = CustomUser
     fields = [
-        "nome_completo",
+        "first_name",
+        "last_name",
         "telefone",
         "logradouro",
         "numero",

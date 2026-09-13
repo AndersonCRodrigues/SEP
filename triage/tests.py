@@ -327,14 +327,16 @@ class TriageRecordSaveTests(TestCase):
     def setUp(self):
         self.patient = Patient.objects.create(
             email="patient.triage@test.com",
-            nome_completo="Paciente Teste",
+            first_name="Paciente",
+            last_name="Teste",
             cpf="12345678909",
             telefone="21999999999",
         )
 
         self.student = Student.objects.create(
             email="student.triage@test.com",
-            nome_completo="Aluno Teste",
+            first_name="Aluno",
+            last_name="Teste",
             cpf="52998224725",
             telefone="21888888888",
         )

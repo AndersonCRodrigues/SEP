@@ -343,4 +343,4 @@ class TriageFeedback(BusinessRulesMixin, models.Model):
         ordering = ["-created_at"]
 
     def __str__(self):
-        return f"Feedback de {self.author.nome_completo} em {self.triage}"
+        return f"Feedback de {self.author.get_full_name()} em {self.triage}"

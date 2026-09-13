@@ -42,7 +42,8 @@ class PerfilAlunoView(GroupRequiredMixin, UpdateView):
     required_group = "Students"
     model = Student
     fields = [
-        "nome_completo",
+        "first_name",
+        "last_name",
         "telefone",
         "logradouro",
         "numero",

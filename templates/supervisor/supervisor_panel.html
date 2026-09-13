@@ -24,7 +24,7 @@
                 <tbody>
                     {% for usuario in usuarios_listados %}
                     <tr>
-                        <td>{{ usuario.nome_completo }}</td>
+                        <td>{{ usuario.get_full_name }}</td>
                         <td><span class="badge text-bg-primary">{{ usuario.get_role_display }}</span></td>
                     </tr>
                     {% empty %}

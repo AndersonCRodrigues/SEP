@@ -9,7 +9,8 @@ from .models import CustomUser
 
 PERSONAL_FIELDS = (
     "email",
-    "nome_completo",
+    "first_name",
+    "last_name",
     "cpf",
     "telefone",
     "logradouro",

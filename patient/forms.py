@@ -11,7 +11,8 @@ class PacienteCreationForm(UserCreationForm):
         model = Patient
         fields = (
             "email",
-            "nome_completo",
+            "first_name",
+            "last_name",
             "cpf",
             "data_nascimento",
             "telefone",

@@ -26,7 +26,7 @@ def usuarios_alunos_e_professores():
     professores = Teacher.objects.filter(
         role__in=[CustomUser.Role.PROFESSOR, CustomUser.Role.SUPERVISOR]
     ).prefetch_related("acting_areas")
-    return sorted(chain(alunos, professores), key=lambda u: u.nome_completo)
+    return sorted(chain(alunos, professores), key=lambda u: u.get_full_name())
 
 
 class PainelSupervisorView(GroupRequiredMixin, ListView):
@@ -79,7 +79,7 @@ def cadastrar_supervisor(request):
 
             messages.success(
                 request,
-                f"Supervisor {user.nome_completo} cadastrado e e-mail enviado com sucesso!",
+                f"Supervisor {user.get_full_name()} cadastrado e e-mail enviado com sucesso!",
             )
             return redirect("superadmin:painel")
     else:

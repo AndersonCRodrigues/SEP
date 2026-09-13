@@ -8,9 +8,9 @@ from .forms import CustomUserCreationForm
 class CustomUserAdmin(UserAdmin):
     add_form = CustomUserCreationForm
     model = CustomUser
-    list_display = ("email", "nome_completo", "role", "cpf", "is_staff")
+    list_display = ("email", "first_name", "last_name", "role", "cpf", "is_staff")
     list_filter = ("role", "is_staff", "is_active")
-    search_fields = ("email", "nome_completo", "cpf")
+    search_fields = ("email", "first_name", "last_name", "cpf")
     ordering = ("email",)
 
     fieldsets = (
@@ -19,7 +19,8 @@ class CustomUserAdmin(UserAdmin):
             "Informações Pessoais",
             {
                 "fields": (
-                    "nome_completo",
+                    "first_name",
+                    "last_name",
                     "cpf",
                     "telefone",
                     "logradouro",
@@ -57,7 +58,8 @@ class CustomUserAdmin(UserAdmin):
                 "classes": ("wide",),
                 "fields": (
                     "email",
-                    "nome_completo",
+                    "first_name",
+                    "last_name",
                     "cpf",
                     "telefone",
                     "logradouro",
