@@ -11,7 +11,6 @@ from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.views.generic import DetailView, FormView, TemplateView, UpdateView, View
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from core.mixins import GroupRequiredMixin
 from .forms import AdministrativoCreationForm, MedicalCertificateForm
 from core.utils import sincronizar_grupo
 from core.models import CustomUser
@@ -89,18 +88,14 @@ def period_range(period, today):
 
 class AdministrativeOnly(LoginRequiredMixin, UserPassesTestMixin):
     def test_func(self):
-        return (
-            self.request.user.is_superuser
-            or self.request.user.role == CustomUser.Role.ADMINISTRATIVO
-        )
+        return self.request.user.role == CustomUser.Role.ADMINISTRATIVO
 
 
 class PainelAdministracaoView(AdministrativeOnly, TemplateView):
     template_name = "administration/administration_panel.html"
 
 
-class PerfilAdministrativoView(GroupRequiredMixin, UpdateView):
-    required_group = "Administration"
+class PerfilAdministrativoView(AdministrativeOnly, UpdateView):
     model = CustomUser
     fields = [
         "first_name",
