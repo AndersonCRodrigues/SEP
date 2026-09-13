@@ -8,10 +8,10 @@ from django.core.exceptions import PermissionDenied
 from django.db import DatabaseError
 from django.urls import reverse_lazy
 from django.utils import timezone
-from django.views.generic import TemplateView, UpdateView
+from django.views.generic import FormView, TemplateView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from core.mixins import GroupRequiredMixin
-from .forms import AdministrativoCreationForm
+from .forms import AdministrativoCreationForm, MedicalCertificateForm
 from core.utils import sincronizar_grupo
 from core.models import CustomUser
 from documents.models import AttendanceCertificate, InternshipDeclaration
@@ -329,13 +329,13 @@ class DeclarationsView(AdministrativeOnly, TemplateView):
         rows = [
             self.as_row(
                 document,
-                "Paciente",
-                document.patient,
+                "Paciente" if document.patient_id else "Aluno",
+                document.person,
                 f"Comparecimento — {self.reference(document):%d/%m/%Y}",
             )
             for document in AttendanceCertificate.objects.visible_to(user)
             .filter(kind=AttendanceCertificate.Kind.DECLARATION)
-            .select_related("patient")
+            .select_related("patient", "student")
         ]
 
         rows += [
@@ -373,8 +373,39 @@ class DeclarationsView(AdministrativeOnly, TemplateView):
         }
 
 
-class CertificatesView(AdministrativeOnly, TemplateView):
+class CertificatesView(AdministrativeOnly, FormView):
     template_name = "administration/atestados.html"
+    form_class = MedicalCertificateForm
+    success_url = reverse_lazy("administration:atestados")
+
+    RECENT_SHOWN = 5
+
+    def test_func(self):
+        """Alem da area, quem emite sai da matriz declarada no proprio model."""
+        return super().test_func() and AttendanceCertificate.can_be_created_by(
+            self.request.user
+        )
+
+    def get_form_kwargs(self):
+        return super().get_form_kwargs() | {"user": self.request.user}
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["recent"] = [
+            {"name": str(document.person), "issued_at": document.issued_at}
+            for document in AttendanceCertificate.objects.visible_to(self.request.user)
+            .filter(
+                kind=AttendanceCertificate.Kind.MEDICAL_CERTIFICATE,
+                status=AttendanceCertificate.Status.ISSUED,
+            )
+            .select_related("patient", "student")[: self.RECENT_SHOWN]
+        ]
+        return context
+
+    def form_valid(self, form):
+        certificate = form.issue(self.request.user)
+        messages.success(self.request, f"Atestado de {certificate.person} emitido.")
+        return super().form_valid(form)
 
 
 class AdministrativeHomeView(AdministrativeOnly, TemplateView):
@@ -443,14 +474,14 @@ class AdministrativeHomeView(AdministrativeOnly, TemplateView):
 
         for document in (
             AttendanceCertificate.objects.visible_to(user)
-            .select_related("patient")
+            .select_related("patient", "student")
             .order_by("-issued_at")[: self.ACTIVITIES_SHOWN]
         ):
             items.append(
                 {
                     "kind": "document",
                     "title": f"{document.get_kind_display()} emitido",
-                    "detail": str(document.patient),
+                    "detail": str(document.person),
                     "when": document.created_at,
                 }
             )

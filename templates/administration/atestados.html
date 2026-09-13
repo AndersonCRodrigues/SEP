@@ -1,8 +1,32 @@
 {% extends "administration/base_admin.html" %}
+{% load components %}
 
 {% block title %}Atestados{% endblock %}
 
 {% block content %}
-<h1>Atestados</h1>
-<p>Em construção.</p>
+<h1 class="certificates-banner">Emitir atestados</h1>
+
+<div class="certificates">
+  {% section class="certificate-form" %}
+  {# O PDF em si ainda nao e gerado: o botao emite o atestado. #}
+  {% include "components/form.html" with form=form submit_label="Gerar atestado em PDF" %}
+  {% endsection %}
+
+  {% section title="Atestados emitidos recentemente" class="recent-certificates" id="recent-title" %}
+  <ul class="recent-list">
+    {% for item in recent %}
+    <li class="recent-item">
+      <span class="recent-name">{{ item.name }}</span>
+      <time class="recent-date" datetime="{{ item.issued_at|date:'Y-m-d' }}">
+        {{ item.issued_at|date:"d/m/Y" }}
+      </time>
+    </li>
+    {% empty %}
+    <li class="recent-empty">
+      {% include "components/empty_state.html" with message="Nenhum atestado emitido ainda." %}
+    </li>
+    {% endfor %}
+  </ul>
+  {% endsection %}
+</div>
 {% endblock %}
