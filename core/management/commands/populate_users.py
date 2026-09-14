@@ -141,7 +141,7 @@ class Command(BaseCommand):
                     user.is_staff = True
                     user.is_superuser = True
 
-                user.set_password("SenhaForte123!")
+                user.set_password("Senha123!")
 
                 try:
                     user.full_clean()
