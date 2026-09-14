@@ -171,6 +171,13 @@ MESSAGE_TAGS = {
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
+SEP_CONTACT = {
+    "name": "Serviço Escola de Psicologia",
+    "city": "Maricá, RJ",
+    "phone": "(21) 2000-0000",
+    "email": "sep@univassouras.edu.br",
+}
+
 # Republicacao explicita da API deste modulo (PEP 8 permite wildcard import
 # quando o modulo de origem declara __all__). Isso evita que "import os",
 # "Path", "base64" etc. vazem para dev.py/prod.py via `from .base import *`
@@ -198,4 +205,5 @@ __all__ = [
     "MESSAGE_TAGS",
     "CRISPY_ALLOWED_TEMPLATE_PACKS",
     "CRISPY_TEMPLATE_PACK",
+    "SEP_CONTACT",
 ]
