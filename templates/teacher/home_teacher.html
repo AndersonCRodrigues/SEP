@@ -21,6 +21,24 @@
 {% endblock %}
 
 {% block content %}
+<!-- NAV MOBILE: replica as abas "Opções de Serviço" do Figma. So aparece
+    no mobile (d-md-none) -- no desktop a navbar de cima ja cobre isso.
+    Sao links simples pras paginas que ja existem, sem JS. -->
+<div class="d-md-none mb-3">
+    <h2 class="h6 text-body-secondary mb-2">Opções de Serviço</h2>
+    <div class="overflow-auto">
+        <div class="d-flex flex-nowrap gap-2 pb-2" style="width: max-content;">
+            <a href="{% url 'teacher:home' %}" class="btn btn-primary btn-sm rounded-pill">Página inicial</a>
+            <a href="{% url 'teacher:alunos' %}" class="btn btn-outline-secondary btn-sm rounded-pill">Meus alunos</a>
+            <a href="{% url 'teacher:presenca' %}" class="btn btn-outline-secondary btn-sm rounded-pill">Presença</a>
+            <a href="{% url 'teacher:prontuarios' %}" class="btn btn-outline-secondary btn-sm rounded-pill">Prontuários</a>
+            <a href="{% url 'teacher:triagens' %}" class="btn btn-outline-secondary btn-sm rounded-pill">Avaliações</a>
+            <a href="{% url 'teacher:perfil' %}" class="btn btn-outline-secondary btn-sm rounded-pill">Área</a>
+        </div>
+    </div>
+</div>
+
+
 <!-- Cards de Estatísticas -->
 <div class="row g-3 mb-4">
     <div class="col-6 col-md-3">
@@ -59,7 +77,13 @@
         </div>
     </div>
 </div>
-
+{% if avaliacoes_pendentes_total > 0 %}
+    <div class="alert alert-warning d-md-none" role="alert">
+        <h3 class="h6 alert-heading mb-1"><i class="bi bi-exclamation-triangle"></i> Atenção Pendente</h3>
+        <p class="mb-2 small">Avaliação de desempenho de {{ avaliacoes_pendentes_total }} aluno(s) em aberto.</p>
+        <a href="{% url 'teacher:triagens' %}" class="btn btn-warning btn-sm">Avaliar orientados</a>
+    </div>
+{% endif %}
 <div class="row g-3">
     <!-- Atividades Recentes -->
     <div class="col-12 col-lg-8">
@@ -92,7 +116,7 @@
         </section>
     </div>
 
-    <!-- Acesso Rápido -->
+    <!-- Acesso Rápido --
     <div class="col-12 col-lg-4">
         <section class="card h-100">
             <div class="card-body">
