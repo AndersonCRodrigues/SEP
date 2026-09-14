@@ -5,7 +5,6 @@ app_name = "patient"
 
 urlpatterns = [
     path("", views.PatientHomeView.as_view(), name="home"),
-    path("edit/", views.EditarDadosPacienteView.as_view(), name="edit_data"),
     path("agendamentos/", views.PatientAppointmentsView.as_view(), name="agendamentos"),
     path(
         "agendamentos/solicitar/",
