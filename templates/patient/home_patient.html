@@ -55,37 +55,75 @@
   </ul>
   {% endsection %}
 
-  <div class="side-panel">
-    {% if alert %}
-    <section class="notice" role="status" aria-labelledby="notice-title">
-      <h2 id="notice-title" class="notice-title">Alerta ativo</h2>
-      <p class="notice-message">
-        Sessão hoje às <strong>{{ alert.time|time:"H:i" }}</strong>{% if alert.attendant %} com {{ alert.attendant }}{% endif %}
-      </p>
-      <a class="notice-action" href="{% url 'patient:agendamentos' %}">Ver agendamento</a>
-    </section>
-    {% endif %}
+  {% section title="Calendário" class="calendar" id="calendar-title" %}
+  <form class="calendar-nav" method="get" action="">
+    <a
+      class="calendar-previous"
+      href="?ano={{ previous_month|date:'Y' }}&amp;mes={{ previous_month|date:'n' }}"
+      aria-label="Mês anterior"
+    >&lsaquo;</a>
 
-    {% section title="Próximos eventos" class="upcoming" id="upcoming-title" %}
-    <ul class="upcoming-list">
-      {% for event in upcoming %}
-      <li class="upcoming-event">
-        <time class="upcoming-date" datetime="{{ event.when|date:'c' }}">
-          {{ event.day_label }} às {{ event.when|time:"H:i" }}
-        </time>
-        <span class="upcoming-kind">{{ event.kind }}</span>
-        {% if event.attendant %}
-        <span class="upcoming-attendant">com {{ event.attendant }}</span>
-        {% endif %}
-      </li>
-      {% empty %}
-      <li class="upcoming-empty">
-        {% include "components/empty_state.html" with message="Nenhuma sessão agendada." %}
-      </li>
+    <label class="visually-hidden" for="calendar-month">Mês</label>
+    <select id="calendar-month" name="mes">
+      {% for number, name in calendar_months %}
+      <option value="{{ number }}" {% if number == calendar_month %}selected{% endif %}>
+        {{ name }}
+      </option>
       {% endfor %}
-    </ul>
-    {% endsection %}
-  </div>
+    </select>
+
+    <label class="visually-hidden" for="calendar-year">Ano</label>
+    <select id="calendar-year" name="ano">
+      {% for year in calendar_years %}
+      <option value="{{ year }}" {% if year == calendar_year %}selected{% endif %}>
+        {{ year }}
+      </option>
+      {% endfor %}
+    </select>
+
+    <button type="submit">Ver</button>
+
+    <a
+      class="calendar-next"
+      href="?ano={{ next_month|date:'Y' }}&amp;mes={{ next_month|date:'n' }}"
+      aria-label="Próximo mês"
+    >&rsaquo;</a>
+  </form>
+
+  <table class="calendar-grid">
+    <caption class="visually-hidden">
+      Suas sessões no mês selecionado
+    </caption>
+    <thead>
+      <tr>
+        <th scope="col" abbr="Domingo">Dom</th>
+        <th scope="col" abbr="Segunda-feira">Seg</th>
+        <th scope="col" abbr="Terça-feira">Ter</th>
+        <th scope="col" abbr="Quarta-feira">Qua</th>
+        <th scope="col" abbr="Quinta-feira">Qui</th>
+        <th scope="col" abbr="Sexta-feira">Sex</th>
+        <th scope="col" abbr="Sábado">Sáb</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for week in calendar_weeks %}
+      <tr>
+        {% for day in week %}
+        <td
+          class="day{% if not day.in_month %} day-outside-month{% endif %}{% if day.has_event %} day-with-event{% endif %}"
+          {% if day.today %}aria-current="date"{% endif %}
+        >
+          <time datetime="{{ day.date|date:'Y-m-d' }}">{{ day.date|date:"j" }}</time>
+          {% if day.has_event %}
+          <span class="visually-hidden">com sessão</span>
+          {% endif %}
+        </td>
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endsection %}
 </div>
 {% endif %}
 {% endblock %}

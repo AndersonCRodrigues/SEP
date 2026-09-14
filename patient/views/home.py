@@ -2,13 +2,13 @@ from django.db import DatabaseError
 from django.urls import reverse
 from django.utils import timezone
 from django.views.generic import TemplateView
+from core.month_calendar import displayed_month, month_calendar, month_range
 from scheduling.models import Appointment
 from ..models import Patient
 from .access import PatientOnly
 from .sessions import (
     SESSION_STATUS,
     Status,
-    attendant_name,
     relative_day,
     session_badge,
     upcoming_appointments,
@@ -53,7 +53,6 @@ TRIAGE_STATUS = {
 class PatientHomeView(PatientOnly, TemplateView):
     template_name = "patient/home_patient.html"
 
-    UPCOMING_SHOWN = 3
     UNAVAILABLE = "Não foi possível carregar suas informações agora."
 
     def get_context_data(self, **kwargs):
@@ -74,7 +73,7 @@ class PatientHomeView(PatientOnly, TemplateView):
             "assigned_student", "teacher"
         )
 
-        upcoming = list(upcoming_appointments(user, today)[: self.UPCOMING_SHOWN])
+        next_appointment = upcoming_appointments(user, today).first()
         last_session = (
             appointments.filter(scheduled_at__lt=now)
             .exclude(status=Status.SCHEDULED)
@@ -83,9 +82,8 @@ class PatientHomeView(PatientOnly, TemplateView):
         )
         patient = Patient.objects.visible_to(user).first()
         triage = TRIAGE_STATUS.get(patient.flow_status if patient else "", NOT_STARTED)
-        next_appointment = upcoming[0] if upcoming else None
 
-        return {
+        return self.calendar(user, today) | {
             "sessions_done": appointments.filter(status=Status.ATTENDED).count(),
             "triage_status": triage[0],
             "next_session": (
@@ -99,9 +97,18 @@ class PatientHomeView(PatientOnly, TemplateView):
                 self.appointment_activity(next_appointment, now),
                 self.triage_activity(triage),
             ],
-            "alert": self.today_alert(next_appointment, today),
-            "upcoming": [self.as_event(appointment, today) for appointment in upcoming],
         }
+
+    def calendar(self, user, today):
+        year, month = displayed_month(self.request.GET, today)
+        first, last = month_range(year, month)
+        session_days = set(
+            Appointment.objects.visible_to(user)
+            .exclude(status=Status.CANCELLED)
+            .filter(scheduled_at__date__range=(first, last))
+            .dates("scheduled_at", "day")
+        )
+        return month_calendar(year, month, today, session_days)
 
     @staticmethod
     def local_day(appointment):
@@ -162,22 +169,4 @@ class PatientHomeView(PatientOnly, TemplateView):
             "level": level,
             "url": reverse("patient:triagens"),
             "link_label": "Ver minhas triagens",
-        }
-
-    @classmethod
-    def today_alert(cls, appointment, today):
-        if appointment is None or cls.local_day(appointment) != today:
-            return None
-        return {
-            "time": timezone.localtime(appointment.scheduled_at),
-            "attendant": attendant_name(appointment),
-        }
-
-    @classmethod
-    def as_event(cls, appointment, today):
-        return {
-            "when": timezone.localtime(appointment.scheduled_at),
-            "day_label": relative_day(cls.local_day(appointment), today),
-            "kind": appointment.get_kind_display(),
-            "attendant": attendant_name(appointment),
         }
