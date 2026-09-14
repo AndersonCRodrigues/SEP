@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Minhas Triagens | Sistema SEP{% endblock %}
+
+{% block content %}
+<header class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Minhas Triagens</h1>
+</header>
+
+<div class="row">
+    <div class="col-12">
+        <section class="card">
+            <div class="card-body">
+                {% if triagens %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>Paciente</th>
+                                <th>Data</th>
+                                <th>Status</th>
+                                <th>Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for triage in triagens %}
+                            <tr>
+                                <td><strong>{{ triage.patient.nome_completo }}</strong></td>
+                                <td>{{ triage.created_at|date:"d/m/Y H:i" }}</td>
+                                <td>
+                                    <span class="badge bg-secondary">
+                                        {{ triage.get_status_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="{% url 'triage_detail' triage.pk %}" class="btn btn-sm btn-outline-primary">
+                                        Ver Detalhes / Feedback
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-body-secondary mb-0">Você ainda não realizou nenhuma triagem.</p>
+                {% endif %}
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}

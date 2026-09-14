@@ -14,6 +14,7 @@ from core.models import CustomUser
 from .forms import VincularAlunoForm
 from students.models import StudentActivity
 from .forms import StudentActivityForm
+from patient.models import Patient
 
 
 class HomeProfessorView(LoginRequiredMixin,UserPassesTestMixin, TemplateView):
@@ -63,13 +64,13 @@ class PerfilProfessorView(LoginRequiredMixin,UserPassesTestMixin, UpdateView):
 
 
 class PainelProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    """Painel do Professor. Supervisor tem o painel próprio em
+    supervisor:orientacao — não reaproveita mais essa view/template."""
+
     template_name = "teacher/teacher_panel.html"
 
     def test_func(self):
-        return self.request.user.role in (
-            CustomUser.Role.PROFESSOR,
-            CustomUser.Role.SUPERVISOR,
-        )
+        return self.request.user.role == CustomUser.Role.PROFESSOR
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -77,19 +78,25 @@ class PainelProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView)
 
         professor = get_object_or_404(Teacher, pk=self.request.user.pk)
 
-        if professor.role == CustomUser.Role.SUPERVISOR:
-            context["alunos_vinculados"] = Student.objects.filter(
-                current_advisor__isnull=False
-            )
-        else:
-            context["alunos_vinculados"] = professor.current_advisees.all()
-
+        context["alunos_vinculados"] = professor.current_advisees.all()
+        # Professor só recebe o que o Supervisor escolheu especificamente
+        # pra ele — isso é responsible_teachers no Patient, não o Referral
+        # em si (que é área-based e é coisa de Supervisor).
+        context["pacientes_encaminhados"] = Patient.objects.filter(
+            responsible_teachers=professor
+        )
         context["alunos_disponiveis"] = Student.objects.filter(
             current_advisor__isnull=True
         )
         context["form_vincular"] = VincularAlunoForm()
         context["form_horas"] = StudentActivityForm(user=professor)
         return context
+
+
+def _painel_redirect_for(user):
+    if user.role == CustomUser.Role.SUPERVISOR:
+        return "supervisor:orientacao"
+    return "teacher:painel"
 
 
 @login_required
@@ -120,7 +127,7 @@ def vincular_aluno(request):
         else:
             messages.error(request, "Corrija os erros do formulário de vínculo.")
 
-    return redirect("teacher:painel")
+    return redirect(_painel_redirect_for(request.user))
 
 
 @login_required
@@ -146,4 +153,4 @@ def lancar_horas(request):
         else:
             messages.error(request, "Corrija os erros do formulário de horas.")
 
-    return redirect("teacher:painel")
+    return redirect(_painel_redirect_for(request.user))

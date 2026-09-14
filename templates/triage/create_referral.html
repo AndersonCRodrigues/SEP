@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Encaminhar Triagem | Sistema SEP{% endblock %}
+
+{% block content %}
+<header class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Encaminhar Triagem</h1>
+    <span class="navbar-text text-body-secondary">Paciente: {{ referral_for_screening.patient.nome_completo }}</span>
+</header>
+
+{% if erro %}
+<div class="alert alert-danger">{{ erro }}</div>
+{% endif %}
+
+<div class="row">
+    <div class="col-12 col-lg-8">
+        <section class="card">
+            <div class="card-body">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Área(s) de Atuação</label>
+                        {% for area in all_areas %}
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="areas" value="{{ area.pk }}" id="area{{ area.pk }}">
+                            <label class="form-check-label" for="area{{ area.pk }}">{{ area.nome }}</label>
+                        </div>
+                        {% empty %}
+                        <p class="text-body-secondary">Nenhuma área de atuação cadastrada.</p>
+                        {% endfor %}
+                    </div>
+                    <button type="submit" class="btn btn-primary">Encaminhar</button>
+                </form>
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}

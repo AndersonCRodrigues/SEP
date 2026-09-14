@@ -1,0 +1,132 @@
+{% extends "home.html" %}
+
+{% block home_title %}Orientação e Encaminhamentos{% endblock %}
+
+{% block home_content %}
+<div class="col-12 col-md-6">
+    <section class="card h-100">
+        <div class="card-body">
+            <h2 class="h5 card-title">Alunos Vinculados</h2>
+            {% if alunos_vinculados %}
+            <ul class="list-group list-group-flush">
+                {% for aluno in alunos_vinculados %}
+                <li class="list-group-item px-0">{{ aluno.nome_completo }} — {{ aluno.matricula }}</li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="card-text text-body-secondary mb-0">Nenhum aluno vinculado ainda.</p>
+            {% endif %}
+        </div>
+    </section>
+</div>
+
+<div class="col-12 col-md-6">
+    <section class="card h-100">
+        <div class="card-body">
+            <h2 class="h5 card-title">Triagens Pendentes</h2>
+            {% if triagens_pendentes %}
+            <ul class="list-group list-group-flush">
+                {% for triagem in triagens_pendentes %}
+                <li class="list-group-item px-0">
+                    <a href="{% url 'triage_detail' triagem.pk %}">{{ triagem.patient.nome_completo }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="card-text text-body-secondary mb-0">Nenhuma triagem pendente de parecer/encaminhamento.</p>
+            {% endif %}
+        </div>
+    </section>
+</div>
+
+<div class="col-12">
+    <section class="card">
+        <div class="card-body">
+            <h2 class="h5 card-title">Histórico de Triagens</h2>
+            {% if historico_triagens %}
+            <div class="table-responsive">
+                <table class="table table-striped align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col">Paciente</th>
+                            <th scope="col">Realizada por</th>
+                            <th scope="col">Recebida</th>
+                            <th scope="col">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for triagem in historico_triagens %}
+                        <tr>
+                            <td><a href="{% url 'triage_detail' triagem.pk %}">{{ triagem.patient.nome_completo }}</a></td>
+                            <td>{{ triagem.student_author.nome_completo }}</td>
+                            <td>{{ triagem.created_at }}</td>
+                            <td>
+                                <span class="badge text-bg-secondary">{{ triagem.get_status_display }}</span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="card-text text-body-secondary mb-0">Nenhuma triagem no histórico ainda.</p>
+            {% endif %}
+        </div>
+    </section>
+</div>
+
+<div class="col-12 col-md-6">
+    <section class="card h-100">
+        <div class="card-body">
+            <h2 class="h5 card-title">Todos os Encaminhamentos</h2>
+            {% if todos_encaminhamentos %}
+            <ul class="list-group list-group-flush">
+                {% for encaminhamento in todos_encaminhamentos %}
+                <li class="list-group-item px-0">
+                    <a href="{% url 'triage_detail' encaminhamento.triage.pk %}">
+                        {{ encaminhamento.patient.nome_completo }}
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="card-text text-body-secondary mb-0">Nenhum encaminhamento no sistema.</p>
+            {% endif %}
+        </div>
+    </section>
+</div>
+
+<div class="col-12 col-md-6">
+    <section class="card h-100">
+        <div class="card-body">
+            <h2 class="h5 card-title">Alunos Disponíveis pra Vincular</h2>
+            {% if alunos_disponiveis %}
+            <form method="post" action="{% url 'teacher:vincular_aluno' %}">
+                {% csrf_token %}
+                {{ form_vincular.as_p }}
+                <button type="submit" class="btn btn-primary">Vincular Aluno</button>
+            </form>
+            {% else %}
+            <p class="card-text text-body-secondary mb-0">Não há alunos disponíveis no momento.</p>
+            {% endif %}
+        </div>
+    </section>
+</div>
+
+<div class="col-12 col-md-6">
+    <section class="card h-100">
+        <div class="card-body">
+            <h2 class="h5 card-title">Lançar Horas</h2>
+            {% if alunos_vinculados %}
+            <form method="post" action="{% url 'teacher:lancar_horas' %}">
+                {% csrf_token %}
+                {{ form_horas.as_p }}
+                <button type="submit" class="btn btn-primary">Registrar Horas</button>
+            </form>
+            {% else %}
+            <p class="card-text text-body-secondary mb-0">Vincule um aluno antes de lançar horas.</p>
+            {% endif %}
+        </div>
+    </section>
+</div>
+{% endblock %}
