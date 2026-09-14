@@ -1,21 +1,6 @@
 from calendar import monthrange
 from datetime import timedelta
 
-MONTH_NAMES = [
-    "Janeiro",
-    "Fevereiro",
-    "Março",
-    "Abril",
-    "Maio",
-    "Junho",
-    "Julho",
-    "Agosto",
-    "Setembro",
-    "Outubro",
-    "Novembro",
-    "Dezembro",
-]
-
 WEEKDAY_NAMES = [
     "Segunda-feira",
     "Terça-feira",

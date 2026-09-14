@@ -1,13 +1,12 @@
-from calendar import Calendar, monthrange
-from datetime import date, datetime, time, timedelta
+from datetime import datetime, time
 
 from django.utils import timezone
 from django.views.generic import TemplateView
+from core.month_calendar import displayed_month, month_calendar, month_range
 from documents.models import AttendanceCertificate, InternshipDeclaration
 from scheduling.models import Appointment, Room, RoomBooking
 from scheduling.occupancy import busy_until
 from .access import AdministrativeOnly
-from .dates import MONTH_NAMES
 
 
 class AdministrativeHomeView(AdministrativeOnly, TemplateView):
@@ -110,9 +109,8 @@ class AdministrativeHomeView(AdministrativeOnly, TemplateView):
         return timezone.make_aware(datetime.combine(day, time.min))
 
     def calendar_context(self, user, today):
-        year, month = self.displayed_month(today)
-        first = date(year, month, 1)
-        last = date(year, month, monthrange(year, month)[1])
+        year, month = displayed_month(self.request.GET, today)
+        first, last = month_range(year, month)
 
         with_event = set(
             Appointment.objects.visible_to(user)
@@ -120,34 +118,4 @@ class AdministrativeHomeView(AdministrativeOnly, TemplateView):
             .dates("scheduled_at", "day")
         )
 
-        weeks = [
-            [
-                {
-                    "date": day,
-                    "in_month": day.month == month,
-                    "today": day == today,
-                    "has_event": day in with_event,
-                }
-                for day in week
-            ]
-            for week in Calendar(firstweekday=6).monthdatescalendar(year, month)
-        ]
-
-        return {
-            "calendar_year": year,
-            "calendar_month": month,
-            "calendar_weeks": weeks,
-            "calendar_months": list(enumerate(MONTH_NAMES, start=1)),
-            "calendar_years": range(today.year - 2, today.year + 3),
-            "previous_month": first - timedelta(days=1),
-            "next_month": last + timedelta(days=1),
-        }
-
-    def displayed_month(self, today):
-        try:
-            year = int(self.request.GET.get("ano", today.year))
-            month = int(self.request.GET.get("mes", today.month))
-            date(year, month, 1)
-        except (TypeError, ValueError):
-            return today.year, today.month
-        return year, month
+        return month_calendar(year, month, today, with_event)
