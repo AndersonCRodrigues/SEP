@@ -16,7 +16,7 @@ from areas.forms import AreaAtuacaoForm
 from core.utils import sincronizar_grupo
 from .utils import gerar_senha_temporaria, enviar_email_credenciais
 
-# usados só pela PainelOrientacaoSupervisorView, adicionada no final do arquivo
+
 from teacher.forms import VincularAlunoForm, StudentActivityForm
 from triage.models import Referral, TriageRecord
 from core.constants import TriageStatus
