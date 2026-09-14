@@ -18,6 +18,7 @@ DEMO_EMAIL = "paciente.demo@teste.com"
 DEMO_PASSWORD = "Paciente@123"
 SESSION_HOUR = 14
 TRIAGE_DAYS_AGO = 60
+OLD_TRIAGE_DAYS_AGO = 400
 
 HISTORY = (
     (7, Appointment.Status.ATTENDED),
@@ -114,23 +115,29 @@ class Command(BaseCommand):
         student.save()
 
     def triage(self, patient, student, referred_by, teacher, area):
-        record = TriageRecord.objects.create(
-            patient=patient,
-            student_author=student,
-            chief_complaint="Registro de demonstração.",
-        )
-        closed_at = timezone.now() - timedelta(days=TRIAGE_DAYS_AGO)
-        record.status = TriageStatus.REFERRED
-        record.closed_by = referred_by
-        record.closed_at = closed_at
-        record.save()
-        TriageRecord.objects.filter(pk=record.pk).update(
-            created_at=closed_at - timedelta(days=2)
-        )
+        for status, days_ago in (
+            (TriageStatus.CLOSED, OLD_TRIAGE_DAYS_AGO),
+            (TriageStatus.REFERRED, TRIAGE_DAYS_AGO),
+        ):
+            record = TriageRecord.objects.create(
+                patient=patient,
+                student_author=student,
+                chief_complaint="Registro de demonstração.",
+            )
+            closed_at = timezone.now() - timedelta(days=days_ago)
+            record.status = status
+            record.closed_by = referred_by
+            record.closed_at = closed_at
+            record.save()
+            TriageRecord.objects.filter(pk=record.pk).update(
+                created_at=closed_at - timedelta(days=2)
+            )
 
         patient.responsible_teachers.add(teacher)
         CaseAssignment.objects.assign(student, patient, acting_area=area)
-        self.stdout.write("Triagem encaminhada e aluno designado.")
+        self.stdout.write(
+            "Triagem antiga encerrada, triagem atual encaminhada e aluno designado."
+        )
 
     def sessions(self, patient, student, teacher):
         today = timezone.localtime().replace(
