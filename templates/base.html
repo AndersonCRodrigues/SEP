@@ -49,6 +49,7 @@
           {% block user_actions %}
           <ul class="navbar-nav align-items-lg-center gap-2">
             {% if request.user.is_authenticated %}
+            {% block user_links %}
             <li class="nav-item">
               <a href="#" class="nav-link" title="Notificações">
                 <i class="bi bi-bell"></i>
@@ -64,6 +65,7 @@
                 <i class="bi bi-person-circle"></i>
               </a>
             </li>
+            {% endblock %}
             <li class="nav-item">
               <form method="post" action="{% url 'logout' %}" class="d-inline">
                 {% csrf_token %}

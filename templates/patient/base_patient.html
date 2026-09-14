@@ -53,18 +53,22 @@
 {% endwith %}
 {% endblock %}
 
-{% block user_actions %}
-<div class="header-actions">
+{% block user_links %}
+<li class="nav-item">
   <button type="button" class="header-action" aria-label="Mensagens">
     <span aria-hidden="true">✉</span>
   </button>
+</li>
+<li class="nav-item">
   <button type="button" class="header-action" aria-label="Notificações">
     <span aria-hidden="true">🔔</span>
   </button>
+</li>
+<li class="nav-item">
   <button type="button" class="header-action" aria-label="Minha conta">
     <span aria-hidden="true">👤</span>
   </button>
-</div>
+</li>
 {% endblock %}
 
 {% block page_header %}{% endblock %}
