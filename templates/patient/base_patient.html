@@ -38,7 +38,7 @@
       <a
         class="nav-link"
         href="{% url 'patient:triagens' %}"
-        {% if current == 'triagens' %}aria-current="page"{% endif %}
+        {% if current == 'triagens' or current == 'triagem_detalhe' %}aria-current="page"{% endif %}
       >Triagem</a>
     </li>
     <li class="nav-item">

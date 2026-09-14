@@ -19,5 +19,10 @@ urlpatterns = [
         name="historico_detalhe",
     ),
     path("triagens/", views.PatientTriagesView.as_view(), name="triagens"),
+    path(
+        "triagens/<int:pk>/",
+        views.PatientTriageDetailView.as_view(),
+        name="triagem_detalhe",
+    ),
     path("contato/", views.PatientContactView.as_view(), name="contato"),
 ]
