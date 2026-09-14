@@ -1,22 +1,22 @@
 from core.fields import only_digits
 from core.models import CustomUser
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
 from django.utils import timezone
 
 from .models import Patient
 
 
-class PacienteCreationForm(UserCreationForm):
-    created_by_user = None
-
+class PacienteCreationForm(forms.ModelForm):
     data_nascimento = forms.DateField(
-        label="Data de nascimento",
+        label="Data de Nascimento",
         widget=forms.DateInput(
-            attrs={"class": "date-picker", "autocomplete": "off"},
             format="%Y-%m-%d",
+            attrs={
+                "class": "date-picker",
+                "placeholder": "Selecione a data"
+            }
         ),
-        input_formats=["%Y-%m-%d"],
+        input_formats=["%Y-%m-%d", "%d/%m/%Y"],
     )
 
     social_name = forms.CharField(
@@ -55,9 +55,7 @@ class PacienteCreationForm(UserCreationForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.instance.role = CustomUser.Role.PACIENTE
-
-        self.fields.pop("password1", None)
-        self.fields.pop("password2", None)
+        self.created_by_user = None  # Evita AttributeError se não for passado pela view
 
     def clean_data_nascimento(self):
         data = self.cleaned_data.get("data_nascimento")
@@ -75,8 +73,6 @@ class PacienteCreationForm(UserCreationForm):
             )
 
         cleaned_data = self.cleaned_data.copy()
-        cleaned_data.pop("password1", None)
-        cleaned_data.pop("password2", None)
         cleaned_data["role"] = CustomUser.Role.PACIENTE
 
         return Patient.objects.create_with_credentials(
