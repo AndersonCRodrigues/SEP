@@ -15,3 +15,5 @@ urlpatterns = [
     path("patient/", include("patient.urls")),
     path("triage/", include("triage.urls")),
 ]
+
+handler403 = "core.exception_handlers.custom_permission_denied_view"

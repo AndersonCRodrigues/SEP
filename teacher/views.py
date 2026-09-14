@@ -17,8 +17,15 @@ from .forms import StudentActivityForm
 from patient.models import Patient
 
 
-class HomeProfessorView(LoginRequiredMixin, TemplateView):
+class HomeProfessorView(LoginRequiredMixin,UserPassesTestMixin, TemplateView):
     template_name = "teacher/home_teacher.html"
+
+    def test_func(self):
+        return self.request.user.role in (
+            CustomUser.Role.PROFESSOR,
+            CustomUser.Role.SUPERVISOR,
+        )
+
 
 
 @login_required
@@ -39,11 +46,17 @@ def cadastrar_professor(request):
     return render(request, "teacher/cadastro.html", {"form": form})
 
 
-class PerfilProfessorView(LoginRequiredMixin, UpdateView):
+class PerfilProfessorView(LoginRequiredMixin,UserPassesTestMixin, UpdateView):
     model = Teacher
     form_class = PerfilProfessorForm
     template_name = "teacher/perfil.html"
     success_url = reverse_lazy("teacher:home")
+
+    def test_func(self):
+        return self.request.user.role in (
+            CustomUser.Role.PROFESSOR,
+            CustomUser.Role.SUPERVISOR,
+        )
 
     def get_object(self, queryset=None):
 

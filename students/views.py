@@ -9,12 +9,17 @@ from .forms import AlunoCreationForm
 from .models import Student
 from core.utils import sincronizar_grupo
 from core.mixins import GroupRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from core.models import CustomUser
 
 
-class HomeEstudanteView(LoginRequiredMixin, TemplateView):
+
+class HomeEstudanteView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = "student/home_student.html"
 
-
+    def test_func(self):
+        return self.request.user.role == CustomUser.Role.ALUNO
+    
 @login_required
 def cadastrar_aluno(request):
     if not request.user.has_perm("students.add_student"):
@@ -54,8 +59,11 @@ class PerfilAlunoView(GroupRequiredMixin, UpdateView):
         return get_object_or_404(Student, pk=self.request.user.pk)
 
 
-class MeuProfessorView(LoginRequiredMixin, TemplateView):
+class MeuProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView ):
     template_name = "student/meu_professor.html"
+
+    def test_func(self):
+        return self.request.user.role == CustomUser.Role.ALUNO
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -64,5 +72,8 @@ class MeuProfessorView(LoginRequiredMixin, TemplateView):
         return context
 
 
-class PainelEstudanteView(LoginRequiredMixin, TemplateView):
+class PainelEstudanteView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = "student/student_panel.html"
+
+    def test_func(self):
+        return self.request.user.role == CustomUser.Role.ALUNO
