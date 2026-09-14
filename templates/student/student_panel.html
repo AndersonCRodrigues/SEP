@@ -6,7 +6,10 @@
 <header class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="h3 mb-0">Painel do Estudante</h1>
     <div class="d-flex flex-wrap gap-2">
-        <a href="{% url 'students:meu_professor' %}" class="btn btn-primary btn-sm">Meu Professor</a>
+        <a href="{% url 'minhas_triagens' %}" class="btn btn-primary btn-sm">
+            <i class="bi bi-file-earmark-text"></i> Minhas Triagens / Feedbacks
+        </a>
+        <a href="{% url 'students:meu_professor' %}" class="btn btn-outline-primary btn-sm">Meu Professor</a>
         <a href="{% url 'students:perfil' %}" class="btn btn-outline-primary btn-sm">Meu Perfil</a>
         <a href="{% url 'students:home' %}" class="btn btn-outline-secondary btn-sm">
             <i class="bi bi-arrow-left"></i> Voltar para a Home
@@ -14,7 +17,7 @@
     </div>
 </header>
 
-<div class="row g-3">
+<div class="row g-3 mb-4">
     <div class="col-12 col-md-6">
         <section class="card h-100">
             <div class="card-body">
@@ -33,6 +36,37 @@
             <div class="card-body">
                 <h2 class="h5 card-title">Meus Atendimentos e Consultas</h2>
                 <p class="card-text">Seus agendamentos e registros acadêmicos/clínicos aparecerão aqui.</p>
+            </div>
+        </section>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <section class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 class="h5 card-title mb-0">Minhas Triagens e Pareceres</h2>
+                    <a href="{% url 'minhas_triagens' %}" class="btn btn-sm btn-link">Ver todas</a>
+                </div>
+                
+                <div class="list-group list-group-flush">
+                    {% for triage in triagens %}
+                    <div class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>{{ triage.patient.nome_completo }}</strong>
+                            <div class="text-body-secondary small">
+                                Status: {{ triage.get_status_display }} | Data: {{ triage.created_at|date:"d/m/Y" }}
+                            </div>
+                        </div>
+                        <a href="{% url 'triage_detail' triage.pk %}" class="btn btn-sm btn-outline-primary">
+                            Ver Feedback
+                        </a>
+                    </div>
+                    {% empty %}
+                    <p class="text-body-secondary mb-0">Nenhuma triagem cadastrada até o momento.</p>
+                    {% endfor %}
+                </div>
             </div>
         </section>
     </div>
