@@ -31,6 +31,7 @@ class RedirecionarHomeView(LoginRequiredMixin, View):
 class CustomLoginView(LoginView):
     template_name = "login.html"
     authentication_form = LoginEmailOuMatriculaForm
+    redirect_authenticated_user = True
 
     def get_success_url(self):
         return reverse_lazy("home_redirect")
