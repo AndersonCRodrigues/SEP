@@ -13,6 +13,11 @@ urlpatterns = [
         name="solicitar_horario",
     ),
     path("historico/", views.PatientHistoryView.as_view(), name="historico"),
+    path(
+        "historico/<int:pk>/",
+        views.PatientSessionDetailView.as_view(),
+        name="historico_detalhe",
+    ),
     path("triagens/", views.PatientTriagesView.as_view(), name="triagens"),
     path("contato/", views.PatientContactView.as_view(), name="contato"),
 ]
