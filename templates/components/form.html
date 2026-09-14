@@ -1,0 +1,5 @@
+<form method="post" action="{{ action_url|default:"" }}" novalidate>
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">{{ submit_label|default:"Salvar" }}</button>
+</form>

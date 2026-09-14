@@ -2,6 +2,7 @@ from django.urls import reverse_lazy
 from django.views.generic import TemplateView, UpdateView
 from core.mixins import GroupRequiredMixin
 from core.models import CustomUser
+from django.contrib.auth.decorators import login_required
 
 
 class HomePacienteView(GroupRequiredMixin, TemplateView):
@@ -39,7 +40,7 @@ class EditarDadosPacienteView(GroupRequiredMixin, UpdateView):
         # o paciente só pode editar o próprio cadastro
         return self.request.user
 
-
+@login_required
 def enviar_email(request):
     if request.method == "POST":
         pass
