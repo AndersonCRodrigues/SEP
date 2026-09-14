@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title_suffix %} | SEP Maricá{% endblock %}
+
+{% block brand %}
+<a class="navbar-brand brand" href="{% url 'patient:home' %}">
+  <span class="brand-name">SEP Maricá</span>
+  <span class="brand-institution">Universidade de Vassouras</span>
+</a>
+{% endblock %}
+
+{% block main_nav %}
+{% with current=request.resolver_match.url_name %}
+<nav class="main-nav" aria-label="Navegação principal">
+  <ul class="navbar-nav">
+    <li class="nav-item">
+      <a
+        class="nav-link"
+        href="{% url 'patient:home' %}"
+        {% if current == 'home' %}aria-current="page"{% endif %}
+      >Página inicial</a>
+    </li>
+    <li class="nav-item">
+      <a
+        class="nav-link"
+        href="{% url 'patient:agendamentos' %}"
+        {% if current == 'agendamentos' or current == 'solicitar_horario' %}aria-current="page"{% endif %}
+      >Agendamentos</a>
+    </li>
+    <li class="nav-item">
+      <a
+        class="nav-link"
+        href="{% url 'patient:historico' %}"
+        {% if current == 'historico' %}aria-current="page"{% endif %}
+      >Histórico</a>
+    </li>
+    <li class="nav-item">
+      <a
+        class="nav-link"
+        href="{% url 'patient:triagens' %}"
+        {% if current == 'triagens' %}aria-current="page"{% endif %}
+      >Triagem</a>
+    </li>
+    <li class="nav-item">
+      <a
+        class="nav-link"
+        href="{% url 'patient:contato' %}"
+        {% if current == 'contato' %}aria-current="page"{% endif %}
+      >Contato</a>
+    </li>
+  </ul>
+</nav>
+{% endwith %}
+{% endblock %}
+
+{% block user_actions %}
+<div class="header-actions">
+  <button type="button" class="header-action" aria-label="Mensagens">
+    <span aria-hidden="true">✉</span>
+  </button>
+  <button type="button" class="header-action" aria-label="Notificações">
+    <span aria-hidden="true">🔔</span>
+  </button>
+  <button type="button" class="header-action" aria-label="Minha conta">
+    <span aria-hidden="true">👤</span>
+  </button>
+</div>
+{% endblock %}
+
+{% block page_header %}{% endblock %}
+
+{% block footer %}
+<footer class="site-footer">
+  <p>Univassouras</p>
+</footer>
+{% endblock %}

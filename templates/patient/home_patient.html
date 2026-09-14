@@ -1,29 +1,91 @@
-{% extends "home.html" %}
+{% extends "patient/base_patient.html" %}
+{% load components %}
 
-{% block home_title %}Meus Agendamentos{% endblock %}
+{% block title %}Página inicial{% endblock %}
 
-{% block home_content %}
-<div class="col-12 col-md-6">
-    <div class="card h-100">
-        <div class="card-body">
-            <h2 class="h5 card-title">Meus agendamentos</h2>
-        </div>
-        <ul class="list-group list-group-flush">
-            {% for agendamento in agendamentos %}
-            <li class="list-group-item">{{ agendamento.data }} — {{ agendamento.descricao }}</li>
-            {% empty %}
-            <li class="list-group-item text-body-secondary">Nenhum agendamento no momento.</li>
-            {% endfor %}
-        </ul>
-    </div>
+{% block content %}
+<section class="greeting">
+  <h1>Olá, {{ request.user.first_name|default:"paciente" }}!</h1>
+  <p class="greeting-subtitle">Página inicial - Paciente</p>
+</section>
+
+{% if home_error %}
+{% include "components/error_state.html" with message=home_error retry_url=request.path %}
+{% else %}
+<section class="summary" aria-labelledby="summary-title">
+  <h2 id="summary-title" class="visually-hidden">Resumo</h2>
+  <ul class="summary-list">
+    <li class="indicator">
+      <span class="indicator-label">Sessões realizadas</span>
+      <strong class="indicator-value">{{ sessions_done }}</strong>
+    </li>
+    <li class="indicator">
+      <span class="indicator-label">Status da triagem</span>
+      <strong class="indicator-value">{{ triage_status }}</strong>
+    </li>
+    <li class="indicator">
+      <span class="indicator-label">Próxima sessão</span>
+      <strong class="indicator-value">{{ next_session }}</strong>
+    </li>
+    <li class="indicator">
+      <span class="indicator-label">Faltas</span>
+      <strong class="indicator-value">{{ absences }}</strong>
+    </li>
+  </ul>
+</section>
+
+<div class="panel">
+  {% section title="Atividades recentes" class="activities" id="activities-title" %}
+  <ul class="activity-list">
+    {% for activity in activities %}
+    <li class="activity activity-{{ activity.kind }}">
+      <h3 class="activity-section">{{ activity.section }}</h3>
+      {% if activity.label %}
+      {% include "components/badge.html" with label=activity.label level=activity.level %}
+      {% endif %}
+      <p class="activity-title">{{ activity.title }}</p>
+      {% if activity.detail %}
+      <p class="activity-detail">{{ activity.detail }}</p>
+      {% endif %}
+      <a class="activity-link" href="{{ activity.url }}" aria-label="{{ activity.link_label }}">
+        <span aria-hidden="true">&rsaquo;</span>
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
+  {% endsection %}
+
+  <div class="side-panel">
+    {% if alert %}
+    <section class="notice" role="status" aria-labelledby="notice-title">
+      <h2 id="notice-title" class="notice-title">Alerta ativo</h2>
+      <p class="notice-message">
+        Sessão hoje às <strong>{{ alert.time|time:"H:i" }}</strong>{% if alert.attendant %} com {{ alert.attendant }}{% endif %}
+      </p>
+      <a class="notice-action" href="{% url 'patient:agendamentos' %}">Ver agendamento</a>
+    </section>
+    {% endif %}
+
+    {% section title="Próximos eventos" class="upcoming" id="upcoming-title" %}
+    <ul class="upcoming-list">
+      {% for event in upcoming %}
+      <li class="upcoming-event">
+        <time class="upcoming-date" datetime="{{ event.when|date:'c' }}">
+          {{ event.day_label }} às {{ event.when|time:"H:i" }}
+        </time>
+        <span class="upcoming-kind">{{ event.kind }}</span>
+        {% if event.attendant %}
+        <span class="upcoming-attendant">com {{ event.attendant }}</span>
+        {% endif %}
+      </li>
+      {% empty %}
+      <li class="upcoming-empty">
+        {% include "components/empty_state.html" with message="Nenhuma sessão agendada." %}
+      </li>
+      {% endfor %}
+    </ul>
+    {% endsection %}
+  </div>
 </div>
-
-<div class="col-12 col-md-6">
-    <div class="card h-100">
-        <div class="card-body">
-            <h2 class="h5 card-title">Meus dados</h2>
-            <a href="{% url 'patient:edit_data' %}" class="btn btn-primary">Editar meus dados</a>
-        </div>
-    </div>
-</div>
+{% endif %}
 {% endblock %}
