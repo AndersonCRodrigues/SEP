@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import ValidationError,  PermissionDenied
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.http import HttpResponseForbidden
 
@@ -19,8 +19,8 @@ from .forms import (
     TriageRecordForm,
 )
 
-
 Role = CustomUser.Role
+
 
 def get_iarv_form_class(patient):
     age = patient.current_age
@@ -38,12 +38,12 @@ def get_iarv_form_class(patient):
 
     return IarvAdultForm
 
+
 @login_required
 def minhas_triagens(request):
     """
     Lista as triagens do próprio Aluno, pra ele conseguir voltar depois e
-    ver o parecer do Supervisor — sem isso, a única forma de achar de novo
-    a triagem era guardar a URL na mão.
+    ver o parecer do Supervisor 
     """
     if request.user.role != Role.ALUNO:
         return HttpResponseForbidden("Apenas Alunos podem acessar as próprias triagens.")
@@ -57,13 +57,7 @@ def minhas_triagens(request):
 
 @login_required
 def fila_triagem(request):
-    """
-    Lista pacientes que ainda não foram reivindicados por nenhuma triagem
-    (flow_status == "").  De propósito NÃO passa por
-    Patient.objects.visible_to(request.user): nesse momento não existe
-    posse nenhuma ainda pra filtrar, então usar o queryset role-scoped
-    aqui sempre devolveria a fila vazia.
-    """
+
     if request.user.role != Role.ALUNO:
         return HttpResponseForbidden("Apenas Alunos podem acessar a fila de triagem.")
 
@@ -86,7 +80,7 @@ def create_triage(request, patient_id):
     try:
         student_author = Student.objects.get(pk=request.user.pk)
     except Student.DoesNotExist:
-        raise PermissionDenied("Apenas alunos podem criar uma ficha de triagem.")
+        raise ValidationError("Apenas alunos podem criar uma ficha de triagem.")
 
     iarv_form_class = get_iarv_form_class(patient)
 
@@ -106,7 +100,8 @@ def create_triage(request, patient_id):
                 iarv.triage_record = triage_record
                 iarv.save()
 
-           
+            # era redirect("home_redirect", pk=triage_record.pk) — home_redirect
+         
             return redirect("triage_detail", pk=triage_record.pk)
 
     else:
@@ -144,8 +139,20 @@ def submit_triage(request, pk):
 @login_required
 def triage_detail(request, pk):
     triage = get_object_or_404(TriageRecord, pk=pk)
+    user = request.user
 
-    if request.user.role == Role.ALUNO and triage.status != TriageStatus.OPEN:
+    if user.role == Role.ALUNO:
+ 
+        if triage.student_author_id != user.pk:
+            return HttpResponseForbidden("Você não tem acesso a essa triagem.")
+    else:
+        # Professor/Supervisor: só quem esse TriageRecordQuerySet.VISIBLE_TO
+        # realmente inclui pra esse usuário (Supervisor vê tudo, Professor só
+        # triagens de alunos que ele orienta).
+        if not TriageRecord.objects.visible_to(user).filter(pk=triage.pk).exists():
+            return HttpResponseForbidden("Você não tem acesso a essa triagem.")
+
+    if user.role == Role.ALUNO and triage.status != TriageStatus.OPEN:
         context = {
             "paciente": triage.patient.nome_completo,
             "feedback_triage": triage.feedbacks.all(),
@@ -155,17 +162,18 @@ def triage_detail(request, pk):
         context = {
             "paciente": triage.patient.nome_completo,
             "triage": triage,
-           
+            # flags calculadas aqui (não no template) pra não depender de
+            # comparar request.user.role com string literal no HTML
             "pode_submeter": (
-                request.user.role == Role.ALUNO
-                and triage.student_author_id == request.user.pk
+                user.role == Role.ALUNO
+                and triage.student_author_id == user.pk
                 and triage.is_open
             ),
-            "pode_dar_feedback": TriageFeedback.can_be_created_by(request.user),
-            "pode_encaminhar": Referral.can_be_created_by(request.user, triage=triage),
+            "pode_dar_feedback": TriageFeedback.can_be_created_by(user),
+            "pode_encaminhar": Referral.can_be_created_by(user, triage=triage),
         }
 
-    return render(request, "triage/triage_details.html", context)
+    return render(request, "triage_details.html", context)
 
 
 @login_required
@@ -175,6 +183,12 @@ def create_feedback(request, pk):
 
     if not TriageFeedback.can_be_created_by(request.user):
         return HttpResponseForbidden("Você não pode enviar parecer pra essa triagem.")
+
+    # can_be_created_by só checa a ROLE (Professor/Supervisor). Sem isso,
+    # qualquer Professor conseguia dar parecer numa triagem de aluno que ele
+    # nem orienta — falta checar que ele enxerga ESSA triagem específica.
+    if not TriageRecord.objects.visible_to(request.user).filter(pk=triage.pk).exists():
+        return HttpResponseForbidden("Você não tem acesso a essa triagem.")
 
     if request.method == "POST":
         content = request.POST.get("content", "").strip()
@@ -205,7 +219,7 @@ def create_referral(request, pk):
     all_areas = AreaActing.objects.all()
     patient = referral_for_screening.patient
     # request.user é sempre CustomUser (AUTH_USER_MODEL), nunca a subclasse
-   
+    # Teacher automaticamente, mesmo quando a role é SUPERVISOR/PROFESSOR.
     coordinator = get_object_or_404(Teacher, pk=request.user.pk)
 
     if request.method == "POST":
@@ -220,23 +234,40 @@ def create_referral(request, pk):
             return render(request, "triage/create_referral.html", context)
 
         areas_selecionadas = AreaActing.objects.filter(pk__in=area_ids)
-        professores_da_area = Teacher.objects.filter(
-            acting_areas__in=areas_selecionadas,
-            role=Role.PROFESSOR,
-        ).distinct()
 
         with transaction.atomic():
+            # Tranca a linha e reconfirma o status dentro da transação —
+            # sem isso, duas requisições concorrentes do Supervisor podiam
+            # passar as duas pelo can_be_created_by (lido antes da atomic)
+            # e criar dois Referral pra mesma triagem.
+            triage_travada = TriageRecord.objects.select_for_update().get(
+                pk=referral_for_screening.pk
+            )
+            if not Referral.can_be_created_by(request.user, triage=triage_travada):
+                context = {
+                    "all_areas": all_areas,
+                    "referral_for_screening": triage_travada,
+                    "erro": "Essa triagem já foi encaminhada.",
+                }
+                return render(request, "triage/create_referral.html", context)
+
+            professores_da_area = Teacher.objects.filter(
+                acting_areas__in=areas_selecionadas,
+                role=Role.PROFESSOR,
+            ).distinct()
+
             referral_details = Referral.objects.create(
-                triage=referral_for_screening,
+                triage=triage_travada,
                 patient=patient,
                 coordinator=coordinator,
             )
             referral_details.area.set(areas_selecionadas)
             # todo professor que atua em alguma das áreas escolhidas ganha
-            
+            # acesso ao paciente — antes era só o professor selecionado,
+            # agora o encaminhamento é por área mesmo.
             patient.responsible_teachers.set(professores_da_area)
 
-        
+       
         return redirect("supervisor:orientacao")
 
     context = {
