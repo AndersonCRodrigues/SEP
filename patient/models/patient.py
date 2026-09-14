@@ -44,11 +44,10 @@ class PatientQuerySet(RoleScopedQuerySet):
 # Manager customizado estendendo o CustomUserManager mantido do merge
 class PatientManager(CustomUserManager):
 
-    def create_with_credentials(
-        self, raw_data, created_by_user=None, commit=True
-    ):
+    def create_with_credentials(self, raw_data, created_by_user=None, commit=True):
         senha_temporaria = generate_temporary_password()
 
+        raw_data = {**raw_data, "must_change_password": True}
         paciente = self.model(**raw_data)
         paciente.set_password(senha_temporaria)
 
