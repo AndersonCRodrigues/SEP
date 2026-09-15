@@ -49,15 +49,7 @@
       <i class="bi bi-people me-2"></i>Usuários Cadastrados
     </a>
   </li>
-  <li class="nav-item">
-    <a
-      class="nav-link {% if current_view == 'supervisor:register' %}active{% endif %}"
-      href="{% url 'supervisor:register' %}"
-      aria-current="{% if current_view == 'supervisor:register' %}page{% else %}false{% endif %}"
-    >
-      <i class="bi bi-person-plus me-2"></i>Cadastrar Usuário
-    </a>
-  </li>
+  
   {% endif %}
 
   {% if request.user.role == 'PR' %}

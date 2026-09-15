@@ -30,6 +30,7 @@ class CustomUser(AbstractUser):
     cidade = models.CharField(max_length=100, verbose_name="Cidade")
     estado = BRStateField(verbose_name="Estado")
     cep = BRPostalCodeField(verbose_name="CEP")
+    must_change_password = models.BooleanField(default=False,verbose_name="Precisa trocar a senha",)
 
     role = models.CharField(
         max_length=2, choices=Role.choices, default=Role.ALUNO, verbose_name="Cargo"
