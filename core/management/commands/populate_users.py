@@ -19,16 +19,11 @@ from teacher.models import Teacher
 
 # Dicionário que mapeia a Role para o Modelo específico do banco de dados
 MODEL_BY_ROLE = {
-    
     CustomUser.Role.PROFESSOR: Teacher,
-
-    CustomUser.Role.SUPERVISOR: Teacher,  
-
     CustomUser.Role.SUPERVISOR: Teacher,
-
+    CustomUser.Role.SUPERVISOR: Teacher,
     CustomUser.Role.ALUNO: Student,
     CustomUser.Role.PACIENTE: Patient,
-
 }
 
 DEFAULT_AREAS = [

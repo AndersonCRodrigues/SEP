@@ -18,9 +18,7 @@ Role = CustomUser.Role
 def with_open_case(prefix="", **lookups):
     caminho = f"{prefix}assignment_history"
     filtros = {f"{caminho}__end_date__isnull": True}
-    filtros.update(
-        {f"{caminho}__{campo}": valor for campo, valor in lookups.items()}
-    )
+    filtros.update({f"{caminho}__{campo}": valor for campo, valor in lookups.items()})
     return Q(**filtros)
 
 
@@ -45,7 +43,6 @@ class PatientQuerySet(RoleScopedQuerySet):
 
 # Manager customizado estendendo o CustomUserManager mantido do merge
 class PatientManager(CustomUserManager):
-
     def create_with_credentials(self, raw_data, created_by_user=None, commit=True):
         senha_temporaria = generate_temporary_password()
 
@@ -130,9 +127,7 @@ class Patient(BusinessRulesMixin, CustomUser):
         verbose_name="Professores responsáveis",
     )
 
-    created_at = models.DateTimeField(
-        auto_now_add=True, verbose_name="Criado em"
-    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Criado em")
 
     is_accompanied = models.BooleanField(
         null=True, blank=True, verbose_name="Está acompanhado"
@@ -225,9 +220,7 @@ class Patient(BusinessRulesMixin, CustomUser):
         if new_status == self.flow_status:
             return False
 
-        if new_status not in self.ALLOWED_TRANSITIONS.get(
-            self.flow_status, ()
-        ):
+        if new_status not in self.ALLOWED_TRANSITIONS.get(self.flow_status, ()):
             atual = self.get_flow_status_display() or "sem fluxo"
             destino = self.FlowStatus(new_status).label
             raise ValidationError(

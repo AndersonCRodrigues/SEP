@@ -43,7 +43,6 @@ class TeacherArea(BusinessRulesMixin, models.Model):
     def __str__(self):
         return f"{self.teacher} - {self.area}"
 
-
     def save(self, *args, **kwargs):
         if self.role not in (CustomUser.Role.PROFESSOR, CustomUser.Role.SUPERVISOR):
             self.role = CustomUser.Role.PROFESSOR
@@ -72,7 +71,6 @@ class Teacher(CustomUser):
             raise ValidationError(
                 {"acting_areas": "Professor precisa de ao menos uma área de atuação."}
             )
-
 
     def __str__(self):
         areas = ", ".join(a.nome for a in self.acting_areas.all())

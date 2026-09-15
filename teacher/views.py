@@ -16,7 +16,7 @@ from students.models import StudentActivity
 from .forms import StudentActivityForm
 
 
-class HomeProfessorView(LoginRequiredMixin,UserPassesTestMixin, TemplateView):
+class HomeProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = "teacher/home_teacher.html"
 
     def test_func(self):
@@ -24,7 +24,6 @@ class HomeProfessorView(LoginRequiredMixin,UserPassesTestMixin, TemplateView):
             CustomUser.Role.PROFESSOR,
             CustomUser.Role.SUPERVISOR,
         )
-
 
 
 @login_required
@@ -45,7 +44,7 @@ def cadastrar_professor(request):
     return render(request, "teacher/cadastro.html", {"form": form})
 
 
-class PerfilProfessorView(LoginRequiredMixin,UserPassesTestMixin, UpdateView):
+class PerfilProfessorView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Teacher
     form_class = PerfilProfessorForm
     template_name = "teacher/perfil.html"

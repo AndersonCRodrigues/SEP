@@ -10,10 +10,7 @@ class PacienteCreationForm(forms.ModelForm):
         label="Data de Nascimento",
         widget=forms.DateInput(
             format="%Y-%m-%d",
-            attrs={
-                "class": "date-picker",
-                "placeholder": "Selecione a data"
-            }
+            attrs={"class": "date-picker", "placeholder": "Selecione a data"},
         ),
         input_formats=["%Y-%m-%d", "%d/%m/%Y"],
     )

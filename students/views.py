@@ -12,14 +12,13 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from core.models import CustomUser
 
 
-
 class HomeEstudanteView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = "student/home.html"
 
-
     def test_func(self):
         return self.request.user.role == CustomUser.Role.ALUNO
-    
+
+
 @login_required
 def cadastrar_aluno(request):
     if not request.user.has_perm("students.add_student"):
@@ -60,7 +59,7 @@ class PerfilAlunoView(GroupRequiredMixin, UpdateView):
         return get_object_or_404(Student, pk=self.request.user.pk)
 
 
-class MeuProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView ):
+class MeuProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = "student/meu_professor.html"
 
     def test_func(self):

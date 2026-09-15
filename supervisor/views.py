@@ -121,7 +121,7 @@ class PerfilSupervisorView(GroupRequiredMixin, UpdateView):
 
     def get_object(self, queryset=None):
         user = self.request.user
-        
+
         try:
             return Teacher.objects.get(pk=user.pk)
         except Teacher.DoesNotExist:
