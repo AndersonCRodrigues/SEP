@@ -1,7 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.views.generic import TemplateView, UpdateView
 from django.urls import reverse_lazy
@@ -14,7 +13,7 @@ from core.models import CustomUser
 
 
 
-class HomeEstudanteView(LoginRequiredMixin, TemplateView):
+class HomeEstudanteView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = "student/home.html"
 
 
