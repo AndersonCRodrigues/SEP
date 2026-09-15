@@ -5,6 +5,7 @@ app_name = "supervisor"
 
 urlpatterns = [
     path("", views.HomeSupervisorView.as_view(), name="home"),
+    path("perfil/", views.PerfilSupervisorView.as_view(), name="perfil"),
     path("painel/", views.PainelSupervisorView.as_view(), name="painel"),
     path("usuarios/", views.ListarUsuariosView.as_view(), name="listar_usuarios"),
     path("register/", views.cadastrar_supervisor, name="register"),

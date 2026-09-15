@@ -49,6 +49,7 @@ class CustomUser(AbstractUser):
     )
     estado = BRStateField(verbose_name="Estado")
     cep = BRPostalCodeField(verbose_name="CEP")
+    must_change_password = models.BooleanField(default=False,verbose_name="Precisa trocar a senha",)
 
     role = models.CharField(
         max_length=2, choices=Role.choices, default=Role.ALUNO, verbose_name="Cargo"
@@ -131,6 +132,10 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return f"{self.get_full_name()} / {self.email or self.cpf}"
+
+    @property
+    def nome_completo(self):
+        return self.get_full_name()
 
     class Meta:
         verbose_name = "Usuário"

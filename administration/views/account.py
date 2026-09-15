@@ -1,11 +1,11 @@
-from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
+from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView, UpdateView
-from core.utils import sincronizar_grupo
 from core.models import CustomUser
+from core.utils import sincronizar_grupo
 from ..forms import AdministrativoCreationForm
 from .access import AdministrativeOnly
 
@@ -38,7 +38,9 @@ class PerfilAdministrativoView(AdministrativeOnly, UpdateView):
 @login_required
 def cadastrar_administrativo(request):
     if not request.user.has_perm("core.add_customuser"):
-        raise PermissionDenied("Apenas o Superadmin pode cadastrar Administrativo.")
+        raise PermissionDenied(
+            "Apenas o Superadmin pode cadastrar Administrativo."
+        )
 
     if request.method == "POST":
         form = AdministrativoCreationForm(request.POST)

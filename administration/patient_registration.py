@@ -2,7 +2,6 @@ from dataclasses import dataclass
 
 from django.db import transaction
 
-from core.fields import only_digits
 from core.utils import sincronizar_grupo
 from patient.models import Patient
 
@@ -25,6 +24,13 @@ class Step:
 
 STEPS = (
     Step("nome", "Identificação", "Nome completo", "person", forms.FullNameForm),
+    Step(
+        "nome-social",
+        "Identificação",
+        "Nome social e identidade de gênero",
+        "person",
+        forms.SocialIdentityForm,
+    ),
     Step("cpf", "Identificação", "CPF", "person", forms.CpfForm),
     Step(
         "nascimento",
@@ -139,16 +145,16 @@ class PatientRegistration:
 
     @transaction.atomic
     def complete(self, registered_by):
-        values = {}
+        values = {"registered_by": registered_by}
         for step in self.steps():
             form = step.form_class(data=self.answer(step))
             form.is_valid()
             values.update(form.cleaned_data)
 
-        patient = Patient(registered_by=registered_by, **values)
-        patient.set_password(only_digits(values["cpf"]))
-        patient.full_clean()
-        patient.save()
+        Patient(**values).full_clean(exclude=["password"])
+        patient = Patient.objects.create_with_credentials(
+            raw_data=values, created_by_user=registered_by
+        )
         sincronizar_grupo(patient)
 
         self.session.pop(SESSION_KEY, None)

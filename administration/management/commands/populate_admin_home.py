@@ -110,12 +110,25 @@ class Command(BaseCommand):
         patients = list(Patient.objects.all()[:6])
         for student, patient in zip(students, patients):
             if not student.open_cases.exists():
+                self.ready_for_treatment(patient)
                 CaseAssignment.objects.assign(student, patient, acting_area=area)
 
         self.stdout.write(
             f"{len(students)} alunos e {len(patients)} pacientes prontos."
         )
         return students, patients
+
+    @staticmethod
+    def ready_for_treatment(patient):
+        flow = Patient.FlowStatus
+        allowed = Patient.ALLOWED_TRANSITIONS
+        if patient.flow_status == flow.IN_TREATMENT:
+            return
+        if flow.IN_TREATMENT in allowed.get(patient.flow_status, ()):
+            return
+        if flow.REFERRED not in allowed.get(patient.flow_status, ()):
+            patient.advance_to(flow.IN_TRIAGE)
+        patient.advance_to(flow.REFERRED)
 
     def create_rooms(self):
         rooms = [

@@ -14,8 +14,9 @@ from core.models import CustomUser
 
 
 
-class HomeEstudanteView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
-    template_name = "student/home_student.html"
+class HomeEstudanteView(LoginRequiredMixin, TemplateView):
+    template_name = "student/home.html"
+
 
     def test_func(self):
         return self.request.user.role == CustomUser.Role.ALUNO
@@ -54,7 +55,7 @@ class PerfilAlunoView(GroupRequiredMixin, UpdateView):
         "cep",
     ]
     template_name = "student/perfil.html"
-    success_url = reverse_lazy("students:perfil")
+    success_url = reverse_lazy("students:home")
 
     def get_object(self, queryset=None):
         return get_object_or_404(Student, pk=self.request.user.pk)

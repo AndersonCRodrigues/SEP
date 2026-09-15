@@ -247,6 +247,30 @@ class FullNameForm(RegistrationStepForm):
     )
 
 
+class SocialIdentityForm(RegistrationStepForm):
+    social_name = forms.CharField(
+        label="Nome social (opcional)",
+        max_length=150,
+        required=False,
+        validators=[validate_letters],
+        widget=forms.TextInput(
+            attrs={"placeholder": "Nome social", "data-only": "letters"}
+        ),
+    )
+    gender_identity = forms.CharField(
+        label="Identidade de gênero (opcional)",
+        max_length=50,
+        required=False,
+        validators=[validate_letters],
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "Ex: Cisgênero, Transgênero, Não-binário",
+                "data-only": "letters",
+            }
+        ),
+    )
+
+
 class CpfForm(RegistrationStepForm):
     cpf = BRCPFField(
         label="CPF",

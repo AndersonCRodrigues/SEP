@@ -344,7 +344,7 @@ class TriageRecordSaveTests(TestCase):
     def test_save_sets_patient_flow_status_to_in_triage_on_creation(self):
         self.assertEqual(
             self.patient.flow_status,
-            "",
+            Patient.FlowStatus.AWAITING_TRIAGE,
         )
 
         TriageRecord.objects.create(

@@ -26,6 +26,7 @@ SESSION_TITLES = {
 NOT_STARTED = ("Não iniciada", "secondary", "Sua triagem ainda não começou.")
 
 TRIAGE_STATUS = {
+    FlowStatus.AWAITING_TRIAGE: NOT_STARTED,
     FlowStatus.IN_TRIAGE: (
         "Em andamento",
         "warning",
