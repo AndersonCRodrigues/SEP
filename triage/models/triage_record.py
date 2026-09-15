@@ -6,7 +6,7 @@ from core.models import CustomUser
 from core.permissions import ALL, BusinessRulesMixin, RoleScopedQuerySet
 from patient.models import Patient
 from students.models import Student
-from core.constants import VISIBLE_TO_AUTHOR, TriageStatus
+from core.constants import VISIBLE_TO_AUTHOR, VISIBLE_TO_PATIENT, TriageStatus
 from utils.fields import EncryptedTextField
 
 Role = CustomUser.Role
@@ -17,6 +17,7 @@ class TriageRecordQuerySet(RoleScopedQuerySet):
         Role.SUPERVISOR: ALL,
         Role.PROFESSOR: lambda u: Q(student_author__current_advisor_id=u.pk),
         Role.ALUNO: lambda u: Q(student_author_id=u.pk, status__in=VISIBLE_TO_AUTHOR),
+        Role.PACIENTE: lambda u: Q(patient_id=u.pk, status__in=VISIBLE_TO_PATIENT),
     }
 
 
@@ -343,4 +344,4 @@ class TriageFeedback(BusinessRulesMixin, models.Model):
         ordering = ["-created_at"]
 
     def __str__(self):
-        return f"Feedback de {self.author.nome_completo} em {self.triage}"
+        return f"Feedback de {self.author.get_full_name()} em {self.triage}"

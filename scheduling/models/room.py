@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q
@@ -8,6 +10,8 @@ from students.models import Student
 from patient.models import Patient
 
 Role = CustomUser.Role
+
+BOOKING_DURATION = timedelta(hours=1)
 
 
 class RoomQuerySet(RoleScopedQuerySet):
@@ -74,6 +78,22 @@ class RoomBookingQuerySet(RoleScopedQuerySet):
     def open(self):
         return self.filter(end_date__isnull=True)
 
+    def occupying(self, instant):
+        start = instant - BOOKING_DURATION
+
+        if start.date() == instant.date():
+            window = Q(
+                weekday=instant.weekday(),
+                start_time__gt=start.time(),
+                start_time__lte=instant.time(),
+            )
+        else:
+            window = Q(weekday=instant.weekday(), start_time__lte=instant.time()) | Q(
+                weekday=start.weekday(), start_time__gt=start.time()
+            )
+
+        return self.open().filter(window)
+
 
 class RoomBookingManager(models.Manager.from_queryset(RoomBookingQuerySet)):
     def open_for(self, room_id, weekday, start_time):
@@ -90,6 +110,8 @@ class RoomBookingManager(models.Manager.from_queryset(RoomBookingQuerySet)):
 
 
 class RoomBooking(BusinessRulesMixin, models.Model):
+    DURATION = BOOKING_DURATION
+
     class Weekday(models.IntegerChoices):
         MONDAY = 0, "Segunda-feira"
         TUESDAY = 1, "Terça-feira"

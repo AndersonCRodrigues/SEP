@@ -1,18 +1,16 @@
 from django.contrib import admin
-from .models import Teacher,TeacherArea
+from .models import Teacher, TeacherArea
+
 
 class TeacherAreaInline(admin.TabularInline):
     model = TeacherArea
     extra = 1
 
 
-
 @admin.register(Teacher)
 class TeacherAdmin(admin.ModelAdmin):
-    list_display = ("nome_completo", "email", "matricula", "role")
+    list_display = ("first_name", "last_name", "email", "matricula", "role")
 
-    search_fields = ("nome_completo", "email", "cpf")
-
+    search_fields = ("first_name", "last_name", "email", "cpf")
 
     inlines = [TeacherAreaInline]
-

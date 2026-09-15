@@ -1,0 +1,55 @@
+{% extends "patient/base_patient.html" %}
+{% load components %}
+
+{% block title %}Meus agendamentos{% endblock %}
+
+{% block content %}
+<header class="page-heading">
+  <h1>Meus agendamentos</h1>
+  <a class="page-action" href="{% url 'patient:solicitar_horario' %}">Solicitar novo horário</a>
+</header>
+
+{% if appointments_error %}
+{% include "components/error_state.html" with message=appointments_error retry_url=request.path %}
+{% else %}
+{% data_table columns=column_labels label="Meus agendamentos" %}
+{% for row in appointments %}
+<tr>
+  <td>
+    <time datetime="{{ row.when|date:'c' }}">{{ row.when_label }}</time>
+  </td>
+  <td>{{ row.attendant|default:"A definir" }}</td>
+  <td>{% include "components/badge.html" with label=row.label level=row.level %}</td>
+</tr>
+{% empty %}
+<tr>
+  <td colspan="{{ column_labels|length }}">
+    {% include "components/empty_state.html" with message="Você não tem sessões agendadas." %}
+  </td>
+</tr>
+{% endfor %}
+{% enddata_table %}
+
+{% section title="Minhas solicitações de horário" class="schedule-requests" id="requests-title" %}
+<ul class="request-list">
+  {% for item in schedule_requests %}
+  <li class="request">
+    <p class="request-preference">
+      <time datetime="{{ item.preferred_date|date:'Y-m-d' }}">{{ item.preferred_date|date:"d/m/Y" }}</time>
+      — {{ item.period }}
+    </p>
+    {% include "components/badge.html" with label=item.label level=item.level %}
+    <p class="request-date">Solicitada em {{ item.created_at|date:"d/m/Y" }}</p>
+    {% if item.response %}
+    <p class="request-response">Resposta: {{ item.response }}</p>
+    {% endif %}
+  </li>
+  {% empty %}
+  <li class="request-empty">
+    {% include "components/empty_state.html" with message="Nenhuma solicitação de horário enviada." %}
+  </li>
+  {% endfor %}
+</ul>
+{% endsection %}
+{% endif %}
+{% endblock %}

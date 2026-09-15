@@ -16,7 +16,7 @@ from students.models import StudentActivity
 from .forms import StudentActivityForm
 
 
-class HomeProfessorView(LoginRequiredMixin,UserPassesTestMixin, TemplateView):
+class HomeProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = "teacher/home_teacher.html"
 
     def test_func(self):
@@ -24,7 +24,6 @@ class HomeProfessorView(LoginRequiredMixin,UserPassesTestMixin, TemplateView):
             CustomUser.Role.PROFESSOR,
             CustomUser.Role.SUPERVISOR,
         )
-
 
 
 @login_required
@@ -45,7 +44,7 @@ def cadastrar_professor(request):
     return render(request, "teacher/cadastro.html", {"form": form})
 
 
-class PerfilProfessorView(LoginRequiredMixin,UserPassesTestMixin, UpdateView):
+class PerfilProfessorView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Teacher
     form_class = PerfilProfessorForm
     template_name = "teacher/perfil.html"
@@ -113,7 +112,7 @@ def vincular_aluno(request):
             try:
                 Advising.objects.change_advisor(aluno, professor, term=periodo)
                 messages.success(
-                    request, f"{aluno.nome_completo} vinculado com sucesso!"
+                    request, f"{aluno.get_full_name()} vinculado com sucesso!"
                 )
             except ValidationError as e:
                 messages.error(request, str(e))

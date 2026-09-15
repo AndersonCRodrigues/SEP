@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import F, Q
 from areas.models import AreaActing
@@ -11,23 +12,39 @@ from students.models import Student
 Role = CustomUser.Role
 
 
+class CertificateStatus(models.TextChoices):
+    PENDING = "PE", "Pendente"
+    ISSUED = "EM", "Emitida"
+
+
 class BaseCertificate(BusinessRulesMixin, models.Model):
+    Status = CertificateStatus
+
     content = models.TextField(verbose_name="Conteúdo")
+
+    status = models.CharField(
+        max_length=2,
+        choices=CertificateStatus.choices,
+        default=CertificateStatus.PENDING,
+        verbose_name="Situação",
+    )
 
     issued_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
         on_delete=models.PROTECT,
         related_name="%(class)s_set",
         verbose_name="Emitido por",
     )
 
-    issued_at = models.DateField(verbose_name="Data de emissão")
+    issued_at = models.DateField(null=True, blank=True, verbose_name="Data de emissão")
 
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Criado em")
 
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Atualizado em")
 
-    DOCUMENT_FIELDS = ("content", "issued_at")
+    DOCUMENT_FIELDS = ("content", "issued_at", "status")
 
     CREATABLE_BY = (Role.ADMINISTRATIVO,)
     DELETABLE_BY = ()
@@ -35,6 +52,26 @@ class BaseCertificate(BusinessRulesMixin, models.Model):
     class Meta:
         abstract = True
         ordering = ["-issued_at"]
+        constraints = [
+            models.CheckConstraint(
+                condition=Q(status=CertificateStatus.PENDING)
+                | Q(issued_at__isnull=False, issued_by__isnull=False),
+                name="%(class)s_issued_has_date_and_author",
+            )
+        ]
+
+    def clean(self):
+        super().clean()
+        if self.status != CertificateStatus.ISSUED:
+            return
+
+        missing = {}
+        if not self.issued_at:
+            missing["issued_at"] = "Documento emitido precisa da data de emissão."
+        if not self.issued_by_id:
+            missing["issued_by"] = "Documento emitido precisa de quem o emitiu."
+        if missing:
+            raise ValidationError(missing)
 
 
 class AttendanceCertificateQuerySet(RoleScopedQuerySet):
@@ -44,8 +81,11 @@ class AttendanceCertificateQuerySet(RoleScopedQuerySet):
         Role.PROFESSOR: lambda u: (
             with_open_case("patient__", student__current_advisor_id=u.pk)
             | Q(patient__responsible_teachers=u.pk)
+            | Q(student__current_advisor_id=u.pk)
         ),
-        Role.ALUNO: lambda u: with_open_case("patient__", student_id=u.pk),
+        Role.ALUNO: lambda u: (
+            with_open_case("patient__", student_id=u.pk) | Q(student_id=u.pk)
+        ),
         Role.PACIENTE: lambda u: Q(patient_id=u.pk),
     }
 
@@ -59,9 +99,20 @@ class AttendanceCertificate(BaseCertificate):
 
     patient = models.ForeignKey(
         Patient,
+        null=True,
+        blank=True,
         on_delete=models.PROTECT,
         related_name="certificates",
         verbose_name="Paciente",
+    )
+
+    student = models.ForeignKey(
+        Student,
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name="certificates",
+        verbose_name="Aluno",
     )
 
     appointment = models.ForeignKey(
@@ -99,9 +150,27 @@ class AttendanceCertificate(BaseCertificate):
     class Meta(BaseCertificate.Meta):
         verbose_name = "Declaração de comparecimento"
         verbose_name_plural = "Declarações de comparecimento"
+        constraints = BaseCertificate.Meta.constraints + [
+            models.CheckConstraint(
+                condition=Q(patient__isnull=False, student__isnull=True)
+                | Q(patient__isnull=True, student__isnull=False),
+                name="certificate_belongs_to_one_person",
+            )
+        ]
+
+    @property
+    def person(self):
+        return self.patient or self.student
+
+    def clean(self):
+        super().clean()
+        if bool(self.patient_id) == bool(self.student_id):
+            raise ValidationError(
+                "Informe o paciente ou o aluno, e exatamente um dos dois."
+            )
 
     def __str__(self):
-        return f"{self.get_kind_display()} de {self.patient} ({self.issued_at})"
+        return f"{self.get_kind_display()} de {self.person} ({self.issued_at})"
 
 
 class InternshipDeclarationQuerySet(RoleScopedQuerySet):
@@ -140,7 +209,7 @@ class InternshipDeclaration(BaseCertificate):
     class Meta(BaseCertificate.Meta):
         verbose_name = "Declaração de estágio"
         verbose_name_plural = "Declarações de estágio"
-        constraints = [
+        constraints = BaseCertificate.Meta.constraints + [
             models.CheckConstraint(
                 condition=Q(end_date__gte=F("start_date")),
                 name="internship_period_is_ordered",

@@ -1,0 +1,52 @@
+{% extends "patient/base_patient.html" %}
+{% load components %}
+
+{% block title %}{% if session %}Sessão de {{ session.when|date:"d/m/Y" }}{% else %}Detalhes da sessão{% endif %}{% endblock %}
+
+{% block content %}
+<h1 class="page-banner">
+  {% if session %}Sessão de {{ session.when|date:"d/m/Y" }}{% else %}Detalhes da sessão{% endif %}
+</h1>
+
+{% if session_error %}
+{% include "components/error_state.html" with message=session_error retry_url=request.path %}
+{% else %}
+{% section class="session-detail" %}
+<dl class="session-data">
+  <div class="session-item">
+    <dt>Data</dt>
+    <dd><time datetime="{{ session.when|date:'Y-m-d' }}">{{ session.when|date:"d/m/Y" }}</time></dd>
+  </div>
+  <div class="session-item">
+    <dt>Horário</dt>
+    <dd><time datetime="{{ session.when|time:'H:i' }}">{{ session.when|time:"H:i" }}</time></dd>
+  </div>
+  <div class="session-item">
+    <dt>Duração</dt>
+    <dd>{{ session.duration }} minutos</dd>
+  </div>
+  <div class="session-item">
+    <dt>Tipo</dt>
+    <dd>{{ session.kind }}</dd>
+  </div>
+  <div class="session-item">
+    <dt>Atendimento por</dt>
+    <dd>{{ session.attendant|default:"Não informado" }}</dd>
+  </div>
+  {% if session.teacher and session.teacher != session.attendant %}
+  <div class="session-item">
+    <dt>Professor responsável</dt>
+    <dd>{{ session.teacher }}</dd>
+  </div>
+  {% endif %}
+  <div class="session-item">
+    <dt>Situação</dt>
+    <dd>{% include "components/badge.html" with label=session.label level=session.level %}</dd>
+  </div>
+</dl>
+<p class="session-message">{{ session.message }}</p>
+{% endsection %}
+{% endif %}
+
+<a class="back-link" href="{% url 'patient:historico' %}">Voltar para o histórico</a>
+{% endblock %}

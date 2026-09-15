@@ -33,10 +33,8 @@ def generate_temporary_password(length=12):
     return "".join(secrets.choice(alphabet) for _ in range(length))
 
 
-def send_temporary_password_email(
-    user, temporary_password, usuario_responsavel=None
-):
-    
+def send_temporary_password_email(user, temporary_password, usuario_responsavel=None):
+
     target_user = usuario_responsavel or user
 
     try:
@@ -65,9 +63,7 @@ def send_temporary_password_email(
         )
 
     except Exception as e:
-        logger.error(
-            f"Erro ao enviar e-mail de credenciais para {user.email}: {e}"
-        )
+        logger.error(f"Erro ao enviar e-mail de credenciais para {user.email}: {e}")
 
         # Falha: usa o campo singular 'detail'
         SecurityLog.objects.create(

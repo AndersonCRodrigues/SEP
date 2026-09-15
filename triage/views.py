@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import ValidationError,  PermissionDenied
+from django.core.exceptions import ValidationError, PermissionDenied
 from django.db import transaction
 from patient.models import Patient
 from students.models import Student
@@ -10,6 +10,7 @@ from .forms import (
     IarvChildForm,
     TriageRecordForm,
 )
+
 
 def get_iarv_form_class(patient):
     age = patient.current_age
@@ -26,6 +27,7 @@ def get_iarv_form_class(patient):
         return IarvAdolescentForm
 
     return IarvAdultForm
+
 
 @login_required
 def create_triage(request, patient_id):

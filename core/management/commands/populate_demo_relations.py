@@ -4,9 +4,7 @@ from datetime import date, timedelta
 
 from django.core.management.base import BaseCommand
 
-from areas.models import AreaActing
 from core.models import CustomUser
-from patient.models import Patient
 from students.models import Advising, Student, StudentActivity
 from teacher.models import Teacher
 
@@ -49,7 +47,6 @@ class Command(BaseCommand):
             self.style.SUCCESS(f"{vinculados} aluno(s) vinculado(s) a um professor.")
         )
 
-        area = AreaActing.objects.first()
         atividades_criadas = 0
         for aluno in Student.objects.filter(current_advisor__isnull=False):
             professor = aluno.current_advisor
@@ -64,5 +61,7 @@ class Command(BaseCommand):
             atividades_criadas += 1
 
         self.stdout.write(
-            self.style.SUCCESS(f"{atividades_criadas} atividade(s) de exemplo criada(s).")
+            self.style.SUCCESS(
+                f"{atividades_criadas} atividade(s) de exemplo criada(s)."
+            )
         )
