@@ -15,7 +15,7 @@ from teacher.models import Teacher
 from triage.models import TriageRecord
 
 DEMO_EMAIL = "paciente.demo@teste.com"
-DEMO_PASSWORD = "Paciente@123"
+DEMO_PASSWORD = "Paciente@123"  # nosec B105
 SESSION_HOUR = 14
 TRIAGE_DAYS_AGO = 60
 OLD_TRIAGE_DAYS_AGO = 400
@@ -31,7 +31,7 @@ UPCOMING_WEEKS = (0, 1, 2, 3)
 
 
 def valid_cpf():
-    digits = [random.randint(0, 9) for _ in range(9)]
+    digits = [random.randint(0, 9) for _ in range(9)]  # nosec B311
     for size in (10, 11):
         remainder = 11 - sum(d * w for d, w in zip(digits, range(size, 1, -1))) % 11
         digits.append(0 if remainder >= 10 else remainder)
