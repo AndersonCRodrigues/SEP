@@ -1,0 +1,31 @@
+{% extends "administration/base_admin.html" %}
+
+{% block title %}Cadastro concluído{% endblock %}
+
+{% block main_nav %}{% endblock %}
+
+{% block content %}
+<section class="registration-completed" aria-labelledby="completed-title">
+  <span class="completed-icon" aria-hidden="true"></span>
+  <h1 id="completed-title" class="completed-title">Cadastro concluído com sucesso!</h1>
+
+  <dl class="completed-summary">
+    <div class="completed-row">
+      <dt>Paciente</dt>
+      <dd>{{ patient.get_full_name }} #{{ patient.pk }}</dd>
+    </div>
+    <div class="completed-row">
+      <dt>Cadastrado por</dt>
+      <dd>{{ patient.registered_by.get_full_name|default:"—" }}</dd>
+    </div>
+    <div class="completed-row">
+      <dt>Concluído em</dt>
+      <dd>
+        <time datetime="{{ patient.created_at|date:'c' }}">{{ patient.created_at|date:"d/m/Y à\s H:i" }}</time>
+      </dd>
+    </div>
+  </dl>
+
+  <a class="completed-continue" href="{% url 'administration:pacientes' %}">Continuar</a>
+</section>
+{% endblock %}

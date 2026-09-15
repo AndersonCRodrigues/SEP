@@ -1,0 +1,28 @@
+{% extends "patient/base_patient.html" %}
+
+{% block title %}Solicitar novo horário{% endblock %}
+
+{% block content %}
+<h1>Solicitar novo horário</h1>
+
+{% if request_error %}
+{% include "components/error_state.html" with message=request_error retry_url=request.path %}
+{% elif pending_request %}
+<section class="notice" role="status" aria-labelledby="pending-title">
+  <h2 id="pending-title" class="notice-title">Solicitação pendente</h2>
+  <p class="notice-message">
+    Você já pediu um horário para {{ pending_request.preferred_date|date:"d/m/Y" }}
+    ({{ pending_request.get_preferred_period_display }}). Aguarde a resposta do
+    Administrativo para pedir outro.
+  </p>
+</section>
+{% else %}
+<p class="page-intro">
+  Escolha a data e o período de sua preferência. O Administrativo vai responder
+  sua solicitação.
+</p>
+{% include "components/form.html" with form=form submit_label="Enviar solicitação" %}
+{% endif %}
+
+<a class="back-link" href="{% url 'patient:agendamentos' %}">Voltar para meus agendamentos</a>
+{% endblock %}

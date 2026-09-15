@@ -172,7 +172,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 LANGUAGE_CODE = "en-us"
-TIME_ZONE = "UTC"
+TIME_ZONE = "America/Sao_Paulo"
 USE_I18N = True
 USE_TZ = True
 STATIC_URL = "static/"
@@ -191,6 +191,13 @@ MESSAGE_TAGS = {
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
+
+SEP_CONTACT = {
+    "name": "Serviço Escola de Psicologia",
+    "city": "Maricá, RJ",
+    "phone": "(21) 2000-0000",
+    "email": "sep@univassouras.edu.br",
+}
 
 # Republicacao explicita da API deste modulo (PEP 8 permite wildcard import
 # quando o modulo de origem declara __all__). Isso evita que "import os",
@@ -219,4 +226,5 @@ __all__ = [
     "MESSAGE_TAGS",
     "CRISPY_ALLOWED_TEMPLATE_PACKS",
     "CRISPY_TEMPLATE_PACK",
+    "SEP_CONTACT",
 ]
