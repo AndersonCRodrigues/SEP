@@ -50,6 +50,7 @@
           <ul class="navbar-nav align-items-lg-center gap-2">
             {% if request.user.is_authenticated %}
             {% block user_links %}
+            {# TODO: botões sem lógica; ficam para fazer #}
             <li class="nav-item">
               <a href="#" class="nav-link" title="Notificações">
                 <i class="bi bi-bell"></i>
