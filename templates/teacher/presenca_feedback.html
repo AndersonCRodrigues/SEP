@@ -3,8 +3,8 @@
 {% block title %}Presença e Feedback | Sistema SEP{% endblock %}
 
 {% block breadcrumbs %}
-    <li class="breadcrumb-item"><a href="{% url 'home_redirect' %}">Página inicial</a></li>
-    <li class="breadcrumb-item active" aria-current="page">Presença e Feedback</li>
+  <li class="breadcrumb-item"><a href="{% url 'home_redirect' %}">Página inicial</a></li>
+  <li class="breadcrumb-item active" aria-current="page">Presença e Feedback</li>
 {% endblock %}
 
 {% block page_title %}Presença e Feedback{% endblock %}
@@ -16,6 +16,35 @@
         <i class="bi bi-calendar3"></i> Referente a hoje, {{ hoje|date:"d/m/Y" }}
     </p>
 </div>
+
+<!-- Filtro por aluno (a pedido do front, validação de 12/09) -->
+<section class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-12 col-md-6">
+                <label for="filtro-aluno-presenca" class="form-label">Filtrar por aluno</label>
+                <select id="filtro-aluno-presenca" name="aluno" class="form-select">
+                    <option value="">Todos os alunos</option>
+                    {% for aluno in alunos_para_filtro %}
+                    <option value="{{ aluno.pk }}" {% if aluno_filtro_id == aluno.pk|stringformat:"s" %}selected{% endif %}>
+                        {{ aluno.nome_completo }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-6 col-md-3 d-grid">
+                <button type="submit" class="btn btn-outline-secondary">
+                    <i class="bi bi-funnel"></i> Filtrar
+                </button>
+            </div>
+            {% if aluno_filtro_id %}
+            <div class="col-6 col-md-3 d-grid">
+                <a href="{% url 'teacher:presenca' %}" class="btn btn-outline-danger">Limpar filtro</a>
+            </div>
+            {% endif %}
+        </form>
+    </div>
+</section>
 
 <section class="card mb-4">
     <div class="card-body">

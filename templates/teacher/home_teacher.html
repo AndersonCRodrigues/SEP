@@ -11,9 +11,12 @@
 
 {% block page_actions %}
   <div class="d-flex gap-2">
+    {% comment %}
+    COMENTADO a pedido do front (validação de 12/09): rota teacher:painel comentada em urls.py
     <a href="{% url 'teacher:painel' %}" class="btn btn-primary btn-sm">
       <i class="bi bi-clipboard-data"></i> Painel do Professor
     </a>
+    {% endcomment %}
     <a href="{% url 'teacher:alunos' %}" class="btn btn-outline-primary btn-sm">
       <i class="bi bi-people"></i> Meus Alunos
     </a>
@@ -116,7 +119,12 @@
         </section>
     </div>
 
-    <!-- Acesso Rápido --
+    {% comment %}
+    COMENTADO a pedido do front (validação de 12/09): não querem o card de
+    Acesso Rápido por enquanto. Deixado aqui, não apagado, pra reativar fácil
+    se voltarem atrás.
+
+    <!-- Acesso Rápido -->
     <div class="col-12 col-lg-4">
         <section class="card h-100">
             <div class="card-body">
@@ -138,6 +146,7 @@
             </div>
         </section>
     </div>
+    {% endcomment %}
 </div>
 
 <div class="row g-3 mt-0">

@@ -5,7 +5,8 @@ app_name = "teacher"
 
 urlpatterns = [
     path("", views.HomeProfessorView.as_view(), name="home"),
-    path("painel/", views.PainelProfessorView.as_view(), name="painel"),
+    # COMENTADO a pedido do front (validação de 12/09) -- ver nota em views.py
+    # path("painel/", views.PainelProfessorView.as_view(), name="painel"),
     path("cadastrar/", views.cadastrar_professor, name="cadastrar"),
     path("perfil/", views.PerfilProfessorView.as_view(), name="perfil"),
     path("vincular-aluno/", views.vincular_aluno, name="vincular_aluno"),

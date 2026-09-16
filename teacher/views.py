@@ -175,28 +175,36 @@ class PerfilProfessorView(LoginRequiredMixin,UserPassesTestMixin, UpdateView):
         return get_object_or_404(Teacher, pk=self.request.user.pk)
 
 
-class PainelProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
-    template_name = "teacher/teacher_panel.html"
-
-    def test_func(self):
-        return self.request.user.role in (
-            CustomUser.Role.PROFESSOR,
-            CustomUser.Role.SUPERVISOR,
-        )
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        from students.models import Student
-
-        professor = get_object_or_404(Teacher, pk=self.request.user.pk)
-        context["alunos_vinculados"] = professor.current_advisees.all()
-
-        context["alunos_disponiveis"] = Student.objects.filter(
-            current_advisor__isnull=True
-        )
-        context["form_vincular"] = VincularAlunoForm()
-        context["form_horas"] = StudentActivityForm(user=professor)
-        return context
+# COMENTADO a pedido do front (validação de 12/09): a decisão do Card 1 é
+# que cada papel tenha uma única tela inicial (ver "Mapa de Rotas e
+# Permissões", seção Card 1). teacher:home já absorveu resumo/atividades/
+# calendário; falta só decidir onde os dois formulários abaixo (Vincular
+# Aluno, Lançar Horas) vão morar antes de remover isto de vez. Comentado, não
+# apagado, pra não perder a implementação. A rota em urls.py e o link na
+# sidebar também estão comentados -- ver esses dois arquivos.
+#
+# class PainelProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+#     template_name = "teacher/teacher_panel.html"
+#
+#     def test_func(self):
+#         return self.request.user.role in (
+#             CustomUser.Role.PROFESSOR,
+#             CustomUser.Role.SUPERVISOR,
+#         )
+#
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         from students.models import Student
+#
+#         professor = get_object_or_404(Teacher, pk=self.request.user.pk)
+#         context["alunos_vinculados"] = professor.current_advisees.all()
+#
+#         context["alunos_disponiveis"] = Student.objects.filter(
+#             current_advisor__isnull=True
+#         )
+#         context["form_vincular"] = VincularAlunoForm()
+#         context["form_horas"] = StudentActivityForm(user=professor)
+#         return context
 
 
 @login_required
@@ -227,7 +235,7 @@ def vincular_aluno(request):
         else:
             messages.error(request, "Corrija os erros do formulário de vínculo.")
 
-    return redirect("teacher:painel")
+    return redirect("teacher:alunos")
 
 
 @login_required
@@ -253,7 +261,7 @@ def lancar_horas(request):
         else:
             messages.error(request, "Corrija os erros do formulário de horas.")
 
-    return redirect("teacher:painel")
+    return redirect("teacher:alunos")
 
 
 # ---------------------------------------------------------------------------
@@ -399,23 +407,31 @@ class ProntuarioDetalheView(LoginRequiredMixin, UserPassesTestMixin, DetailView)
         )
 
     def get_context_data(self, **kwargs):
+        # MOCK (a pedido do front, validação de 12/09): o botão de confirmar
+        # ainda não tem o fluxo fechado com produto, então aparece sempre
+        # habilitado aqui. A checagem real (editable_fields_for) está
+        # comentada no post() abaixo, pronta pra voltar quando o fluxo for
+        # validado.
         context = super().get_context_data(**kwargs)
-        context["pode_confirmar"] = "confirmed_by" in context[
-            "nota"
-        ].editable_fields_for(self.request.user)
+        context["pode_confirmar"] = True
         return context
 
     def post(self, request, *args, **kwargs):
-        nota = self.get_object()
-
-        if "confirmed_by" not in nota.editable_fields_for(request.user):
-            raise PermissionDenied("Você não pode confirmar esta evolução.")
-
-        nota.confirmed_by = request.user
-        nota.confirmed_at = timezone.now()
-        nota.save(update_fields=["confirmed_by", "confirmed_at"])
-        messages.success(request, "Evolução confirmada com sucesso.")
+        # MOCK (a pedido do front, validação de 12/09): não persiste nada
+        # ainda. Só simula o sucesso pra validar o clique/redirecionamento.
+        self.get_object()
+        messages.success(request, "Evolução confirmada (simulado).")
         return redirect("teacher:prontuarios")
+
+        # --- lógica real, comentada até o fluxo ser validado com produto ---
+        # nota = self.get_object()
+        # if "confirmed_by" not in nota.editable_fields_for(request.user):
+        #     raise PermissionDenied("Você não pode confirmar esta evolução.")
+        # nota.confirmed_by = request.user
+        # nota.confirmed_at = timezone.now()
+        # nota.save(update_fields=["confirmed_by", "confirmed_at"])
+        # messages.success(request, "Evolução confirmada com sucesso.")
+        # return redirect("teacher:prontuarios")
 
 
 # ---------------------------------------------------------------------------
@@ -445,14 +461,20 @@ class PresencaFeedbackView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
             for registro in Attendance.objects.filter(student__in=alunos, date=hoje)
         }
 
+        # Filtro por aluno (a pedido do front, validação de 12/09): quando
+        # um aluno é escolhido no <select>, a tabela passa a mostrar só a
+        # linha dele, em vez de todos os orientandos.
+        aluno_id = self.request.GET.get("aluno", "").strip()
+        aluno_selecionado = alunos.filter(pk=aluno_id).first() if aluno_id else None
+        alunos_para_tabela = [aluno_selecionado] if aluno_selecionado else alunos
+
         context["linhas"] = [
             {"aluno": aluno, "presenca": presencas_hoje.get(aluno.pk)}
-            for aluno in alunos
+            for aluno in alunos_para_tabela
         ]
         context["hoje"] = hoje
-
-        aluno_id = self.request.GET.get("aluno")
-        aluno_selecionado = alunos.filter(pk=aluno_id).first() if aluno_id else None
+        context["alunos_para_filtro"] = alunos
+        context["aluno_filtro_id"] = aluno_id
 
         if aluno_selecionado:
             context["aluno_selecionado"] = aluno_selecionado
