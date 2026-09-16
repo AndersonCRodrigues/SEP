@@ -2,8 +2,10 @@ from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.db.models import Q
 from django.utils import timezone
+from core.fields import collapse_spaces
 from core.managers import CustomUserManager
 from core.models import CustomUser
+from core.validators import validate_letters
 from core.permissions import ALL, BusinessRulesMixin, RoleScopedQuerySet
 from teacher.models import Teacher
 from core.constants import VISIBLE_TO_AUTHOR
@@ -16,9 +18,7 @@ Role = CustomUser.Role
 def with_open_case(prefix="", **lookups):
     caminho = f"{prefix}assignment_history"
     filtros = {f"{caminho}__end_date__isnull": True}
-    filtros.update(
-        {f"{caminho}__{campo}": valor for campo, valor in lookups.items()}
-    )
+    filtros.update({f"{caminho}__{campo}": valor for campo, valor in lookups.items()})
     return Q(**filtros)
 
 
@@ -43,11 +43,10 @@ class PatientQuerySet(RoleScopedQuerySet):
 
 # Manager customizado estendendo o CustomUserManager mantido do merge
 class PatientManager(CustomUserManager):
-
     def create_with_credentials(self, raw_data, created_by_user=None, commit=True):
         senha_temporaria = generate_temporary_password()
 
-        raw_data = {**raw_data, "must_change_password": True}
+        raw_data = {**raw_data, "must_change_password": True}  # nosec B105
         paciente = self.model(**raw_data)
         paciente.set_password(senha_temporaria)
 
@@ -128,15 +127,48 @@ class Patient(BusinessRulesMixin, CustomUser):
         verbose_name="Professores responsáveis",
     )
 
-    created_at = models.DateTimeField(
-        auto_now_add=True, verbose_name="Criado em"
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Criado em")
+
+    is_accompanied = models.BooleanField(
+        null=True, blank=True, verbose_name="Está acompanhado"
+    )
+
+    guardian_first_name = models.CharField(
+        max_length=150,
+        blank=True,
+        validators=[validate_letters],
+        verbose_name="Nome do responsável",
+    )
+
+    guardian_last_name = models.CharField(
+        max_length=150,
+        blank=True,
+        validators=[validate_letters],
+        verbose_name="Sobrenome do responsável",
+    )
+
+    guardian_relationship = models.CharField(
+        max_length=100,
+        blank=True,
+        validators=[validate_letters],
+        verbose_name="Grau de parentesco",
+    )
+
+    registered_by = models.ForeignKey(
+        CustomUser,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="registered_patients",
+        verbose_name="Cadastrado por",
     )
 
     # Usa o PatientManager preservando o PatientQuerySet do merge
     objects = PatientManager.from_queryset(PatientQuerySet)()
 
     REGISTRATION_FIELDS = (
-        "nome_completo",
+        "first_name",
+        "last_name",
         "cpf",
         "data_nascimento",
         "social_name",
@@ -188,9 +220,7 @@ class Patient(BusinessRulesMixin, CustomUser):
         if new_status == self.flow_status:
             return False
 
-        if new_status not in self.ALLOWED_TRANSITIONS.get(
-            self.flow_status, ()
-        ):
+        if new_status not in self.ALLOWED_TRANSITIONS.get(self.flow_status, ()):
             atual = self.get_flow_status_display() or "sem fluxo"
             destino = self.FlowStatus(new_status).label
             raise ValidationError(
@@ -209,6 +239,12 @@ class Patient(BusinessRulesMixin, CustomUser):
 
     def enforce_role(self):
         self.role = CustomUser.Role.PACIENTE
+
+    def normalize(self):
+        super().normalize()
+        self.guardian_first_name = collapse_spaces(self.guardian_first_name)
+        self.guardian_last_name = collapse_spaces(self.guardian_last_name)
+        self.guardian_relationship = collapse_spaces(self.guardian_relationship)
 
     def __str__(self):
         return self.nome_completo

@@ -13,8 +13,7 @@ def _build_slot_tag(tag_name, template_path):
 
         def render(self, context):
             resolved = {
-                key: value.resolve(context)
-                for key, value in self.kwargs.items()
+                key: value.resolve(context) for key, value in self.kwargs.items()
             }
             body = self.nodelist.render(context)
             return render_to_string(template_path, {**resolved, "body": body})
@@ -35,3 +34,4 @@ def _build_slot_tag(tag_name, template_path):
 register.tag("card", _build_slot_tag("card", "components/_card.html"))
 register.tag("section", _build_slot_tag("section", "components/_section.html"))
 register.tag("modal", _build_slot_tag("modal", "components/_modal.html"))
+register.tag("data_table", _build_slot_tag("data_table", "components/_data_table.html"))

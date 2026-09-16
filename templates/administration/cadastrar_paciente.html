@@ -1,27 +1,132 @@
 {% extends "base.html" %}
-{% load crispy_forms_tags %}
 
-{% block title %}Cadastrar Paciente | Sistema SEP{% endblock %}
+{% block title %}Cadastro de paciente{% endblock %}
+
+{% block title_suffix %} | SEP Maricá{% endblock %}
+
+{% block site_header %}{% endblock %}
+
+{% block page_header %}{% endblock %}
 
 {% block content %}
-<header class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="h3 mb-0">Cadastrar Paciente</h1>
-    <a href="{% url 'administration:painel' %}" class="btn btn-outline-secondary btn-sm">
-        <i class="bi bi-arrow-left"></i> Voltar para o Painel
-    </a>
-</header>
+<div class="registration">
+  <aside class="registration-progress" aria-label="Progresso do cadastro">
+    <p class="registration-brand">
+      <span class="registration-icon" aria-hidden="true"></span>
+      <strong class="registration-name">Cadastro</strong>
+      <span class="registration-subtitle">Ficha do paciente</span>
+    </p>
 
-<div class="row">
-    <div class="col-12 col-lg-8">
-        <section class="card">
-            <div class="card-body">
-                <form method="post">
-                    {% csrf_token %}
-                    {{ form|crispy }}
-                    <button type="submit" class="btn btn-primary">Cadastrar</button>
-                </form>
-            </div>
-        </section>
-    </div>
+    <ol class="progress-sections">
+      {% for section in sections %}
+      <li
+        class="progress-section progress-{{ section.state }}"
+        {% if section.state == "current" %}aria-current="step"{% endif %}
+      >
+        <span class="progress-name">{{ section.name }}</span>
+        <span class="visually-hidden">
+          {% if section.state == "done" %}concluída{% elif section.state == "current" %}em andamento{% else %}pendente{% endif %}
+        </span>
+      </li>
+      {% endfor %}
+    </ol>
+  </aside>
+
+  <section class="question" aria-labelledby="question-title">
+    <p class="question-counter">{{ step.section }} · pergunta {{ number }} de {{ total }}</p>
+
+    <h1 id="question-title" class="question-title">
+      <span class="question-icon question-icon-{{ step.icon }}" aria-hidden="true"></span>
+      {{ step.title }}
+    </h1>
+
+    <form class="question-form" method="post" novalidate>
+      {% csrf_token %}
+
+      {% for field in form %}
+      <div class="question-field question-field-{{ field.name }}">
+        <label
+          for="{{ field.id_for_label }}"
+          {% if form.fields|length == 1 %}class="visually-hidden"{% endif %}
+        >{{ field.label }}</label>
+        {{ field }}
+        {{ field.errors }}
+      </div>
+      {% endfor %}
+
+      <div class="question-actions">
+        <button
+          type="submit"
+          name="action"
+          value="back"
+          class="question-back"
+          formnovalidate
+          {% if is_first %}disabled{% endif %}
+        >Voltar</button>
+        <button type="submit" name="action" value="next" class="question-next">Avançar</button>
+      </div>
+    </form>
+  </section>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  (function () {
+    function formatCpf(digits) {
+      return digits
+        .replace(/^(\d{3})(\d)/, "$1.$2")
+        .replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
+        .replace(/^(\d{3})\.(\d{3})\.(\d{3})(\d)/, "$1.$2.$3-$4");
+    }
+
+    function formatCep(digits) {
+      return digits.replace(/^(\d{5})(\d)/, "$1-$2");
+    }
+
+    const masks = {
+      cpf: { length: 11, format: formatCpf },
+      cep: { length: 8, format: formatCep },
+    };
+
+    const forbidden = {
+      digits: /\D/g,
+      letters: /[^\p{L} '’-]/gu,
+    };
+
+    document.querySelectorAll("[data-mask]").forEach(function (input) {
+      const mask = masks[input.dataset.mask];
+      function apply() {
+        input.value = mask.format(input.value.replace(/\D/g, "").slice(0, mask.length));
+      }
+      input.addEventListener("input", apply);
+      apply();
+    });
+
+    document.querySelectorAll("[data-only]").forEach(function (input) {
+      const pattern = forbidden[input.dataset.only];
+      input.addEventListener("input", function () {
+        const allowed = input.value.replace(pattern, "");
+        if (allowed !== input.value) {
+          input.value = allowed;
+        }
+      });
+    });
+
+    const noNumber = document.getElementById("id_no_number");
+    const number = document.getElementById("id_numero");
+    if (noNumber && number) {
+      function syncNumber() {
+        number.disabled = noNumber.checked;
+        if (noNumber.checked) {
+          number.value = "S/N";
+        } else if (number.value === "S/N") {
+          number.value = "";
+        }
+      }
+      noNumber.addEventListener("change", syncNumber);
+      syncNumber();
+    }
+  })();
+</script>
 {% endblock %}

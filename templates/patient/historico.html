@@ -1,0 +1,47 @@
+{% extends "patient/base_patient.html" %}
+{% load components %}
+
+{% block title %}Histórico de sessões{% endblock %}
+
+{% block content %}
+<h1 class="page-banner">Histórico de sessões</h1>
+
+{% if history_error %}
+{% include "components/error_state.html" with message=history_error retry_url=request.path %}
+{% else %}
+{% data_table columns=column_labels label="Histórico de sessões" %}
+{% for row in sessions %}
+<tr>
+  <td>
+    <a class="session-link" href="{% url 'patient:historico_detalhe' row.pk %}">
+      <span class="visually-hidden">Ver detalhes da sessão de </span>
+      <time datetime="{{ row.when|date:'c' }}">{{ row.when_label }}</time>
+    </a>
+  </td>
+  <td>{{ row.attendant|default:"A definir" }}</td>
+  <td>{% include "components/badge.html" with label=row.label level=row.level %}</td>
+</tr>
+{% empty %}
+<tr>
+  <td colspan="{{ column_labels|length }}">
+    {% include "components/empty_state.html" with message="Nenhuma sessão no seu histórico ainda." %}
+  </td>
+</tr>
+{% endfor %}
+{% enddata_table %}
+
+{% if page.paginator.num_pages > 1 %}
+<nav class="pagination-nav" aria-label="Páginas do histórico">
+  {% if page.has_previous %}
+  <a class="pagination-previous" href="?pagina={{ page.previous_page_number }}" rel="prev">Anterior</a>
+  {% endif %}
+  <span class="pagination-current" aria-current="page">
+    Página {{ page.number }} de {{ page.paginator.num_pages }}
+  </span>
+  {% if page.has_next %}
+  <a class="pagination-next" href="?pagina={{ page.next_page_number }}" rel="next">Próxima</a>
+  {% endif %}
+</nav>
+{% endif %}
+{% endif %}
+{% endblock %}

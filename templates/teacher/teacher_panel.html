@@ -10,7 +10,7 @@
             {% if alunos_vinculados %}
             <ul class="list-group list-group-flush">
                 {% for aluno in alunos_vinculados %}
-                <li class="list-group-item px-0">{{ aluno.nome_completo }} — {{ aluno.matricula }}</li>
+                <li class="list-group-item px-0">{{ aluno.get_full_name }} — {{ aluno.matricula }}</li>
                 {% endfor %}
             </ul>
             {% else %}

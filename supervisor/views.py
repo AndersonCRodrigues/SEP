@@ -2,7 +2,7 @@ from itertools import chain
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
-from django.shortcuts import render, redirect,get_object_or_404
+from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.views.generic import ListView, TemplateView, CreateView, UpdateView
@@ -27,7 +27,7 @@ def usuarios_alunos_e_professores():
     professores = Teacher.objects.filter(
         role__in=[CustomUser.Role.PROFESSOR, CustomUser.Role.SUPERVISOR]
     ).prefetch_related("acting_areas")
-    return sorted(chain(alunos, professores), key=lambda u: u.nome_completo)
+    return sorted(chain(alunos, professores), key=lambda u: u.get_full_name())
 
 
 class PainelSupervisorView(GroupRequiredMixin, ListView):
@@ -80,7 +80,7 @@ def cadastrar_supervisor(request):
 
             messages.success(
                 request,
-                f"Supervisor {user.nome_completo} cadastrado e e-mail enviado com sucesso!",
+                f"Supervisor {user.get_full_name()} cadastrado e e-mail enviado com sucesso!",
             )
             return redirect("superadmin:painel")
     else:
@@ -121,7 +121,7 @@ class PerfilSupervisorView(GroupRequiredMixin, UpdateView):
 
     def get_object(self, queryset=None):
         user = self.request.user
-        
+
         try:
             return Teacher.objects.get(pk=user.pk)
         except Teacher.DoesNotExist:
