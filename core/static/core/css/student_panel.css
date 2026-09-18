@@ -1,0 +1,95 @@
+/* ═══════════════════════════════════════════
+   student_panel.css  —  Prontuários e evolução
+   ═══════════════════════════════════════════ */
+
+:root {
+  --sep-maroon: #6D1D20;
+}
+
+/* Título superior arredondado */
+.panel-title-pill {
+  background-color: var(--sep-maroon);
+  color: #FFFFFF;
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  text-align: center;
+  border-radius: 40px;
+  padding: 10px 0;
+  width: 100%;
+  max-width: 950px;
+  margin: 0 auto 40px auto;
+}
+
+/* Container de registros */
+.records-wrapper {
+  max-width: 950px;
+  margin: 0 auto;
+}
+
+/* Cabeçalhos (Pacientes, Última evolução) */
+.records-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr 100px;
+  padding: 0 32px 12px 32px;
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #000000;
+}
+
+/* Caixa com borda */
+.records-container {
+  background: #FFFFFF;
+  border: 1px solid #A59C97;
+  border-radius: 20px;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Linha de registro */
+.record-row {
+  background-color: #E6E6E6;
+  border-radius: 20px;
+  padding: 14px 20px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 100px;
+  align-items: center;
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #000000;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.record-row:hover {
+  background-color: #D4D4D4;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+/* Badges */
+.badge-pill {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 0;
+  border-radius: 20px;
+  font-family: 'Museo Sans', sans-serif;
+  text-align: center;
+  display: inline-block;
+  white-space: nowrap;
+  min-width: 90px;
+}
+
+.badge-green {
+  background-color: #3AA600;
+  color: #FFFFFF;
+}
+
+.badge-red {
+  background-color: #B43B3B;
+  color: #FFFFFF;
+}

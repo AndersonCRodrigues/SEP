@@ -1,0 +1,117 @@
+/* ═══════════════════════════════════════════════
+   student_feedback.css  —  Feedbacks recebidos
+   ═══════════════════════════════════════════════ */
+
+:root {
+  --sep-maroon: #6D1D20;
+}
+
+/* Título superior arredondado */
+.feedback-title-pill {
+  background-color: var(--sep-maroon);
+  color: #FFFFFF;
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  text-align: center;
+  border-radius: 40px;
+  padding: 12px 0;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto 36px auto;
+}
+
+/* Container de registros */
+.feedback-wrapper {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* Cabeçalhos */
+.feedback-header {
+  display: grid;
+  grid-template-columns: 2fr 1.5fr 1.5fr 90px;
+  padding: 0 28px 10px 28px;
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #000000;
+}
+
+/* Caixa com borda */
+.feedback-container {
+  background: #FFFFFF;
+  border: 1px solid #A59C97;
+  border-radius: 20px;
+  padding: 18px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Linha de registro */
+.feedback-row {
+  background-color: #E6E6E6;
+  border-radius: 20px;
+  padding: 14px 20px;
+  display: grid;
+  grid-template-columns: 2fr 1.5fr 1.5fr 90px;
+  align-items: center;
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #000000;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.feedback-row:hover {
+  background-color: #D4D4D4;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+/* Badge Novo — laranja */
+.badge-novo {
+  background-color: #D97706;
+  color: #FFFFFF;
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 5px 0;
+  border-radius: 20px;
+  text-align: center;
+  display: inline-block;
+  white-space: nowrap;
+  min-width: 90px;
+}
+
+/* Badge Lida — verde */
+.badge-lida {
+  background-color: #3AA600;
+  color: #FFFFFF;
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 5px 0;
+  border-radius: 20px;
+  text-align: center;
+  display: inline-block;
+  white-space: nowrap;
+  min-width: 90px;
+}
+
+/* Badge Editada — vermelho */
+.badge-editada {
+  background-color: #B43B3B;
+  color: #FFFFFF;
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 5px 0;
+  border-radius: 20px;
+  text-align: center;
+  display: inline-block;
+  white-space: nowrap;
+  min-width: 90px;
+}

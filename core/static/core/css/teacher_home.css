@@ -1,0 +1,241 @@
+/* ═══════════════════════════════════════════
+   teacher_home.css  —  Dashboard do Professor
+   ═══════════════════════════════════════════ */
+
+:root {
+  --sep-maroon: #6D1D20;
+  --sep-black: #000000;
+  --sep-gray-card: #D9D9D9;
+}
+
+/* ── Saudação ── */
+.teacher-greeting {
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--sep-maroon);
+  margin-bottom: 2px;
+}
+
+.teacher-breadcrumb {
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--sep-maroon);
+  margin: 0 0 1.5rem 0;
+}
+
+/* ── Cards de estatística ── */
+.stat-card {
+  background-color: var(--sep-maroon);
+  color: #FFFFFF;
+  border-radius: 16px;
+  padding: 20px 16px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 130px;
+}
+
+.stat-label {
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  line-height: 1.2;
+}
+
+.stat-number {
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 42px;
+  font-weight: 700;
+  display: block;
+  line-height: 1;
+}
+
+/* ── Título de seção ── */
+.section-title {
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--sep-maroon);
+}
+
+/* ── Cards de atividade ── */
+.activity-card {
+  background: #E1E1E1;
+  border-radius: 16px;
+  padding: 20px 22px 12px 22px;
+  margin-bottom: 20px;
+}
+
+.activity-type {
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--sep-maroon);
+}
+
+.activity-title {
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #000000;
+  margin: 10px 0 2px;
+}
+
+.activity-sub {
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  color: #000000;
+  margin: 0 0 28px 0;
+}
+
+.activity-divider {
+  border-top: 1px solid var(--sep-maroon);
+  opacity: 1;
+  margin: 0 0 8px 0;
+}
+
+.activity-chevron {
+  color: var(--sep-maroon);
+  font-size: 18px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+/* Badges */
+.badge-revisar  { background: #E2ADAD; color: var(--sep-maroon); font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 20px; font-family: 'Museo Sans', sans-serif; white-space: nowrap; }
+.badge-concluido{ background: #A9D18E; color: #2D6A2D;            font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 20px; font-family: 'Museo Sans', sans-serif; white-space: nowrap; }
+.badge-enviar   { background: #F5C6A0; color: #7B3D00;            font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 20px; font-family: 'Museo Sans', sans-serif; white-space: nowrap; }
+
+/* ── Calendário ── */
+
+.cal-title-btn {
+  background-color: var(--sep-maroon);
+  color: #FFFFFF;
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  text-align: center;
+  border-radius: 20px;
+  padding: 8px 48px;
+  display: inline-block;
+}
+
+.calendar-card {
+  background: #FFFFFF;
+  border: 2px solid #A59C97;
+  border-radius: 28px;
+  padding: 20px 24px;
+  width: 100%;
+  max-width: 340px;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cal-nav-btn {
+  background: none;
+  border: none;
+  font-size: 0.9rem;
+  color: #555;
+  padding: 4px 8px;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: background 0.15s;
+}
+.cal-nav-btn:hover { background: #f0f0f0; }
+
+.cal-select {
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 2px 6px;
+  font-size: 0.75rem;
+  color: #333;
+  background: #fff;
+  cursor: pointer;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  text-align: center;
+}
+
+.cal-header {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #aaa;
+  padding: 2px 0 6px;
+}
+
+.cal-day {
+  font-size: 0.75rem;
+  padding: 3px 2px 2px;
+  color: #333;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-height: 28px;
+  border-radius: 6px;
+}
+
+.cal-highlight-dark {
+  background-color: #2d2d2d;
+  color: #fff !important;
+  border-radius: 6px;
+  font-weight: 700;
+}
+
+.cal-highlight-light {
+  background-color: #f3f3f3;
+  color: #333;
+  border-radius: 6px;
+  font-weight: 700;
+}
+
+.cal-empty { min-height: 28px; }
+
+.cal-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dot-green  { background: #3AA600; }
+.dot-red    { background: #BE4A4F; }
+.dot-orange { background: #DB8D10; }
+
+.cal-legend-pill {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  background: #FFFFFF;
+  border: 1px solid #CCC;
+  border-radius: 20px;
+  padding: 5px 16px;
+  width: max-content;
+  margin: 0 auto;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  color: #4A4A4A;
+}
+.legend-item.green  { color: #3AA600; }
+.legend-item.red    { color: #BE4A4F; }
+.legend-item.orange { color: #DB8D10; }
