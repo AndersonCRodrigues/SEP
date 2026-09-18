@@ -1,19 +1,168 @@
 {% extends "home.html" %}
+{% load static %}
 
-{% block home_title %}Área do Professor{% endblock %}
+{% block extra_css %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'core/css/teacher_home.css' %}">
+{% endblock %}
+
+{% block home_title %}Página inicial - Professor{% endblock %}
 
 {% block home_content %}
-<div class="col-12 col-md-6">
-    <div class="card h-100">
-        <div class="card-body">
-            <h2 class="h5 card-title">Área do Professor</h2>
-            <p class="card-text">Acompanhamento de estudantes, diários e apontamentos.</p>
-            <div class="d-flex flex-wrap gap-2">
-                <a href="{% url 'teacher:painel' %}" class="btn btn-primary">Acessar Painel do Professor</a>
-                <a href="{% url 'teacher:perfil' %}" class="btn btn-outline-primary">Meu Perfil</a>
-                <button type="button" class="btn btn-outline-secondary">Prontuários</button>
-            </div>
-        </div>
+<div class="col-12">
+  {# ── Saudação e breadcrumb ── #}
+  <h1 class="teacher-greeting">Olá, professor!</h1>
+  <p class="teacher-breadcrumb">Página inicial - Professor</p>
+
+  {# ── Cards de estatística ── #}
+  <div class="row g-2 mb-4">
+    <div class="col-6 col-md-3">
+      <div class="stat-card">
+        <p class="stat-label">Alunos orientados</p>
+        <span class="stat-number">{{ alunos_orientados|default:"6" }}</span>
+      </div>
     </div>
+    <div class="col-6 col-md-3">
+      <div class="stat-card">
+        <p class="stat-label">Pacientes ativos</p>
+        <span class="stat-number">{{ pacientes_ativos|default:"21" }}</span>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="stat-card">
+        <p class="stat-label">Presença hoje</p>
+        <span class="stat-number">{{ presenca_hoje|default:"5/6" }}</span>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="stat-card">
+        <p class="stat-label">Avaliações pendentes</p>
+        <span class="stat-number">{{ avaliacoes_pendentes|default:"2" }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    {# ── Atividades recentes ── #}
+    <div class="col-12 col-lg-8 mb-4">
+      <h2 class="section-title mb-3">Atividades recentes</h2>
+      
+      {% if atividades %}
+        {% for atividade in atividades %}
+          <!-- Renderizar atividade dinâmica -->
+        {% endfor %}
+      {% else %}
+        {# Placeholder / Mock #}
+        <div class="activity-card">
+          <div class="d-flex justify-content-between align-items-start">
+            <h3 class="activity-type">Triagens</h3>
+            <span class="badge-revisar">Revisar</span>
+          </div>
+          <p class="activity-title">Triagem - Paciente A.S.</p>
+          <p class="activity-sub">Recebida às 14:20</p>
+          <hr class="activity-divider">
+          <div class="text-end"><i class="bi bi-chevron-right activity-chevron"></i></div>
+        </div>
+
+        <div class="activity-card">
+          <div class="d-flex justify-content-between align-items-start">
+            <h3 class="activity-type">Encaminhamento</h3>
+            <span class="badge-concluido">Concluído</span>
+          </div>
+          <p class="activity-title">Encaminhamento concluído</p>
+          <p class="activity-sub">Paciente para Prof. Renata</p>
+          <hr class="activity-divider">
+          <div class="text-end"><i class="bi bi-chevron-right activity-chevron"></i></div>
+        </div>
+
+        <div class="activity-card">
+          <div class="d-flex justify-content-between align-items-start">
+            <h3 class="activity-type">Feedback</h3>
+            <span class="badge-enviar">Enviar</span>
+          </div>
+          <p class="activity-title">Feedback pendente</p>
+          <p class="activity-sub">Sessão de 08/09 aguardando resposta</p>
+          <hr class="activity-divider">
+          <div class="text-end"><i class="bi bi-chevron-right activity-chevron"></i></div>
+        </div>
+      {% endif %}
+    </div>
+
+    {# ── Calendário ── #}
+    <div class="col-12 col-lg-4 d-flex flex-column align-items-center mb-4">
+      <div class="cal-title-btn mb-3">Calendário</div>
+      
+      <div class="calendar-card">
+        <!-- Header: < Month Year > -->
+        <div class="d-flex justify-content-between align-items-center px-2">
+          <button class="cal-nav-btn">&lt;</button>
+          <div class="d-flex gap-2">
+            <select class="cal-select border-0 bg-transparent fw-bold" style="font-size: 1rem;">
+              <option>Sep</option>
+            </select>
+            <select class="cal-select border-0 bg-transparent fw-bold" style="font-size: 1rem;">
+              <option>2025</option>
+            </select>
+          </div>
+          <button class="cal-nav-btn">&gt;</button>
+        </div>
+
+        <!-- Grid -->
+        <div class="calendar-grid mt-2">
+          <!-- Dias da semana -->
+          <div class="cal-header">Su</div>
+          <div class="cal-header">Mo</div>
+          <div class="cal-header">Tu</div>
+          <div class="cal-header">We</div>
+          <div class="cal-header">Th</div>
+          <div class="cal-header">Fr</div>
+          <div class="cal-header">Sa</div>
+
+          <!-- Linha 1 -->
+          <div class="cal-empty"></div>
+          <div class="cal-day">1 <span class="cal-dot dot-red"></span></div>
+          <div class="cal-day">2 <span class="cal-dot dot-red"></span></div>
+          <div class="cal-day">3 <span class="cal-dot dot-green"></span></div>
+          <div class="cal-day">4 <span class="cal-dot dot-green"></span></div>
+          <div class="cal-day">5 <span class="cal-dot dot-red"></span></div>
+          <div class="cal-day">6</div>
+
+          <!-- Linha 2 -->
+          <div class="cal-day">7</div>
+          <div class="cal-day">8 <span class="cal-dot dot-green"></span></div>
+          <div class="cal-day cal-highlight-dark">9 <span class="cal-dot dot-orange"></span></div>
+          <div class="cal-day">10 <span class="cal-dot dot-green"></span></div>
+          <div class="cal-day">11 <span class="cal-dot dot-red"></span></div>
+          <div class="cal-day">12 <span class="cal-dot dot-green"></span></div>
+          <div class="cal-day cal-highlight-dark">13</div>
+
+          <!-- Linha 3 -->
+          <div class="cal-day">14</div>
+          <div class="cal-day">15 <span class="cal-dot dot-green"></span></div>
+          <div class="cal-day">16 <span class="cal-dot dot-orange"></span></div>
+          <div class="cal-day">17 <span class="cal-dot dot-green"></span></div>
+          <div class="cal-day">18</div>
+          <div class="cal-day">19 <span class="cal-dot dot-green"></span></div>
+          <div class="cal-day">20</div>
+
+          <!-- Linha 4 -->
+          <div class="cal-day">21</div>
+          <div class="cal-day">22 <span class="cal-dot dot-orange"></span></div>
+          <div class="cal-day">23 <span class="cal-dot dot-orange"></span></div>
+          <div class="cal-day">24 <span class="cal-dot dot-orange"></span></div>
+          <div class="cal-day">25</div>
+          <div class="cal-day">26</div>
+          <div class="cal-day">27</div>
+        </div>
+
+        <!-- Legenda -->
+        <div class="cal-legend-pill mt-3">
+          <div class="legend-item green"><span class="cal-dot dot-green"></span> Disponível</div>
+          <div class="legend-item red"><span class="cal-dot dot-red"></span> Agendado</div>
+          <div class="legend-item orange"><span class="cal-dot dot-orange"></span> Pendente</div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}

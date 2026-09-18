@@ -5,13 +5,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{% block title %}Sistema{% endblock %}</title>
+
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
       rel="stylesheet"
       integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
       crossorigin="anonymous"
     />
-
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
@@ -19,72 +19,252 @@
       crossorigin="anonymous"
     />
 
+    <style>
+      :root { --sep-maroon: #6D1D20; --sep-maroon-dark: #591619; }
+
+      /* ── Navbar ── */
+      .sep-navbar {
+        background-color: var(--sep-maroon);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        height: 75px;
+        padding: 0;
+      }
+      .sep-navbar .navbar-brand {
+        color: #fff;
+        font-weight: 700;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .sep-navbar .navbar-brand img {
+        height: 34px;
+        width: auto;
+      }
+      .sep-navbar .nav-link {
+        color: rgba(255,255,255,0.88) !important;
+        font-size: 0.88rem;
+        font-weight: 500;
+        padding: 0.5rem 0.75rem !important;
+        border-radius: 4px;
+        transition: color 0.15s, background 0.15s;
+      }
+      .sep-navbar .nav-link:hover,
+      .sep-navbar .nav-link.active {
+        color: #fff !important;
+        background-color: rgba(255,255,255,0.12);
+      }
+      /* Botões de ícone (direita) */
+      .sep-navbar .nav-icon-btn {
+        color: rgba(255,255,255,0.88);
+        background: rgba(255,255,255,0.12);
+        border: 1px solid rgba(255,255,255,0.25);
+        border-radius: 8px;
+        width: 36px;
+        height: 36px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        text-decoration: none;
+        transition: background 0.15s;
+      }
+      .sep-navbar .nav-icon-btn:hover {
+        background: rgba(255,255,255,0.22);
+        color: #fff;
+      }
+      /* ── Footer ── */
+      .sep-footer {
+        background-color: var(--sep-maroon);
+        padding: 14px 0;
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        z-index: 1030; /* Fica acima do conteúdo */
+      }
+      body {
+        padding-bottom: 60px; /* Espaço para o footer não cobrir o conteúdo */
+      }
+    </style>
+
     {% block extra_css %}{% endblock %}
   </head>
-  <body class="d-flex flex-column min-vh-100">
-    <nav
-      class="navbar navbar-expand-lg bg-primary sticky-top"
-      data-bs-theme="dark"
-    >
-      <div class="container-fluid">
-        <a class="navbar-brand" href="{% url 'home_redirect' %}">
-          <i class="bi bi-mortarboard-fill"></i> Sistema SEP
+
+  <body class="d-flex flex-column min-vh-100 bg-white">
+
+    {# ════════════════ NAVBAR ════════════════ #}
+    <nav class="sep-navbar navbar navbar-expand-lg sticky-top" data-bs-theme="dark">
+      <div class="container-fluid px-4 px-lg-5 h-100 d-flex align-items-center">
+
+        {# Brand / Logo #}
+        <a class="navbar-brand d-flex flex-column align-items-start text-decoration-none" href="{% url 'home_redirect' %}" style="gap: 2px; padding: 0; margin-right: 2rem;">
+          <span style="font-family: 'Museo Sans', sans-serif; font-weight: 700; font-size: 20px; color: #FFFFFF; line-height: 1;">SEP Maricá</span>
+          <img src="{% static 'core/images/logo-home-aluno-vassouras.png' %}" alt="Univassouras" style="height: 24px; width: auto; object-fit: contain;">
         </a>
 
+        {# Toggle mobile #}
         <button
-          class="navbar-toggler"
+          class="navbar-toggler border-0"
           type="button"
           data-bs-toggle="collapse"
-          data-bs-target="#navbarContent"
-          aria-controls="navbarContent"
+          data-bs-target="#navbarMain"
+          aria-controls="navbarMain"
           aria-expanded="false"
           aria-label="Alternar navegação"
         >
           <span class="navbar-toggler-icon"></span>
         </button>
 
-        <div class="collapse navbar-collapse" id="navbarContent">
-          <ul class="navbar-nav ms-auto align-items-lg-center gap-2">
-            {% if request.user.is_authenticated %}
+        <div class="collapse navbar-collapse" id="navbarMain">
+
+          {# Links centrais — por cargo #}
+          {% if request.user.is_authenticated %}
+          <ul class="navbar-nav mx-auto gap-1">
+
+            {% if request.user.role == 'AL' %}
             <li class="nav-item">
-              <span class="navbar-text">
-                Bem-vindo, {{ request.user.nome_completo }}
-              </span>
+              <a class="nav-link {% if request.resolver_match.view_name == 'students:home' %}active{% endif %}"
+                 href="{% url 'students:home' %}">Página inicial</a>
             </li>
             <li class="nav-item">
-              <form method="post" action="{% url 'logout' %}" class="d-inline">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-outline-light btn-sm">
-                  <i class="bi bi-box-arrow-right"></i> Sair
-                </button>
-              </form>
-            </li>
-            {% else %}
-            <li class="nav-item">
-              <span class="navbar-text">Bem-vindo, Visitante</span>
+              <a class="nav-link {% if 'students:painel' in request.resolver_match.view_name %}active{% endif %}"
+                 href="{% url 'students:painel' %}">Prontuários</a>
             </li>
             <li class="nav-item">
-              <a href="{% url 'login' %}" class="btn btn-outline-light btn-sm">
-                <i class="bi bi-box-arrow-in-right"></i> Entrar
-              </a>
+              <a class="nav-link {% if request.resolver_match.view_name == 'students:triagens' %}active{% endif %}"
+                 href="{% url 'students:triagens' %}">Triagens</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link {% if request.resolver_match.view_name == 'students:feedbacks' %}active{% endif %}"
+                 href="{% url 'students:feedbacks' %}">Feedbacks</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link {% if request.resolver_match.view_name == 'students:encaminhamentos' %}active{% endif %}"
+                 href="{% url 'students:encaminhamentos' %}">Encaminhamentos</a>
             </li>
             {% endif %}
+
+            {% if request.user.role == 'SV' %}
+            <li class="nav-item">
+              <a class="nav-link {% if request.resolver_match.view_name == 'supervisor:home' %}active{% endif %}"
+                 href="{% url 'supervisor:home' %}">Página Inicial</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'supervisor:painel' %}">Painel</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'supervisor:listar_usuarios' %}">Usuários</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'supervisor:areas' %}">Áreas</a>
+            </li>
+            {% endif %}
+
+            {% if request.user.role == 'PR' %}
+            <li class="nav-item">
+              <a class="nav-link {% if request.resolver_match.view_name == 'teacher:home' %}active{% endif %}"
+                 href="{% url 'teacher:home' %}">Página inicial</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'teacher:painel' %}">Meus alunos</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">Prontuários</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">Presença</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">Avaliações</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">Área de atuação</a>
+            </li>
+            {% endif %}
+
+            {% if request.user.role == 'AD' %}
+            <li class="nav-item">
+              <a class="nav-link {% if request.resolver_match.view_name == 'administration:home' %}active{% endif %}"
+                 href="{% url 'administration:home' %}">Página Inicial</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'administration:painel' %}">Painel</a>
+            </li>
+            {% endif %}
+
+            {% if request.user.role == 'SA' or request.user.is_superuser %}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'superadmin:home' %}">Página Inicial</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'superadmin:painel' %}">Painel Global</a>
+            </li>
+            {% endif %}
+
+            {% if request.user.role == 'PA' %}
+            <li class="nav-item">
+              <a class="nav-link {% if request.resolver_match.view_name == 'patient:home' %}active{% endif %}"
+                 href="{% url 'patient:home' %}">Página Inicial</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'patient:edit_data' %}">Meus Dados</a>
+            </li>
+            {% endif %}
+
           </ul>
+
+          {# Ícones à direita #}
+          <div class="d-flex align-items-center gap-2 ms-2">
+            <!-- Mensagens -->
+            <a href="#" class="btn d-flex justify-content-center align-items-center" style="width: 46px; height: 46px; border-radius: 14px; background-color: rgba(255,255,255,0.05); color: #FFFFFF; border: 1px solid rgba(255,255,255,0.3); padding: 0; transition: 0.2s;">
+              <i class="bi bi-envelope" style="font-size: 20px;"></i>
+            </a>
+
+            <!-- Notificações -->
+            <a href="#" class="btn d-flex justify-content-center align-items-center" style="width: 46px; height: 46px; border-radius: 14px; background-color: rgba(255,255,255,0.05); color: #FFFFFF; border: 1px solid rgba(255,255,255,0.3); padding: 0; transition: 0.2s;">
+              <i class="bi bi-bell" style="font-size: 20px;"></i>
+            </a>
+
+            <!-- Perfil / Dropdown -->
+            <div class="dropdown">
+              <button class="btn d-flex justify-content-center align-items-center" type="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false" style="width: 46px; height: 46px; border-radius: 14px; background-color: rgba(255,255,255,0.15); color: #FFFFFF; border: none; padding: 0; transition: 0.2s;">
+                <i class="bi bi-person" style="font-size: 24px;"></i>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end shadow-sm mt-1">
+                <li>
+                  <span class="dropdown-item-text small text-muted">
+                    {{ request.user.nome_completo }}
+                  </span>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                  <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="dropdown-item text-danger">
+                      <i class="bi bi-box-arrow-right me-2"></i>Sair
+                    </button>
+                  </form>
+                </li>
+              </ul>
+            </div>
+          </div>
+          {% endif %}
+
         </div>
       </div>
     </nav>
 
-    <div class="container-fluid flex-grow-1">
-      <div class="row h-100">
-        {% if request.user.is_authenticated %}
-        <aside class="col-12 col-md-3 col-lg-2 bg-light border-end p-3">
-          {% include "partials/_sidebar.html" %}
-        </aside>
-        {% endif %}
-
-        <main class="col py-4">{% block content %}{% endblock %}</main>
+    {# ════════════════ CONTEÚDO PRINCIPAL ════════════════ #}
+    <main class="flex-grow-1">
+      <div class="container-fluid py-4 px-4">
+        {% block content %}{% endblock %}
       </div>
-    </div>
+    </main>
+
+    {# ════════════════ FOOTER ════════════════ #}
+    <footer class="sep-footer d-flex justify-content-center align-items-center">
+      <img src="{% static 'core/images/logo-home-aluno-vassouras-rodape.png' %}" alt="Univassouras" style="height: 28px; margin: 0;">
+    </footer>
 
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"

@@ -1,0 +1,95 @@
+{% extends "home.html" %}
+{% load static %}
+
+{% block extra_css %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'core/css/student_triage.css' %}">
+{% endblock %}
+
+{% block home_title %}Triagens a realizar{% endblock %}
+
+{% block home_content %}
+<div class="col-12 mt-4 mb-5">
+
+  <div class="triage-title-pill">
+    Triagens a realizar
+  </div>
+
+  <div class="triage-wrapper">
+    <div class="triage-header">
+      <div>Nome do paciente:</div>
+      <div>Encaminhado por:</div>
+      <div>Data do encaminhamento:</div>
+      <div></div>
+    </div>
+
+    <div class="triage-container">
+
+      {% if triagens %}
+        {% for triagem in triagens %}
+        <div class="triage-row">
+          <div>{{ triagem.paciente_nome }} #{{ triagem.paciente_id }}</div>
+          <div>{{ triagem.encaminhado_por }}</div>
+          <div>{{ triagem.data_encaminhamento }}</div>
+          <div class="text-end">
+            <a href="#" class="btn-iniciar">Iniciar</a>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        {# Dados mock — substituir por {% for %} quando o backend estiver pronto #}
+        <div class="triage-row">
+          <div>José Santos #9872736</div>
+          <div>Prof.º Jorge Junior</div>
+          <div>24/07/2026 - 11:39h</div>
+          <div class="text-end"><a href="#" class="btn-iniciar">Iniciar</a></div>
+        </div>
+        <div class="triage-row">
+          <div>José Santos #9872736</div>
+          <div>Prof.º Jorge Junior</div>
+          <div>24/07/2026 - 11:39h</div>
+          <div class="text-end"><a href="#" class="btn-iniciar">Iniciar</a></div>
+        </div>
+        <div class="triage-row">
+          <div>José Santos #9872736</div>
+          <div>Prof.º Jorge Junior</div>
+          <div>24/07/2026 - 11:39h</div>
+          <div class="text-end"><a href="#" class="btn-iniciar">Iniciar</a></div>
+        </div>
+        <div class="triage-row">
+          <div>José Santos #9872736</div>
+          <div>Prof.º Jorge Junior</div>
+          <div>24/07/2026 - 11:39h</div>
+          <div class="text-end"><a href="#" class="btn-iniciar">Iniciar</a></div>
+        </div>
+        <div class="triage-row">
+          <div>José Santos #9872736</div>
+          <div>Prof.º Jorge Junior</div>
+          <div>24/07/2026 - 11:39h</div>
+          <div class="text-end"><a href="#" class="btn-iniciar">Iniciar</a></div>
+        </div>
+        <div class="triage-row">
+          <div>José Santos #9872736</div>
+          <div>Prof.º Jorge Junior</div>
+          <div>24/07/2026 - 11:39h</div>
+          <div class="text-end"><a href="#" class="btn-iniciar">Iniciar</a></div>
+        </div>
+        <div class="triage-row">
+          <div>José Santos #9872736</div>
+          <div>Prof.º Jorge Junior</div>
+          <div>24/07/2026 - 11:39h</div>
+          <div class="text-end"><a href="#" class="btn-iniciar">Iniciar</a></div>
+        </div>
+        <div class="triage-row">
+          <div>José Santos #9872736</div>
+          <div>Prof.º Jorge Junior</div>
+          <div>24/07/2026 - 11:39h</div>
+          <div class="text-end"><a href="#" class="btn-iniciar">Iniciar</a></div>
+        </div>
+      {% endif %}
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}

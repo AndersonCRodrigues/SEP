@@ -1,0 +1,69 @@
+{% extends "home.html" %}
+{% load static %}
+
+{% block extra_css %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'core/css/student_referral.css' %}">
+{% endblock %}
+
+{% block home_title %}Encaminhamentos recebidos{% endblock %}
+
+{% block home_content %}
+<div class="col-12 mt-4 mb-5">
+
+  <div class="referral-title-pill">
+    Encaminhamentos recebidos
+  </div>
+
+  <div class="referral-wrapper">
+    <div class="referral-header">
+      <div>Pacientes:</div>
+      <div>Situação</div>
+      <div></div>
+    </div>
+
+    <div class="referral-container">
+
+      {% if encaminhamentos %}
+        {% for enc in encaminhamentos %}
+        <div class="referral-row">
+          <div>{{ enc.paciente_nome }} #{{ enc.paciente_id }}</div>
+          <div>{{ enc.situacao }}</div>
+          <div class="text-end">
+            {% if enc.status == 'ativo' %}
+              <span class="badge-ativo">Ativo</span>
+            {% else %}
+              <span class="badge-pendente">Pendente</span>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        {# Mock — será substituído pelo {% for %} quando o backend estiver pronto #}
+        <div class="referral-row">
+          <div>José Santos #9872736</div>
+          <div>Encaminhado por Supervisor geral</div>
+          <div class="text-end"><span class="badge-ativo">Ativo</span></div>
+        </div>
+        <div class="referral-row">
+          <div>Camila Duarte #4471736</div>
+          <div>Aguardando confirmação</div>
+          <div class="text-end"><span class="badge-pendente">Pendente</span></div>
+        </div>
+        <div class="referral-row">
+          <div>Rafael Nunes #3390214</div>
+          <div>Aguardando confirmação</div>
+          <div class="text-end"><span class="badge-pendente">Pendente</span></div>
+        </div>
+        <div class="referral-row">
+          <div>Ana Beatriz #5528871</div>
+          <div>Encaminhado por Supervisor geral</div>
+          <div class="text-end"><span class="badge-ativo">Ativo</span></div>
+        </div>
+      {% endif %}
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}

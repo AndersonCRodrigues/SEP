@@ -66,3 +66,15 @@ class MeuProfessorView(LoginRequiredMixin, TemplateView):
 
 class PainelEstudanteView(LoginRequiredMixin, TemplateView):
     template_name = "student/student_panel.html"
+
+
+class TriagemAlunoView(LoginRequiredMixin, TemplateView):
+    template_name = "student/student_triage.html"
+
+
+class EncaminhamentosAlunoView(LoginRequiredMixin, TemplateView):
+    template_name = "student/student_referral.html"
+
+
+class FeedbacksAlunoView(LoginRequiredMixin, TemplateView):
+    template_name = "student/student_feedback.html"

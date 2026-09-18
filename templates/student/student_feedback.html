@@ -1,0 +1,77 @@
+{% extends "home.html" %}
+{% load static %}
+
+{% block extra_css %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'core/css/student_feedback.css' %}">
+{% endblock %}
+
+{% block home_title %}Feedbacks recebidos{% endblock %}
+
+{% block home_content %}
+<div class="col-12 mt-4 mb-5">
+
+  <div class="feedback-title-pill">
+    Feedbacks recebidos
+  </div>
+
+  <div class="feedback-wrapper">
+    <div class="feedback-header">
+      <div>Referente a:</div>
+      <div>Realizada por:</div>
+      <div>Recebida:</div>
+      <div>Status:</div>
+    </div>
+
+    <div class="feedback-container">
+
+      {% if feedbacks %}
+        {% for fb in feedbacks %}
+        <div class="feedback-row">
+          <div>{{ fb.referente }}</div>
+          <div>{{ fb.realizada_por }}</div>
+          <div>{{ fb.recebida }}</div>
+          <div class="text-end">
+            {% if fb.status == 'novo' %}
+              <span class="badge-novo">Novo</span>
+            {% elif fb.status == 'lida' %}
+              <span class="badge-lida">Lida</span>
+            {% else %}
+              <span class="badge-editada">Editada</span>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        {# Mock — será substituído pelo {% for %} quando o backend estiver pronto #}
+        <div class="feedback-row">
+          <div>Triagem - José Santos</div>
+          <div>Supervisor geral</div>
+          <div>Recebida às 14:20</div>
+          <div class="text-end"><span class="badge-novo">Novo</span></div>
+        </div>
+        <div class="feedback-row">
+          <div>Triagem - Camila Duarte</div>
+          <div>Supervisor geral</div>
+          <div>Recebida às 13:05</div>
+          <div class="text-end"><span class="badge-novo">Novo</span></div>
+        </div>
+        <div class="feedback-row">
+          <div>Prontuário - Rafael Nunes</div>
+          <div>Prof. Renata Alvez</div>
+          <div>Analisada hoje</div>
+          <div class="text-end"><span class="badge-lida">Lida</span></div>
+        </div>
+        <div class="feedback-row">
+          <div>Prontuário - Ana Beatriz</div>
+          <div>Prof. Marcos Lima</div>
+          <div>Recebida ontem</div>
+          <div class="text-end"><span class="badge-editada">Editada</span></div>
+        </div>
+      {% endif %}
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}
