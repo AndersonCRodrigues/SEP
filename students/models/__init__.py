@@ -2,7 +2,12 @@ from .activity import StudentActivity
 from .advising import Advising
 from .case import CaseAssignment
 from .records import Attendance, PerformanceReview
-from .scoping import AdviseeScopedQuerySet, can_reach_student, current_term
+from .scoping import (
+    AdviseeScopedQuerySet,
+    advisees_visible_to,
+    can_reach_student,
+    current_term,
+)
 from .student import Student
 
 __all__ = [
@@ -13,6 +18,7 @@ __all__ = [
     "PerformanceReview",
     "Student",
     "StudentActivity",
+    "advisees_visible_to",
     "can_reach_student",
     "current_term",
 ]

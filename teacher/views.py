@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from students.models import Advising
+from students.models import Advising, advisees_visible_to
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
@@ -33,7 +33,7 @@ class HomeProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         Figma não têm equivalente no backend ainda, então ficam de fora até
         virarem task."""
         import calendar
-        from datetime import date
+        from datetime import date, datetime
 
         from scheduling.models import Appointment
 
@@ -51,11 +51,26 @@ class HomeProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
             (1, ano + 1) if mes == 12 else (mes + 1, ano)
         )
 
+        # `scheduled_at` é guardado em UTC (USE_TZ=True), mas o "mês" que o
+        # calendário mostra é o mês local (o mesmo usado por
+        # timezone.localdate()/timezone.localtime()). Filtrar diretamente
+        # por scheduled_at__year/__month compara o componente em UTC do
+        # campo, não o local: um agendamento perto da virada do mês (ex.:
+        # 31/01 22h no fuso local, já 01/02 de madrugada em UTC, ou o
+        # inverso) pode aparecer no mês errado ou sumir do mês certo.
+        # Por isso convertemos o mês local pedido num intervalo
+        # timezone-aware [início, fim) e filtramos scheduled_at por esse
+        # intervalo, em vez de pelos componentes de data/mês do campo.
+        inicio_mes = timezone.make_aware(datetime(ano, mes, 1))
+        inicio_mes_seguinte = timezone.make_aware(
+            datetime(ano_seguinte, mes_seguinte, 1)
+        )
+
         agendamentos_mes = Appointment.objects.visible_to(
             self.request.user
         ).filter(
-            scheduled_at__year=ano,
-            scheduled_at__month=mes,
+            scheduled_at__gte=inicio_mes,
+            scheduled_at__lt=inicio_mes_seguinte,
             status=Appointment.Status.SCHEDULED,
         )
         dias_com_agendamento = {
@@ -81,8 +96,7 @@ class HomeProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         from students.models import Attendance, Student
 
         context = super().get_context_data(**kwargs)
-        professor = get_object_or_404(Teacher, pk=self.request.user.pk)
-        alunos = professor.current_advisees.all()
+        alunos = advisees_visible_to(self.request.user)
 
         hoje = timezone.localdate()
         context["calendario"] = self._montar_calendario(hoje)
@@ -281,8 +295,7 @@ class AlunosOrientacaoView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     def get_queryset(self):
         from students.models import Student
 
-        professor = get_object_or_404(Teacher, pk=self.request.user.pk)
-        alunos = professor.current_advisees.all()
+        alunos = advisees_visible_to(self.request.user)
 
         termo_busca = self.request.GET.get("q", "").strip()
         if termo_busca:
@@ -451,8 +464,7 @@ class PresencaFeedbackView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
         from students.models import Attendance, PerformanceReview, Student
 
         context = super().get_context_data(**kwargs)
-        professor = get_object_or_404(Teacher, pk=self.request.user.pk)
-        alunos = professor.current_advisees.all().order_by("nome_completo")
+        alunos = advisees_visible_to(self.request.user).order_by("nome_completo")
 
         hoje = timezone.localdate()
         presencas_hoje = {
@@ -586,8 +598,7 @@ class DefinirTriagemView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
         from students.models import Student
 
         context = super().get_context_data(**kwargs)
-        professor = get_object_or_404(Teacher, pk=self.request.user.pk)
-        alunos = professor.current_advisees.all().order_by("nome_completo")
+        alunos = advisees_visible_to(self.request.user).order_by("nome_completo")
 
         # MOCK: ainda não foi definido como produto/backend que essa tela do
         # Figma mapeia para CaseAssignment (limite de alunos por paciente).

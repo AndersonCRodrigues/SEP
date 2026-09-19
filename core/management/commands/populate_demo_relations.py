@@ -2,7 +2,9 @@ import os
 import random
 from datetime import date, timedelta
 
+from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand
+from django.db import transaction
 
 from areas.models import AreaActing
 from core.management.commands.populate_users import generate_valid_cpf
@@ -83,9 +85,10 @@ class Command(BaseCommand):
             self.style.SUCCESS(f"{atividades_criadas} atividade(s) de exemplo criada(s).")
         )
 
-        self._criar_pacientes_mock(area, professores)
+        area = AreaActing.objects.first()
+        self._criar_pacientes_mock(area, professores, atividades_criadas)
 
-    def _criar_pacientes_mock(self, area, professores):
+    def _criar_pacientes_mock(self, area, professores, atividades_criadas):
         """MOCK temporário: cria pacientes em triagem (REFERRED) e em
         atendimento (IN_TREATMENT, com CaseAssignment + ProgressNote +
         PerformanceReview) só para dar conteúdo às telas de Prontuários,
@@ -133,53 +136,94 @@ class Command(BaseCommand):
             criados_triagem += 1
 
         # --- Pacientes em atendimento (Prontuários + Presença/Feedback) ---
+        #
+        # CaseAssignment.objects.assign() faz o paciente avançar para
+        # IN_TREATMENT (Patient.advance_to) e pode levantar ValidationError
+        # por dois motivos: a área de atuação não pôde ser resolvida (o
+        # orientador atua em mais de uma área e nenhuma foi informada), ou a
+        # transição de flow_status não é permitida a partir do estado atual
+        # do paciente (ex.: partir direto de AWAITING_TRIAGE para
+        # IN_TREATMENT não é uma transição válida -- só "" ou REFERRED
+        # podem). Sem tratar isso por registro, um único aluno/paciente
+        # incompatível derrubava o comando inteiro e nenhum dado depois
+        # dele era criado. Por isso: (1) o paciente já nasce em REFERRED,
+        # que é um estado de onde a transição para IN_TREATMENT é válida, e
+        # (2) cada atribuição roda isolada em sua própria transação, com
+        # try/except -- se falhar, essa iteração é revertida e o comando
+        # segue para o próximo aluno em vez de abortar.
         criados_atendimento = 0
         for i, aluno in enumerate(alunos):
             email = f"paciente.atendimento{i}@teste.com"
             if Patient.objects.filter(email=email).exists():
                 continue
 
-            paciente = Patient(
-                email=email,
-                nome_completo=f"Paciente Atendimento {i + 1}",
-                cpf=generate_valid_cpf(),
-                data_nascimento=date(1990, 6, 15),
-                role=CustomUser.Role.PACIENTE,
-                **ENDERECO_PADRAO,
-            )
-            paciente.set_password("SenhaForte123!")
-            paciente.save()
+            area_do_aluno = area or aluno.default_acting_area
+            if area_do_aluno is None:
+                self.stdout.write(
+                    self.style.WARNING(
+                        f"Pulando {aluno.nome_completo}: não foi possível "
+                        "determinar a área de atuação (orientador sem área "
+                        "única e nenhuma área padrão cadastrada)."
+                    )
+                )
+                continue
 
-            CaseAssignment.objects.assign(
-                student=aluno, patient=paciente, acting_area=area
-            )
+            try:
+                with transaction.atomic():
+                    paciente = Patient(
+                        email=email,
+                        nome_completo=f"Paciente Atendimento {i + 1}",
+                        cpf=generate_valid_cpf(),
+                        data_nascimento=date(1990, 6, 15),
+                        role=CustomUser.Role.PACIENTE,
+                        flow_status=Patient.FlowStatus.REFERRED,
+                        **ENDERECO_PADRAO,
+                    )
+                    paciente.set_password("SenhaForte123!")
+                    paciente.save()
 
-            ProgressNote.objects.create(
-                patient=paciente,
-                student=aluno,
-                acting_area=area,
-                content=(
-                    "Evolução de exemplo gerada por populate_demo_relations. "
-                    "Paciente relatou melhora na adesão às sessões."
-                ),
-                session_date=date.today() - timedelta(days=random.randint(1, 7)),  # nosec B311
-            )
+                    CaseAssignment.objects.assign(
+                        student=aluno, patient=paciente, acting_area=area_do_aluno
+                    )
 
-            PerformanceReview.objects.create(
-                student=aluno,
-                teacher=aluno.current_advisor,
-                content=(
-                    "Feedback de exemplo: boa condução clínica, atenção ao "
-                    "registro de evolução e à postura ética em sessão."
-                ),
-            )
+                    ProgressNote.objects.create(
+                        patient=paciente,
+                        student=aluno,
+                        acting_area=area_do_aluno,
+                        content=(
+                            "Evolução de exemplo gerada por "
+                            "populate_demo_relations. Paciente relatou "
+                            "melhora na adesão às sessões."
+                        ),
+                        session_date=date.today()
+                        - timedelta(days=random.randint(1, 7)),  # nosec B311
+                    )
+
+                    PerformanceReview.objects.create(
+                        student=aluno,
+                        teacher=aluno.current_advisor,
+                        content=(
+                            "Feedback de exemplo: boa condução clínica, "
+                            "atenção ao registro de evolução e à postura "
+                            "ética em sessão."
+                        ),
+                    )
+            except ValidationError as exc:
+                self.stdout.write(
+                    self.style.WARNING(
+                        f"Não foi possível criar o caso de "
+                        f"{aluno.nome_completo}: {exc}"
+                    )
+                )
+                continue
+
             criados_atendimento += 1
 
         self.stdout.write(
             self.style.SUCCESS(
                 f"{criados_triagem} paciente(s) em triagem e "
                 f"{criados_atendimento} em atendimento "
-                "(com prontuário e feedback) criados."
+                "(com prontuário e feedback) criados. "
                 f"{atividades_criadas} atividade(s) de exemplo criada(s)."
             )
         )
