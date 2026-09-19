@@ -115,9 +115,16 @@ class Command(BaseCommand):
             if Patient.objects.filter(email=email).exists():
                 continue
 
+            # nome_completo não é mais uma coluna gravável: agora é uma
+            # @property em CustomUser (get_full_name()), então passá-la
+            # como kwarg do construtor levanta TypeError. O nome vem de
+            # first_name/last_name -- e sem dígitos, já que ambos têm
+            # validate_letters (mesma convenção do sufixo por letra usado
+            # em populate_users.py).
             paciente = Patient(
                 email=email,
-                nome_completo=f"Paciente Triagem {i + 1}",
+                first_name="Paciente",
+                last_name=f"Triagem {chr(65 + i)}",
                 cpf=generate_valid_cpf(),
                 data_nascimento=date(1995, 1, 1) - timedelta(days=i * 365),
                 role=CustomUser.Role.PACIENTE,
@@ -172,7 +179,8 @@ class Command(BaseCommand):
                 with transaction.atomic():
                     paciente = Patient(
                         email=email,
-                        nome_completo=f"Paciente Atendimento {i + 1}",
+                        first_name="Paciente",
+                        last_name=f"Atendimento {chr(65 + i)}",
                         cpf=generate_valid_cpf(),
                         data_nascimento=date(1990, 6, 15),
                         role=CustomUser.Role.PACIENTE,

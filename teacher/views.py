@@ -302,8 +302,12 @@ class AlunosOrientacaoView(LoginRequiredMixin, UserPassesTestMixin, ListView):
 
         termo_busca = self.request.GET.get("q", "").strip()
         if termo_busca:
+            # nome_completo é uma @property em CustomUser (get_full_name()),
+            # não uma coluna -- não dá pra usar num filter()/Q(). Busca-se
+            # pelos campos reais (first_name/last_name) em vez disso.
             alunos = alunos.filter(
-                Q(nome_completo__icontains=termo_busca)
+                Q(first_name__icontains=termo_busca)
+                | Q(last_name__icontains=termo_busca)
                 | Q(matricula__icontains=termo_busca)
             )
 
@@ -311,7 +315,7 @@ class AlunosOrientacaoView(LoginRequiredMixin, UserPassesTestMixin, ListView):
         if fase_filtro in Student.Stage.values:
             alunos = alunos.filter(stage=fase_filtro)
 
-        return alunos.order_by("nome_completo")
+        return alunos.order_by("first_name", "last_name")
 
     def get_context_data(self, **kwargs):
         from students.models import Student
@@ -384,9 +388,14 @@ class ProntuariosView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
 
         termo_busca = self.request.GET.get("q", "").strip()
         if termo_busca:
+            # Idem: nome_completo não existe como coluna em Patient/Student
+            # (é property herdada de CustomUser), então o filtro por nome
+            # precisa ir direto em first_name/last_name.
             notas = notas.filter(
-                Q(patient__nome_completo__icontains=termo_busca)
-                | Q(student__nome_completo__icontains=termo_busca)
+                Q(patient__first_name__icontains=termo_busca)
+                | Q(patient__last_name__icontains=termo_busca)
+                | Q(student__first_name__icontains=termo_busca)
+                | Q(student__last_name__icontains=termo_busca)
             )
 
         # MOCK: ainda não existe regra de prazo/SLA para "Pendente" vs "Revisar"
@@ -405,6 +414,23 @@ class ProntuariosView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
 
 
 class ProntuarioDetalheView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
+    """Detalhe de uma evolução + confirmação.
+
+    BLOQUEADA por enquanto (pedido de 19/09): a tela inteira ainda é MOCK
+    -- `pode_confirmar` é sempre True em get_context_data() e o post()
+    não persiste nada de verdade (ver lógica real comentada mais abaixo,
+    dentro do post()). Como não existe fluxo de confirmação de verdade
+    por trás, fechamos o acesso à página aqui em cima, via get()/post(),
+    em vez de deixar entrar e simular sucesso -- assim ninguém confirma
+    uma evolução "de mentirinha" achando que é de verdade, seja entrando
+    pela lista de Prontuários, pelo card de Atividades recentes da Home,
+    ou digitando a URL direto.
+
+    Reverter: apagar o get() abaixo e trocar o post() por só a lógica
+    real (hoje comentada no fim do método) quando o fluxo de confirmação
+    for fechado e validado com produto.
+    """
+
     template_name = "teacher/prontuario_detalhe.html"
     context_object_name = "nota"
 
@@ -413,6 +439,14 @@ class ProntuarioDetalheView(LoginRequiredMixin, UserPassesTestMixin, DetailView)
             CustomUser.Role.PROFESSOR,
             CustomUser.Role.SUPERVISOR,
         )
+
+    def get(self, request, *args, **kwargs):
+        messages.info(
+            request,
+            "O detalhe do prontuário ainda está em construção e não pode "
+            "ser acessado no momento.",
+        )
+        return redirect("teacher:prontuarios")
 
     def get_queryset(self):
         from patient.models import ProgressNote
@@ -426,17 +460,27 @@ class ProntuarioDetalheView(LoginRequiredMixin, UserPassesTestMixin, DetailView)
         # ainda não tem o fluxo fechado com produto, então aparece sempre
         # habilitado aqui. A checagem real (editable_fields_for) está
         # comentada no post() abaixo, pronta pra voltar quando o fluxo for
-        # validado.
+        # validado. Mantido só para quando o bloqueio do get() acima for
+        # removido -- hoje esta tela nem chega a renderizar.
         context = super().get_context_data(**kwargs)
         context["pode_confirmar"] = True
         return context
 
     def post(self, request, *args, **kwargs):
-        # MOCK (a pedido do front, validação de 12/09): não persiste nada
-        # ainda. Só simula o sucesso pra validar o clique/redirecionamento.
-        self.get_object()
-        messages.success(request, "Evolução confirmada (simulado).")
+        messages.info(
+            request,
+            "O detalhe do prontuário ainda está em construção e não pode "
+            "ser acessado no momento.",
+        )
         return redirect("teacher:prontuarios")
+
+        # --- mock anterior (a pedido do front, validação de 12/09): não
+        # persistia nada, só simulava sucesso pra validar o clique. Deixado
+        # comentado junto com o bloqueio de acesso -- não faz sentido
+        # simular confirmação de uma tela que está fechada.
+        # self.get_object()
+        # messages.success(request, "Evolução confirmada (simulado).")
+        # return redirect("teacher:prontuarios")
 
         # --- lógica real, comentada até o fluxo ser validado com produto ---
         # nota = self.get_object()
@@ -467,7 +511,17 @@ class PresencaFeedbackView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
         from students.models import Attendance, PerformanceReview, Student
 
         context = super().get_context_data(**kwargs)
-        alunos = advisees_visible_to(self.request.user).order_by("nome_completo")
+        alunos = advisees_visible_to(self.request.user).order_by("first_name", "last_name")
+
+        # Busca por nome (a pedido do front, 19/09): igual à de "Meus
+        # Alunos" -- filtra a lista antes de montar tabela/<select>, além
+        # do filtro por aluno específico já existente logo abaixo.
+        termo_busca = self.request.GET.get("q", "").strip()
+        if termo_busca:
+            alunos = alunos.filter(
+                Q(first_name__icontains=termo_busca)
+                | Q(last_name__icontains=termo_busca)
+            )
 
         hoje = timezone.localdate()
         presencas_hoje = {
@@ -495,6 +549,7 @@ class PresencaFeedbackView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
         context["hoje"] = hoje
         context["alunos_para_filtro"] = alunos
         context["aluno_filtro_id"] = aluno_id
+        context["termo_busca"] = termo_busca
 
         if aluno_selecionado:
             context["aluno_selecionado"] = aluno_selecionado
@@ -577,7 +632,7 @@ class TriagensPendentesView(LoginRequiredMixin, UserPassesTestMixin, ListView):
         return (
             Patient.objects.visible_to(self.request.user)
             .filter(flow_status=Patient.FlowStatus.REFERRED)
-            .order_by("nome_completo")
+            .order_by("first_name", "last_name")
         )
 
 
@@ -601,7 +656,7 @@ class DefinirTriagemView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
         from students.models import Student
 
         context = super().get_context_data(**kwargs)
-        alunos = advisees_visible_to(self.request.user).order_by("nome_completo")
+        alunos = advisees_visible_to(self.request.user).order_by("first_name", "last_name")
 
         # MOCK: ainda não foi definido como produto/backend que essa tela do
         # Figma mapeia para CaseAssignment (limite de alunos por paciente).
