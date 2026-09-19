@@ -1,0 +1,298 @@
+{% extends "administration/base_admin.html" %}
+{% load components %}
+
+{% block title %}Atestados{% endblock %}
+
+{% block extra_css %}
+<style>
+  .person-picker {
+    position: relative;
+    display: inline-block;
+    width: min(100%, 28rem);
+    vertical-align: top;
+  }
+
+  .person-picker .person-filter {
+    width: 100%;
+  }
+
+  .person-picker select {
+    position: absolute;
+    top: calc(100% + 2px);
+    left: 0;
+    z-index: 10;
+    width: 100%;
+    padding: 0.25rem 0;
+    overflow-y: auto;
+    background-color: var(--bs-body-bg);
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.375rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  }
+
+  .person-picker select:empty {
+    display: none;
+  }
+
+  .person-picker option {
+    padding: 0.375rem 0.75rem;
+    cursor: pointer;
+  }
+
+  .person-picker option:hover {
+    background-color: var(--bs-secondary-bg);
+  }
+
+  .person-picker option:checked {
+    color: #fff;
+    background: var(--bs-primary) linear-gradient(var(--bs-primary), var(--bs-primary));
+  }
+
+  .person-picker .person-filter-status {
+    position: absolute;
+    top: calc(100% + 2px);
+    left: 0;
+    z-index: 10;
+    width: 100%;
+    padding: 0.375rem 0.75rem;
+    color: var(--bs-secondary-color);
+    background-color: var(--bs-body-bg);
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.375rem;
+  }
+
+  .person-picker .person-filter-status:empty {
+    display: none;
+  }
+
+  @media (max-width: 576px) {
+    .person-picker option {
+      padding: 0.375rem 0.5rem;
+      font-size: 0.875rem;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1 class="certificates-banner">Emitir atestados</h1>
+
+<div class="certificates">
+  {% section class="certificate-form" %}
+  {% include "components/form.html" with form=form submit_label="Gerar atestado em PDF" %}
+  {% endsection %}
+
+  {% section title="Atestados emitidos recentemente" class="recent-certificates" id="recent-title" %}
+  <ul class="recent-list">
+    {% for item in recent %}
+    <li class="recent-item">
+      <span class="recent-name">{{ item.name }}</span>
+      <time class="recent-date" datetime="{{ item.issued_at|date:'Y-m-d' }}">
+        {{ item.issued_at|date:"d/m/Y" }}
+      </time>
+    </li>
+    {% empty %}
+    <li class="recent-empty">
+      {% include "components/empty_state.html" with message="Nenhum atestado emitido ainda." %}
+    </li>
+    {% endfor %}
+  </ul>
+  {% endsection %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{{ appointments_url|json_script:"appointments-url" }}
+<script>
+  (function () {
+    const person = document.getElementById("id_person");
+    const appointment = document.getElementById("id_appointment");
+    if (!person || !appointment) return;
+
+    const url = JSON.parse(document.getElementById("appointments-url").textContent);
+
+    function fill(placeholder, items) {
+      appointment.replaceChildren(new Option(placeholder, ""));
+      items.forEach(function (item) {
+        appointment.add(new Option(item.label, item.id));
+      });
+    }
+
+    person.addEventListener("change", function () {
+      if (!person.value) {
+        fill("Escolha a pessoa para ver os atendimentos", []);
+        return;
+      }
+
+      fill("Carregando atendimentos...", []);
+      fetch(url + "?" + new URLSearchParams({ person: person.value }), {
+        headers: { Accept: "application/json" },
+      })
+        .then(function (response) {
+          if (!response.ok) throw new Error(response.status);
+          return response.json();
+        })
+        .then(function (data) {
+          fill(
+            data.appointments.length
+              ? "Escolha a data do atendimento"
+              : "Nenhum atendimento realizado para esta pessoa",
+            data.appointments
+          );
+        })
+        .catch(function () {
+          fill("Não foi possível carregar os atendimentos", []);
+        });
+    });
+
+    const filter = document.getElementById("id_person_filter");
+    const status = document.getElementById("id_person_status");
+    if (!filter || !status) return;
+
+    function normalize(text) {
+      return text.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
+    }
+
+    function nameOf(label) {
+      return label.replace(/ \((Paciente|Aluno)\) - CPF: .*$/, "");
+    }
+
+    const everyone = [...person.options].map(function (option) {
+      return {
+        value: option.value,
+        label: option.textContent,
+        name: normalize(nameOf(option.textContent)),
+      };
+    });
+
+    function chosenName() {
+      const option = person.selectedOptions[0];
+      return option ? nameOf(option.textContent) : "";
+    }
+
+    function openList() {
+      person.hidden = false;
+    }
+
+    function closeList() {
+      person.hidden = true;
+      status.textContent = "";
+    }
+
+    let returningFocus = false;
+
+    function choose() {
+      if (!person.value) return;
+      filter.value = chosenName();
+      closeList();
+      returningFocus = true;
+      filter.focus();
+      returningFocus = false;
+    }
+
+    function selectOnly() {
+      if (person.options.length === 1) {
+        person.selectedIndex = 0;
+        person.dispatchEvent(new Event("change"));
+        choose();
+      }
+    }
+
+    filter.value = chosenName();
+    closeList();
+
+    function startSearch() {
+      filter.select();
+      applyFilter("");
+      openList();
+    }
+
+    filter.addEventListener("focus", function () {
+      if (!returningFocus) startSearch();
+    });
+
+    filter.addEventListener("click", function () {
+      if (person.hidden) startSearch();
+    });
+
+    [filter, person].forEach(function (element) {
+      element.addEventListener("focusout", function (event) {
+        if (event.relatedTarget !== filter && event.relatedTarget !== person) {
+          closeList();
+          filter.value = chosenName();
+        }
+      });
+    });
+
+    let picking = false;
+
+    person.addEventListener("pointerdown", function () {
+      picking = true;
+    });
+
+    ["input", "click"].forEach(function (type) {
+      person.addEventListener(type, function () {
+        if (picking) {
+          picking = false;
+          choose();
+        }
+      });
+    });
+
+    person.addEventListener("keydown", function (event) {
+      picking = false;
+      if (event.key === "Enter") {
+        event.preventDefault();
+        choose();
+      } else if (event.key === "Escape") {
+        closeList();
+        filter.focus();
+      }
+    });
+
+    filter.addEventListener("input", function () {
+      applyFilter(filter.value);
+      openList();
+    });
+
+    function applyFilter(text) {
+      const terms = normalize(text).split(/\s+/).filter(Boolean);
+      const selected = person.value;
+      const matches = everyone.filter(function (item) {
+        return terms.every(function (term) {
+          return item.name.includes(term);
+        });
+      });
+
+      person.replaceChildren();
+      matches.forEach(function (item) {
+        person.add(new Option(item.label, item.value, false, item.value === selected));
+      });
+      status.textContent = matches.length ? "" : "Nenhuma pessoa encontrada com esse nome";
+      person.size = Math.max(2, Math.min(8, matches.length));
+
+      if (selected && person.value !== selected) {
+        person.dispatchEvent(new Event("change"));
+      }
+    }
+
+    filter.addEventListener("keydown", function (event) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        selectOnly();
+      } else if (event.key === "Escape") {
+        event.preventDefault();
+        closeList();
+      } else if (event.key === "ArrowDown" && person.options.length) {
+        event.preventDefault();
+        openList();
+        person.focus();
+        if (person.selectedIndex < 0) {
+          person.selectedIndex = 0;
+          person.dispatchEvent(new Event("change"));
+        }
+      }
+    });
+  })();
+</script>
+{% endblock %}

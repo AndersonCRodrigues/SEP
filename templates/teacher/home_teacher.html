@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 
 {% block title %}Painel do Professor | Sistema SEP{% endblock %}
-
 {% block breadcrumbs %}
   <li class="breadcrumb-item"><a href="{% url 'home_redirect' %}">Página inicial</a></li>
   <li class="breadcrumb-item active" aria-current="page">Professor</li>
@@ -20,13 +19,20 @@
     <a href="{% url 'teacher:alunos' %}" class="btn btn-outline-primary btn-sm">
       <i class="bi bi-people"></i> Meus Alunos
     </a>
+    <!-- Botões trazidos da versão anterior para manter os atalhos rápidos no desktop -->
+    <a href="{% url 'teacher:prontuarios' %}" class="btn btn-outline-primary btn-sm">
+      <i class="bi bi-journal-medical"></i> Prontuários
+    </a>
+    <a href="{% url 'teacher:perfil' %}" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-person"></i> Meu Perfil
+    </a>
   </div>
 {% endblock %}
 
 {% block content %}
 <!-- NAV MOBILE: replica as abas "Opções de Serviço" do Figma. So aparece
-    no mobile (d-md-none) -- no desktop a navbar de cima ja cobre isso.
-    Sao links simples pras paginas que ja existem, sem JS. -->
+     no mobile (d-md-none) -- no desktop a navbar de cima ja cobre isso.
+     Sao links simples pras paginas que ja existem, sem JS. -->
 <div class="d-md-none mb-3">
     <h2 class="h6 text-body-secondary mb-2">Opções de Serviço</h2>
     <div class="overflow-auto">
@@ -40,7 +46,6 @@
         </div>
     </div>
 </div>
-
 
 <!-- Cards de Estatísticas -->
 <div class="row g-3 mb-4">
@@ -80,6 +85,7 @@
         </div>
     </div>
 </div>
+{% endblock %}
 {% if avaliacoes_pendentes_total > 0 %}
     <div class="alert alert-warning d-md-none" role="alert">
         <h3 class="h6 alert-heading mb-1"><i class="bi bi-exclamation-triangle"></i> Atenção Pendente</h3>

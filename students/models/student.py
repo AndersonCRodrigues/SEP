@@ -54,4 +54,4 @@ class Student(CustomUser):
         self.role = CustomUser.Role.ALUNO
 
     def __str__(self):
-        return self.nome_completo
+        return self.get_full_name()

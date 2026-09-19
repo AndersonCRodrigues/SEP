@@ -139,7 +139,6 @@ class HomeProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         return context
 
 
-
 @login_required
 def cadastrar_professor(request):
     if not request.user.has_perm("teacher.add_teacher"):
@@ -158,7 +157,7 @@ def cadastrar_professor(request):
     return render(request, "teacher/cadastro.html", {"form": form})
 
 
-class PerfilProfessorView(LoginRequiredMixin,UserPassesTestMixin, UpdateView):
+class PerfilProfessorView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Teacher
     form_class = PerfilProfessorForm
     template_name = "teacher/perfil.html"
@@ -228,7 +227,7 @@ def vincular_aluno(request):
             try:
                 Advising.objects.change_advisor(aluno, professor, term=periodo)
                 messages.success(
-                    request, f"{aluno.nome_completo} vinculado com sucesso!"
+                    request, f"{aluno.get_full_name()} vinculado com sucesso!"
                 )
             except ValidationError as e:
                 messages.error(request, str(e))

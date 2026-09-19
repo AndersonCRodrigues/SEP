@@ -13,25 +13,41 @@ O projeto usa quatro mecanismos diferentes para controlar acesso, o que já é a
 | Rota | View | Mecanismo | Quem acessa |
 |---|---|---|---|
 | `/` | RedirecionarHomeView | — | Público ou qualquer autenticado, redireciona |
-| `/login/` | CustomLoginView | — | Público |
-| `/logout/` | CustomLogoutView | — | Autenticado |
+| `/login/` | CustomLoginView | redirect_authenticated_user | Público; usuário já logado é redirecionado para `/`, que leva à home da própria role |
+| `/logout/` | CustomLogoutView | — | Autenticado, só por POST (o botão Sair do header); GET responde 405 |
  
 ## administration/ (prefixo /administration/)
  
 | Rota | View | Mecanismo | Quem acessa |
 |---|---|---|---|
-| home | PainelAdministracaoView | UserPassesTestMixin | Superuser ou ADMINISTRATIVO |
-| painel/ | PainelAdministracaoView | UserPassesTestMixin | Superuser ou ADMINISTRATIVO |
+| home | AdministrativeHomeView | AdministrativeOnly (LoginRequiredMixin + UserPassesTestMixin, role ADMINISTRATIVO) | ADMINISTRATIVO |
+| painel/ | PainelAdministracaoView | AdministrativeOnly | ADMINISTRATIVO |
 | cadastrar/ | cadastrar_administrativo | has_perm("core.add_customuser") | Superadmin |
-| perfil/ | PerfilAdministrativoView | GroupRequiredMixin("Administration") | Grupo Administration |
-| cadastrar-paciente/ | cadastrar_paciente | Role direto | Superuser ou ADMINISTRATIVO |
+| perfil/ | PerfilAdministrativoView | AdministrativeOnly | ADMINISTRATIVO, só o próprio |
+| pacientes/ | PatientsView | AdministrativeOnly | ADMINISTRATIVO |
+| cadastrar-paciente/ | PatientRegistrationStartView | CanRegisterPatients (AdministrativeOnly + Patient.can_be_created_by) | ADMINISTRATIVO; inicia o cadastro e redireciona para a primeira etapa |
+| cadastrar-paciente/\<step\>/ | PatientRegistrationStepView | CanRegisterPatients | ADMINISTRATIVO |
+| pacientes/\<pk\>/cadastro-concluido/ | RegistrationCompletedView | CanRegisterPatients + Patient.visible_to | ADMINISTRATIVO |
+| agenda/ | ScheduleView | AdministrativeOnly + Appointment.visible_to | ADMINISTRATIVO |
+| salas/ | RoomsView | AdministrativeOnly + Room.visible_to | ADMINISTRATIVO |
+| declaracoes/ | DeclarationsView | AdministrativeOnly + visible_to dos documentos | ADMINISTRATIVO |
+| atestados/ | CertificatesView | CanIssueCertificates (AdministrativeOnly + AttendanceCertificate.can_be_created_by) | ADMINISTRATIVO |
+| atestados/atendimentos/ | CertificateAppointmentsView (JSON) | CanIssueCertificates | ADMINISTRATIVO |
+
+O Superadmin (superuser) não acessa as telas do Administrativo: o `AdministrativeOnly` confere só a role.
  
 ## patient/ (prefixo /patient/)
  
 | Rota | View | Mecanismo | Quem acessa |
 |---|---|---|---|
-| home | HomePacienteView | GroupRequiredMixin("Patient") | Grupo Patient |
-| edit/ | EditarDadosPacienteView | GroupRequiredMixin("Patient") | Grupo Patient, só o próprio |
+| home | PatientHomeView | PatientOnly (LoginRequiredMixin + UserPassesTestMixin, role PACIENTE) | PACIENTE, só os próprios dados |
+| agendamentos/ | PatientAppointmentsView | PatientOnly + Appointment e AppointmentRequest.visible_to | PACIENTE |
+| agendamentos/solicitar/ | AppointmentRequestView | PatientOnly + AppointmentRequest.can_be_created_by | PACIENTE; uma solicitação pendente por vez |
+| historico/ | PatientHistoryView | PatientOnly + Appointment.visible_to | PACIENTE |
+| historico/\<pk\>/ | PatientSessionDetailView | PatientOnly + Appointment.visible_to | PACIENTE; sessão de outro paciente ou ainda agendada responde 404 |
+| triagens/ | PatientTriagesView | PatientOnly + TriageRecord.visible_to | PACIENTE; só as próprias triagens encerradas |
+| triagens/\<pk\>/ | PatientTriageDetailView | PatientOnly + TriageRecord.visible_to | PACIENTE; triagem de outro paciente, aberta ou enviada responde 404 |
+| contato/ | PatientContactView | PatientOnly | PACIENTE |
  
 ## students/ (prefixo /students/)
  
@@ -110,7 +126,7 @@ E é registrado em config/urls.py:
 ```python
 handler403 = "core.exception_handlers.custom_permission_denied_view"
 ```
-Um detalhe importante: o handler403 só é ativado pelo Django quando DEBUG é False. Em desenvolvimento, com DEBUG True, o Django mostra a página de erro técnica detalhada em vez de acionar o handler. Pra testar esse comportamento de verdade é preciso rodar com DJANGO_DEBUG=False no .env.
+Um detalhe importante: o handler403 é acionado tanto com DEBUG True quanto com DEBUG False. Foi conferido no container de desenvolvimento: um paciente que digita `/administration/` é redirecionado para `/patient/`. Com DEBUG True, só as páginas de 404 e 500 continuam sendo as páginas técnicas do Django.
 
 
 ## Card 1, relevante pra esse mapa

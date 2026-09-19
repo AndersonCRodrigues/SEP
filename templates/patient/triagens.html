@@ -1,0 +1,36 @@
+{% extends "patient/base_patient.html" %}
+{% load components %}
+
+{% block title %}Minhas triagens{% endblock %}
+
+{% block content %}
+<h1 class="page-banner">Minhas triagens</h1>
+
+{% if triages_error %}
+{% include "components/error_state.html" with message=triages_error retry_url=request.path %}
+{% else %}
+{% if in_progress and triages %}
+<p class="triage-progress" role="status">{{ in_progress_message }}</p>
+{% endif %}
+
+{% section title="Triagens concluídas" class="triages" id="triages-title" %}
+<ul class="triage-list">
+  {% for item in triages %}
+  <li class="triage">
+    <h3 class="triage-title">
+      Triagem de <time datetime="{{ item.created_at|date:'Y-m-d' }}">{{ item.created_at|date:"d/m/Y" }}</time>
+    </h3>
+    {% include "components/badge.html" with label=item.label level=item.level %}
+    <a class="triage-link" href="{% url 'patient:triagem_detalhe' item.pk %}">
+      Ver detalhes<span class="visually-hidden"> da triagem de {{ item.created_at|date:"d/m/Y" }}</span>
+    </a>
+  </li>
+  {% empty %}
+  <li class="triage-empty">
+    {% include "components/empty_state.html" with message=empty_message %}
+  </li>
+  {% endfor %}
+</ul>
+{% endsection %}
+{% endif %}
+{% endblock %}

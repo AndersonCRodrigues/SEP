@@ -1,7 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.views.generic import TemplateView, UpdateView
 from django.urls import reverse_lazy
@@ -13,13 +12,13 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from core.models import CustomUser
 
 
-
 class HomeEstudanteView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
-    template_name = "student/home_student.html"
+    template_name = "student/home.html"
 
     def test_func(self):
         return self.request.user.role == CustomUser.Role.ALUNO
-    
+
+
 @login_required
 def cadastrar_aluno(request):
     if not request.user.has_perm("students.add_student"):
@@ -42,7 +41,8 @@ class PerfilAlunoView(GroupRequiredMixin, UpdateView):
     required_group = "Students"
     model = Student
     fields = [
-        "nome_completo",
+        "first_name",
+        "last_name",
         "telefone",
         "logradouro",
         "numero",
@@ -53,13 +53,13 @@ class PerfilAlunoView(GroupRequiredMixin, UpdateView):
         "cep",
     ]
     template_name = "student/perfil.html"
-    success_url = reverse_lazy("students:perfil")
+    success_url = reverse_lazy("students:home")
 
     def get_object(self, queryset=None):
         return get_object_or_404(Student, pk=self.request.user.pk)
 
 
-class MeuProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView ):
+class MeuProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = "student/meu_professor.html"
 
     def test_func(self):

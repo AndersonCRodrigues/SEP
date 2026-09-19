@@ -1,0 +1,41 @@
+{% extends "patient/base_patient.html" %}
+
+{% block title %}Triagem concluída{% endblock %}
+
+{% block content %}
+{% if triage_error %}
+<h1 class="page-banner">Triagem</h1>
+{% include "components/error_state.html" with message=triage_error retry_url=request.path %}
+{% else %}
+<section class="triage-result" aria-labelledby="triage-title">
+  <p class="triage-icon" aria-hidden="true">✓</p>
+  <h1 id="triage-title">Sua triagem foi concluída</h1>
+  <p class="triage-summary">
+    Preenchida em <time datetime="{{ triage.created_at|date:'Y-m-d' }}">{{ triage.created_at|date:"d/m/Y" }}</time>
+    {{ triage.summary }}
+  </p>
+  {% include "components/badge.html" with label=triage.label level=triage.level %}
+
+  <dl class="triage-data">
+    <div class="triage-item">
+      <dt>{{ triage.closed_by_label }}</dt>
+      <dd>{{ triage.closed_by|default:"Equipe do SEP" }}</dd>
+    </div>
+    {% if triage.closed_at %}
+    <div class="triage-item">
+      <dt>{{ triage.closed_at_label }}</dt>
+      <dd><time datetime="{{ triage.closed_at|date:'Y-m-d' }}">{{ triage.closed_at|date:"d/m/Y" }}</time></dd>
+    </div>
+    {% endif %}
+    {% if triage.teachers %}
+    <div class="triage-item">
+      <dt>Professor responsável</dt>
+      <dd>{{ triage.teachers|join:", " }}</dd>
+    </div>
+    {% endif %}
+  </dl>
+</section>
+{% endif %}
+
+<a class="back-link" href="{% url 'patient:triagens' %}">Voltar para minhas triagens</a>
+{% endblock %}

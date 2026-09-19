@@ -66,7 +66,6 @@ class Command(BaseCommand):
             self.style.SUCCESS(f"{vinculados} aluno(s) vinculado(s) a um professor.")
         )
 
-        area = AreaActing.objects.first()
         atividades_criadas = 0
         for aluno in Student.objects.filter(current_advisor__isnull=False):
             professor = aluno.current_advisor
@@ -181,5 +180,6 @@ class Command(BaseCommand):
                 f"{criados_triagem} paciente(s) em triagem e "
                 f"{criados_atendimento} em atendimento "
                 "(com prontuário e feedback) criados."
+                f"{atividades_criadas} atividade(s) de exemplo criada(s)."
             )
         )
