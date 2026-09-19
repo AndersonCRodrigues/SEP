@@ -43,6 +43,9 @@ class HomeProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         except ValueError:
             mes, ano = hoje.month, hoje.year
 
+        if not 1 <= mes <= 12 or not 1 <= ano <= 9999:
+            mes, ano = hoje.month, hoje.year
+
         data_referencia = date(ano, mes, 1)
         mes_anterior, ano_anterior = (
             (12, ano - 1) if mes == 1 else (mes - 1, ano)
