@@ -465,7 +465,13 @@ class PresencaFeedbackView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
         # um aluno é escolhido no <select>, a tabela passa a mostrar só a
         # linha dele, em vez de todos os orientandos.
         aluno_id = self.request.GET.get("aluno", "").strip()
-        aluno_selecionado = alunos.filter(pk=aluno_id).first() if aluno_id else None
+        # isdigit() evita ValueError do Django ao comparar string nao
+        # numerica com pk inteiro (ex.: ?aluno=abc manipulado na URL).
+        aluno_selecionado = (
+            alunos.filter(pk=aluno_id).first()
+            if aluno_id.isdigit()
+            else None
+        )
         alunos_para_tabela = [aluno_selecionado] if aluno_selecionado else alunos
 
         context["linhas"] = [
