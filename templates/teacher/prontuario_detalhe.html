@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Evolução de {{ nota.patient.nome_completo }} | Sistema SEP{% endblock %}
+
+{% block breadcrumbs %}
+  <li class="breadcrumb-item"><a href="{% url 'home_redirect' %}">Página inicial</a></li>
+  <!-- Passo intermediário para a listagem -->
+  <li class="breadcrumb-item"><a href="{% url 'teacher:prontuarios' %}">Prontuários</a></li>
+  <li class="breadcrumb-item active" aria-current="page">Evolução</li>
+{% endblock %}
+
+{% block page_title %}Evolução de {{ nota.patient.nome_completo }}{% endblock %}
+
+{% block page_actions %}
+  <a href="{% url 'teacher:prontuarios' %}" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-arrow-left"></i> Voltar para Prontuários
+  </a>
+{% endblock %}
+
+{% block content %}
+<div class="row g-3">
+    <div class="col-12 col-lg-8">
+        <section class="card mb-3">
+            <div class="card-body">
+                <p class="mb-1"><strong>Aluno responsável:</strong> {{ nota.student.nome_completo }}</p>
+                <p class="mb-1"><strong>Área de atuação:</strong> {{ nota.acting_area.nome|default:"—" }}</p>
+                <p class="mb-1"><strong>Data da sessão:</strong> {{ nota.session_date }}</p>
+                <p class="mb-3">
+                    <strong>Situação:</strong>
+                    {% if nota.pending_confirmation %}
+                        <span class="badge text-bg-warning">Pendente de confirmação</span>
+                    {% else %}
+                        <span class="badge text-bg-success">
+                            Confirmado por {{ nota.confirmed_by.nome_completo }} em {{ nota.confirmed_at|date:"d/m/Y H:i" }}
+                        </span>
+                    {% endif %}
+                </p>
+                <hr>
+                <h2 class="h6 mb-3">Evolução registrada</h2>
+                <p class="mb-0" style="white-space: pre-line;">{{ nota.content }}</p>
+            </div>
+        </section>
+
+        {% if pode_confirmar and nota.pending_confirmation %}
+        <section class="card">
+            <div class="card-body">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    <!-- Adicionado um ícone e formatação para destacar o aviso -->
+                    <p class="mb-3 text-body-secondary">
+                        <i class="bi bi-info-circle"></i> Ao confirmar, esta evolução passa a constar como revisada pela supervisão.
+                    </p>
+                    <button type="submit" class="btn btn-primary">Confirmar evolução</button>
+                </form>
+            </div>
+        </section>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

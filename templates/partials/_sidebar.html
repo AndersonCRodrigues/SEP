@@ -1,5 +1,5 @@
 {% with current_view=request.resolver_match.view_name %}
-<ul class="nav nav-pills flex-column gap-1">
+<ul class="nav nav-pills flex-column flex-lg-row gap-2">
   {% if request.user.role == 'SA' %}
   <li class="nav-item">
     <a
@@ -52,7 +52,7 @@
   
   {% endif %}
 
-  {% if request.user.role == 'PR' %}
+    {% if request.user.role == 'PR' %}
   <li class="nav-item">
     <a
       class="nav-link {% if current_view == 'teacher:home' %}active{% endif %}"
@@ -62,6 +62,8 @@
       <i class="bi bi-house-door me-2"></i>Início
     </a>
   </li>
+  {% comment %}
+  COMENTADO a pedido do front (validação de 12/09): rota teacher:painel comentada em urls.py
   <li class="nav-item">
     <a
       class="nav-link {% if current_view == 'teacher:painel' %}active{% endif %}"
@@ -69,6 +71,52 @@
       aria-current="{% if current_view == 'teacher:painel' %}page{% else %}false{% endif %}"
     >
       <i class="bi bi-clipboard-data me-2"></i>Painel do Professor
+    </a>
+  </li>
+  {% endcomment %}
+  <li class="nav-item">
+    <a
+      class="nav-link {% if current_view == 'teacher:alunos' %}active{% endif %}"
+      href="{% url 'teacher:alunos' %}"
+      aria-current="{% if current_view == 'teacher:alunos' %}page{% else %}false{% endif %}"
+    >
+      <i class="bi bi-people me-2"></i>Meus Alunos
+    </a>
+  </li>
+  <li class="nav-item">
+    <a
+      class="nav-link {% if current_view == 'teacher:prontuarios' %}active{% endif %}"
+      href="{% url 'teacher:prontuarios' %}"
+      aria-current="{% if current_view == 'teacher:prontuarios' %}page{% else %}false{% endif %}"
+    >
+      <i class="bi bi-file-earmark-medical me-2"></i>Prontuários
+    </a>
+  </li>
+  <li class="nav-item">
+    <a
+      class="nav-link {% if current_view == 'teacher:presenca' %}active{% endif %}"
+      href="{% url 'teacher:presenca' %}"
+      aria-current="{% if current_view == 'teacher:presenca' %}page{% else %}false{% endif %}"
+    >
+      <i class="bi bi-calendar-check me-2"></i>Presença
+    </a>
+  </li>
+  <li class="nav-item">
+    <a
+      class="nav-link {% if current_view == 'teacher:triagens' %}active{% endif %}"
+      href="{% url 'teacher:triagens' %}"
+      aria-current="{% if current_view == 'teacher:triagens' %}page{% else %}false{% endif %}"
+    >
+      <i class="bi bi-clipboard2-pulse me-2"></i>Avaliações
+    </a>
+  </li>
+  <li class="nav-item">
+    <a
+      class="nav-link {% if current_view == 'teacher:perfil' %}active{% endif %}"
+      href="{% url 'teacher:perfil' %}"
+      aria-current="{% if current_view == 'teacher:perfil' %}page{% else %}false{% endif %}"
+    >
+      <i class="bi bi-mortarboard me-2"></i>Área de Atuação
     </a>
   </li>
   {% endif %}

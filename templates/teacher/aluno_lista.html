@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}Alunos sob Orientação | Sistema SEP{% endblock %}
+
+{% block breadcrumbs %}
+    <li class="breadcrumb-item"><a href="{% url 'home_redirect' %}">Página inicial</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Meus Alunos</li>
+{% endblock %}
+
+{% block page_title %}Alunos sob Orientação{% endblock %}
+
+{% block page_actions %}
+    {% comment %}
+    COMENTADO a pedido do front (validação de 12/09): apontava pra
+    teacher:painel (comentada). O formulário de vincular aluno ainda não
+    tem uma nova casa definida.
+    <a href="{% url 'teacher:painel' %}" class="btn btn-primary btn-sm">
+        <i class="bi bi-person-plus"></i> Selecionar alunos
+    </a>
+    {% endcomment %}
+{% endblock %}
+
+{% block content %}
+<!-- Card de Filtros -->
+<section class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-12 col-md-6">
+                <label for="busca-aluno" class="form-label">Buscar por nome ou matrícula</label>
+                <input
+                    type="text"
+                    id="busca-aluno"
+                    name="q"
+                    class="form-control"
+                    value="{{ termo_busca }}"
+                    placeholder="Nome do aluno..."
+                >
+            </div>
+            <div class="col-12 col-md-4">
+                <label for="filtro-fase" class="form-label">Fase do estágio</label>
+                <select id="filtro-fase" name="fase" class="form-select">
+                    <option value="">Todas</option>
+                    {% for valor, rotulo in fases_disponiveis %}
+                    <option value="{{ valor }}" {% if fase_filtro == valor %}selected{% endif %}>
+                        {{ rotulo }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-12 col-md-2 d-grid">
+                <button type="submit" class="btn btn-outline-secondary">
+                    <i class="bi bi-search"></i> Filtrar
+                </button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<!-- Card da Tabela de Alunos -->
+<section class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col">Nome do aluno</th>
+                        <th scope="col">Curso e período</th>
+                        <th scope="col">Pacientes sob orientação</th>
+                        <th scope="col" class="text-end">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for aluno in alunos %}
+                    <tr>
+                        <td>{{ aluno.nome_completo }}</td>
+                        <td>{{ aluno.curso_periodo|default:"—" }}</td>
+                        <td>{{ aluno.open_cases.count }} paciente(s) ativos</td>
+                        <td class="text-end">
+                            <a href="{% url 'teacher:aluno_detalhe' aluno.pk %}" class="btn btn-success btn-sm">
+                                Ver perfil
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center py-4 border-0">
+                            <!-- Injeção do componente de estado vazio -->
+                            {% include "components/empty_state.html" with message="Nenhum aluno encontrado para os filtros aplicados." %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% endblock %}

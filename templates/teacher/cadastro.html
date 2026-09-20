@@ -2,18 +2,20 @@
 
 {% block title %}Cadastrar Professor | Sistema SEP{% endblock %}
 
-{% block content %}
-<h1 class="h3 mb-4">Cadastrar Professor</h1>
+{% block breadcrumbs %}
+    <li class="breadcrumb-item"><a href="{% url 'home_redirect' %}">Página inicial</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Cadastrar Professor</li>
+{% endblock %}
 
+{% block page_title %}Cadastrar Professor{% endblock %}
+
+{% block content %}
 <div class="row">
     <div class="col-12 col-lg-8">
         <section class="card">
             <div class="card-body">
-                <form method="post">
-                    {% csrf_token %}
-                    {{ form.as_p }}
-                    <button type="submit" class="btn btn-primary">Cadastrar</button>
-                </form>
+                <!-- Injeção do componente de formulário -->
+                {% include "components/form.html" with submit_label="Cadastrar" %}
             </div>
         </section>
     </div>

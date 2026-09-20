@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Definir quem fará a triagem | Sistema SEP{% endblock %}
+
+{% block breadcrumbs %}
+  <li class="breadcrumb-item"><a href="{% url 'home_redirect' %}">Página inicial</a></li>
+  <!-- Passo intermediário para a listagem de avaliações -->
+  <li class="breadcrumb-item"><a href="{% url 'teacher:triagens' %}">Avaliações</a></li>
+  <li class="breadcrumb-item active" aria-current="page">Definir Triagem</li>
+{% endblock %}
+
+{% block page_title %}Definir quem fará a triagem{% endblock %}
+
+{% block page_actions %}
+  <a href="{% url 'teacher:triagens' %}" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-arrow-left"></i> Voltar para Avaliações
+  </a>
+{% endblock %}
+
+{% block content %}
+<div class="row g-3">
+    <div class="col-12 col-lg-8">
+        
+        <!-- Card de Informações do Paciente -->
+        <section class="card mb-3">
+            <div class="card-body">
+                <p class="text-body-secondary mb-1">Paciente</p>
+                <!-- Aplicado o mesmo padrão visual de ID que usamos nos prontuários -->
+                <h2 class="h5 mb-1">{{ paciente.nome_completo }} <span class="text-body-secondary small">#{{ paciente.pk }}</span></h2>
+                <p class="text-body-secondary mb-0">
+                    <i class="bi bi-calendar3"></i> Triagem recebida em {{ paciente.created_at|date:"d/m/Y" }}
+                </p>
+            </div>
+        </section>
+
+        <!-- Card de Designação -->
+        <section class="card">
+            <div class="card-body">
+                {% if vagas_disponiveis == 0 %}
+                    <!-- Injeção do componente genérico de alerta -->
+                    {% include "components/alert.html" with level="warning" message="Este paciente já atingiu o limite de alunos responsáveis." %}
+                {% endif %}
+
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    <ul class="list-group list-group-flush mb-3">
+                        {% for linha in linhas %}
+                        <li class="list-group-item px-0">
+                            <div class="form-check">
+                                <input
+                                    class="form-check-input"
+                                    type="checkbox"
+                                    name="alunos"
+                                    value="{{ linha.aluno.pk }}"
+                                    id="aluno-{{ linha.aluno.pk }}"
+                                    {% if linha.ja_designado %}checked{% endif %}
+                                    {% if not linha.habilitado %}disabled{% endif %}
+                                >
+                                <label class="form-check-label" for="aluno-{{ linha.aluno.pk }}">
+                                    {{ linha.aluno.nome_completo }}
+                                    {% if linha.ja_designado %}
+                                    <span class="badge text-bg-success ms-1">Já designado</span>
+                                    {% endif %}
+                                </label>
+                            </div>
+                        </li>
+                        {% empty %}
+                        <li class="list-group-item px-0 border-0">
+                            <!-- Injeção do componente de estado vazio -->
+                            {% include "components/empty_state.html" with message="Nenhum aluno disponível para designação." %}
+                        </li>
+                        {% endfor %}
+                    </ul>
+
+                    <button type="submit" class="btn btn-primary" {% if not linhas %}disabled{% endif %}>
+                        Confirmar seleção
+                    </button>
+                </form>
+            </div>
+        </section>
+
+    </div>
+</div>
+{% endblock %}
