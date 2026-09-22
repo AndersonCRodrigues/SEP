@@ -1,15 +1,15 @@
-{% extends "base.html" %}
+{% extends "student/base_student.html" %}
 
-{% block title %}Triagem concluída | Sistema SEP{% endblock %}
+{% block title %}Triagem concluída{% endblock %}
 
 {% block breadcrumbs %}
-  <li class="breadcrumb-item"><a href="{% url 'students:home' %}">Página inicial</a></li>
-  <li class="breadcrumb-item"><a href="{% url 'students:triagens' %}">Triagens</a></li>
-  <li class="breadcrumb-item active" aria-current="page">Conclusão</li>
+<li class="breadcrumb-item"><a href="{% url 'students:home' %}">Página inicial</a></li>
+<li class="breadcrumb-item"><a href="{% url 'students:triagens' %}">Triagens</a></li>
+<li class="breadcrumb-item active" aria-current="page">Conclusão</li>
 {% endblock %}
 
 {% block page_title %}Triagem concluída com sucesso!{% endblock %}
 
 {% block content %}
-<a href="{% url 'students:triagens' %}">Voltar para Triagens a realizar</a>
+<a class="back-link" href="{% url 'students:triagens' %}">Voltar para Triagens a realizar</a>
 {% endblock %}

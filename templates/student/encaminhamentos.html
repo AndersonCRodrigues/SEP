@@ -1,10 +1,10 @@
-{% extends "base.html" %}
+{% extends "student/base_student.html" %}
 
-{% block title %}Encaminhamentos recebidos | Sistema SEP{% endblock %}
+{% block title %}Encaminhamentos recebidos{% endblock %}
 
 {% block breadcrumbs %}
-  <li class="breadcrumb-item"><a href="{% url 'students:home' %}">Página inicial</a></li>
-  <li class="breadcrumb-item active" aria-current="page">Encaminhamentos</li>
+<li class="breadcrumb-item"><a href="{% url 'students:home' %}">Página inicial</a></li>
+<li class="breadcrumb-item active" aria-current="page">Encaminhamentos</li>
 {% endblock %}
 
 {% block page_title %}Encaminhamentos recebidos{% endblock %}

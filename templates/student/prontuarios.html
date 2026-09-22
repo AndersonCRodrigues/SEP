@@ -1,10 +1,10 @@
-{% extends "base.html" %}
+{% extends "student/base_student.html" %}
 
-{% block title %}Prontuários e evolução | Sistema SEP{% endblock %}
+{% block title %}Prontuários e evolução{% endblock %}
 
 {% block breadcrumbs %}
-  <li class="breadcrumb-item"><a href="{% url 'students:home' %}">Página inicial</a></li>
-  <li class="breadcrumb-item active" aria-current="page">Prontuários</li>
+<li class="breadcrumb-item"><a href="{% url 'students:home' %}">Página inicial</a></li>
+<li class="breadcrumb-item active" aria-current="page">Prontuários</li>
 {% endblock %}
 
 {% block page_title %}Prontuários e evolução{% endblock %}

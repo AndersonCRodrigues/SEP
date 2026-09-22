@@ -1,10 +1,10 @@
-{% extends "base.html" %}
+{% extends "student/base_student.html" %}
 
-{% block title %}Feedbacks recebidos | Sistema SEP{% endblock %}
+{% block title %}Feedbacks recebidos{% endblock %}
 
 {% block breadcrumbs %}
-  <li class="breadcrumb-item"><a href="{% url 'students:home' %}">Página inicial</a></li>
-  <li class="breadcrumb-item active" aria-current="page">Feedbacks</li>
+<li class="breadcrumb-item"><a href="{% url 'students:home' %}">Página inicial</a></li>
+<li class="breadcrumb-item active" aria-current="page">Feedbacks</li>
 {% endblock %}
 
 {% block page_title %}Feedbacks recebidos{% endblock %}

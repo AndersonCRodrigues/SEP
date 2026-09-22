@@ -1,18 +1,26 @@
-{% extends "home.html" %}
+{% extends "student/base_student.html" %}
 
-{% block home_title %}Área do Estudante{% endblock %}
+{% block title %}Página inicial{% endblock %}
 
-{% block home_content %}
-<div class="col-12 col-md-6">
-    <div class="card h-100">
-        <div class="card-body">
-            <h2 class="h5 card-title">Área do Estudante</h2>
-            <p class="card-text">Visualização de dados pessoais, horários e consultas.</p>
-            <div class="d-flex flex-wrap gap-2">
-                <a href="{% url 'students:painel' %}" class="btn btn-primary">Acessar Painel do Estudante</a>
-                {# TODO: botões sem lógica; ficam para fazer #}
-                <button type="button" class="btn btn-outline-secondary">Submissão de prontuários</button>
-                <button type="button" class="btn btn-outline-secondary">Calendário</button>
+{% block breadcrumbs %}
+<li class="breadcrumb-item active" aria-current="page">Página inicial - Aluno</li>
+{% endblock %}
+
+{% block page_title %}Olá, aluno!{% endblock %}
+
+{% block content %}
+<div class="row g-3">
+    <div class="col-12 col-md-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <h2 class="h5 card-title">Área do Estudante</h2>
+                <p class="card-text">Visualização de dados pessoais, horários e consultas.</p>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{% url 'students:painel' %}" class="btn btn-primary">Acessar Painel do Estudante</a>
+                    {# TODO: botões sem lógica; ficam para fazer #}
+                    <button type="button" class="btn btn-outline-secondary">Submissão de prontuários</button>
+                    <button type="button" class="btn btn-outline-secondary">Calendário</button>
+                </div>
             </div>
         </div>
     </div>

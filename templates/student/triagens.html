@@ -1,10 +1,10 @@
-{% extends "base.html" %}
+{% extends "student/base_student.html" %}
 
-{% block title %}Triagens a realizar | Sistema SEP{% endblock %}
+{% block title %}Triagens a realizar{% endblock %}
 
 {% block breadcrumbs %}
-  <li class="breadcrumb-item"><a href="{% url 'students:home' %}">Página inicial</a></li>
-  <li class="breadcrumb-item active" aria-current="page">Triagens</li>
+<li class="breadcrumb-item"><a href="{% url 'students:home' %}">Página inicial</a></li>
+<li class="breadcrumb-item active" aria-current="page">Triagens</li>
 {% endblock %}
 
 {% block page_title %}Triagens a realizar{% endblock %}
