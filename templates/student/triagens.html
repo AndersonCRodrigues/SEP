@@ -1,4 +1,5 @@
 {% extends "student/base_student.html" %}
+{% load components %}
 
 {% block title %}Triagens a realizar{% endblock %}
 
@@ -10,5 +11,27 @@
 {% block page_title %}Triagens a realizar{% endblock %}
 
 {% block content %}
+{% if triages %}
+{% data_table columns=columns label="Triagens designadas a você" %}
+{% for triage in triages %}
+<tr class="triage">
+  <td class="triage-patient">{{ triage.patient }}</td>
+  <td class="triage-referred-by">{{ triage.referred_by }}</td>
+  <td class="triage-referred-at">
+    <time datetime="{{ triage.referred_at|date:'Y-m-d\TH:i' }}">
+      {{ triage.referred_at|date:"d/m/Y - H:i" }}h
+    </time>
+  </td>
+  <td class="triage-action">
+    {# TODO: botão sem lógica; fica para fazer #}
+    <button type="button" class="triage-start">
+      Iniciar<span class="visually-hidden"> a triagem de {{ triage.patient }}</span>
+    </button>
+  </td>
+</tr>
+{% endfor %}
+{% enddata_table %}
+{% else %}
 {% include "components/empty_state.html" with message="Nenhuma triagem designada para você." %}
+{% endif %}
 {% endblock %}

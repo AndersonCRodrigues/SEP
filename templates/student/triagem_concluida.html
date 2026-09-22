@@ -11,5 +11,26 @@
 {% block page_title %}Triagem concluída com sucesso!{% endblock %}
 
 {% block content %}
+{% include "components/alert.html" with message="A ficha foi enviada para a supervisão." level="success" %}
+
+<dl class="triage-summary">
+  <div class="triage-field">
+    <dt>Paciente</dt>
+    <dd>{{ triage.patient.get_full_name }}</dd>
+  </div>
+  <div class="triage-field">
+    <dt>Entrevistado por</dt>
+    <dd>{{ triage.student_author.get_full_name }}</dd>
+  </div>
+  <div class="triage-field">
+    <dt>Concluído em</dt>
+    <dd>
+      <time datetime="{{ completed_at|date:'Y-m-d\TH:i' }}">
+        {{ completed_at|date:"d/m/Y" }} às {{ completed_at|date:"H:i" }}
+      </time>
+    </dd>
+  </div>
+</dl>
+
 <a class="back-link" href="{% url 'students:triagens' %}">Voltar para Triagens a realizar</a>
 {% endblock %}
