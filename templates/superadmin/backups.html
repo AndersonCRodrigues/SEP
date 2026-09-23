@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Backups | Sistema SEP{% endblock %}
+
+{% block breadcrumbs %}
+{{ block.super }}
+<li class="breadcrumb-item"><a href="{% url 'superadmin:home' %}">Superadmin</a></li>
+<li class="breadcrumb-item active" aria-current="page">Backups</li>
+{% endblock %}
+
+{% block page_title %}Backups{% endblock %}
+
+{% block page_actions %}
+<button class="btn btn-primary" disabled title="Ação de backup real ainda não aprovada pelo time">
+    Executar backup agora
+</button>
+{% endblock %}
+
+{% block content %}
+<section class="card">
+    <div class="card-body">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Quando</th>
+                    <th>Escopo</th>
+                    <th>Tamanho</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for backup in backups %}
+                <tr>
+                    <td>{{ backup.executado_em|default:backup.agendado_para|date:"d/m/Y H:i"|default:"—" }}</td>
+                    <td>{{ backup.escopo }}</td>
+                    <td>{{ backup.tamanho|default:"—" }}</td>
+                    <td>
+                        {% if backup.status == "OK" %}
+                        <span class="badge text-bg-success">Concluído</span>
+                        {% elif backup.status == "AG" %}
+                        <span class="badge text-bg-secondary">Agendado</span>
+                        {% else %}
+                        <span class="badge text-bg-danger">Falhou</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4">{% include "components/empty_state.html" with message="Nenhum backup registrado." %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}
