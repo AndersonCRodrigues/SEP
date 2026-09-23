@@ -26,9 +26,19 @@ urlpatterns = [
     ),
     path("triagens/", views.CoordinatorTriagesView.as_view(), name="triagens"),
     path(
+        "triagens/<int:pk>/",
+        views.CoordinatorTriageDetailView.as_view(),
+        name="triagem_detalhe",
+    ),
+    path(
         "encaminhamentos/",
         views.CoordinatorReferralsView.as_view(),
         name="encaminhamentos",
+    ),
+    path(
+        "encaminhamentos/<int:pk>/",
+        views.CoordinatorReferralsView.as_view(),
+        name="encaminhar",
     ),
     path("feedbacks/", views.CoordinatorFeedbacksView.as_view(), name="feedbacks"),
 ]

@@ -1,14 +1,73 @@
 {% extends "supervisor/base_coordinator.html" %}
+{% load components %}
 
 {% block title %}Novo encaminhamento{% endblock %}
 
 {% block breadcrumbs %}
 <li class="breadcrumb-item"><a href="{% url 'supervisor:home' %}">Página inicial</a></li>
-<li class="breadcrumb-item active" aria-current="page">Novo encaminhamento</li>
+<li class="breadcrumb-item active" aria-current="page">Encaminhamentos</li>
 {% endblock %}
 
 {% block page_title %}Novo encaminhamento{% endblock %}
 
 {% block content %}
-{% include "components/empty_state.html" with message="Nenhuma triagem analisada esperando encaminhamento." %}
+<div class="panel">
+  {% section title="Triagem escolhida" class="referral-form" id="referral-title" %}
+  {% if triagem %}
+  <div class="referral-patient">
+    <p class="referral-label">Paciente</p>
+    <p class="referral-name">{{ triagem.patient.get_full_name }}</p>
+    <p class="referral-date">
+      Triagem realizada por {{ triagem.student_author.get_full_name }}
+    </p>
+  </div>
+
+  <form class="referral-choice" method="post" action="{% url 'supervisor:encaminhar' triagem.pk %}">
+    {% csrf_token %}
+    <fieldset>
+      <legend>Alocar para professor(es)</legend>
+      {% for professor in teachers %}
+      <p class="teacher-option">
+        <input
+          type="checkbox"
+          id="professor-{{ professor.pk }}"
+          name="professores"
+          value="{{ professor.pk }}"
+          {% if professor.pk in chosen %}checked{% endif %}
+        />
+        <label for="professor-{{ professor.pk }}">
+          {{ professor.get_full_name }}
+          {% for area in professor.acting_areas.all %} — {{ area.nome }}{% endfor %}
+        </label>
+      </p>
+      {% empty %}
+      <p class="teacher-empty">
+        {% include "components/empty_state.html" with message="Nenhum professor cadastrado para receber o encaminhamento." %}
+      </p>
+      {% endfor %}
+    </fieldset>
+
+    <button type="submit" class="confirm-referral">Confirmar encaminhamento</button>
+  </form>
+  {% else %}
+  {% include "components/empty_state.html" with message="Nenhuma triagem analisada esperando encaminhamento." %}
+  {% endif %}
+  {% endsection %}
+
+  {% section title="Encaminhamentos recentes" class="referral-recent" id="recent-title" %}
+  <ul class="referral-list">
+    {% for item in recent %}
+    <li class="referral">
+      <p class="referral-name">{{ item.patient }}</p>
+      <p class="referral-teachers">{{ item.teachers }}</p>
+      {% include "components/badge.html" with label=item.label level=item.level %}
+    </li>
+    {% empty %}
+    <li class="referral-empty">
+      {% include "components/empty_state.html" with message="Nenhum encaminhamento feito ainda." %}
+    </li>
+    {% endfor %}
+  </ul>
+  {% endsection %}
+</div>
 {% endblock %}

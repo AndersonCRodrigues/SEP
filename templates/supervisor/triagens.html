@@ -1,14 +1,50 @@
 {% extends "supervisor/base_coordinator.html" %}
+{% load components %}
 
 {% block title %}Triagens para analisar{% endblock %}
 
 {% block breadcrumbs %}
 <li class="breadcrumb-item"><a href="{% url 'supervisor:home' %}">Página inicial</a></li>
-<li class="breadcrumb-item active" aria-current="page">Triagens para analisar</li>
+<li class="breadcrumb-item active" aria-current="page">Triagens</li>
 {% endblock %}
 
 {% block page_title %}Triagens para analisar{% endblock %}
 
 {% block content %}
+{% section title="Filtros" class="filters" id="filters-title" %}
+<form class="triage-filters" method="get" action="">
+  <p class="filter">
+    <label for="filter-situation">Situação</label>
+    <select id="filter-situation" name="situacao">
+      <option value="">Todas</option>
+      {% for value, label in situations %}
+      <option value="{{ value }}" {% if situation_filter == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </p>
+  <button type="submit">Filtrar</button>
+</form>
+{% endsection %}
+
+{% if rows %}
+{% data_table columns=columns label="Triagens aguardando análise" %}
+{% for row in rows %}
+<tr class="triage">
+  <td class="triage-patient">{{ row.patient }}</td>
+  <td class="triage-student">{{ row.student }}</td>
+  <td class="triage-received">{{ row.received }}</td>
+  <td class="triage-status">
+    {% include "components/badge.html" with label=row.label level=row.level %}
+  </td>
+  <td class="triage-action">
+    <a href="{% url 'supervisor:triagem_detalhe' row.triage.pk %}">
+      Analisar<span class="visually-hidden"> a triagem de {{ row.patient }}</span>
+    </a>
+  </td>
+</tr>
+{% endfor %}
+{% enddata_table %}
+{% else %}
 {% include "components/empty_state.html" with message="Nenhuma triagem aguardando análise." %}
+{% endif %}
 {% endblock %}
