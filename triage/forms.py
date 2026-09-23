@@ -17,6 +17,7 @@ class TriageRecordForm(forms.ModelForm):
             "status",
             "closed_by",
             "closed_at",
+            "submitted_at",
         )
 
 
