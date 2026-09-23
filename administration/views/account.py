@@ -46,7 +46,7 @@ def cadastrar_administrativo(request):
             user = form.save()
             sincronizar_grupo(user)
             messages.success(request, "Administrativo cadastrado com sucesso!")
-            return redirect("superadmin:painel")
+            return redirect("superadmin:home")
     else:
         form = AdministrativoCreationForm()
 
