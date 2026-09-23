@@ -1,15 +1,15 @@
 {% extends "home.html" %}
 
-{% block home_title %}Coordenação & Supervisão{% endblock %}
+{% block home_title %}Coordenação{% endblock %}
 
 {% block home_content %}
 <div class="col-12 col-md-6">
     <div class="card h-100">
         <div class="card-body">
-            <h2 class="h5 card-title">Coordenação &amp; Supervisão</h2>
+            <h2 class="h5 card-title">Coordenação</h2>
             <p class="card-text">Gestão de equipe, usuários e relatórios.</p>
             <div class="d-flex flex-wrap gap-2">
-                <a href="{% url 'supervisor:painel' %}" class="btn btn-primary">Acessar Painel do Supervisor</a>
+                <a href="{% url 'supervisor:painel' %}" class="btn btn-primary">Acessar Painel do Coordenador</a>
                 <a href="{% url 'students:cadastrar' %}" class="btn btn-outline-primary">Cadastrar Aluno</a>
                 <a href="{% url 'teacher:cadastrar' %}" class="btn btn-outline-primary">Cadastrar Professor</a>
                 <a href="{% url 'teacher:alunos' %}" class="btn btn-outline-secondary">Meus Alunos Orientandos</a>

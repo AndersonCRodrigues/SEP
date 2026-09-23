@@ -52,7 +52,7 @@ class MeuProfessorView(StudentOnly, TemplateView):
 @login_required
 def cadastrar_aluno(request):
     if not request.user.has_perm("students.add_student"):
-        raise PermissionDenied("Apenas Supervisores podem cadastrar Alunos.")
+        raise PermissionDenied("Apenas Coordenadores podem cadastrar Alunos.")
 
     if request.method == "POST":
         form = AlunoCreationForm(request.POST)

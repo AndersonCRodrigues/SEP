@@ -22,7 +22,7 @@ class SupervisorCreationForm(ProfessorCreationForm):
         role = self.cleaned_data["role"]
         if role != Teacher.Role.SUPERVISOR:
             raise forms.ValidationError(
-                "Pelo Superadmin, só é possível cadastrar Supervisor."
+                "Pelo Superadmin, só é possível cadastrar Coordenador."
             )
         return role
 

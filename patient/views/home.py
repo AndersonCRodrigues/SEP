@@ -35,7 +35,7 @@ TRIAGE_STATUS = {
     FlowStatus.AWAITING_REVIEW: (
         "Em análise",
         "warning",
-        "Sua triagem está em análise pela supervisão.",
+        "Sua triagem está em análise pela coordenação.",
     ),
     FlowStatus.REFERRED: (
         "Concluída",

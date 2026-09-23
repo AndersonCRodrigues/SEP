@@ -8,7 +8,7 @@ NEW_FEEDBACK_HOURS = 24
 PENDING_TRIAGES = (
     ("José Santos", "Prof.º Jorge Junior", 0, 11),
     ("Camila Duarte", "Prof.ª Renata Alves", 1, 9),
-    ("Rafael Nunes", "Supervisor geral", 2, 14),
+    ("Rafael Nunes", "Coordenação geral", 2, 14),
     ("Ana Beatriz", "Prof. Marcos Lima", 3, 16),
     ("Lucas Prado", "Prof.º Jorge Junior", 6, 10),
 )
@@ -40,7 +40,7 @@ def referral_status(case, today):
             "level": "danger",
         }
     return {
-        "situation": "Encaminhado por Supervisor geral",
+        "situation": "Encaminhado por Coordenação geral",
         "label": "Ativo",
         "level": "success",
     }

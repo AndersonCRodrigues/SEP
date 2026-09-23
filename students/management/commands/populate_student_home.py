@@ -194,7 +194,7 @@ class Command(BaseCommand):
             patient=confirmed,
             student=student,
             acting_area=area,
-            content="Evolução revisada pela supervisão.",
+            content="Evolução revisada pela coordenação.",
             session_date=timezone.localdate() - timedelta(days=2),
             confirmed_by=supervisor,
             confirmed_at=timezone.now(),
