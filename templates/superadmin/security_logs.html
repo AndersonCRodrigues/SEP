@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Logs de Segurança | Sistema SEP{% endblock %}
+
+{% block breadcrumbs %}
+{{ block.super }}
+<li class="breadcrumb-item"><a href="{% url 'superadmin:home' %}">Superadmin</a></li>
+<li class="breadcrumb-item active" aria-current="page">Logs de Segurança</li>
+{% endblock %}
+
+{% block page_title %}Logs de segurança{% endblock %}
+
+{% block content %}
+
+<form method="get" class="mb-3">
+    <input type="search" name="q" class="form-control" placeholder="Buscar por evento ou usuário"
+        value="{{ request.GET.q }}">
+</form>
+
+<section class="card">
+    <div class="card-body">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Hora</th>
+                    <th>Evento</th>
+                    <th>Detalhes</th>
+                    <th>Severidade</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr>
+                    <td>{{ log.created_at|date:"H:i:s" }}</td>
+                    <td>{{ log.get_action_display }}</td>
+                    <td>{{ log.detail|default:log.user_identifier }}</td>
+                    <td>
+                        {% if log.severidade == "critico" %}
+                        <span class="badge text-bg-danger">Crítico</span>
+                        {% elif log.severidade == "atencao" %}
+                        <span class="badge text-bg-warning">Atenção</span>
+                        {% else %}
+                        <span class="badge text-bg-secondary">Info</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4">{% include "components/empty_state.html" with message="Nenhum log encontrado." %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% if is_paginated %}
+        <nav aria-label="Paginação de logs">
+            <ul class="pagination">
+                {% if page_obj.has_previous %}
+                <li class="page-item"><a class="page-link"
+                        href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">Anterior</a>
+                </li>
+                {% endif %}
+                <li class="page-item disabled"><span class="page-link">Página {{ page_obj.number }} de {{
+                        page_obj.paginator.num_pages }}</span></li>
+                {% if page_obj.has_next %}
+                <li class="page-item"><a class="page-link"
+                        href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">Próxima</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
