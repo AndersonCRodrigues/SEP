@@ -32,8 +32,18 @@
                 {% for log in logs %}
                 <tr>
                     <td>{{ log.created_at|date:"H:i:s" }}</td>
-                    <td>{{ log.get_action_display }}</td>
-                    <td>{{ log.detail|default:log.user_identifier }}</td>
+                    <td><a href="{% url 'superadmin:log_detail' log.pk %}">{{ log.get_action_display }}</a></td>
+                    <td>
+                        {% if log.detail %}
+                        {{ log.detail }}
+                        {% elif log.user_identifier %}
+                        {{ log.user_identifier }}
+                        {% elif log.target_model %}
+                        {{ log.target_model }} #{{ log.target_id }}
+                        {% else %}
+                        -
+                        {% endif %}
+                    </td>
                     <td>
                         {% if log.severidade == "critico" %}
                         <span class="badge text-bg-danger">Crítico</span>
@@ -61,8 +71,8 @@
                         href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">Anterior</a>
                 </li>
                 {% endif %}
-                <li class="page-item disabled"><span class="page-link">Página {{ page_obj.number }} de {{
-                        page_obj.paginator.num_pages }}</span></li>
+                <li class="page-item disabled"><span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages
+                        }}</span></li>
                 {% if page_obj.has_next %}
                 <li class="page-item"><a class="page-link"
                         href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">Próxima</a>
