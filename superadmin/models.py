@@ -1,10 +1,12 @@
 from django.db import models
+from core.models import CustomUser
 
 
 class ServerStatus(models.Model):
     class Health(models.TextChoices):
         SAUDAVEL = "OK", "Saudável"
         ATENCAO = "AT", "Atenção"
+        OFFLINE = "OF", "Indisponível"
 
     nome = models.CharField(max_length=100, verbose_name="Servidor")
     uptime_percent = models.DecimalField(max_digits=5, decimal_places=2, verbose_name="Uptime (%)")
@@ -23,8 +25,12 @@ class ServerStatus(models.Model):
 
 
 class RolePermissionScope(models.Model):
-   
-    role = models.CharField(max_length=2, unique=True, verbose_name="Perfil")
+    role = models.CharField(
+        max_length=2,
+        choices=CustomUser.Role.choices,
+        unique=True,
+        verbose_name="Perfil",
+    )
     escopo_acesso = models.CharField(max_length=255, verbose_name="Escopo de acesso")
     atualizado_em = models.DateTimeField(auto_now=True)
 
@@ -33,7 +39,7 @@ class RolePermissionScope(models.Model):
         verbose_name_plural = "Escopos de permissão por perfil"
 
     def __str__(self):
-        return f"{self.role} — {self.escopo_acesso}"
+        return f"{self.get_role_display()} — {self.escopo_acesso}"
 
 
 class BackupRecord(models.Model):
