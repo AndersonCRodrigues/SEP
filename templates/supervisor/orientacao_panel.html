@@ -28,7 +28,7 @@
             <ul class="list-group list-group-flush">
                 {% for triagem in triagens_pendentes %}
                 <li class="list-group-item px-0">
-                    <a href="{% url 'triage_detail' triagem.pk %}">{{ triagem.patient.nome_completo }}</a>
+                    <a href="{% url 'triage_detail_supervisor' triagem.pk %}">{{ triagem.patient.nome_completo }}</a>
                 </li>
                 {% endfor %}
             </ul>
@@ -57,7 +57,7 @@
                     <tbody>
                         {% for triagem in historico_triagens %}
                         <tr>
-                            <td><a href="{% url 'triage_detail' triagem.pk %}">{{ triagem.patient.nome_completo }}</a></td>
+                            <td><a href="{% url 'triage_detail_supervisor' triagem.pk %}">{{ triagem.patient.nome_completo }}</a></td>
                             <td>{{ triagem.student_author.nome_completo }}</td>
                             <td>{{ triagem.created_at }}</td>
                             <td>
@@ -83,7 +83,7 @@
             <ul class="list-group list-group-flush">
                 {% for encaminhamento in todos_encaminhamentos %}
                 <li class="list-group-item px-0">
-                    <a href="{% url 'triage_detail' encaminhamento.triage.pk %}">
+                    <a href="{% url 'triage_detail_supervisor' encaminhamento.triage.pk %}">
                         {{ encaminhamento.patient.nome_completo }}
                     </a>
                 </li>
