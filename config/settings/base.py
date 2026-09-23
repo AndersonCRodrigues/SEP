@@ -141,6 +141,24 @@ else:
         }
     }
 
+
+EMAIL_BACKEND = os.getenv(
+    "DJANGO_EMAIL_BACKEND",
+    "django.core.mail.backends.console.EmailBackend",
+)
+
+
+DEFAULT_FROM_EMAIL = os.getenv("DJANGO_DEFAULT_FROM_EMAIL", "no-reply@sep.local")
+
+
+if EMAIL_BACKEND == "django.core.mail.backends.smtp.EmailBackend":
+    EMAIL_HOST = os.getenv("DJANGO_EMAIL_HOST")
+    EMAIL_PORT = int(os.getenv("DJANGO_EMAIL_PORT", "587"))
+    EMAIL_HOST_USER = os.getenv("DJANGO_EMAIL_HOST_USER")
+    EMAIL_HOST_PASSWORD = os.getenv("DJANGO_EMAIL_HOST_PASSWORD")
+    EMAIL_USE_TLS = os.getenv("DJANGO_EMAIL_USE_TLS", "True").lower() == "true"
+
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
@@ -151,7 +169,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 LANGUAGE_CODE = "en-us"
-TIME_ZONE = "UTC"
+TIME_ZONE = "America/Sao_Paulo"
 USE_I18N = True
 USE_TZ = True
 STATIC_URL = "static/"
@@ -170,6 +188,13 @@ MESSAGE_TAGS = {
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
+
+SEP_CONTACT = {
+    "name": "Serviço Escola de Psicologia",
+    "city": "Maricá, RJ",
+    "phone": "(21) 2000-0000",
+    "email": "sep@univassouras.edu.br",
+}
 
 # Republicacao explicita da API deste modulo (PEP 8 permite wildcard import
 # quando o modulo de origem declara __all__). Isso evita que "import os",
@@ -198,4 +223,5 @@ __all__ = [
     "MESSAGE_TAGS",
     "CRISPY_ALLOWED_TEMPLATE_PACKS",
     "CRISPY_TEMPLATE_PACK",
+    "SEP_CONTACT",
 ]

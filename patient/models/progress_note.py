@@ -1,7 +1,6 @@
 from django.conf import settings
 from django.db import models
 from django.db.models import Q
-from areas.models import AreaActing
 from core.models import CustomUser
 from core.permissions import ALL, BusinessRulesMixin, RoleScopedQuerySet
 from .patient import Patient, with_open_case
@@ -33,7 +32,7 @@ class ProgressNote(BusinessRulesMixin, models.Model):
     )
 
     acting_area = models.ForeignKey(
-        AreaActing,
+        "areas.AreaActing",
         null=True,
         blank=True,
         on_delete=models.PROTECT,

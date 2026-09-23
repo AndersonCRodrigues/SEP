@@ -15,6 +15,7 @@ from .forms import SupervisorCreationForm
 from areas.forms import AreaAtuacaoForm
 from core.utils import sincronizar_grupo
 from .utils import gerar_senha_temporaria, enviar_email_credenciais
+from teacher.forms import PerfilProfessorForm
 
 
 from teacher.forms import VincularAlunoForm, StudentActivityForm
@@ -31,7 +32,7 @@ def usuarios_alunos_e_professores():
     professores = Teacher.objects.filter(
         role__in=[CustomUser.Role.PROFESSOR, CustomUser.Role.SUPERVISOR]
     ).prefetch_related("acting_areas")
-    return sorted(chain(alunos, professores), key=lambda u: u.nome_completo)
+    return sorted(chain(alunos, professores), key=lambda u: u.get_full_name())
 
 
 class PainelSupervisorView(GroupRequiredMixin, ListView):
@@ -84,7 +85,7 @@ def cadastrar_supervisor(request):
 
             messages.success(
                 request,
-                f"Supervisor {user.nome_completo} cadastrado e e-mail enviado com sucesso!",
+                f"Supervisor {user.get_full_name()} cadastrado e e-mail enviado com sucesso!",
             )
             return redirect("superadmin:painel")
     else:
@@ -154,3 +155,25 @@ class PainelOrientacaoSupervisorView(GroupRequiredMixin, TemplateView):
         context["form_vincular"] = VincularAlunoForm()
         context["form_horas"] = StudentActivityForm(user=supervisor)
         return context
+class PerfilSupervisorView(GroupRequiredMixin, UpdateView):
+    required_group = "Supervisor"
+    model = Teacher
+    form_class = PerfilProfessorForm
+    template_name = "supervisor/perfil.html"
+    success_url = reverse_lazy("supervisor:home")
+
+    def get_object(self, queryset=None):
+        user = self.request.user
+
+        try:
+            return Teacher.objects.get(pk=user.pk)
+        except Teacher.DoesNotExist:
+            teacher = Teacher(customuser_ptr_id=user.pk)
+            teacher.__dict__.update(user.__dict__)
+            teacher.role = CustomUser.Role.SUPERVISOR
+            teacher.save()
+            return teacher
+
+    def form_valid(self, form):
+        messages.success(self.request, "Perfil atualizado com sucesso!")
+        return super().form_valid(form)

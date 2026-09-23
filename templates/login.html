@@ -1,39 +1,61 @@
 {% extends "base.html" %}
 
-{% block title %}Login{% endblock %}
+{% block title %}Login | Sistema SEP{% endblock %}
 
 {% block content %}
-<h1>Login</h1>
+<div class="row justify-content-center mt-5">
+    <div class="col-12 col-md-6 col-lg-4">
+        
+        <!-- Envelopamos o form em um card para dar cara de painel de acesso -->
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <h1 class="h4 text-center mb-4">Acesso ao Sistema</h1>
 
-<form method="post">
-    {% csrf_token %}
-    {{ form.non_field_errors }}
-    <p>
-        {{ form.username.label_tag }}
-        {{ form.username }}
-        {{ form.username.errors }}
-    </p>
-    <p>
-        {{ form.password.label_tag }}
-        <span style="display: inline-flex; align-items: center; gap: 4px;">
-            {{ form.password }}
-            <button type="button" id="toggle-senha" aria-label="Mostrar senha" class="btn p-0 border-0 bg-transparent d-inline-flex align-items-center">
-                <svg id="icone-olho-fechado" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
-                    <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a18.9 18.9 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-                    <line x1="1" y1="1" x2="23" y2="23"></line>
-                </svg>
-                <svg id="icone-olho-aberto" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"></path>
-                    <circle cx="12" cy="12" r="3"></circle>
-                </svg>
-            </button>
-        </span>
-        {{ form.password.errors }}
-    </p>
-    <button type="submit" class="btn btn-primary">Entrar</button>
-</form>
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    
+                    <!-- Uso do componente de erro para mensagens não atreladas a campos específicos -->
+                    {% if form.non_field_errors %}
+                        {% include "components/error_state.html" with message=form.non_field_errors %}
+                    {% endif %}
+
+                    <div class="mb-3">
+                        <label for="{{ form.username.id_for_label }}" class="form-label">Usuário</label>
+                        {{ form.username }}
+                        {% if form.username.errors %}
+                            <div class="text-danger small mt-1">{{ form.username.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="{{ form.password.id_for_label }}" class="form-label">Senha</label>
+                        
+                        <!-- Transformei a sua span em um "input-group" nativo do Bootstrap -->
+                        <div class="input-group">
+                            {{ form.password }}
+                            <button type="button" id="toggle-senha" aria-label="Mostrar senha" class="btn btn-outline-secondary">
+                                <!-- Ícone de olho fechado (Bootstrap Icons) -->
+                                <i class="bi bi-eye-slash" id="icone-olho-fechado" style="display: none;"></i>
+                                <!-- Ícone de olho aberto -->
+                                <i class="bi bi-eye" id="icone-olho-aberto"></i>
+                            </button>
+                        </div>
+                        
+                        {% if form.password.errors %}
+                            <div class="text-danger small mt-1">{{ form.password.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">Entrar</button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
 
 <script>
+    // Script mantido, mas ajustado para trocar a classe do ícone do Bootstrap Icons
     document.getElementById("toggle-senha").addEventListener("click", function () {
         const campoSenha = document.getElementById("id_password");
         const olhoAberto = document.getElementById("icone-olho-aberto");
@@ -41,8 +63,8 @@
         const ehSenha = campoSenha.type === "password";
 
         campoSenha.type = ehSenha ? "text" : "password";
-        olhoFechado.style.display = ehSenha ? "none" : "inline";
-        olhoAberto.style.display = ehSenha ? "inline" : "none";
+        olhoFechado.style.display = ehSenha ? "inline" : "none";
+        olhoAberto.style.display = ehSenha ? "none" : "inline";
         this.setAttribute("aria-label", ehSenha ? "Ocultar senha" : "Mostrar senha");
     });
 </script>

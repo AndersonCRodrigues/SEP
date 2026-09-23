@@ -43,6 +43,11 @@ class TeacherArea(BusinessRulesMixin, models.Model):
     def __str__(self):
         return f"{self.teacher} - {self.area}"
 
+    def save(self, *args, **kwargs):
+        if self.role not in (CustomUser.Role.PROFESSOR, CustomUser.Role.SUPERVISOR):
+            self.role = CustomUser.Role.PROFESSOR
+        super().save(*args, **kwargs)
+
 
 class Teacher(CustomUser):
     acting_areas = models.ManyToManyField(
@@ -69,4 +74,4 @@ class Teacher(CustomUser):
 
     def __str__(self):
         areas = ", ".join(a.nome for a in self.acting_areas.all())
-        return f"{self.nome_completo} ({areas})" if areas else self.nome_completo
+        return f"{self.get_full_name()} ({areas})" if areas else self.get_full_name()
