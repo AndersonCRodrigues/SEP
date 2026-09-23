@@ -19,17 +19,36 @@
                 <form method="post" novalidate>
                     {% csrf_token %}
                     <div class="mb-3">
-                        <label class="form-label">Área(s) de Atuação</label>
+                        <label class="form-label fw-semibold mb-3">Selecione a(s) Área(s) de Atuação</label>
+                        
                         {% for area in all_areas %}
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="areas" value="{{ area.pk }}" id="area{{ area.pk }}">
-                            <label class="form-check-label" for="area{{ area.pk }}">{{ area.nome }}</label>
+                        <div class="form-check d-flex align-items-center justify-content-between p-2 mb-2 border rounded {% if not area.esta_ativa %}bg-light{% endif %}">
+                            <div class="d-flex align-items-center gap-2">
+                                <input
+                                    class="form-check-input ms-1"
+                                    type="checkbox"
+                                    name="areas"
+                                    value="{{ area.pk }}"
+                                    id="area{{ area.pk }}"
+                                    {% if not area.esta_ativa %}disabled{% endif %}
+                                >
+                                <label class="form-check-label {% if not area.esta_ativa %}text-muted{% else %}fw-medium{% endif %}" for="area{{ area.pk }}">
+                                    {{ area.nome }}
+                                </label>
+                            </div>
+
+                            {% if area.esta_ativa %}
+                                <span class="badge text-bg-success">Ativa</span>
+                            {% else %}
+                                <span class="badge text-bg-secondary">Inativa — Sem Professor Cadastrado</span>
+                            {% endif %}
                         </div>
                         {% empty %}
                         <p class="text-body-secondary">Nenhuma área de atuação cadastrada.</p>
                         {% endfor %}
                     </div>
-                    <button type="submit" class="btn btn-primary">Encaminhar</button>
+
+                    <button type="submit" class="btn btn-primary mt-2">Encaminhar</button>
                 </form>
             </div>
         </section>
