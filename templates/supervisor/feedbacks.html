@@ -1,14 +1,65 @@
 {% extends "supervisor/base_coordinator.html" %}
+{% load components %}
 
 {% block title %}Feedback sobre triagens{% endblock %}
 
 {% block breadcrumbs %}
 <li class="breadcrumb-item"><a href="{% url 'supervisor:home' %}">Página inicial</a></li>
-<li class="breadcrumb-item active" aria-current="page">Feedback sobre triagens</li>
+<li class="breadcrumb-item active" aria-current="page">Feedbacks</li>
 {% endblock %}
 
 {% block page_title %}Feedback sobre triagens{% endblock %}
 
 {% block content %}
+{% section title="Filtros" class="filters" id="filters-title" %}
+<form class="feedback-filters" method="get" action="">
+  <p class="filter">
+    <label for="filter-situation">Situação</label>
+    <select id="filter-situation" name="situacao">
+      <option value="">Todos</option>
+      {% for value, label in situations %}
+      <option value="{{ value }}" {% if situation_filter == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </p>
+  <button type="submit">Filtrar</button>
+</form>
+{% endsection %}
+
+{% if rows %}
+{% data_table columns=columns label="Triagens analisadas" %}
+{% for row in rows %}
+<tr class="feedback">
+  <td class="feedback-student">{{ row.student }}</td>
+  <td class="feedback-patient">{{ row.patient }}</td>
+  <td class="feedback-status">
+    {% include "components/badge.html" with label=row.label level=row.level %}
+  </td>
+  <td class="feedback-action">
+    {% if not row.sent %}
+    <a href="?triagem={{ row.triage.pk }}">
+      Escrever<span class="visually-hidden"> o feedback de {{ row.student }}</span>
+    </a>
+    {% endif %}
+  </td>
+</tr>
+{% endfor %}
+{% enddata_table %}
+{% else %}
 {% include "components/empty_state.html" with message="Nenhum parecer a enviar." %}
+{% endif %}
+
+{% if chosen %}
+{% section title="Feedback para "|add:chosen.student_author.get_full_name class="feedback-form" id="feedback-form-title" %}
+<form class="feedback-write" method="post" action="{% url 'supervisor:feedbacks' %}">
+  {% csrf_token %}
+  <input type="hidden" name="triagem" value="{{ chosen.pk }}" />
+  <p class="field">
+    <label for="parecer">Triagem de {{ chosen.patient.get_full_name }}</label>
+    <textarea id="parecer" name="parecer" rows="5" placeholder="Escreva o feedback sobre a condução da triagem..."></textarea>
+  </p>
+  <button type="submit" class="send-feedback">Enviar avaliação</button>
+</form>
+{% endsection %}
+{% endif %}
 {% endblock %}
