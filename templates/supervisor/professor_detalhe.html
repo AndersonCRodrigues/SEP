@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}{{ professor.get_full_name }} | Sistema SEP{% endblock %}
+
+{% block breadcrumbs %}
+<li class="breadcrumb-item"><a href="{% url 'supervisor:home' %}">Página inicial</a></li>
+<li class="breadcrumb-item"><a href="{% url 'supervisor:professores' %}">Professores</a></li>
+<li class="breadcrumb-item active" aria-current="page">{{ professor.get_full_name }}</li>
+{% endblock %}
+
+{% block page_title %}{{ professor.get_full_name }}{% endblock %}
+
+{% block content %}
+<dl class="teacher-detail">
+  <div class="teacher-field">
+    <dt>Áreas de atuação</dt>
+    <dd>
+      {% for area in professor.acting_areas.all %}{{ area.nome }}{% if not forloop.last %}, {% endif %}{% empty %}Sem área{% endfor %}
+    </dd>
+  </div>
+  <div class="teacher-field">
+    <dt>CRP</dt>
+    <dd>{{ professor.crp|default:"Não informado" }}</dd>
+  </div>
+</dl>
+{% endblock %}

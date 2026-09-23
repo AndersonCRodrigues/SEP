@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Feedback sobre triagens | Sistema SEP{% endblock %}
+
+{% block breadcrumbs %}
+<li class="breadcrumb-item"><a href="{% url 'supervisor:home' %}">Página inicial</a></li>
+<li class="breadcrumb-item active" aria-current="page">Feedback sobre triagens</li>
+{% endblock %}
+
+{% block page_title %}Feedback sobre triagens{% endblock %}
+
+{% block content %}
+{% include "components/empty_state.html" with message="Nenhum parecer a enviar." %}
+{% endblock %}

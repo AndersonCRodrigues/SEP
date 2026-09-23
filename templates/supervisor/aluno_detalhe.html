@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}{{ aluno.get_full_name }} | Sistema SEP{% endblock %}
+
+{% block breadcrumbs %}
+<li class="breadcrumb-item"><a href="{% url 'supervisor:home' %}">Página inicial</a></li>
+<li class="breadcrumb-item"><a href="{% url 'supervisor:alunos' %}">Alunos</a></li>
+<li class="breadcrumb-item active" aria-current="page">{{ aluno.get_full_name }}</li>
+{% endblock %}
+
+{% block page_title %}{{ aluno.get_full_name }}{% endblock %}
+
+{% block content %}
+<dl class="student-detail">
+  <div class="student-field">
+    <dt>Orientador</dt>
+    <dd>{{ aluno.current_advisor.get_full_name|default:"Sem orientador" }}</dd>
+  </div>
+  <div class="student-field">
+    <dt>Fase do estágio</dt>
+    <dd>{{ aluno.get_stage_display }}</dd>
+  </div>
+</dl>
+{% endblock %}

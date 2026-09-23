@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Triagens para analisar | Sistema SEP{% endblock %}
+
+{% block breadcrumbs %}
+<li class="breadcrumb-item"><a href="{% url 'supervisor:home' %}">Página inicial</a></li>
+<li class="breadcrumb-item active" aria-current="page">Triagens para analisar</li>
+{% endblock %}
+
+{% block page_title %}Triagens para analisar{% endblock %}
+
+{% block content %}
+{% include "components/empty_state.html" with message="Nenhuma triagem aguardando análise." %}
+{% endblock %}

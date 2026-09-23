@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Novo encaminhamento | Sistema SEP{% endblock %}
+
+{% block breadcrumbs %}
+<li class="breadcrumb-item"><a href="{% url 'supervisor:home' %}">Página inicial</a></li>
+<li class="breadcrumb-item active" aria-current="page">Novo encaminhamento</li>
+{% endblock %}
+
+{% block page_title %}Novo encaminhamento{% endblock %}
+
+{% block content %}
+{% include "components/empty_state.html" with message="Nenhuma triagem analisada esperando encaminhamento." %}
+{% endblock %}

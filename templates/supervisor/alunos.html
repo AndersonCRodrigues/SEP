@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Alunos cadastrados | Sistema SEP{% endblock %}
+
+{% block breadcrumbs %}
+<li class="breadcrumb-item"><a href="{% url 'supervisor:home' %}">Página inicial</a></li>
+<li class="breadcrumb-item active" aria-current="page">Alunos</li>
+{% endblock %}
+
+{% block page_title %}Alunos cadastrados{% endblock %}
+
+{% block content %}
+{% if alunos %}
+<ul class="student-list">
+  {% for aluno in alunos %}
+  <li class="student">
+    <a href="{% url 'supervisor:aluno_detalhe' aluno.pk %}">{{ aluno.get_full_name }}</a>
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+{% include "components/empty_state.html" with message="Nenhum aluno cadastrado." %}
+{% endif %}
+{% endblock %}

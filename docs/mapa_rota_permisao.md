@@ -83,13 +83,30 @@ O `perfil/` continua no grupo do Django enquanto as outras rotas do Aluno confer
  
 | Rota | View | Mecanismo | Quem acessa |
 |---|---|---|---|
-| home | HomeSupervisorView | GroupRequiredMixin("Supervisor") | Grupo Supervisor |
-| painel/ | PainelSupervisorView | GroupRequiredMixin("Supervisor") | Grupo Supervisor |
-| usuarios/ | ListarUsuariosView | GroupRequiredMixin("Supervisor") | Grupo Supervisor |
+| home | CoordinatorHomeView | CoordinatorOnly (LoginRequiredMixin + UserPassesTestMixin, role SV) | COORDENADOR |
+| professores/ | CoordinatorTeachersView | CoordinatorOnly | COORDENADOR |
+| professores/\<pk\>/ | CoordinatorTeacherDetailView | CoordinatorOnly | COORDENADOR |
+| alunos/ | CoordinatorStudentsView | CoordinatorOnly | COORDENADOR |
+| alunos/\<pk\>/ | CoordinatorStudentDetailView | CoordinatorOnly | COORDENADOR |
+| triagens/ | CoordinatorTriagesView | CoordinatorOnly | COORDENADOR |
+| encaminhamentos/ | CoordinatorReferralsView | CoordinatorOnly | COORDENADOR |
+| feedbacks/ | CoordinatorFeedbacksView | CoordinatorOnly | COORDENADOR |
+| usuarios/ | CoordinatorTeachersView | CoordinatorOnly | COORDENADOR; é a mesma listagem de professores, mantida pelo nome antigo |
+| painel/ | PainelSupervisorView | GroupRequiredMixin("Supervisor") | Grupo Supervisor, tela antiga |
+| perfil/ | PerfilSupervisorView | GroupRequiredMixin("Supervisor") | Grupo Supervisor, só o próprio |
 | register/ | cadastrar_supervisor | has_perm("core.add_customuser") | Superadmin |
 | areas/ | ListaAreasView | GroupRequiredMixin("Supervisor") | Grupo Supervisor |
-| areas/nova/ | CriarAreaView | has_perm("areas.add_areaacting") | Supervisor |
-| areas/<pk>/editar/ | EditarAreaView | has_perm("areas.change_areaacting") | Supervisor |
+| areas/nova/ | CriarAreaView | has_perm("areas.add_areaacting") | Coordenador |
+| areas/\<pk\>/editar/ | EditarAreaView | has_perm("areas.change_areaacting") | Coordenador |
+
+O papel `SV` se chama **Coordenador** na interface; a pasta `supervisor/`, a rota
+`/supervisor/`, o namespace `supervisor:` e o grupo do Django "Supervisor"
+continuam com o nome antigo. As telas novas conferem a role; as antigas seguem no
+grupo, a mesma mistura de mecanismos já registrada na legenda.
+
+O cadastro de professor e o de aluno continuam em `/teacher/cadastrar/` e
+`/students/cadastrar/`, por permissão do Django, e é para lá que os botões de
+cadastrar da área do Coordenador apontam.
  
 ## superadmin/ (prefixo /superadmin/)
  
