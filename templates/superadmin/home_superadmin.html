@@ -7,7 +7,7 @@
 <li class="breadcrumb-item active" aria-current="page">Superadmin</li>
 {% endblock %}
 
-{% block page_title %}Olá, Superadmin!{% endblock %}
+{% block page_title %}Olá, equipe de TI!{% endblock %}
 
 {% block content %}
 
@@ -15,49 +15,72 @@
     <div class="col-12 col-md-6 col-lg-3">
         <section class="card h-100">
             <div class="card-body">
-                <h2 class="h6 card-title text-body-secondary">Usuários cadastrados</h2>
-                <p class="display-6 mb-0">{{ total_usuarios }}</p>
+                <h2 class="h6 card-title text-body-secondary">Usuários ativos</h2>
+                <p class="display-6 mb-0">{{ active_users }}</p>
             </div>
         </section>
     </div>
     <div class="col-12 col-md-6 col-lg-3">
         <section class="card h-100">
             <div class="card-body">
-                <h2 class="h6 card-title text-body-secondary">Usuários ativos</h2>
-                <p class="display-6 mb-0">{{ usuarios_ativos }}</p>
+                <h2 class="h6 card-title text-body-secondary">Logs hoje</h2>
+                <p class="display-6 mb-0">{{ logs_today }}</p>
+            </div>
+        </section>
+    </div>
+    <div class="col-12 col-md-6 col-lg-3">
+        <section class="card h-100">
+            <div class="card-body">
+                <h2 class="h6 card-title text-body-secondary">Alertas abertos</h2>
+                <p class="display-6 mb-0">{{ open_alerts }}</p>
             </div>
         </section>
     </div>
 </div>
 
-<section class="card mt-3">
-    <div class="card-body">
-        <h2 class="h5 card-title">Usuários por papel</h2>
-        <ul class="list-group list-group-flush">
-            {% for item in usuarios_por_role %}
-            <li class="list-group-item d-flex justify-content-between">
-                <span>{{ item.label }}</span>
-                <span class="badge text-bg-secondary">{{ item.total }}</span>
-            </li>
-            {% empty %}
-            <li class="list-group-item text-body-secondary">Nenhum usuário cadastrado ainda.</li>
-            {% endfor %}
-        </ul>
+<div class="row g-3 mt-1">
+    <div class="col-12 col-lg-7">
+        <section class="card h-100">
+            <div class="card-body">
+                <h2 class="h5 card-title">Atividades recentes</h2>
+                <div class="list-group list-group-flush">
+                    {% for activity in recent_activities %}
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <strong>{{ activity.title }}</strong>
+                
+                            {% if activity.status %}
+                            <span class="badge text-bg-secondary">
+                                {{ activity.status }}
+                            </span>
+                            {% endif %}
+                        </div>
+                
+                        <div class="text-body-secondary small">
+                            {{ activity.when|date:"d/m H:i" }} — {{ activity.detail }}
+                        </div>
+                    </div>
+                
+                    {% empty %}
+                
+                    {% include "components/empty_state.html" with message="Nenhuma atividade recente." %}
+                
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
     </div>
-</section>
 
-<section class="card mt-3">
-    <div class="card-body">
-        <h2 class="h5 card-title">Acessos principais</h2>
-        <div class="d-flex flex-wrap gap-2">
-            <a href="{% url 'superadmin:servidores' %}" class="btn btn-outline-primary">Servidores</a>
-            <a href="{% url 'superadmin:logs' %}" class="btn btn-outline-primary">Logs de Segurança</a>
-            <a href="{% url 'superadmin:permissoes' %}" class="btn btn-outline-primary">Permissões</a>
-            <a href="{% url 'superadmin:backups' %}" class="btn btn-outline-primary">Backups</a>
-            <a href="{% url 'supervisor:register' %}" class="btn btn-outline-primary">Cadastrar Coordenador</a>
-            <a href="{% url 'administration:cadastrar' %}" class="btn btn-outline-primary">Cadastrar Administrativo</a>
+    <div class="col-12 col-lg-5">
+        {% if alert_server %}
+        {% include "components/alert.html" with level="warning" message=alert_message %}
+        <div class="mt-2">
+            <a href="{% url 'superadmin:servidores' %}" class="btn btn-primary btn-sm">Ver logs de infraestrutura</a>
         </div>
+        {% else %}
+        {% include "components/alert.html" with level="success" message="Nenhum alerta ativo no momento." %}
+        {% endif %}
     </div>
-</section>
+</div>
 
 {% endblock %}
