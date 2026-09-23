@@ -35,9 +35,10 @@ def enviar_email_credenciais(user, senha_temporaria, usuario_responsavel=None):
 
         SecurityLog.objects.create(
             user=usuario_responsavel or user,
-            action="EMAIL_BOAS_VINDAS_ENVIADO",
+            action=SecurityLog.Action.CREATE,
+            detail=f"Email de boas-vindas enviado com sucesso para {user.email}.",
             target_model="Patient",
-            target_id=user.pk,
+            target_id=str(user.pk),
         )
 
     except Exception as e:
@@ -45,8 +46,8 @@ def enviar_email_credenciais(user, senha_temporaria, usuario_responsavel=None):
 
         SecurityLog.objects.create(
             user=usuario_responsavel or user,
-            action="FALHA_ENVIO_EMAIL",
-            details=f"Erro SMTP ao tentar notificar {user.email}: {str(e)}",
+            action=SecurityLog.Action.CREATE,
+            detail=f"Falha ao enviar email de boas-vindas para {user.email}: {e}",
             target_model="Patient",
-            target_id=user.pk,
+            target_id=str(user.pk),
         )
