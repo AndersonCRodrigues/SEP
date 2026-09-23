@@ -3,50 +3,40 @@
 {% block title %}Minhas Triagens | Sistema SEP{% endblock %}
 
 {% block content %}
-<header class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="h3 mb-0">Minhas Triagens</h1>
-</header>
+<h1 class="h3 mb-4">Minhas Triagens</h1>
 
-<div class="row">
-    <div class="col-12">
-        <section class="card">
-            <div class="card-body">
-                {% if triagens %}
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle">
-                        <thead>
-                            <tr>
-                                <th>Paciente</th>
-                                <th>Data</th>
-                                <th>Status</th>
-                                <th>Ação</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for triage in triagens %}
-                            <tr>
-                                <td><strong>{{ triage.patient.nome_completo }}</strong></td>
-                                <td>{{ triage.created_at|date:"d/m/Y H:i" }}</td>
-                                <td>
-                                    <span class="badge bg-secondary">
-                                        {{ triage.get_status_display }}
-                                    </span>
-                                </td>
-                                <td>
-                                    <a href="{% url 'triage_detail' triage.pk %}" class="btn btn-sm btn-outline-primary">
-                                        Ver Detalhes / Feedback
-                                    </a>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                {% else %}
-                <p class="text-body-secondary mb-0">Você ainda não realizou nenhuma triagem.</p>
-                {% endif %}
-            </div>
-        </section>
+<section class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col">Paciente</th>
+                        <th scope="col">Criada em</th>
+                        <th scope="col">Status</th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for triagem in triagens %}
+                    <tr>
+                        <td>{{ triagem.patient.nome_completo }}</td>
+                        <td>{{ triagem.created_at }}</td>
+                        <td><span class="badge text-bg-secondary">{{ triagem.get_status_display }}</span></td>
+                        <td class="text-end">
+                            <a href="{% url 'triage_detail_student' triagem.pk %}" class="btn btn-outline-primary btn-sm">Ver</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4">
+                            {% include "components/empty_state.html" with message="Você ainda não fez nenhuma triagem." %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
-</div>
+</section>
 {% endblock %}
