@@ -10,49 +10,49 @@
 {% endblock %}
 
 {% block main_nav %}
-{% with current=request.resolver_match.url_name %}
+{% with current=request.resolver_match.view_name %}
 <nav class="main-nav" aria-label="Navegação principal">
   <ul class="navbar-nav">
     <li class="nav-item">
       <a
         class="nav-link"
         href="{% url 'supervisor:home' %}"
-        {% if current == 'home' %}aria-current="page"{% endif %}
+        {% if current == 'supervisor:home' %}aria-current="page"{% endif %}
       >Página inicial</a>
     </li>
     <li class="nav-item">
       <a
         class="nav-link"
         href="{% url 'supervisor:alunos' %}"
-        {% if current == 'alunos' or current == 'aluno_detalhe' %}aria-current="page"{% endif %}
+        {% if current == 'supervisor:alunos' or current == 'supervisor:aluno_detalhe' or current == 'students:cadastrar' %}aria-current="page"{% endif %}
       >Alunos</a>
     </li>
     <li class="nav-item">
       <a
         class="nav-link"
         href="{% url 'supervisor:professores' %}"
-        {% if current == 'professores' or current == 'professor_detalhe' or current == 'listar_usuarios' %}aria-current="page"{% endif %}
+        {% if current == 'supervisor:professores' or current == 'supervisor:professor_detalhe' or current == 'supervisor:listar_usuarios' or current == 'teacher:cadastrar' %}aria-current="page"{% endif %}
       >Professores</a>
     </li>
     <li class="nav-item">
       <a
         class="nav-link"
         href="{% url 'supervisor:triagens' %}"
-        {% if current == 'triagens' %}aria-current="page"{% endif %}
+        {% if current == 'supervisor:triagens' or current == 'supervisor:triagem_detalhe' %}aria-current="page"{% endif %}
       >Triagens</a>
     </li>
     <li class="nav-item">
       <a
         class="nav-link"
         href="{% url 'supervisor:feedbacks' %}"
-        {% if current == 'feedbacks' %}aria-current="page"{% endif %}
+        {% if current == 'supervisor:feedbacks' %}aria-current="page"{% endif %}
       >Feedbacks</a>
     </li>
     <li class="nav-item">
       <a
         class="nav-link"
         href="{% url 'supervisor:encaminhamentos' %}"
-        {% if current == 'encaminhamentos' %}aria-current="page"{% endif %}
+        {% if current == 'supervisor:encaminhamentos' or current == 'supervisor:encaminhar' %}aria-current="page"{% endif %}
       >Encaminhamentos</a>
     </li>
   </ul>
