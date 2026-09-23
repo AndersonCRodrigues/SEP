@@ -69,7 +69,7 @@ class Referral(BusinessRulesMixin,models.Model):
     def can_be_created_by(cls, user,triage=None, **context):
          if not super().can_be_created_by(user):
             return False
-         if triage and triage.status==TriageStatus.SUBMITTED:
+         if triage and triage.status in (TriageStatus.SUBMITTED, TriageStatus.FINALIZED_EDITION):
             return True
          else:
              return False
