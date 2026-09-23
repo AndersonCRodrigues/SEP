@@ -1,6 +1,6 @@
-{% extends "base.html" %}
+{% extends "supervisor/base_coordinator.html" %}
 
-{% block title %}{{ professor.get_full_name }} | Sistema SEP{% endblock %}
+{% block title %}{{ professor.get_full_name }}{% endblock %}
 
 {% block breadcrumbs %}
 <li class="breadcrumb-item"><a href="{% url 'supervisor:home' %}">Página inicial</a></li>
