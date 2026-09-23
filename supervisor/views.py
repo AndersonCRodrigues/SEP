@@ -82,7 +82,7 @@ def cadastrar_supervisor(request):
                 request,
                 f"Supervisor {user.get_full_name()} cadastrado e e-mail enviado com sucesso!",
             )
-            return redirect("superadmin:painel")
+            return redirect("superadmin:home")
     else:
         form = SupervisorCreationForm()
 
