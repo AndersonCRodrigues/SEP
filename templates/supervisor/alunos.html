@@ -1,4 +1,5 @@
 {% extends "supervisor/base_coordinator.html" %}
+{% load components %}
 
 {% block title %}Alunos cadastrados{% endblock %}
 
@@ -9,15 +10,50 @@
 
 {% block page_title %}Alunos cadastrados{% endblock %}
 
+{% block page_actions %}
+<a class="new-student" href="{% url 'students:cadastrar' %}">+ cadastrar aluno</a>
+{% endblock %}
+
 {% block content %}
-{% if alunos %}
-<ul class="student-list">
-  {% for aluno in alunos %}
-  <li class="student">
-    <a href="{% url 'supervisor:aluno_detalhe' aluno.pk %}">{{ aluno.get_full_name }}</a>
-  </li>
-  {% endfor %}
-</ul>
+{% section title="Filtros" class="filters" id="filters-title" %}
+<form class="student-filters" method="get" action="">
+  <p class="filter">
+    <label for="filter-search">Buscar por nome ou matrícula</label>
+    <input type="search" id="filter-search" name="q" value="{{ search }}" />
+  </p>
+  <p class="filter">
+    <label for="filter-area">Área do orientador</label>
+    <select id="filter-area" name="area">
+      <option value="">Todas</option>
+      {% for area in areas %}
+      <option value="{{ area.pk }}" {% if area_filter == area.pk|stringformat:"s" %}selected{% endif %}>
+        {{ area.nome }}
+      </option>
+      {% endfor %}
+    </select>
+  </p>
+  <button type="submit">Filtrar</button>
+</form>
+{% endsection %}
+
+{% if students %}
+{% data_table columns=columns label="Alunos cadastrados" %}
+{% for row in students %}
+<tr class="student">
+  <td class="student-name">{{ row.student.get_full_name }}</td>
+  <td class="student-advisor">{{ row.advisor }}</td>
+  <td class="student-stage">{{ row.stage }}</td>
+  <td class="student-status">
+    {% include "components/badge.html" with label=row.label level=row.level %}
+  </td>
+  <td class="student-action">
+    <a href="{% url 'supervisor:aluno_detalhe' row.student.pk %}">
+      Editar<span class="visually-hidden"> {{ row.student.get_full_name }}</span>
+    </a>
+  </td>
+</tr>
+{% endfor %}
+{% enddata_table %}
 {% else %}
 {% include "components/empty_state.html" with message="Nenhum aluno cadastrado." %}
 {% endif %}

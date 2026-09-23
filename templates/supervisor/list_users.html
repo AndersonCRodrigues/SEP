@@ -1,4 +1,5 @@
 {% extends "supervisor/base_coordinator.html" %}
+{% load components %}
 
 {% block title %}Professores cadastrados{% endblock %}
 
@@ -10,34 +11,50 @@
 {% block page_title %}Professores cadastrados{% endblock %}
 
 {% block page_actions %}
-<a href="{% url 'teacher:cadastrar' %}" class="btn btn-primary btn-sm">+ cadastrar professor</a>
+<a class="new-teacher" href="{% url 'teacher:cadastrar' %}">+ cadastrar professor</a>
 {% endblock %}
 
 {% block content %}
-<section class="card">
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-striped align-middle mb-0">
-                <thead>
-                    <tr>
-                        <th scope="col">Nome</th>
-                        <th scope="col">Papel</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for usuario in usuarios_listados %}
-                    <tr>
-                        <td>{{ usuario.get_full_name }}</td>
-                        <td><span class="badge text-bg-primary">{{ usuario.get_role_display }}</span></td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="2" class="text-body-secondary">Nenhum professor cadastrado.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-</section>
+{% section title="Filtros" class="filters" id="filters-title" %}
+<form class="teacher-filters" method="get" action="">
+  <p class="filter">
+    <label for="filter-search">Buscar por nome</label>
+    <input type="search" id="filter-search" name="q" value="{{ search }}" />
+  </p>
+  <p class="filter">
+    <label for="filter-area">Área de atuação</label>
+    <select id="filter-area" name="area">
+      <option value="">Todas</option>
+      {% for area in areas %}
+      <option value="{{ area.pk }}" {% if area_filter == area.pk|stringformat:"s" %}selected{% endif %}>
+        {{ area.nome }}
+      </option>
+      {% endfor %}
+    </select>
+  </p>
+  <button type="submit">Filtrar</button>
+</form>
+{% endsection %}
+
+{% if teachers %}
+{% data_table columns=columns label="Professores cadastrados" %}
+{% for row in teachers %}
+<tr class="teacher">
+  <td class="teacher-name">{{ row.teacher.get_full_name }}</td>
+  <td class="teacher-areas">{{ row.areas|default:"Sem área" }}</td>
+  <td class="teacher-advisees">{{ row.advisees }} aluno{{ row.advisees|pluralize }}</td>
+  <td class="teacher-status">
+    {% include "components/badge.html" with label=row.label level=row.level %}
+  </td>
+  <td class="teacher-action">
+    <a href="{% url 'supervisor:professor_detalhe' row.teacher.pk %}">
+      Editar<span class="visually-hidden"> {{ row.teacher.get_full_name }}</span>
+    </a>
+  </td>
+</tr>
+{% endfor %}
+{% enddata_table %}
+{% else %}
+{% include "components/empty_state.html" with message="Nenhum professor cadastrado." %}
+{% endif %}
 {% endblock %}
