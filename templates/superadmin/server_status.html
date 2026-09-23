@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Status dos Servidores | Sistema SEP{% endblock %}
+
+{% block breadcrumbs %}
+{{ block.super }}
+<li class="breadcrumb-item"><a href="{% url 'superadmin:home' %}">Superadmin</a></li>
+<li class="breadcrumb-item active" aria-current="page">Servidores</li>
+{% endblock %}
+
+{% block page_title %}Status dos servidores{% endblock %}
+
+{% block content %}
+<section class="card">
+    <div class="card-body">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Servidor</th>
+                    <th>Uptime</th>
+                    <th>CPU</th>
+                    <th>Memória</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for servidor in servidores %}
+                <tr>
+                    <td>{{ servidor.nome }}</td>
+                    <td>{{ servidor.uptime_percent }}%</td>
+                    <td>CPU {{ servidor.cpu_percent }}%</td>
+                    <td>MEM {{ servidor.memoria_percent }}%</td>
+                    <td>
+                        {% if servidor.health == "OK" %}
+                        <span class="badge text-bg-success">Saudável</span>
+                        {% else %}
+                        <span class="badge text-bg-danger">Atenção</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5">{% include "components/empty_state.html" with message="Nenhum servidor cadastrado."
+                        %}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}
