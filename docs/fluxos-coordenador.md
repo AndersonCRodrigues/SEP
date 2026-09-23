@@ -37,10 +37,16 @@ notificações, conta).
 
 ## 2. Ordem dos fluxos
 
-**Triagem e encaminhamento.** Página inicial (indicador "Triagens pendentes") →
-Triagens para analisar → "Analisar" abre a triagem → Novo encaminhamento, onde o
-Coordenador escolhe o professor ou os professores → "Confirmar encaminhamento" →
-volta para a fila, e o caso aparece em Encaminhamentos recentes.
+**Triagem e encaminhamento.** O aluno conclui a triagem e ela vai para a
+coordenação. Página inicial (indicador "Triagens pendentes") → Triagens para
+analisar → "Analisar" abre a triagem → Novo encaminhamento, que lista as últimas
+triagens concluídas: o Coordenador escolhe o paciente, filtra os professores pela
+área de atuação do caso e marca quem vai receber → "Confirmar encaminhamento" →
+o caso aparece em Encaminhamentos recentes.
+
+Concluir a triagem **não** dá alta ao paciente: a triagem é a etapa inicial do
+atendimento, e a alta só existe no fim dele. O paciente fica aguardando o parecer
+da coordenação até ser encaminhado.
 
 **Feedback.** Página inicial (indicador "Feedbacks a enviar") → Feedback sobre
 triagens → "Enviar" abre o campo de escrita daquele aluno → "Enviar avaliação" →
@@ -71,7 +77,7 @@ alcance total nas triagens, pacientes, alunos e professores.
 | Professores cadastrados | Nenhum professor cadastrado | Falha ao carregar a lista | Professor cadastrado |
 | Alunos cadastrados | Nenhum aluno cadastrado | Falha ao carregar a lista | Aluno cadastrado |
 | Triagens para analisar | Nenhuma triagem aguardando análise | Falha ao carregar a fila | — |
-| Novo encaminhamento | Nenhuma triagem analisada esperando encaminhamento | Falha ao carregar, ou professor não escolhido | Encaminhamento confirmado |
+| Novo encaminhamento | Nenhuma triagem concluída esperando encaminhamento | Falha ao carregar, ou professor não escolhido | Encaminhamento confirmado |
 | Feedback sobre triagens | Nenhum parecer a enviar | Falha ao carregar a lista | Parecer enviado |
 | Adicionar professores | — | Campo inválido, e-mail ou CPF já cadastrado | Cadastro concluído |
 | Adicionar alunos | — | Campo inválido, e-mail, CPF ou matrícula já cadastrados | Cadastro concluído |

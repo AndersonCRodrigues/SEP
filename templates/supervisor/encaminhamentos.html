@@ -12,15 +12,47 @@
 
 {% block content %}
 <div class="panel">
-  {% section title="Triagem escolhida" class="referral-form" id="referral-title" %}
+  {% section title="Triagens concluídas" class="concluded-triages" id="concluded-title" %}
+  <ul class="triage-choice-list">
+    {% for item in triagens %}
+    <li class="triage-choice{% if item.selected %} triage-choice-selected{% endif %}">
+      <a
+        href="{% url 'supervisor:encaminhar' item.triage.pk %}"
+        {% if item.selected %}aria-current="true"{% endif %}
+      >{{ item.patient }}</a>
+      <p class="triage-choice-student">Triagem por {{ item.student }}</p>
+      <p class="triage-choice-received">{{ item.received }}</p>
+    </li>
+    {% empty %}
+    <li class="triage-choice-empty">
+      {% include "components/empty_state.html" with message="Nenhuma triagem concluída esperando encaminhamento." %}
+    </li>
+    {% endfor %}
+  </ul>
+  {% endsection %}
+
   {% if triagem %}
+  {% section title="Encaminhar paciente" class="referral-form" id="referral-title" %}
   <div class="referral-patient">
     <p class="referral-label">Paciente</p>
     <p class="referral-name">{{ triagem.patient.get_full_name }}</p>
-    <p class="referral-date">
-      Triagem realizada por {{ triagem.student_author.get_full_name }}
-    </p>
+    <p class="referral-date">Triagem realizada por {{ triagem.student_author.get_full_name }}</p>
   </div>
+
+  <form class="referral-area" method="get" action="{% url 'supervisor:encaminhar' triagem.pk %}">
+    <p class="filter">
+      <label for="filter-area">Área de atuação do caso</label>
+      <select id="filter-area" name="area">
+        <option value="">Todas</option>
+        {% for area in areas %}
+        <option value="{{ area.pk }}" {% if area_filter == area.pk|stringformat:"s" %}selected{% endif %}>
+          {{ area.nome }}
+        </option>
+        {% endfor %}
+      </select>
+    </p>
+    <button type="submit">Filtrar professores</button>
+  </form>
 
   <form class="referral-choice" method="post" action="{% url 'supervisor:encaminhar' triagem.pk %}">
     {% csrf_token %}
@@ -42,17 +74,15 @@
       </p>
       {% empty %}
       <p class="teacher-empty">
-        {% include "components/empty_state.html" with message="Nenhum professor cadastrado para receber o encaminhamento." %}
+        {% include "components/empty_state.html" with message="Nenhum professor com essa área de atuação." %}
       </p>
       {% endfor %}
     </fieldset>
 
     <button type="submit" class="confirm-referral">Confirmar encaminhamento</button>
   </form>
-  {% else %}
-  {% include "components/empty_state.html" with message="Nenhuma triagem analisada esperando encaminhamento." %}
-  {% endif %}
   {% endsection %}
+  {% endif %}
 
   {% section title="Encaminhamentos recentes" class="referral-recent" id="recent-title" %}
   <ul class="referral-list">

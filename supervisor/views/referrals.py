@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.utils import timezone
 from django.views.generic import TemplateView
 
+from areas.models import AreaActing
 from core.constants import TriageStatus
 from core.models import CustomUser
 from patient.models import Patient
@@ -12,8 +13,10 @@ from teacher.models import Teacher
 from triage.models import TriageRecord
 
 from .access import CoordinatorOnly
+from .triages import received_label
 
-OPEN_FOR_REFERRAL = (TriageStatus.SUBMITTED, TriageStatus.CLOSED)
+CONCLUDED = (TriageStatus.SUBMITTED, TriageStatus.CLOSED)
+CONCLUDED_LIMIT = 10
 RECENT_LIMIT = 6
 
 
@@ -23,12 +26,24 @@ class CoordinatorReferralsView(CoordinatorOnly, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.request.user
+        now = timezone.localtime()
         triagem = self.selected_triage(user)
+        area = self.request.GET.get("area", "")
 
+        context["triagens"] = [
+            {
+                "triage": record,
+                "patient": record.patient.get_full_name(),
+                "student": record.student_author.get_full_name(),
+                "received": received_label(record.created_at, now),
+                "selected": triagem is not None and record.pk == triagem.pk,
+            }
+            for record in self.concluded(user)[:CONCLUDED_LIMIT]
+        ]
         context["triagem"] = triagem
-        context["teachers"] = Teacher.objects.filter(
-            role=CustomUser.Role.PROFESSOR
-        ).prefetch_related("acting_areas")
+        context["areas"] = AreaActing.objects.order_by("nome")
+        context["area_filter"] = area
+        context["teachers"] = self.teachers(area)
         context["chosen"] = (
             set(triagem.patient.responsible_teachers.values_list("pk", flat=True))
             if triagem
@@ -40,7 +55,7 @@ class CoordinatorReferralsView(CoordinatorOnly, TemplateView):
     def post(self, request, *args, **kwargs):
         triagem = self.selected_triage(request.user)
         if triagem is None:
-            messages.error(request, "Nenhuma triagem disponível para encaminhar.")
+            messages.error(request, "Escolha a triagem do paciente a encaminhar.")
             return redirect("supervisor:encaminhamentos")
 
         escolhidos = Teacher.objects.filter(
@@ -62,18 +77,31 @@ class CoordinatorReferralsView(CoordinatorOnly, TemplateView):
         )
         return redirect("supervisor:encaminhamentos")
 
-    def selected_triage(self, user):
-        disponiveis = (
+    @staticmethod
+    def concluded(user):
+        return (
             TriageRecord.objects.visible_to(user)
-            .filter(status__in=OPEN_FOR_REFERRAL)
+            .filter(status__in=CONCLUDED)
             .select_related("patient", "student_author")
             .order_by("-created_at")
         )
 
-        if self.kwargs.get("pk"):
-            return get_object_or_404(disponiveis, pk=self.kwargs["pk"])
+    @staticmethod
+    def teachers(area):
+        professores = Teacher.objects.filter(
+            role=CustomUser.Role.PROFESSOR
+        ).prefetch_related("acting_areas")
 
-        return disponiveis.first()
+        if area.isdigit():
+            professores = professores.filter(acting_areas__pk=area)
+
+        return professores.distinct().order_by("first_name", "last_name")
+
+    def selected_triage(self, user):
+        if self.kwargs.get("pk"):
+            return get_object_or_404(self.concluded(user), pk=self.kwargs["pk"])
+
+        return self.concluded(user).first()
 
     @staticmethod
     @transaction.atomic
