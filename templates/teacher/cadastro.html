@@ -1,23 +1,36 @@
-{% extends "base.html" %}
+{% extends "supervisor/base_coordinator.html" %}
+{% load components %}
 
-{% block title %}Cadastrar Professor | Sistema SEP{% endblock %}
+{% block title %}Adicionar professores{% endblock %}
 
 {% block breadcrumbs %}
-    <li class="breadcrumb-item"><a href="{% url 'home_redirect' %}">Página inicial</a></li>
-    <li class="breadcrumb-item active" aria-current="page">Cadastrar Professor</li>
+<li class="breadcrumb-item"><a href="{% url 'supervisor:home' %}">Página inicial</a></li>
+<li class="breadcrumb-item"><a href="{% url 'supervisor:professores' %}">Professores</a></li>
+<li class="breadcrumb-item active" aria-current="page">Adicionar</li>
 {% endblock %}
 
-{% block page_title %}Cadastrar Professor{% endblock %}
+{% block page_title %}Adicionar professores{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-12 col-lg-8">
-        <section class="card">
-            <div class="card-body">
-                <!-- Injeção do componente de formulário -->
-                {% include "components/form.html" with submit_label="Cadastrar" %}
-            </div>
-        </section>
-    </div>
-</div>
+{% if form.errors %}
+{% include "components/alert.html" with message="Confira os campos destacados abaixo." level="danger" %}
+{% endif %}
+
+<form class="teacher-form" method="post" novalidate>
+  {% csrf_token %}
+  {{ form.as_p }}
+
+  {# TODO: campos sem persistência; as duas permissões ainda não existem no cadastro #}
+  <fieldset class="teacher-permissions">
+    <legend>Permissões</legend>
+    {% for permissao in permissoes %}
+    <p class="permission">
+      <input type="checkbox" id="permissao-{{ permissao.value }}" name="permissoes" value="{{ permissao.value }}" />
+      <label for="permissao-{{ permissao.value }}">{{ permissao.label }}</label>
+    </p>
+    {% endfor %}
+  </fieldset>
+
+  <button type="submit" class="submit-teacher">Cadastrar professor</button>
+</form>
 {% endblock %}

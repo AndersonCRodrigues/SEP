@@ -1,3 +1,4 @@
+from supervisor.views.mocks import teacher_permissions
 from django.shortcuts import render, redirect, get_object_or_404
 from students.models import Advising, advisees_visible_to
 from django.contrib import messages
@@ -165,7 +166,11 @@ def cadastrar_professor(request):
     else:
         form = ProfessorCreationForm()
 
-    return render(request, "teacher/cadastro.html", {"form": form})
+    return render(
+        request,
+        "teacher/cadastro.html",
+        {"form": form, "permissoes": teacher_permissions()},
+    )
 
 
 class PerfilProfessorView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):

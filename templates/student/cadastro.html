@@ -1,21 +1,36 @@
-{% extends "base.html" %}
+{% extends "supervisor/base_coordinator.html" %}
+{% load components %}
 
-{% block title %}Cadastrar Aluno | Sistema SEP{% endblock %}
+{% block title %}Adicionar alunos{% endblock %}
+
+{% block breadcrumbs %}
+<li class="breadcrumb-item"><a href="{% url 'supervisor:home' %}">Página inicial</a></li>
+<li class="breadcrumb-item"><a href="{% url 'supervisor:alunos' %}">Alunos</a></li>
+<li class="breadcrumb-item active" aria-current="page">Adicionar</li>
+{% endblock %}
+
+{% block page_title %}Adicionar alunos{% endblock %}
 
 {% block content %}
-<h1 class="h3 mb-4">Cadastrar Aluno</h1>
+{% if form.errors %}
+{% include "components/alert.html" with message="Confira os campos destacados abaixo." level="danger" %}
+{% endif %}
 
-<div class="row">
-    <div class="col-12 col-lg-8">
-        <section class="card">
-            <div class="card-body">
-                <form method="post">
-                    {% csrf_token %}
-                    {{ form.as_p }}
-                    <button type="submit" class="btn btn-primary">Cadastrar</button>
-                </form>
-            </div>
-        </section>
-    </div>
-</div>
+<form class="student-form" method="post" novalidate>
+  {% csrf_token %}
+  {{ form.as_p }}
+
+  {# TODO: campos sem persistência; curso e período ainda não existem no cadastro #}
+  <fieldset class="student-enrollment">
+    <legend>Dados acadêmicos</legend>
+    {% for campo in matricula_academica %}
+    <p class="field">
+      <label for="campo-{{ campo.value }}">{{ campo.label }}</label>
+      <input type="text" id="campo-{{ campo.value }}" name="{{ campo.value }}" />
+    </p>
+    {% endfor %}
+  </fieldset>
+
+  <button type="submit" class="submit-student">Cadastrar aluno</button>
+</form>
 {% endblock %}
