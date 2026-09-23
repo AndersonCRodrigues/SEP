@@ -21,26 +21,36 @@
                     <th>CPU</th>
                     <th>Memória</th>
                     <th>Status</th>
+                    <th>Atualizado em</th>
                 </tr>
             </thead>
             <tbody>
-                {% for servidor in servidores %}
+                {% for server in servidores %}
+                {% if server.health == "OF" %}
+                <tr class="table-danger">
+                    <td>{{ server.nome }}</td>
+                    <td colspan="4">{% include "components/error_state.html" with message="Servidor indisponivel, sem resposta." %}</td>
+                    <td>{{ server.atualizado_em|date:"d/m/Y H:i" }}</td>
+                </tr>
+                {% else %}
                 <tr>
-                    <td>{{ servidor.nome }}</td>
-                    <td>{{ servidor.uptime_percent }}%</td>
-                    <td>CPU {{ servidor.cpu_percent }}%</td>
-                    <td>MEM {{ servidor.memoria_percent }}%</td>
+                    <td>{{ server.nome }}</td>
+                    <td>{{ server.uptime_percent }}%</td>
+                    <td>CPU {{ server.cpu_percent }}%</td>
+                    <td>MEM {{ server.memoria_percent }}%</td>
                     <td>
-                        {% if servidor.health == "OK" %}
+                        {% if server.health == "OK" %}
                         <span class="badge text-bg-success">Saudável</span>
                         {% else %}
                         <span class="badge text-bg-danger">Atenção</span>
                         {% endif %}
                     </td>
+                    <td>{{ server.atualizado_em|date:"d/m/Y H:i" }}</td>
                 </tr>
+                {% endif %}
                 {% empty %}
                 <tr>
-                    <td colspan="5">{% include "components/empty_state.html" with message="Nenhum servidor cadastrado."
+                    <td colspan="6">{% include "components/empty_state.html" with message="Nenhum servidor cadastrado."
                         %}</td>
                 </tr>
                 {% endfor %}
