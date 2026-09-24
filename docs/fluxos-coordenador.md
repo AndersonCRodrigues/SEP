@@ -24,7 +24,7 @@ Onde o dado ainda não existe no banco, a tela entra com **dado mockado** e um
 | *(sem referência)* | Alunos cadastrados | `/supervisor/alunos/` | Nome, orientador, área e fase do estágio |
 | `triagens setup supervisor(PC)` | Triagens para analisar | `/supervisor/triagens/` | Paciente, quem realizou, quando chegou e situação |
 | `encaminhamentos setup supervisor(PC)` | Novo encaminhamento | `/supervisor/encaminhamentos/` | Paciente da triagem, professores para alocar e encaminhamentos recentes |
-| `feedback setup supervisor(PC)` | Feedback sobre triagens | `/supervisor/feedbacks/` | Aluno, paciente, situação do parecer e campo para escrever |
+| `feedback setup supervisor(PC)` | Feedback sobre triagens | `/supervisor/feedbacks/` | Aluno, paciente, situação da triagem (Em triagem, Pendente, Enviado) e campo para escrever |
 | `cadastrar professor setup supervisor(PC)` | Adicionar professores | `/supervisor/professores/cadastrar/` | Formulário de cadastro |
 | `cadastrar aluno setup supervisor(PC)` | Adicionar alunos | `/supervisor/alunos/cadastrar/` | Formulário de cadastro |
 
@@ -49,8 +49,12 @@ atendimento, e a alta só existe no fim dele. O paciente fica aguardando o parec
 da coordenação até ser encaminhado.
 
 **Feedback.** Página inicial (indicador "Feedbacks a enviar") → Feedback sobre
-triagens → "Enviar" abre o campo de escrita daquele aluno → "Enviar avaliação" →
-a linha passa a "Enviado".
+triagens → "Escrever" abre o campo de escrita daquele aluno → "Enviar avaliação"
+→ a linha passa a "Enviado".
+
+A situação acompanha a triagem: enquanto o aluno preenche a ficha ela fica "Em
+triagem" e não há o que escrever; quando o aluno finaliza, passa a "Pendente" e
+o campo de escrita é liberado; depois do parecer, "Enviado".
 
 **Professores.** Página inicial → Professores cadastrados → "+ cadastrar
 professor" abre o formulário, ou "Editar" abre o detalhe do professor.
@@ -78,7 +82,7 @@ alcance total nas triagens, pacientes, alunos e professores.
 | Alunos cadastrados | Nenhum aluno cadastrado | Falha ao carregar a lista | Aluno cadastrado |
 | Triagens para analisar | Nenhuma triagem aguardando análise | Falha ao carregar a fila | — |
 | Novo encaminhamento | Nenhuma triagem concluída esperando encaminhamento | Falha ao carregar, ou professor não escolhido | Encaminhamento confirmado |
-| Feedback sobre triagens | Nenhum parecer a enviar | Falha ao carregar a lista | Parecer enviado |
+| Feedback sobre triagens | Nenhuma triagem para acompanhar | Falha ao carregar a lista | Parecer enviado |
 | Adicionar professores | — | Campo inválido, e-mail ou CPF já cadastrado | Cadastro concluído |
 | Adicionar alunos | — | Campo inválido, e-mail, CPF ou matrícula já cadastrados | Cadastro concluído |
 
@@ -93,7 +97,7 @@ expirada são os avisos que o `handler403` já deixa na página de destino.
 | Triagens pendentes | Triagens enviadas pelo aluno e ainda não analisadas | Real |
 | Encaminhamentos hoje | Triagens encaminhadas com data de fechamento de hoje | Real |
 | Professores ativos | Professores com orientando vinculado | Real |
-| Feedbacks a enviar | Triagens analisadas sem parecer do Coordenador | Real |
+| Feedbacks a enviar | Triagens finalizadas pelo aluno e ainda sem parecer do Coordenador | Real |
 | Atividades recentes e calendário | Triagens, encaminhamentos e pareceres, com o calendário do mês já compartilhado | Real |
 | Professores: área, alunos vinculados e situação | Cadastro do professor e orientações abertas | Real |
 | Alunos: orientador, área e fase | Cadastro do aluno | Real |

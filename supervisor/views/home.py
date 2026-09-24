@@ -11,9 +11,8 @@ from teacher.models import Teacher
 from triage.models import TriageRecord
 
 from .access import CoordinatorOnly
+from .feedbacks import FINISHED
 from .mocks import submitted_at
-
-ANALYZED = (TriageStatus.CLOSED, TriageStatus.REFERRED)
 
 
 class CoordinatorHomeView(CoordinatorOnly, TemplateView):
@@ -38,7 +37,7 @@ class CoordinatorHomeView(CoordinatorOnly, TemplateView):
         )
         pending = triages.filter(status=TriageStatus.SUBMITTED)
         awaiting_feedback = (
-            triages.filter(status__in=ANALYZED)
+            triages.filter(status__in=FINISHED)
             .annotate(pareceres=Count("feedbacks"))
             .filter(pareceres=0)
         )
@@ -63,7 +62,7 @@ class CoordinatorHomeView(CoordinatorOnly, TemplateView):
                     .first()
                 ),
                 self.feedback_activity(
-                    awaiting_feedback.order_by("-closed_at").first()
+                    awaiting_feedback.order_by("-created_at").first()
                 ),
             ],
         }
@@ -139,7 +138,7 @@ class CoordinatorHomeView(CoordinatorOnly, TemplateView):
 
         return activity | {
             "title": "Feedback pendente",
-            "detail": f"Triagem de {record.patient.get_full_name()} analisada",
+            "detail": f"Triagem de {record.patient.get_full_name()} aguardando parecer",
             "label": "Pendente",
             "level": "warning",
         }

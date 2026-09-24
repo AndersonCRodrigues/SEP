@@ -16,7 +16,7 @@
   <p class="filter">
     <label for="filter-situation">Situação</label>
     <select id="filter-situation" name="situacao">
-      <option value="">Todos</option>
+      <option value="">Todas</option>
       {% for value, label in situations %}
       <option value="{{ value }}" {% if situation_filter == value %}selected{% endif %}>{{ label }}</option>
       {% endfor %}
@@ -27,7 +27,7 @@
 {% endsection %}
 
 {% if rows %}
-{% data_table columns=columns label="Triagens analisadas" %}
+{% data_table columns=columns label="Triagens dos alunos" %}
 {% for row in rows %}
 <tr class="feedback">
   <td class="feedback-student">{{ row.student }}</td>
@@ -36,7 +36,7 @@
     {% include "components/badge.html" with label=row.label level=row.level %}
   </td>
   <td class="feedback-action">
-    {% if not row.sent %}
+    {% if row.can_write %}
     <a href="?triagem={{ row.triage.pk }}">
       Escrever<span class="visually-hidden"> o feedback de {{ row.student }}</span>
     </a>
@@ -46,7 +46,7 @@
 {% endfor %}
 {% enddata_table %}
 {% else %}
-{% include "components/empty_state.html" with message="Nenhum parecer a enviar." %}
+{% include "components/empty_state.html" with message="Nenhuma triagem para acompanhar." %}
 {% endif %}
 
 {% if chosen %}
