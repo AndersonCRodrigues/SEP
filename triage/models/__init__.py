@@ -2,6 +2,7 @@ from .iarv_adolescent import IarvAdolescent
 from .iarv_adult import IarvAdult
 from .iarv_child import IarvChild
 from .triage_record import TriageFeedback, TriageRecord
+from .referral import Referral
 
 __all__ = [
     "IarvAdolescent",
@@ -9,4 +10,5 @@ __all__ = [
     "IarvChild",
     "TriageFeedback",
     "TriageRecord",
+    "Referral"
 ]

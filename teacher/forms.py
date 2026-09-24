@@ -3,7 +3,7 @@ from django.contrib.auth.forms import UserCreationForm
 from core.models import CustomUser
 from teacher.models import Teacher
 from areas.models import AreaActing
-from students.models import StudentActivity
+from students.models import StudentActivity, PerformanceReview
 import re
 
 
@@ -117,3 +117,14 @@ class StudentActivityForm(forms.ModelForm):
         if commit:
             instance.save()
         return instance
+
+class PerformanceReviewForm(forms.ModelForm):
+    class Meta:
+        model = PerformanceReview
+        fields = ["content"]
+        labels = {"content": "Feedback clínico para o aluno"}
+        widgets = {
+            "content": forms.Textarea(
+                attrs={"rows": 3, "placeholder": "Feedback clínico para o aluno..."}
+            )
+        }

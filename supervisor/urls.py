@@ -12,4 +12,5 @@ urlpatterns = [
     path("areas/", views.ListaAreasView.as_view(), name="areas"),
     path("areas/nova/", views.CriarAreaView.as_view(), name="area_criar"),
     path("areas/<int:pk>/editar/", views.EditarAreaView.as_view(), name="area_editar"),
+    path("orientacao/", views.PainelOrientacaoSupervisorView.as_view(), name="orientacao"),
 ]

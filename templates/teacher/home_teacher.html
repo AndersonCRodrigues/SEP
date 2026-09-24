@@ -1,20 +1,221 @@
-{% extends "home.html" %}
+{% extends "base.html" %}
 
-{% block home_title %}Área do Professor{% endblock %}
+{% block title %}Painel do Professor | Sistema SEP{% endblock %}
+{% block breadcrumbs %}
+  <li class="breadcrumb-item"><a href="{% url 'home_redirect' %}">Página inicial</a></li>
+  <li class="breadcrumb-item active" aria-current="page">Professor</li>
+{% endblock %}
 
-{% block home_content %}
-<div class="col-12 col-md-6">
-    <div class="card h-100">
-        <div class="card-body">
-            <h2 class="h5 card-title">Área do Professor</h2>
-            <p class="card-text">Acompanhamento de estudantes, diários e apontamentos.</p>
-            <div class="d-flex flex-wrap gap-2">
-                <a href="{% url 'teacher:painel' %}" class="btn btn-primary">Acessar Painel do Professor</a>
-                <a href="{% url 'teacher:perfil' %}" class="btn btn-outline-primary">Meu Perfil</a>
-                {# TODO: botão sem lógica; fica para fazer #}
-                <button type="button" class="btn btn-outline-secondary">Prontuários</button>
+{% block page_title %}Olá, professor!{% endblock %}
+
+{% block page_actions %}
+  <div class="d-flex gap-2">
+    {% comment %}
+    COMENTADO a pedido do front (validação de 12/09): rota teacher:painel comentada em urls.py
+    <a href="{% url 'teacher:painel' %}" class="btn btn-primary btn-sm">
+      <i class="bi bi-clipboard-data"></i> Painel do Professor
+    </a>
+    {% endcomment %}
+    <a href="{% url 'teacher:alunos' %}" class="btn btn-outline-primary btn-sm">
+      <i class="bi bi-people"></i> Meus Alunos
+    </a>
+    <!-- Botões trazidos da versão anterior para manter os atalhos rápidos no desktop -->
+    <a href="{% url 'teacher:prontuarios' %}" class="btn btn-outline-primary btn-sm">
+      <i class="bi bi-journal-medical"></i> Prontuários
+    </a>
+    <a href="{% url 'teacher:perfil' %}" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-person"></i> Meu Perfil
+    </a>
+  </div>
+{% endblock %}
+
+{% block content %}
+<!-- NAV MOBILE: replica as abas "Opções de Serviço" do Figma. So aparece
+     no mobile (d-md-none) -- no desktop a navbar de cima ja cobre isso.
+     Sao links simples pras paginas que ja existem, sem JS. -->
+<div class="d-md-none mb-3">
+    <h2 class="h6 text-body-secondary mb-2">Opções de Serviço</h2>
+    <div class="overflow-auto">
+        <div class="d-flex flex-nowrap gap-2 pb-2" style="width: max-content;">
+            <a href="{% url 'teacher:home' %}" class="btn btn-primary btn-sm rounded-pill">Página inicial</a>
+            <a href="{% url 'teacher:alunos' %}" class="btn btn-outline-secondary btn-sm rounded-pill">Meus alunos</a>
+            <a href="{% url 'teacher:presenca' %}" class="btn btn-outline-secondary btn-sm rounded-pill">Presença</a>
+            <a href="{% url 'teacher:prontuarios' %}" class="btn btn-outline-secondary btn-sm rounded-pill">Prontuários</a>
+            <a href="{% url 'teacher:triagens' %}" class="btn btn-outline-secondary btn-sm rounded-pill">Avaliações</a>
+            <a href="{% url 'teacher:perfil' %}" class="btn btn-outline-secondary btn-sm rounded-pill">Área</a>
+        </div>
+    </div>
+</div>
+
+<!-- Cards de Estatísticas -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="card h-100 text-center">
+            <div class="card-body d-flex flex-column justify-content-center">
+                <h2 class="h6 card-title text-body-secondary mb-1">Alunos orientados</h2>
+                <p class="display-6 mb-0 text-primary">{{ alunos_orientados_total }}</p>
             </div>
         </div>
+    </div>
+
+    <div class="col-6 col-md-3">
+        <div class="card h-100 text-center">
+            <div class="card-body d-flex flex-column justify-content-center">
+                <h2 class="h6 card-title text-body-secondary mb-1">Pacientes ativos</h2>
+                <p class="display-6 mb-0 text-primary">{{ pacientes_ativos_total }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-3">
+        <div class="card h-100 text-center">
+            <div class="card-body d-flex flex-column justify-content-center">
+                <h2 class="h6 card-title text-body-secondary mb-1">Presença hoje</h2>
+                <p class="display-6 mb-0 text-primary">{{ presentes_hoje }}/{{ total_para_presenca }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-3">
+        <div class="card h-100 text-center">
+            <div class="card-body d-flex flex-column justify-content-center">
+                <h2 class="h6 card-title text-body-secondary mb-1">Avaliações pendentes</h2>
+                <p class="display-6 mb-0 text-primary">{{ avaliacoes_pendentes_total }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% if avaliacoes_pendentes_total > 0 %}
+    <div class="alert alert-warning d-md-none" role="alert">
+        <h3 class="h6 alert-heading mb-1"><i class="bi bi-exclamation-triangle"></i> Atenção Pendente</h3>
+        <p class="mb-2 small">Avaliação de desempenho de {{ avaliacoes_pendentes_total }} aluno(s) em aberto.</p>
+        <a href="{% url 'teacher:triagens' %}" class="btn btn-warning btn-sm">Avaliar orientados</a>
+    </div>
+{% endif %}
+<div class="row g-3">
+    <!-- Atividades Recentes -->
+    <div class="col-12 col-lg-8">
+        <section class="card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 class="h5 card-title mb-0">Atividades recentes</h2>
+                </div>
+
+                {% if atividades_recentes %}
+                <ul class="list-group list-group-flush">
+                    {% for atividade in atividades_recentes %}
+                    <li class="list-group-item px-0 d-flex justify-content-between align-items-start flex-wrap gap-2">
+                        <div>
+                            <span class="badge text-bg-secondary mb-1">{{ atividade.tipo }}</span>
+                            <p class="mb-0"><strong>{{ atividade.titulo }}</strong></p>
+                            <p class="mb-0 text-body-secondary">{{ atividade.detalhe }}</p>
+                        </div>
+                        {% if atividade.url_name == "teacher:prontuario_detalhe" %}
+                        <!-- Detalhe do prontuário está bloqueado (MOCK) -- ver
+                             ProntuarioDetalheView em teacher/views.py. Item vira
+                             indicador inerte em vez de link até isso mudar. -->
+                        <span
+                            class="btn btn-outline-secondary btn-sm align-self-center disabled"
+                            role="button"
+                            aria-disabled="true"
+                            tabindex="-1"
+                        >
+                            <i class="bi bi-chevron-right"></i>
+                        </span>
+                        {% else %}
+                        <a href="{% url atividade.url_name atividade.url_pk %}" class="btn btn-outline-primary btn-sm align-self-center">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                    <!-- Injeção do componente de estado vazio -->
+                    {% include "components/empty_state.html" with message="Nenhuma pendência no momento." %}
+                {% endif %}
+            </div>
+        </section>
+    </div>
+
+    {% comment %}
+    COMENTADO a pedido do front (validação de 12/09): não querem o card de
+    Acesso Rápido por enquanto. Deixado aqui, não apagado, pra reativar fácil
+    se voltarem atrás.
+
+    <!-- Acesso Rápido -->
+    <div class="col-12 col-lg-4">
+        <section class="card h-100">
+            <div class="card-body">
+                <h2 class="h5 card-title mb-3">Acesso Rápido</h2>
+                <div class="d-flex flex-column gap-2">
+                    <a href="{% url 'teacher:prontuarios' %}" class="btn btn-outline-secondary text-start">
+                        <i class="bi bi-folder2-open me-2"></i> Prontuários
+                    </a>
+                    <a href="{% url 'teacher:presenca' %}" class="btn btn-outline-secondary text-start">
+                        <i class="bi bi-calendar-check me-2"></i> Presença
+                    </a>
+                    <a href="{% url 'teacher:triagens' %}" class="btn btn-outline-secondary text-start">
+                        <i class="bi bi-clipboard-data me-2"></i> Avaliações
+                    </a>
+                    <a href="{% url 'teacher:perfil' %}" class="btn btn-outline-secondary text-start">
+                        <i class="bi bi-person-badge me-2"></i> Área de Atuação
+                    </a>
+                </div>
+            </div>
+        </section>
+    </div>
+    {% endcomment %}
+</div>
+
+<div class="row g-3 mt-0">
+    <!-- Calendário: navegação de mês via link (?mes=&ano=), sem JS.
+         Só marca "Agendado" (Appointment real). "Disponível"/"Pendente" do
+         Figma não têm equivalente no backend ainda. -->
+    <div class="col-12 col-lg-6">
+        <section class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <a
+                        href="?mes={{ calendario.mes_anterior }}&ano={{ calendario.ano_anterior }}"
+                        class="btn btn-outline-secondary btn-sm"
+                    >‹</a>
+                    <h2 class="h6 card-title mb-0">{{ calendario.data_referencia|date:"F/Y"|capfirst }}</h2>
+                    <a
+                        href="?mes={{ calendario.mes_seguinte }}&ano={{ calendario.ano_seguinte }}"
+                        class="btn btn-outline-secondary btn-sm"
+                    >›</a>
+                </div>
+
+                <table class="table table-sm text-center mb-2">
+                    <thead>
+                        <tr>
+                            <th>Do</th><th>Se</th><th>Te</th><th>Qu</th><th>Qu</th><th>Se</th><th>Sá</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for semana in calendario.semanas %}
+                        <tr>
+                            {% for dia in semana %}
+                            <td class="{% if dia != 0 and dia == calendario.dia_hoje %}table-primary{% endif %}">
+                                {% if dia != 0 %}
+                                    {{ dia }}
+                                    {% if dia in calendario.dias_com_agendamento %}
+                                    <br><span class="badge text-bg-warning">•</span>
+                                    {% endif %}
+                                {% endif %}
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <div class="small text-body-secondary">
+                    <span class="badge text-bg-warning">•</span> Agendado
+                </div>
+            </div>
+        </section>
     </div>
 </div>
 {% endblock %}

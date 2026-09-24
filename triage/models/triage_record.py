@@ -2,6 +2,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.db.models import Q
+from django.utils import timezone
 from core.models import CustomUser
 from core.permissions import ALL, BusinessRulesMixin, RoleScopedQuerySet
 from patient.models import Patient
@@ -26,6 +27,7 @@ FLOW_BY_TRIAGE_STATUS = {
     TriageStatus.SUBMITTED: Patient.FlowStatus.AWAITING_REVIEW,
     TriageStatus.CLOSED: Patient.FlowStatus.DISCHARGED,
     TriageStatus.REFERRED: Patient.FlowStatus.REFERRED,
+    TriageStatus.FINALIZED_EDITION:Patient.FlowStatus.AWAITING_REVIEW
 }
 
 
@@ -178,6 +180,7 @@ class TriageRecord(BusinessRulesMixin, models.Model):
         auto_now_add=True,
         verbose_name="Data da triagem",
     )
+    updated_at=models.DateTimeField(auto_now=True)
 
     status = models.CharField(
         max_length=2,
@@ -196,6 +199,7 @@ class TriageRecord(BusinessRulesMixin, models.Model):
     )
 
     closed_at = models.DateTimeField(null=True, blank=True, verbose_name="Fechada em")
+    submitted_at = models.DateTimeField(null=True, blank=True, verbose_name="Enviado em")
 
     objects = TriageRecordQuerySet.as_manager()
 
@@ -236,13 +240,17 @@ class TriageRecord(BusinessRulesMixin, models.Model):
         return ()
 
     def editable_fields_for(self, user):
-        if user.is_authenticated and user.role == Role.ALUNO and not self.is_open:
+        if user.is_authenticated and user.role == Role.ALUNO and  self.status not in(TriageStatus.OPEN,TriageStatus.SUBMITTED):
             return ()
         return super().editable_fields_for(user)
 
     @property
     def is_open(self):
         return self.status == TriageStatus.OPEN
+
+    @property
+    def is_finalized_edition(self):
+        return self.status == TriageStatus.FINALIZED_EDITION
 
     def get_iarv(self):
         relations = (
@@ -280,27 +288,45 @@ class TriageRecord(BusinessRulesMixin, models.Model):
             raise ValidationError("Só o autor envia a própria triagem.")
 
         self.status = TriageStatus.SUBMITTED
-        self.save(update_fields=["status"])
-
+        self.submitted_at = timezone.now()
+        self.save(update_fields=["status","submitted_at"])
+        
+    def finalize_edition(self, user):
+        if self.status != TriageStatus.SUBMITTED:
+            raise ValidationError("Apenas triagens enviadas podem ter sua edição finalizada.")
+        if user.role != Role.SUPERVISOR:
+            raise ValidationError("Apenas supervisores podem fechar a edição.")
+        
+        self.status = TriageStatus.FINALIZED_EDITION
+        self.save(update_fields=["status", "updated_at"])
+        
+        
+        
+        
     def save(self, *args, **kwargs):
+        is_new = self._state.adding
         anterior = (
             None
-            if self._state.adding
+            if is_new
             else TriageRecord.objects.filter(pk=self.pk)
             .values_list("status", flat=True)
             .first()
         )
 
-        with transaction.atomic():
-            super().save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
-            if self.status != anterior:
+        # 1. Se a triagem acabou de ser criada (OPEN), move o paciente para IN_TRIAGE ("Em triagem")
+        if is_new:
+            paciente = Patient.objects.select_for_update().get(pk=self.patient_id)
+            if paciente.flow_status != Patient.FlowStatus.IN_TRIAGE:
+                paciente.advance_to(Patient.FlowStatus.IN_TRIAGE)
+
+        # 2. Se o status mudou (ex: OPEN -> SUBMITTED), avança para AWAITING_REVIEW ("Aguardando parecer")
+        elif anterior is not None and self.status != anterior:
+            novo_fluxo = FLOW_BY_TRIAGE_STATUS.get(self.status)
+            if novo_fluxo:
                 paciente = Patient.objects.select_for_update().get(pk=self.patient_id)
-                paciente.advance_to(FLOW_BY_TRIAGE_STATUS[self.status])
-                self.patient = paciente
-
-    def __str__(self):
-        return f"TriageRecord #{self.pk}"
+                paciente.advance_to(novo_fluxo)
 
 
 class TriageFeedbackQuerySet(RoleScopedQuerySet):
@@ -344,4 +370,4 @@ class TriageFeedback(BusinessRulesMixin, models.Model):
         ordering = ["-created_at"]
 
     def __str__(self):
-        return f"Feedback de {self.author.get_full_name()} em {self.triage}"
+        return f"Feedback de {self.author.nome_completo} em {self.triage}"
