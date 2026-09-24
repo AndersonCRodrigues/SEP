@@ -9,6 +9,10 @@
 
 {% block page_title %}Olá, {{ request.user.first_name|default:"aluno" }}!{% endblock %}
 
+{% block page_actions %}
+<a class="new-triage" href="{% url 'fila_triagem' %}">Fazer triagem</a>
+{% endblock %}
+
 {% block content %}
 {% if home_error %}
 {% include "components/error_state.html" with message=home_error retry_url=request.path %}

@@ -3,9 +3,28 @@ from . import views
 
 
 urlpatterns = [
+    path("minhas-triagens/", views.minhas_triagens, name="minhas_triagens"),
+    path("fila/", views.fila_triagem, name="fila_triagem"),
+    path("create/<int:patient_id>/", views.create_triage, name="create_triage"),
+    path("concluida/<int:pk>/", views.triagem_concluida, name="triagem_concluida"),
+    path("edit/<int:pk>/", views.edit_triage, name="edit_triage"),
+    path("submit/<int:pk>/", views.submit_triage, name="submit_triage"),
+    path("feedback/<int:pk>/", views.create_feedback, name="create_feedback"),
+    path("create_referral/<int:pk>/", views.create_referral, name="create_referral"),
+    # Rotas separadas por Role
     path(
-        "create/<int:patient_id>/",
-        views.create_triage,
-        name="create_triage",
+        "student_detail/<int:pk>/",
+        views.triage_detail_student,
+        name="triage_detail_student",
+    ),
+    path(
+        "supervisor_detail/<int:pk>/",
+        views.triage_detail_supervisor,
+        name="triage_detail_supervisor",
+    ),
+    path(
+        "lock_triage_editing/<int:pk>/",
+        views.lock_triage_editing,
+        name="lock_triage_editing",
     ),
 ]

@@ -124,6 +124,7 @@ class StudentActivityForm(forms.ModelForm):
             instance.save()
         return instance
 
+
 class PerformanceReviewForm(forms.ModelForm):
     class Meta:
         model = PerformanceReview

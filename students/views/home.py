@@ -9,7 +9,8 @@ from triage.models import TriageFeedback
 
 from ..models import CaseAssignment
 from .access import StudentOnly
-from .mocks import feedback_status, pending_triages
+from .mocks import feedback_status
+from .queue import waiting_patients
 
 Status = Appointment.Status
 
@@ -36,11 +37,11 @@ class HomeEstudanteView(StudentOnly, TemplateView):
             .filter(end_date__isnull=True)
             .select_related("patient", "acting_area")
         )
-        triages = pending_triages(user)
+        triages = waiting_patients()
 
         return self.calendar(user, today) | {
             "indicators": [
-                {"label": "Triagens pendentes", "value": len(triages)},
+                {"label": "Triagens pendentes", "value": triages.count()},
                 {
                     "label": "Encaminhamentos hoje",
                     "value": open_cases.filter(start_date=today).count(),
@@ -49,7 +50,7 @@ class HomeEstudanteView(StudentOnly, TemplateView):
                 {"label": "Faltas", "value": self.absences(user)},
             ],
             "activities": [
-                self.triage_activity(triages[0] if triages else None),
+                self.triage_activity(triages.first()),
                 self.referral_activity(open_cases.order_by("-start_date").first()),
                 self.feedback_activity(self.latest_feedback(user), now),
             ],
@@ -84,18 +85,19 @@ class HomeEstudanteView(StudentOnly, TemplateView):
         )
 
     @staticmethod
-    def triage_activity(triage):
+    def triage_activity(patient):
         activity = {
             "kind": "triage",
             "url": reverse("students:triagens"),
             "link_label": "Ver triagens a realizar",
         }
-        if triage is None:
-            return activity | {"title": "Nenhuma triagem designada."}
+        if patient is None:
+            return activity | {"title": "Nenhum paciente aguardando triagem."}
 
+        desde = timezone.localtime(patient.created_at)
         return activity | {
-            "title": f"Triagem - {triage['patient']}",
-            "detail": f"Recebido às {timezone.localtime(triage['referred_at']):%H:%M}",
+            "title": f"Triagem - {patient.get_full_name()}",
+            "detail": f"Aguardando desde {desde:%d/%m/%Y}",
             "label": "Pendente",
             "level": "warning",
         }

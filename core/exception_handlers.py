@@ -20,7 +20,8 @@ def custom_permission_denied_view(request, exception):
         messages.error(request, "Sua sessão expirou. Entre novamente para continuar.")
         return redirect("login")
 
-    messages.error(request, "Você não tem acesso a essa página.")
+    detalhe = next((str(arg) for arg in getattr(exception, "args", ()) if arg), "")
+    messages.error(request, detalhe or "Você não tem acesso a essa página.")
 
     if request.user.is_superuser:
         return redirect("superadmin:home")
