@@ -6,6 +6,8 @@ from django.urls import reverse_lazy
 from django.views.generic import TemplateView, UpdateView
 from core.models import CustomUser
 from core.utils import sincronizar_grupo
+from core.notifications import enviar_credenciais_por_telefone
+from supervisor.utils import gerar_senha_temporaria, enviar_email_credenciais
 from ..forms import AdministrativoCreationForm
 from .access import AdministrativeOnly
 
@@ -34,7 +36,6 @@ class PerfilAdministrativoView(AdministrativeOnly, UpdateView):
     def get_object(self, queryset=None):
         return self.request.user
 
-
 @login_required
 def cadastrar_administrativo(request):
     if not request.user.has_perm("core.add_customuser"):
@@ -43,9 +44,18 @@ def cadastrar_administrativo(request):
     if request.method == "POST":
         form = AdministrativoCreationForm(request.POST)
         if form.is_valid():
-            user = form.save()
+            user = form.save(commit=False)
+
+            senha_temporaria = gerar_senha_temporaria()
+            user.set_password(senha_temporaria)
+            user.save()
+
             sincronizar_grupo(user)
-            messages.success(request, "Administrativo cadastrado com sucesso!")
+
+            enviar_email_credenciais(user, senha_temporaria)
+            enviar_credenciais_por_telefone(user, senha_temporaria)
+
+            messages.success(request, "Administrativo cadastrado e credenciais enviadas com sucesso!")
             return redirect("superadmin:home")
     else:
         form = AdministrativoCreationForm()
