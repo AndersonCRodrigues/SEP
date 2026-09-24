@@ -52,10 +52,17 @@ def cadastrar_administrativo(request):
 
             sincronizar_grupo(user)
 
-            enviar_email_credenciais(user, senha_temporaria)
-            enviar_credenciais_por_telefone(user, senha_temporaria)
+            email_ok = enviar_email_credenciais(user, senha_temporaria)
+            telefone_ok = enviar_credenciais_por_telefone(user, senha_temporaria)
 
-            messages.success(request, "Administrativo cadastrado e credenciais enviadas com sucesso!")
+            if email_ok and telefone_ok:
+                messages.success(request, "Administrativo cadastrado e credenciais enviadas com sucesso!")
+            else:
+                messages.warning(
+                    request,
+                    "Administrativo cadastrado, mas houve falha ao enviar as credenciais. "
+                    "Verifique o log de auditoria e informe a senha manualmente se necessario.",
+                )
             return redirect("superadmin:home")
     else:
         form = AdministrativoCreationForm()
