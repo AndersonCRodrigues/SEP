@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Minhas Triagens | Sistema SEP{% endblock %}
+
+{% block content %}
+<h1 class="h3 mb-4">Minhas Triagens</h1>
+
+<section class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col">Paciente</th>
+                        <th scope="col">Criada em</th>
+                        <th scope="col">Status</th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for triagem in triagens %}
+                    <tr>
+                        <td>{{ triagem.patient.nome_completo }}</td>
+                        <td>{{ triagem.created_at }}</td>
+                        <td><span class="badge text-bg-secondary">{{ triagem.get_status_display }}</span></td>
+                        <td class="text-end">
+                            <a href="{% url 'triage_detail_student' triagem.pk %}" class="btn btn-outline-primary btn-sm">Ver</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4">
+                            {% include "components/empty_state.html" with message="Você ainda não fez nenhuma triagem." %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% endblock %}

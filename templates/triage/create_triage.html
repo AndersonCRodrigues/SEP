@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Nova Triagem | Sistema SEP{% endblock %}
+
+{% block content %}
+<h1 class="h3 mb-1">Nova Triagem</h1>
+<p class="text-body-secondary mb-4">Paciente: {{ patient.nome_completo }} ({{ patient_age }} anos)</p>
+
+<div class="row">
+    <div class="col-12 col-lg-8">
+        <section class="card">
+            <div class="card-body">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    <h2 class="h5 card-title">Dados da Triagem</h2>
+                    {{ triage_form.as_p }}
+
+                    <h2 class="h5 card-title mt-4">Questionário IARV</h2>
+                    {{ iarv_form.as_p }}
+
+                    <button type="submit" class="btn btn-primary">Salvar triagem</button>
+                </form>
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}
