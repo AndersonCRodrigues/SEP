@@ -16,7 +16,7 @@ from areas.forms import AreaAtuacaoForm
 from core.utils import sincronizar_grupo
 from .utils import gerar_senha_temporaria, enviar_email_credenciais
 from teacher.forms import PerfilProfessorForm
-
+from core.notifications import enviar_credenciais_por_telefone
 
 from teacher.forms import VincularAlunoForm, StudentActivityForm
 from triage.models import Referral, TriageRecord
@@ -80,13 +80,22 @@ def cadastrar_supervisor(request):
             # 4. Sincroniza os grupos
             sincronizar_grupo(user)
 
-            # 5. Dispara o e-mail com as credenciais
-            enviar_email_credenciais(user, senha_temporaria)
+            # 5. Dispara as credenciais por email e telefone
+            email_ok = enviar_email_credenciais(user, senha_temporaria)
+            telefone_ok = enviar_credenciais_por_telefone(user, senha_temporaria)
 
-            messages.success(
-                request,
-                f"Supervisor {user.get_full_name()} cadastrado e e-mail enviado com sucesso!",
-            )
+            if email_ok and telefone_ok:
+                messages.success(
+                    request,
+                    f"Supervisor {user.get_full_name()} cadastrado e credenciais enviadas com sucesso!",
+                )
+            else:
+                messages.warning(
+                    request,
+                    f"Supervisor {user.get_full_name()} cadastrado, mas houve falha ao enviar "
+                    "as credenciais. Verifique o log de auditoria e informe a senha manualmente "
+                    "se necessario.",
+                )
             return redirect("superadmin:home")
     else:
         form = SupervisorCreationForm()
@@ -155,6 +164,7 @@ class PainelOrientacaoSupervisorView(GroupRequiredMixin, TemplateView):
         context["form_vincular"] = VincularAlunoForm()
         context["form_horas"] = StudentActivityForm(user=supervisor)
         return context
+    
 class PerfilSupervisorView(GroupRequiredMixin, UpdateView):
     required_group = "Supervisor"
     model = Teacher
