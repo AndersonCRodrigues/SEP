@@ -1,4 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.urls import reverse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied, ValidationError
@@ -182,6 +183,12 @@ def edit_triage(request, pk):
         "triage": triage,
         "triage_form": triage_form,
         "iarv_form": iarv_form,
+        "cancel_url": reverse(
+            "triage_detail_student"
+            if user.role == Role.ALUNO
+            else "triage_detail_supervisor",
+            args=[pk],
+        ),
     }
 
     return render(request, "triage/edit_triage.html", context)

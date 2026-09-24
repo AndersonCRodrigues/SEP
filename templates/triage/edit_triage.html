@@ -20,11 +20,7 @@
 
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-primary">Salvar alterações</button>
-                        {% if user.role == "ALUNO" %}
-                            <a href="{% url 'triage_detail_student' triage.pk %}" class="btn btn-outline-secondary">Cancelar</a>
-                        {% else %}
-                            <a href="{% url 'triage_detail_supervisor' triage.pk %}" class="btn btn-outline-secondary">Cancelar</a>
-                        {% endif %}
+                        <a href="{{ cancel_url }}" class="btn btn-outline-secondary">Cancelar</a>
                     </div>
                 </form>
             </div>
