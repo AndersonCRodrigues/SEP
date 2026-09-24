@@ -9,6 +9,10 @@
 
 {% block page_title %}Olá, coordenação!{% endblock %}
 
+{% block page_actions %}
+<a class="advising-panel" href="{% url 'supervisor:orientacao' %}">Meus alunos orientandos</a>
+{% endblock %}
+
 {% block content %}
 {% if home_error %}
 {% include "components/error_state.html" with message=home_error retry_url=request.path %}

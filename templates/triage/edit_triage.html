@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Triagem | Sistema SEP{% endblock %}
+
+{% block content %}
+<h1 class="h3 mb-1">Editar Triagem</h1>
+<p class="text-body-secondary mb-4">Paciente: {{ triage.patient.nome_completo }}</p>
+
+<div class="row">
+    <div class="col-12 col-lg-8">
+        <section class="card">
+            <div class="card-body">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    <h2 class="h5 card-title">Dados da Triagem</h2>
+                    {{ triage_form.as_p }}
+
+                    <h2 class="h5 card-title mt-4">Questionário IARV</h2>
+                    {{ iarv_form.as_p }}
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">Salvar alterações</button>
+                        <a href="{{ cancel_url }}" class="btn btn-outline-secondary">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}

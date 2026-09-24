@@ -40,6 +40,9 @@ class PatientQuerySet(RoleScopedQuerySet):
         Role.PACIENTE: lambda u: Q(pk=u.pk),
     }
 
+    def awaiting_triage(self):
+        return self.filter(flow_status__in=("", Patient.FlowStatus.AWAITING_TRIAGE))
+
 
 # Manager customizado estendendo o CustomUserManager mantido do merge
 class PatientManager(CustomUserManager):

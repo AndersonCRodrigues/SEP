@@ -41,4 +41,9 @@ urlpatterns = [
         name="encaminhar",
     ),
     path("feedbacks/", views.CoordinatorFeedbacksView.as_view(), name="feedbacks"),
+    path(
+        "orientacao/",
+        views.PainelOrientacaoSupervisorView.as_view(),
+        name="orientacao",
+    ),
 ]

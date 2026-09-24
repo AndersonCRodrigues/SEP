@@ -143,23 +143,35 @@
   {% endif %}
 
   {% if request.user.role == 'AL' %}
-  <li class="nav-item">
-    <a
-      class="nav-link {% if current_view == 'students:home' %}active{% endif %}"
-      href="{% url 'students:home' %}"
-      aria-current="{% if current_view == 'students:home' %}page{% else %}false{% endif %}"
-    >
-      <i class="bi bi-house-door me-2"></i>Início
-    </a>
-  </li>
-  <li class="nav-item">
-    <a
-      class="nav-link {% if current_view == 'students:painel' %}active{% endif %}"
-      href="{% url 'students:painel' %}"
-      aria-current="{% if current_view == 'students:painel' %}page{% else %}false{% endif %}"
-    >
-      <i class="bi bi-journal-text me-2"></i>Painel do Estudante
-    </a>
+ <li class="nav-item">
+  <a
+    class="nav-link {% if current_view == 'students:home' %}active{% endif %}"
+    href="{% url 'students:home' %}"
+    aria-current="{% if current_view == 'students:home' %}page{% else %}false{% endif %}"
+  >
+    <i class="bi bi-house-door me-2"></i>Início
+  </a>
+</li>
+
+<li class="nav-item">
+  <a
+    class="nav-link {% if current_view == 'students:painel' %}active{% endif %}"
+    href="{% url 'students:painel' %}"
+    aria-current="{% if current_view == 'students:painel' %}page{% else %}false{% endif %}"
+  >
+    <i class="bi bi-journal-text me-2"></i>Painel do Estudante
+  </a>
+</li>
+
+<li class="nav-item">
+  <a
+    class="nav-link {% if current_view == 'minhas_triagens' %}active{% endif %}"
+    href="{% url 'minhas_triagens' %}"
+    aria-current="{% if current_view == 'minhas_triagens' %}page{% else %}false{% endif %}"
+  >
+    <i class="bi bi-clipboard-check me-2"></i>Minhas Triagens
+  </a>
+</li>
   </li>
   {% endif %}
 

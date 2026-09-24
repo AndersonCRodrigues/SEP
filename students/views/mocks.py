@@ -1,33 +1,7 @@
 from datetime import timedelta
 
-from django.utils import timezone
-
 EDIT_MARGIN = timedelta(minutes=1)
 NEW_FEEDBACK_HOURS = 24
-
-PENDING_TRIAGES = (
-    ("José Santos", "Prof.º Jorge Junior", 0, 11),
-    ("Camila Duarte", "Prof.ª Renata Alves", 1, 9),
-    ("Rafael Nunes", "Coordenação geral", 2, 14),
-    ("Ana Beatriz", "Prof. Marcos Lima", 3, 16),
-    ("Lucas Prado", "Prof.º Jorge Junior", 6, 10),
-)
-
-
-def pending_triages(student):
-    # TODO: dado mockado. Trocar pela triagem designada ao aluno, com quem
-    # encaminhou e a data do encaminhamento, quando esse vínculo existir.
-    today = timezone.localtime()
-    return [
-        {
-            "patient": patient,
-            "referred_by": referred_by,
-            "referred_at": (today - timedelta(days=days)).replace(
-                hour=hour, minute=39, second=0, microsecond=0
-            ),
-        }
-        for patient, referred_by, days, hour in PENDING_TRIAGES
-    ]
 
 
 def referral_status(case, today):
@@ -40,7 +14,7 @@ def referral_status(case, today):
             "level": "danger",
         }
     return {
-        "situation": "Encaminhado por Coordenação geral",
+        "situation": "Encaminhado por Supervisor geral",
         "label": "Ativo",
         "level": "success",
     }

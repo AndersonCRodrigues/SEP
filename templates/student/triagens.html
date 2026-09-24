@@ -12,26 +12,22 @@
 
 {% block content %}
 {% if triages %}
-{% data_table columns=columns label="Triagens designadas a você" %}
+{% data_table columns=columns label="Pacientes aguardando triagem" %}
 {% for triage in triages %}
 <tr class="triage">
-  <td class="triage-patient">{{ triage.patient }}</td>
-  <td class="triage-referred-by">{{ triage.referred_by }}</td>
-  <td class="triage-referred-at">
-    <time datetime="{{ triage.referred_at|date:'Y-m-d\TH:i' }}">
-      {{ triage.referred_at|date:"d/m/Y - H:i" }}h
-    </time>
+  <td class="triage-patient">{{ triage.name }}</td>
+  <td class="triage-waiting">
+    <time datetime="{{ triage.waiting_since|date:'Y-m-d' }}">{{ triage.waiting_label }}</time>
   </td>
   <td class="triage-action">
-    {# TODO: botão sem lógica; fica para fazer #}
-    <button type="button" class="triage-start">
-      Iniciar<span class="visually-hidden"> a triagem de {{ triage.patient }}</span>
-    </button>
+    <a class="triage-start" href="{{ triage.start_url }}">
+      Iniciar<span class="visually-hidden"> a triagem de {{ triage.name }}</span>
+    </a>
   </td>
 </tr>
 {% endfor %}
 {% enddata_table %}
 {% else %}
-{% include "components/empty_state.html" with message="Nenhuma triagem designada para você." %}
+{% include "components/empty_state.html" with message="Nenhum paciente aguardando triagem." %}
 {% endif %}
 {% endblock %}
