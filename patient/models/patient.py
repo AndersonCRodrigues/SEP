@@ -2,16 +2,15 @@ from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.db.models import Q
 from django.utils import timezone
-
-from core.constants import VISIBLE_TO_AUTHOR
 from core.fields import collapse_spaces
 from core.managers import CustomUserManager
 from core.models import CustomUser
-from core.permissions import ALL, BusinessRulesMixin, RoleScopedQuerySet
-from core.utils import generate_temporary_password, send_temporary_password_email
 from core.validators import validate_letters
+from core.permissions import ALL, BusinessRulesMixin, RoleScopedQuerySet
 from teacher.models import Teacher
+from core.constants import VISIBLE_TO_AUTHOR
 from utils.fields import EncryptedTextField
+from core.utils import generate_temporary_password, send_temporary_password_email
 
 Role = CustomUser.Role
 

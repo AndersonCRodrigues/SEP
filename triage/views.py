@@ -55,9 +55,7 @@ def fila_triagem(request):
     if request.user.role != Role.ALUNO:
         return HttpResponseForbidden("Apenas Alunos podem acessar a fila de triagem.")
 
-    pacientes_aguardando = Patient.objects.filter(
-        flow_status__in=[Patient.FlowStatus.AWAITING_TRIAGE, ""]
-    )
+    pacientes_aguardando = Patient.objects.awaiting_triage()
 
     return render(
         request,
