@@ -1,0 +1,264 @@
+/* ═══════════════════════════════════════════
+   administrativo_home.css 
+   ═══════════════════════════════════════════ */
+
+:root {
+  --sep-maroon: #6D1D20;
+  --sep-maroon-dark: #541618;
+  --sep-black: #000000;
+  --sep-gray-border: #E0DEDC;
+  --sep-text-muted: #777777;
+  --font-main: 'Museo Sans', "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+}
+
+/* ── Saudação ── */
+.greeting {
+  margin-bottom: 2.2rem;
+}
+
+.greeting h1 {
+  font-family: var(--font-main);
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--sep-maroon);
+  margin: 0 0 4px 0;
+}
+
+.greeting-subtitle {
+  font-family: var(--font-main);
+  font-size: 15px;
+  font-weight: 500;
+  color: #8A6466;
+  margin: 0;
+}
+
+/* ── Cards de Resumo ── */
+.summary-list {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 28px;
+  list-style: none;
+  margin: 0 0 50px 0;
+  padding: 0;
+}
+
+.indicator {
+  background-color: var(--sep-maroon);
+  color: #FFFFFF;
+  border-radius: 20px;
+  padding: 32px 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 160px;
+  box-sizing: border-box;
+}
+
+.indicator-label {
+  font-family: var(--font-main);
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  line-height: 1.2;
+  display: block;
+}
+
+.indicator-value {
+  font-family: var(--font-main);
+  font-size: 64px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+/* ── Painel Duplo ── */
+.panel {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  position: relative;
+  align-items: start;
+}
+
+/* Linha divisória vertical */
+.panel::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--sep-maroon);
+  transform: translateX(-50%);
+}
+
+.activities > h2,
+.calendar > h2 {
+  font-family: var(--font-main);
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--sep-maroon);
+  margin: 0 0 24px 0;
+}
+
+/* ── Atividades Recentes ── */
+.activity-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.activity {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--sep-gray-border);
+}
+
+.activity:last-child {
+  border-bottom: none;
+}
+
+.activity-icon {
+  width: 26px;
+  height: 26px;
+  color: var(--sep-maroon);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.activity-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.activity-title {
+  font-family: var(--font-main);
+  font-size: 17px;
+  font-weight: 800;
+  color: #000000;
+  margin: 0 0 4px 0;
+}
+
+.activity-detail {
+  font-family: var(--font-main);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--sep-maroon);
+  margin: 0;
+}
+
+.activity-empty {
+  font-family: var(--font-main);
+  font-size: 15px;
+  color: var(--sep-text-muted);
+  padding: 10px 0;
+}
+
+/* ── Calendário (Card Estilizado) ── */
+.calendar-card {
+  background: #FFFFFF;
+  border: 1px solid var(--sep-gray-border);
+  border-radius: 20px;
+  padding: 24px 32px;
+  max-width: 440px;
+  margin: 0 auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+}
+
+.calendar-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.calendar-previous,
+.calendar-next {
+  text-decoration: none;
+  color: #333;
+  font-size: 18px;
+  font-weight: 700;
+  padding: 0 6px;
+}
+
+.calendar-nav select {
+  border: 1px solid #D0D0D0;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 0.9rem;
+  color: #333;
+  background: #FFF;
+  font-family: var(--font-main);
+  font-weight: 600;
+}
+
+.calendar-nav button[type="submit"] {
+  background-color: var(--sep-maroon);
+  color: #FFF;
+  border: none;
+  border-radius: 12px;
+  padding: 6px 16px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: var(--font-main);
+}
+
+/* Tabela do Calendário */
+.calendar-grid {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 6px;
+  table-layout: fixed;
+}
+
+.calendar-grid th {
+  font-family: var(--font-main);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #888888;
+  padding-bottom: 10px;
+  text-align: center;
+}
+
+/* Remove qualquer interferência de estilos globais de tabela */
+.calendar-grid tbody tr,
+.calendar-grid tbody tr:not(.event-detail) {
+  background: transparent !important;
+}
+
+.calendar-grid td {
+  text-align: center;
+  padding: 0;
+  background: transparent !important;
+}
+
+.calendar-grid td time {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  font-family: var(--font-main);
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #333333;
+  margin: 0 auto;
+}
+
+.calendar-grid td.day-outside-month time {
+  color: #CCCCCC;
+}
+
+/* Marcação de eventos e dia selecionado em Vinho */
+.calendar-grid td.day-with-event time,
+.calendar-grid td[aria-current="date"] time {
+  background-color: var(--sep-maroon);
+  color: #FFFFFF !important;
+  font-weight: 700;
+}
