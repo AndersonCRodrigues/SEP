@@ -1,0 +1,124 @@
+/* ==========================================
+   PERMISSÕES POR PERFIL - FIGMA DESIGN SYSTEM
+   ========================================== */
+
+/* Banner do Título Principal */
+.permissions-header-banner {
+  background-color: #611e25;
+  color: #ffffff;
+  text-align: center;
+  border-radius: 50px;
+  padding: 1rem 2rem;
+  margin-bottom: 2rem;
+}
+
+.permissions-header-banner h1 {
+  color: #ffffff;
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+/* Container Externo */
+.permissions-container {
+  background-color: #ffffff;
+  border: 1.5px solid #dcd3d1;
+  border-radius: 20px;
+  padding: 1.5rem 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+/* Estrutura da Tabela */
+.table-permissions {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 0.85rem;
+  margin-top: -0.5rem;
+}
+
+/* Cabeçalho */
+.table-permissions thead th {
+  border: none;
+  background: transparent;
+  color: #1a1a1a;
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 0.5rem 1.25rem;
+}
+
+/* Linhas em estilo Card */
+.table-permissions tbody tr {
+  background-color: #e3e3e3;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.table-permissions tbody tr:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+.table-permissions tbody td {
+  border: none;
+  padding: 1.1rem 1.25rem;
+  font-size: 0.95rem;
+  color: #1a1a1a;
+  vertical-align: middle;
+}
+
+/* Cantos arredondados do card */
+.table-permissions tbody tr td:first-child {
+  border-top-left-radius: 14px;
+  border-bottom-left-radius: 14px;
+}
+
+.table-permissions tbody tr td:last-child {
+  border-top-right-radius: 14px;
+  border-bottom-right-radius: 14px;
+}
+
+/* Tipografia específica */
+.role-name {
+  font-weight: 700;
+}
+
+.role-scope {
+  font-weight: 500;
+  color: #333333;
+}
+
+/* Botão Editar estilo Pílula Cinza (Figma) */
+.btn-editar-pill {
+  display: inline-block;
+  background-color: #8c8c8c;
+  color: #ffffff !important;
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 0.45rem 1.75rem;
+  border-radius: 20px;
+  text-decoration: none;
+  text-align: center;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.btn-editar-pill:hover {
+  background-color: #737373;
+  color: #ffffff !important;
+  transform: translateY(-1px);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .permissions-container {
+    padding: 1rem;
+    overflow-x: auto;
+  }
+  
+  .permissions-header-banner {
+    border-radius: 20px;
+    padding: 0.75rem;
+  }
+
+  .permissions-header-banner h1 {
+    font-size: 1.25rem;
+  }
+}

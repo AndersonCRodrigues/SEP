@@ -1,0 +1,159 @@
+/* ═══════════════════════════════════════════
+   administrativo_home.css 
+   ═══════════════════════════════════════════ */
+
+:root {
+  --sep-maroon: #6D1D20;
+  --sep-maroon-dark: #541618;
+  --sep-black: #000000;
+  --sep-gray-border: #E0DEDC;
+  --sep-text-muted: #777777;
+  --font-main: 'Museo Sans', "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+}
+
+/* ── Saudação ── */
+.greeting {
+  margin-bottom: 2.2rem;
+}
+
+.greeting h1 {
+  font-family: var(--font-main);
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--sep-maroon);
+  margin: 0 0 4px 0;
+}
+
+.greeting-subtitle {
+  font-family: var(--font-main);
+  font-size: 15px;
+  font-weight: 500;
+  color: #8A6466;
+  margin: 0;
+}
+
+/* ── Cards de Resumo ── */
+.summary-list {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 28px;
+  list-style: none;
+  margin: 0 0 50px 0;
+  padding: 0;
+}
+
+.indicator {
+  background-color: var(--sep-maroon);
+  color: #FFFFFF;
+  border-radius: 20px;
+  padding: 32px 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 160px;
+  box-sizing: border-box;
+}
+
+.indicator-label {
+  font-family: var(--font-main);
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  line-height: 1.2;
+  display: block;
+}
+
+.indicator-value {
+  font-family: var(--font-main);
+  font-size: 64px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+/* ── Painel Duplo ── */
+.panel {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  position: relative;
+  align-items: start;
+}
+
+/* Linha divisória vertical */
+.panel::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--sep-maroon);
+  transform: translateX(-50%);
+}
+
+.activities > h2,
+.calendar > h2 {
+  font-family: var(--font-main);
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--sep-maroon);
+  margin: 0 0 24px 0;
+}
+
+/* ── Atividades Recentes ── */
+.activity-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.activity {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--sep-gray-border);
+}
+
+.activity:last-child {
+  border-bottom: none;
+}
+
+.activity-icon {
+  width: 26px;
+  height: 26px;
+  color: var(--sep-maroon);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.activity-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.activity-title {
+  font-family: var(--font-main);
+  font-size: 17px;
+  font-weight: 800;
+  color: #000000;
+  margin: 0 0 4px 0;
+}
+
+.activity-detail {
+  font-family: var(--font-main);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--sep-maroon);
+  margin: 0;
+}
+
+.activity-empty {
+  font-family: var(--font-main);
+  font-size: 15px;
+  color: var(--sep-text-muted);
+  padding: 10px 0;
+}
+

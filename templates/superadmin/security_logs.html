@@ -1,4 +1,9 @@
-{% extends "base.html" %}
+{% extends "superadmin/base_superadmin.html" %}
+{% load static %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'core/css/superadmin/security_logs.css' %}">
+{% endblock %}
 
 {% block title %}Logs de Segurança | Sistema SEP{% endblock %}
 
@@ -8,82 +13,100 @@
 <li class="breadcrumb-item active" aria-current="page">Logs de Segurança</li>
 {% endblock %}
 
-{% block page_title %}Logs de segurança{% endblock %}
-
 {% block content %}
+<!-- Cabeçalho com Título e Campo de Busca alinhados -->
+<div class="logs-header">
+    <h1 class="logs-title">Logs de segurança</h1>
+    
+    <form method="get" class="logs-search-form">
+        <div class="search-input-wrapper">
+            <svg class="search-icon" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+            <input 
+                type="search" 
+                name="q" 
+                class="form-control-search" 
+                placeholder="Buscar por evento ou usuário" 
+                value="{{ request.GET.q|default:'' }}"
+            >
+        </div>
+    </form>
+</div>
 
-<form method="get" class="mb-3">
-    <input type="search" name="q" class="form-control" placeholder="Buscar por evento ou usuário"
-        value="{{ request.GET.q }}">
-</form>
-
-<section class="card">
-    <div class="card-body">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Hora</th>
-                    <th>Evento</th>
-                    <th>Detalhes</th>
-                    <th>Severidade</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for log in logs %}
-                <tr>
-                    <td>{{ log.created_at|date:"H:i:s" }}</td>
-                    <td><a href="{% url 'superadmin:log_detail' log.pk %}">{{ log.get_action_display }}</a></td>
-                    <td>
-                        {% if log.detail %}
+<!-- Contêiner Principal da Tabela -->
+<div class="logs-container">
+    <table class="table-logs">
+        <thead>
+            <tr>
+                <th style="width: 15%;">Hora:</th>
+                <th style="width: 35%;">Evento:</th>
+                <th style="width: 35%;">Detalhes:</th>
+                <th style="width: 15%;"></th> <!-- Espaço da pílula de severidade -->
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in logs %}
+            <tr>
+                <td class="log-time">{{ log.created_at|date:"H:i:s" }}</td>
+                <td class="log-event">
+                    <a href="{% url 'superadmin:log_detail' log.pk %}">
+                        {{ log.get_action_display }}
+                    </a>
+                </td>
+                <td class="log-details">
+                    {% if log.detail %}
                         {{ log.detail }}
-                        {% elif log.user_identifier %}
-                        {{ log.user_identifier }}
-                        {% elif log.target_model %}
+                    {% elif log.user_identifier %}
+                        Usuário: {{ log.user_identifier }}
+                    {% elif log.target_model %}
                         {{ log.target_model }} #{{ log.target_id }}
-                        {% else %}
+                    {% else %}
                         -
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if log.severidade == "critico" %}
-                        <span class="badge text-bg-danger">Crítico</span>
-                        {% elif log.severidade == "atencao" %}
-                        <span class="badge text-bg-warning">Atenção</span>
-                        {% else %}
-                        <span class="badge text-bg-secondary">Info</span>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="4">{% include "components/empty_state.html" with message="Nenhum log encontrado." %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                    {% endif %}
+                </td>
+                <td class="text-end">
+                    {% if log.severidade == "critico" %}
+                        <span class="badge-status badge-status-critico">Crítico</span>
+                    {% elif log.severidade == "atencao" %}
+                        <span class="badge-status badge-status-atencao">Atenção</span>
+                    {% else %}
+                        <span class="badge-status badge-status-info">Info</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4">
+                    {% include "components/empty_state.html" with message="Nenhum log encontrado." %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
-        {% if is_paginated %}
+    {% if is_paginated %}
+    <div class="logs-pagination-wrapper">
         <nav aria-label="Paginação de logs">
-            <ul class="pagination">
+            <ul class="pagination-custom">
                 {% if page_obj.has_previous %}
-                <li class="page-item"><a class="page-link"
-                        href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">Anterior</a>
+                <li>
+                    <a class="page-link-custom" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">&lt; Anterior</a>
                 </li>
                 {% endif %}
-                <li class="page-item disabled">
-                    <span class="page-link">
-                        Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
-                    </span>
+                
+                <li class="page-info">
+                    Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
                 </li>
+
                 {% if page_obj.has_next %}
-                <li class="page-item"><a class="page-link"
-                        href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">Próxima</a>
+                <li>
+                    <a class="page-link-custom" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">Próxima &gt;</a>
                 </li>
                 {% endif %}
             </ul>
         </nav>
-        {% endif %}
     </div>
-</section>
+    {% endif %}
+</div>
 {% endblock %}

@@ -1,4 +1,10 @@
-{% extends "base.html" %}
+{% extends "superadmin/base_superadmin.html" %}
+{% load components %}
+{% load static %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'core/css/superadmin/superadmin_home.css' %}">
+{% endblock %}
 
 {% block title %}Início | Sistema SEP{% endblock %}
 
@@ -7,80 +13,85 @@
 <li class="breadcrumb-item active" aria-current="page">Superadmin</li>
 {% endblock %}
 
-{% block page_title %}Olá, equipe de TI!{% endblock %}
-
 {% block content %}
+<section class="greeting">
+  <h1>Olá, equipe de TI!</h1>
+  <p class="greeting-subtitle">Página inicial - Superadmin</p>
+</section>
 
-<div class="row g-3">
-    <div class="col-12 col-md-6 col-lg-3">
-        <section class="card h-100">
-            <div class="card-body">
-                <h2 class="h6 card-title text-body-secondary">Usuários ativos</h2>
-                <p class="display-6 mb-0">{{ active_users }}</p>
-            </div>
-        </section>
-    </div>
-    <div class="col-12 col-md-6 col-lg-3">
-        <section class="card h-100">
-            <div class="card-body">
-                <h2 class="h6 card-title text-body-secondary">Logs hoje</h2>
-                <p class="display-6 mb-0">{{ logs_today }}</p>
-            </div>
-        </section>
-    </div>
-    <div class="col-12 col-md-6 col-lg-3">
-        <section class="card h-100">
-            <div class="card-body">
-                <h2 class="h6 card-title text-body-secondary">Alertas abertos</h2>
-                <p class="display-6 mb-0">{{ open_alerts }}</p>
-            </div>
-        </section>
-    </div>
+<section class="summary" aria-labelledby="summary-title">
+  <h2 id="summary-title" class="visually-hidden">Resumo operacional</h2>
+  <ul class="summary-list">
+    <li class="indicator">
+      <span class="indicator-label">Usuários ativos</span>
+      <strong class="indicator-value">{{ active_users }}</strong>
+    </li>
+        <li class="indicator">
+      <span class="indicator-label">Usuários ativos</span>
+      <strong class="indicator-value">{{ active_users }}</strong>
+    </li>
+    <li class="indicator">
+      <span class="indicator-label">Logs hoje</span>
+      <strong class="indicator-value">{{ logs_today }}</strong>
+    </li>
+    <li class="indicator">
+      <span class="indicator-label">Alertas abertos</span>
+      <strong class="indicator-value">{{ open_alerts }}</strong>
+    </li>
+  </ul>
+</section>
+
+<div class="panel">
+  {% section title="Atividades recentes" class="activities" id="activities-title" %}
+  <ul class="activity-list">
+    {% for activity in recent_activities %}
+    <li class="activity activity-{{ activity.kind|default:'default' }}">
+      <!-- Ícone condicional do Figma -->
+      {% if activity.kind == 'session' or activity.kind == 'agenda' %}
+        <svg class="activity-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+        </svg>
+      {% elif activity.kind == 'declaration' or activity.kind == 'document' %}
+        <svg class="activity-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>
+      {% else %}
+        <svg class="activity-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5m0 0h4"></path>
+        </svg>
+      {% endif %}
+
+      <div class="activity-content">
+        <h3 class="activity-title">
+          {{ activity.title }}
+          {% if activity.status %}
+            <span class="badge text-bg-secondary">{{ activity.status }}</span>
+          {% endif %}
+        </h3>
+        <p class="activity-detail">
+          {{ activity.when|date:"d/m H:i" }} — {{ activity.detail }}
+        </p>
+      </div>
+    </li>
+    {% empty %}
+    <li class="activity-empty">
+      {% include "components/empty_state.html" with message="Nenhuma atividade recente." %}
+    </li>
+    {% endfor %}
+  </ul>
+  {% endsection %}
+
+  {% section title="Status do Servidor" class="server-status" id="server-status-title" %}
+  <div class="server-status-card">
+    {% if alert_server %}
+      {% include "components/alert.html" with level="warning" message=alert_message %}
+      <div class="mt-2">
+        <a href="{% url 'superadmin:servidores' %}" class="btn btn-primary btn-sm">Ver logs de infraestrutura</a>
+      </div>
+    {% else %}
+      {% include "components/alert.html" with level="success" message="Nemhum alerta ativo no momento." %}
+    {% endif %}
+  </div>
+  {% endsection %}
 </div>
-
-<div class="row g-3 mt-1">
-    <div class="col-12 col-lg-7">
-        <section class="card h-100">
-            <div class="card-body">
-                <h2 class="h5 card-title">Atividades recentes</h2>
-                <div class="list-group list-group-flush">
-                    {% for activity in recent_activities %}
-                    <div class="list-group-item">
-                        <div class="d-flex justify-content-between">
-                            <strong>{{ activity.title }}</strong>
-                
-                            {% if activity.status %}
-                            <span class="badge text-bg-secondary">
-                                {{ activity.status }}
-                            </span>
-                            {% endif %}
-                        </div>
-                
-                        <div class="text-body-secondary small">
-                            {{ activity.when|date:"d/m H:i" }} — {{ activity.detail }}
-                        </div>
-                    </div>
-                
-                    {% empty %}
-                
-                    {% include "components/empty_state.html" with message="Nenhuma atividade recente." %}
-                
-                    {% endfor %}
-                </div>
-            </div>
-        </section>
-    </div>
-
-    <div class="col-12 col-lg-5">
-        {% if alert_server %}
-        {% include "components/alert.html" with level="warning" message=alert_message %}
-        <div class="mt-2">
-            <a href="{% url 'superadmin:servidores' %}" class="btn btn-primary btn-sm">Ver logs de infraestrutura</a>
-        </div>
-        {% else %}
-        {% include "components/alert.html" with level="success" message="Nenhum alerta ativo no momento." %}
-        {% endif %}
-    </div>
-</div>
-
 {% endblock %}

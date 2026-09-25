@@ -1,0 +1,211 @@
+/* ==========================================
+   LOGS DE SEGURANÇA - LAYOUT FIGMA EXACT
+   ========================================== */
+
+/* Topo: Título e Busca */
+.logs-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.logs-title {
+  color: #611e25;
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.logs-search-form {
+  min-width: 320px;
+}
+
+.search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 14px;
+  color: #757575;
+  pointer-events: none;
+}
+
+.form-control-search {
+  width: 100%;
+  padding: 0.6rem 1rem 0.6rem 2.6rem;
+  border-radius: 25px;
+  border: 1px solid #b3b3b3;
+  background-color: #ebebeb;
+  font-size: 0.95rem;
+  color: #333333;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.form-control-search::placeholder {
+  color: #757575;
+}
+
+.form-control-search:focus {
+  background-color: #ffffff;
+  border-color: #611e25;
+  box-shadow: 0 0 0 3px rgba(97, 30, 37, 0.1);
+}
+
+/* Contêiner da Tabela */
+.logs-container {
+  background-color: #ffffff;
+  border: 1.5px solid #dcd3d1;
+  border-radius: 20px;
+  padding: 1.5rem 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+}
+
+/* Estrutura da Tabela */
+.table-logs {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 0.85rem;
+}
+
+.table-logs thead th {
+  border: none;
+  background: transparent;
+  color: #000000;
+  font-size: 1.05rem;
+  font-weight: 700;
+  padding: 0.25rem 1.25rem;
+}
+
+/* Cards das Linhas */
+.table-logs tbody tr {
+  background-color: #e0e0e0;
+  transition: transform 0.15s ease;
+}
+
+.table-logs tbody tr:hover {
+  transform: translateY(-1px);
+}
+
+.table-logs tbody td {
+  border: none;
+  padding: 1.1rem 1.25rem;
+  font-size: 0.95rem;
+  color: #222222;
+  vertical-align: middle;
+}
+
+.table-logs tbody tr td:first-child {
+  border-top-left-radius: 14px;
+  border-bottom-left-radius: 14px;
+}
+
+.table-logs tbody tr td:last-child {
+  border-top-right-radius: 14px;
+  border-bottom-right-radius: 14px;
+}
+
+/* Estilização das Colunas */
+.log-time {
+  font-weight: 500;
+  color: #333333;
+}
+
+.log-event a {
+  color: #000000;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.log-event a:hover {
+  color: #611e25;
+}
+
+.log-details {
+  color: #444444;
+  font-weight: 500;
+}
+
+/* Badges / Pílulas de Severidade */
+.badge-status {
+  display: inline-block;
+  padding: 0.45rem 1.5rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border-radius: 20px;
+  text-align: center;
+  color: #ffffff !important;
+  min-width: 95px;
+}
+
+.badge-status-critico {
+  background-color: #c82828 !important; /* Vermelho Figma */
+}
+
+.badge-status-atencao {
+  background-color: #e08214 !important; /* Laranja Figma */
+}
+
+.badge-status-info {
+  background-color: #3cae12 !important; /* Verde Figma (ou use #7d7d7d para o cinza) */
+}
+
+/* Paginação */
+.logs-pagination-wrapper {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: center;
+}
+
+.pagination-custom {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.page-link-custom {
+  background-color: #e0e0e0;
+  color: #611e25;
+  font-weight: 700;
+  padding: 0.4rem 1rem;
+  border-radius: 12px;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.page-link-custom:hover {
+  background-color: #d0d0d0;
+}
+
+.page-info {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #666666;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .logs-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .logs-search-form {
+    width: 100%;
+    min-width: 100%;
+  }
+
+  .logs-container {
+    padding: 1rem;
+    overflow-x: auto;
+  }
+}

@@ -1,4 +1,9 @@
-{% extends "base.html" %}
+{% extends "superadmin/base_superadmin.html" %}
+{% load static %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'core/css/superadmin/server_status.css' %}">
+{% endblock %}
 
 {% block title %}Status dos Servidores | Sistema SEP{% endblock %}
 
@@ -8,54 +13,59 @@
 <li class="breadcrumb-item active" aria-current="page">Servidores</li>
 {% endblock %}
 
-{% block page_title %}Status dos servidores{% endblock %}
-
 {% block content %}
-<section class="card">
-    <div class="card-body">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Servidor</th>
-                    <th>Uptime</th>
-                    <th>CPU</th>
-                    <th>Memória</th>
-                    <th>Status</th>
-                    <th>Atualizado em</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for server in servidores %}
-                {% if server.health == "OF" %}
-                <tr class="table-danger">
-                    <td>{{ server.nome }}</td>
-                    <td colspan="4">{% include "components/error_state.html" with message="Servidor indisponivel, sem resposta." %}</td>
-                    <td>{{ server.atualizado_em|date:"d/m/Y H:i" }}</td>
-                </tr>
-                {% else %}
-                <tr>
-                    <td>{{ server.nome }}</td>
-                    <td>{{ server.uptime_percent }}%</td>
-                    <td>CPU {{ server.cpu_percent }}%</td>
-                    <td>MEM {{ server.memoria_percent }}%</td>
-                    <td>
-                        {% if server.health == "OK" %}
-                        <span class="badge text-bg-success">Saudável</span>
-                        {% else %}
-                        <span class="badge text-bg-danger">Atenção</span>
-                        {% endif %}
-                    </td>
-                    <td>{{ server.atualizado_em|date:"d/m/Y H:i" }}</td>
-                </tr>
-                {% endif %}
-                {% empty %}
-                <tr>
-                    <td colspan="6">{% include "components/empty_state.html" with message="Nenhum servidor cadastrado."
-                        %}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</section>
+<!-- Banner Superior do Figma -->
+<div class="page-header-banner">
+    <h1>Status dos servidores</h1>
+</div>
+
+<!-- Contêiner Principal -->
+<div class="servers-container">
+    <table class="table-servers">
+        <thead>
+            <tr>
+                <th>Servidores:</th>
+                <th>Uptime:</th>
+                <th>CPU:</th>
+                <th>Memória:</th>
+                <th class="text-end text-sm-center">Status:</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for server in servidores %}
+            {% if server.health == "OF" %}
+            <tr class="server-offline">
+                <td><strong>{{ server.nome }}</strong></td>
+                <td colspan="3">
+                    {% include "components/error_state.html" with message="Servidor indisponível, sem resposta." %}
+                </td>
+                <td class="text-end text-sm-center">
+                    <span class="badge-status badge-status-warning">Off-line</span>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td><strong>{{ server.nome }}</strong></td>
+                <td>{{ server.uptime_percent }}%</td>
+                <td>CPU {{ server.cpu_percent }}%</td>
+                <td>MEM {{ server.memoria_percent }}%</td>
+                <td class="text-end text-sm-center">
+                    {% if server.health == "OK" %}
+                    <span class="badge-status badge-status-ok">Saudável</span>
+                    {% else %}
+                    <span class="badge-status badge-status-warning">Atenção</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endif %}
+            {% empty %}
+            <tr>
+                <td colspan="5">
+                    {% include "components/empty_state.html" with message="Nenhum servidor cadastrado." %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% endblock %}
