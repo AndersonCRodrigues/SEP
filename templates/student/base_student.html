@@ -48,6 +48,14 @@
         {% if current == 'encaminhamentos' %}aria-current="page"{% endif %}
       >Encaminhamentos</a>
     </li>
+
+    <li class="nav-item">
+      <a
+        class="nav-link"
+        href="{% url 'triage:minhas_triagens' %}"
+        
+      >Minhas triagens</a>
+    </li>
   </ul>
 </nav>
 {% endwith %}
