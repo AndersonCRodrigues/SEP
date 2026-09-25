@@ -6,7 +6,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}{% endblock %}{% block title_suffix %} | SEP Maricá{% endblock %}</title>
-  <link rel="stylesheet" href="{% static 'core/css/administrativo/base_admin.css' %}">
+  <link rel="stylesheet" href="{% static 'core/css/superadmin/base_superadmin.css' %}">
   {% block page_css %}{% endblock %}
   {% block extra_css %}{% endblock %}
 </head>
@@ -14,9 +14,9 @@
 <body>
   <header class="admin-navbar">
     {% block brand %}
-    <a class="admin-navbar__brand" href="{% url 'administration:home' %}">
+    <a class="admin-navbar__brand" href="{% url 'superadmin:home' %}">
       <span class="brand-name">SEP Maricá</span>
-      <span class="brand-institution">Universidade de Vassouras</span>
+      <span class="brand-institution">Superadmin</span>
     </a>
     {% endblock %}
 
@@ -24,18 +24,48 @@
     {% with current=request.resolver_match.url_name %}
     <nav class="main-nav" aria-label="Navegação principal">
       <ul class="admin-navbar__links">
-        <li><a href="{% url 'administration:home' %}" class="{% if current == 'home' %}active{% endif %}">Página
-            inicial</a></li>
-        <li><a href="{% url 'administration:pacientes' %}"
-            class="{% if current == 'pacientes' %}active{% endif %}">Pacientes</a></li>
-        <li><a href="{% url 'administration:agenda' %}" class="{% if current == 'agenda' %}active{% endif %}">Agenda</a>
+        <li>
+          <a href="{% url 'superadmin:home' %}"
+            class="{% if current == 'home' %}active{% endif %}">
+            Página inicial
+          </a>
         </li>
-        <li><a href="{% url 'administration:salas' %}" class="{% if current == 'salas' %}active{% endif %}">Salas</a>
+        <li>
+          <a href="{% url 'superadmin:servidores' %}"
+            class="{% if current == 'servidores' %}active{% endif %}">
+            Servidores
+          </a>
         </li>
-        <li><a href="{% url 'administration:declaracoes' %}"
-            class="{% if current == 'declaracoes' %}active{% endif %}">Declarações</a></li>
-        <li><a href="{% url 'administration:atestados' %}"
-            class="{% if current == 'atestados' %}active{% endif %}">Atestados</a></li>
+        <li>
+          <a href="{% url 'superadmin:logs' %}"
+            class="{% if current == 'logs' or current == 'log_detail' %}active{% endif %}">
+            Logs
+          </a>
+        </li>
+        <li>
+          <a href="{% url 'superadmin:permissoes' %}"
+            class="{% if current == 'permissoes' or current == 'permissao_editar' %}active{% endif %}">
+            Permissões
+          </a>
+        </li>
+        <li>
+          <a href="{% url 'superadmin:backups' %}"
+            class="{% if current == 'backups' %}active{% endif %}">
+            Backups
+          </a>
+        </li>
+        <li>
+          <a href="{% url 'supervisor:register' %}"
+            class="{% if current == 'supervisor' %}active{% endif %}">
+            Supervisor
+          </a>
+        </li>
+        <li>
+          <a href="{% url 'administration:cadastrar' %}"
+            class="{% if current == 'adm' %}active{% endif %}">
+            ADM
+          </a>
+        </li>
       </ul>
     </nav>
     {% endwith %}
