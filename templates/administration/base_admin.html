@@ -1,6 +1,7 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +10,7 @@
   {% block page_css %}{% endblock %}
   {% block extra_css %}{% endblock %}
 </head>
+
 <body>
   <header class="admin-navbar">
     {% block brand %}
@@ -22,12 +24,18 @@
     {% with current=request.resolver_match.url_name %}
     <nav class="main-nav" aria-label="Navegação principal">
       <ul class="admin-navbar__links">
-        <li><a href="{% url 'administration:home' %}" class="{% if current == 'home' %}active{% endif %}">Página inicial</a></li>
-        <li><a href="{% url 'administration:pacientes' %}" class="{% if current == 'pacientes' %}active{% endif %}">Pacientes</a></li>
-        <li><a href="{% url 'administration:agenda' %}" class="{% if current == 'agenda' %}active{% endif %}">Agenda</a></li>
-        <li><a href="{% url 'administration:salas' %}" class="{% if current == 'salas' %}active{% endif %}">Salas</a></li>
-        <li><a href="{% url 'administration:declaracoes' %}" class="{% if current == 'declaracoes' %}active{% endif %}">Declarações</a></li>
-        <li><a href="{% url 'administration:atestados' %}" class="{% if current == 'atestados' %}active{% endif %}">Atestados</a></li>
+        <li><a href="{% url 'administration:home' %}" class="{% if current == 'home' %}active{% endif %}">Página
+            inicial</a></li>
+        <li><a href="{% url 'administration:pacientes' %}"
+            class="{% if current == 'pacientes' %}active{% endif %}">Pacientes</a></li>
+        <li><a href="{% url 'administration:agenda' %}" class="{% if current == 'agenda' %}active{% endif %}">Agenda</a>
+        </li>
+        <li><a href="{% url 'administration:salas' %}" class="{% if current == 'salas' %}active{% endif %}">Salas</a>
+        </li>
+        <li><a href="{% url 'administration:declaracoes' %}"
+            class="{% if current == 'declaracoes' %}active{% endif %}">Declarações</a></li>
+        <li><a href="{% url 'administration:atestados' %}"
+            class="{% if current == 'atestados' %}active{% endif %}">Atestados</a></li>
       </ul>
     </nav>
     {% endwith %}
@@ -38,6 +46,14 @@
       <li><button type="button" class="icon-btn" aria-label="Mensagens">✉</button></li>
       <li><button type="button" class="icon-btn" aria-label="Notificações">🔔</button></li>
       <li><button type="button" class="icon-btn" aria-label="Minha conta">👤</button></li>
+      <li>
+        <form method="post" action="{% url 'logout' %}" class="d-inline">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-outline-light btn-sm">
+            <i class="bi bi-box-arrow-right"></i> Sair
+          </button>
+        </form>
+      </li>
       {% endblock %}
     </ul>
   </header>
@@ -52,4 +68,5 @@
 
   {% block extra_js %}{% endblock %}
 </body>
+
 </html>

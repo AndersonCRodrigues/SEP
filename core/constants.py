@@ -17,3 +17,4 @@ class TriageStatus(models.TextChoices):
 # Enquanto o supervisor nao decide, a ficha ainda e do aluno que a escreveu:
 # ele le, mas so edita enquanto aberta.
 VISIBLE_TO_AUTHOR = (TriageStatus.OPEN,TriageStatus.FINALIZED_EDITION, TriageStatus.SUBMITTED)
+VISIBLE_TO_PATIENT = (TriageStatus.CLOSED, TriageStatus.REFERRED)
