@@ -176,7 +176,7 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = "static/"
-STATICFILES_DIRS = [BASE_DIR / "static"]
+STATICFILES_DIRS = [BASE_DIR / "static", BASE_DIR / "core" / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STORAGES = {
     "staticfiles": {
@@ -184,7 +184,6 @@ STORAGES = {
     },
 }
 STATIC_ROOT = BASE_DIR / "staticfiles"
-STATICFILES_DIRS = [BASE_DIR / "core" / "static"]
 
 
 AUTH_USER_MODEL = "core.CustomUser"
