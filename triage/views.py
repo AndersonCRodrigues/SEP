@@ -58,7 +58,7 @@ def fila_triagem(request):
         return HttpResponseForbidden("Apenas Alunos podem acessar a fila de triagem.")
 
     pacientes_aguardando = Patient.objects.filter(
-        flow_status=Patient.FlowStatus.AWAITING_TRIAGE
+        flow_status__in=[Patient.FlowStatus.AWAITING_TRIAGE, ""]
     )
 
     return render(
@@ -89,12 +89,22 @@ def render_triage_step(request, wizard, step, form):
     )
 
 
-@login_required
-def create_triage_start(request, patient_id):
+def _ensure_can_create_triage(request, patient):
+    """Levanta HttpResponseForbidden se o usuário não pode criar triagem para esse paciente."""
     if request.user.role != Role.ALUNO:
         return HttpResponseForbidden("Apenas alunos podem criar uma ficha de triagem.")
+    if patient.flow_status not in ("", Patient.FlowStatus.AWAITING_TRIAGE):
+        return HttpResponseForbidden("Esse paciente não está aguardando triagem.")
+    return None
 
+
+@login_required
+def create_triage_start(request, patient_id):
     patient = get_object_or_404(Patient, pk=patient_id)
+
+    forbidden = _ensure_can_create_triage(request, patient)
+    if forbidden:
+        return forbidden
 
     try:
         wizard = TriageRegistration.start(request.session, patient)
@@ -109,6 +119,11 @@ def create_triage_start(request, patient_id):
 @login_required
 def create_triage_step(request, patient_id, step):
     patient = get_object_or_404(Patient, pk=patient_id)
+
+    forbidden = _ensure_can_create_triage(request, patient)
+    if forbidden:
+        return forbidden
+
     wizard = TriageRegistration(request.session, patient)
 
     try:
