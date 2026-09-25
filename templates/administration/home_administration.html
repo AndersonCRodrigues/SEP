@@ -2,12 +2,14 @@
 {% load components %}
 {% load static %}
 
-{% block extra_css %}
-  <link rel="stylesheet" href="{% static 'core/css/administrativo/administrativo_home.css' %}">
-{% endblock %}
 {% load components static %}
 
 {% block title %}Página inicial{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/administrativo/administrativo_home.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/teacher_home.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/patient_home.css' %}">
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'core/css/teacher_home.css' %}">
