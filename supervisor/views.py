@@ -10,16 +10,11 @@ from django.urls import reverse_lazy
 from django.views.generic import CreateView, ListView, TemplateView, UpdateView
 
 from areas.forms import AreaAtuacaoForm
-from core.utils import sincronizar_grupo
-from .utils import gerar_senha_temporaria, enviar_email_credenciais
-from teacher.forms import PerfilProfessorForm
-from core.notifications import enviar_credenciais_por_telefone
-
-from teacher.forms import VincularAlunoForm, StudentActivityForm
-from triage.models import Referral, TriageRecord
+from areas.models import AreaActing
 from core.constants import TriageStatus
 from core.mixins import GroupRequiredMixin
 from core.models import CustomUser
+from core.notifications import enviar_credenciais_por_telefone
 from core.utils import sincronizar_grupo
 from students.models import Student
 from teacher.forms import PerfilProfessorForm, StudentActivityForm, VincularAlunoForm

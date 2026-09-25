@@ -1,0 +1,110 @@
+/* Identidade visual do SEP aplicada sobre a estrutura do base.html:
+   a barra, a marca, os ícones de usuário e o rodapé de todas as áreas. */
+
+:root {
+  --sep-maroon: #6d1d20;
+  --sep-maroon-dark: #591619;
+}
+
+/* ── Barra superior ── */
+.sep-navbar {
+  background-color: var(--sep-maroon);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  min-height: 75px;
+  padding: 0;
+}
+
+.sep-navbar .navbar-brand {
+  color: #fff;
+  font-weight: 700;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  margin-right: 2rem;
+  padding: 0;
+  text-decoration: none;
+}
+
+.sep-navbar .navbar-brand img {
+  height: 24px;
+  width: auto;
+  object-fit: contain;
+}
+
+.sep-navbar .brand-name {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1;
+  color: #fff;
+}
+
+.sep-navbar .brand-institution {
+  font-size: 0.72rem;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.78);
+  line-height: 1;
+}
+
+/* ── Navegação principal ── */
+.sep-navbar .nav-link {
+  color: rgba(255, 255, 255, 0.88) !important;
+  font-size: 0.88rem;
+  font-weight: 500;
+  padding: 0.5rem 0.75rem !important;
+  border-radius: 4px;
+  transition:
+    color 0.15s,
+    background 0.15s;
+}
+
+.sep-navbar .nav-link:hover,
+.sep-navbar .nav-link[aria-current="page"] {
+  color: #fff !important;
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+.sep-navbar .main-nav .navbar-nav {
+  flex-direction: row;
+  gap: 0.25rem;
+}
+
+/* ── Ícones de usuário, à direita ── */
+.sep-navbar .header-action {
+  color: rgba(255, 255, 255, 0.88);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 8px;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+
+.sep-navbar .header-action:hover {
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+}
+
+/* ── Rodapé ── */
+.site-footer {
+  background-color: var(--sep-maroon);
+  color: #fff;
+  padding: 14px 0;
+  text-align: center;
+}
+
+.site-footer p {
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+@media (min-width: 992px) {
+  .sep-navbar .main-nav .navbar-nav {
+    flex-wrap: nowrap;
+  }
+}

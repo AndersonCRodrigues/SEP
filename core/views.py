@@ -1,12 +1,20 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView, PasswordChangeView
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.views import View
 
 from core.models import CustomUser
 
 from .forms import LoginEmailOuMatriculaForm
+
+
+class LandingPageView(View):
+    def get(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return redirect("home_redirect")
+        return render(request, "landing.html", {"year": timezone.now().year})
 
 
 class ForcePasswordChangeView(LoginRequiredMixin, PasswordChangeView):

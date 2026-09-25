@@ -1,53 +1,217 @@
 {% extends "patient/base_patient.html" %}
+{% load static %}
 {% load components %}
 
 {% block title %}Métodos de contato{% endblock %}
 
+{% block extra_css %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'core/css/patient_home.css' %}?v=11"> <!-- para herdar header mobile -->
+  <link rel="stylesheet" href="{% static 'core/css/patient_contato.css' %}">
+  <style>
+    /* CSS para o mobile */
+    @media (max-width: 767.98px) {
+      html, body { background-color: #F8F9FA !important; }
+      .sep-navbar  { display: none !important; }
+      main > .container-fluid { padding: 0 !important; }
+    }
+  </style>
+{% endblock %}
+
 {% block content %}
-<h1 class="page-banner">Métodos de contato</h1>
 
-<div class="contact-panels">
-  {% section title="Seu atendimento" class="contact-care" id="care-title" %}
-  {% if caregivers_error %}
-  {% include "components/error_state.html" with message=caregivers_error retry_url=request.path %}
-  {% else %}
-  <ul class="caregiver-list">
-    {% for person in caregivers %}
-    <li class="caregiver">
-      <span class="caregiver-initials" aria-hidden="true">{{ person.initials }}</span>
-      <p class="caregiver-name">{{ person.name }}</p>
-      <p class="caregiver-role">Responsável pelo seu atendimento</p>
-      {# TODO: botão sem lógica; fica para fazer #}
-      <button type="button" class="caregiver-message">
-        Enviar mensagem<span class="visually-hidden"> para {{ person.name }}</span>
-      </button>
-    </li>
-    {% empty %}
-    <li class="caregiver-empty">
-      {% include "components/empty_state.html" with message="Ainda não há um aluno responsável pelo seu atendimento." %}
-    </li>
-    {% endfor %}
-  </ul>
-  {% endif %}
-  {% endsection %}
+<!-- ══════════════════════════════════════
+     MOBILE CONTATO
+     ══════════════════════════════════════ -->
+<div class="d-block d-md-none" style="min-height: 100vh; display: flex; flex-direction: column; background-color: #F8F9FA;">
+  
+  <!-- Header Mobile -->
+  <div class="mobile-header" style="background-color: #6D1D20; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; padding-bottom: 20px;">
+    <a href="{% url 'patient:home' %}" class="mobile-back"></a>
+    <span class="mobile-greeting">Olá, {{ request.user.first_name|default:"Paciente" }}!</span>
+    <div class="mobile-icons d-flex align-items-center gap-3">
+      <i class="bi bi-bell"></i>
+      <form method="post" action="{% url 'logout' %}" class="m-0 p-0 d-inline-flex">
+        {% csrf_token %}
+        <button type="submit" class="p-0 border-0 bg-transparent text-white d-flex align-items-center" style="line-height: 1;">
+          <i class="bi bi-person-circle" style="font-size: 24px;"></i>
+        </button>
+      </form>
+    </div>
+  </div>
 
-  {% section title=service_name class="contact-service" id="service-title" %}
-  <ul class="channel-list">
-    {% for channel in channels %}
-    <li class="channel channel-{{ channel.kind }}">
-      <span class="channel-label">{{ channel.label }}:</span>
-      <a
-        class="channel-link"
-        href="{{ channel.href }}"
-        {% if channel.external %}target="_blank" rel="noopener noreferrer"{% endif %}
-      >{{ channel.value }}{% if channel.external %}<span class="visually-hidden"> (abre em nova aba)</span>{% endif %}</a>
-    </li>
-    {% empty %}
-    <li class="channel-empty">
-      {% include "components/empty_state.html" with message="Os canais de contato ainda não foram configurados." %}
-    </li>
-    {% endfor %}
-  </ul>
-  {% endsection %}
+  <div class="px-3 text-center mt-4 flex-grow-1">
+    
+    <div class="mb-4 text-center">
+      <span style="display: inline-block; background-color: #6D1D20; color: white; padding: 10px 40px; border-radius: 20px; font-weight: 700; font-family: 'Museo Sans', sans-serif; font-size: 16px;">
+        Contato
+      </span>
+    </div>
+
+    {% if caregivers_error %}
+      {% include "components/error_state.html" with message=caregivers_error retry_url=request.path %}
+    {% else %}
+      {% for person in caregivers %}
+        <div style="background-color: #DCDCDC; border-radius: 16px; padding: 24px 16px; margin-bottom: 20px; text-align: center;">
+          <div style="width: 50px; height: 50px; border-radius: 50%; background-color: #E25C5C; color: white; display: flex; align-items: center; justify-content: center; font-family: 'Museo Sans', sans-serif; font-weight: 700; font-size: 18px; margin: 0 auto 12px auto;">
+            {{ person.initials }}
+          </div>
+          <div style="font-family: 'Museo Sans', sans-serif; font-size: 16px; font-weight: 800; color: #000; margin-bottom: 4px;">
+            Aluno {{ person.name|default:"André Ferreira" }}
+          </div>
+          <div style="font-family: 'Museo Sans', sans-serif; font-size: 12px; font-weight: 500; color: #555;">
+            Responsável pelo seu atendimento
+          </div>
+        </div>
+
+        <div class="mb-5 text-center">
+          <button type="button" style="background-color: #6D1D20; color: white; padding: 12px 30px; border-radius: 20px; text-decoration: none; font-weight: 700; font-family: 'Museo Sans', sans-serif; font-size: 14px; border: none;">
+            Enviar mensagem
+          </button>
+        </div>
+      {% empty %}
+        <!-- Mock se não tiver ninguem -->
+        <div style="background-color: #DCDCDC; border-radius: 16px; padding: 24px 16px; margin-bottom: 20px; text-align: center;">
+          <div style="width: 50px; height: 50px; border-radius: 50%; background-color: #E25C5C; color: white; display: flex; align-items: center; justify-content: center; font-family: 'Museo Sans', sans-serif; font-weight: 700; font-size: 18px; margin: 0 auto 12px auto;">
+            AF
+          </div>
+          <div style="font-family: 'Museo Sans', sans-serif; font-size: 16px; font-weight: 800; color: #000; margin-bottom: 4px;">
+            Aluno André Ferreira
+          </div>
+          <div style="font-family: 'Museo Sans', sans-serif; font-size: 12px; font-weight: 500; color: #555;">
+            Responsável pelo seu atendimento
+          </div>
+        </div>
+
+        <div class="mb-5 text-center">
+          <button type="button" style="background-color: #6D1D20; color: white; padding: 12px 30px; border-radius: 20px; text-decoration: none; font-weight: 700; font-family: 'Museo Sans', sans-serif; font-size: 14px; border: none;">
+            Enviar mensagem
+          </button>
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    <div style="background-color: #DCDCDC; border-radius: 16px; padding: 20px 16px; margin-bottom: 30px; text-align: left;">
+      <div style="font-family: 'Museo Sans', sans-serif; font-size: 15px; font-weight: 800; color: #6D1D20; margin-bottom: 16px;">
+        {{ service_name|default:"Serviço Escolar de Psicologia" }}
+      </div>
+      
+      {% if channels %}
+        {% for channel in channels %}
+          <div style="display: flex; align-items: center; margin-bottom: 12px;">
+            {% if channel.kind == 'location' %}
+              <i class="bi bi-geo-alt" style="font-size: 18px; margin-right: 12px; color: #000;"></i>
+            {% elif channel.kind == 'phone' %}
+              <i class="bi bi-telephone" style="font-size: 18px; margin-right: 12px; color: #000;"></i>
+            {% elif channel.kind == 'email' %}
+              <i class="bi bi-envelope" style="font-size: 18px; margin-right: 12px; color: #000;"></i>
+            {% else %}
+              <i class="bi bi-link-45deg" style="font-size: 18px; margin-right: 12px; color: #000;"></i>
+            {% endif %}
+            <a href="{{ channel.href }}" style="font-family: 'Museo Sans', sans-serif; font-size: 13px; font-weight: 500; color: #333; text-decoration: none;" {% if channel.external %}target="_blank"{% endif %}>
+              {{ channel.value }}
+            </a>
+          </div>
+        {% endfor %}
+      {% else %}
+        <!-- Mocks se não houver canais -->
+        <div style="display: flex; align-items: center; margin-bottom: 12px;">
+          <i class="bi bi-geo-alt" style="font-size: 18px; margin-right: 12px; color: #000;"></i>
+          <span style="font-family: 'Museo Sans', sans-serif; font-size: 13px; font-weight: 500; color: #333;">Maricá, RJ</span>
+        </div>
+        <div style="display: flex; align-items: center; margin-bottom: 12px;">
+          <i class="bi bi-telephone" style="font-size: 18px; margin-right: 12px; color: #000;"></i>
+          <span style="font-family: 'Museo Sans', sans-serif; font-size: 13px; font-weight: 500; color: #333;">(21) 2000-0000</span>
+        </div>
+        <div style="display: flex; align-items: center; margin-bottom: 0;">
+          <i class="bi bi-envelope" style="font-size: 18px; margin-right: 12px; color: #000;"></i>
+          <span style="font-family: 'Museo Sans', sans-serif; font-size: 13px; font-weight: 500; color: #333;">sep@univassouras.edu.br</span>
+        </div>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     DESKTOP CONTATO
+     ══════════════════════════════════════ -->
+<div class="d-none d-md-block container-fluid px-lg-4 mt-4 mb-5">
+
+  <div class="page-banner-container">
+    <h1 class="page-banner">Métodos de contato</h1>
+  </div>
+
+  <div class="contact-panels">
+    
+    {# ── Painel: Seu Atendimento ── #}
+    <div class="contact-panel contact-care" id="care-title">
+      <h2 class="panel-title">Seu atendimento</h2>
+      
+      {% if caregivers_error %}
+        {% include "components/error_state.html" with message=caregivers_error retry_url=request.path %}
+      {% else %}
+        <ul class="caregiver-list">
+          {% for person in caregivers %}
+          <li class="caregiver">
+            
+            <div class="caregiver-info-row">
+              <div class="caregiver-avatar">
+                <span class="caregiver-initials" aria-hidden="true">{{ person.initials }}</span>
+              </div>
+              <div class="caregiver-details">
+                <p class="caregiver-name">Aluno {{ person.name|default:"André Ferreira" }}</p>
+                <p class="caregiver-role">Responsável pelo seu atendimento</p>
+              </div>
+            </div>
+
+            <div class="caregiver-action">
+              <button type="button" class="btn-message">
+                Enviar mensagem<span class="visually-hidden"> para {{ person.name }}</span>
+              </button>
+            </div>
+            
+          </li>
+          {% empty %}
+          <li class="caregiver-empty">
+            {% include "components/empty_state.html" with message="Ainda não há um aluno responsável pelo seu atendimento." %}
+          </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </div>
+
+    {# ── Painel: Serviço Escola ── #}
+    <div class="contact-panel contact-service" id="service-title">
+      <h2 class="panel-title">{{ service_name }}</h2>
+      
+      <ul class="channel-list">
+        {% for channel in channels %}
+        <li class="channel channel-{{ channel.kind }}">
+          
+          {% if channel.kind == 'location' %}
+            <i class="bi bi-geo-alt icon-channel"></i>
+          {% elif channel.kind == 'phone' %}
+            <i class="bi bi-telephone icon-channel"></i>
+          {% elif channel.kind == 'email' %}
+            <i class="bi bi-envelope icon-channel"></i>
+          {% endif %}
+          
+          <a
+            class="channel-link"
+            href="{{ channel.href }}"
+            {% if channel.external %}target="_blank" rel="noopener noreferrer"{% endif %}
+          >{{ channel.value }}{% if channel.external %}<span class="visually-hidden"> (abre em nova aba)</span>{% endif %}</a>
+        </li>
+        {% empty %}
+        <li class="channel-empty">
+          {% include "components/empty_state.html" with message="Os canais de contato ainda não foram configurados." %}
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+
+  </div>
 </div>
 {% endblock %}

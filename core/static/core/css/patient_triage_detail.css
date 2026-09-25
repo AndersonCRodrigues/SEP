@@ -1,0 +1,94 @@
+/**
+ * patient_triage_detail.css
+ */
+
+:root {
+  --sep-maroon: #6D1D20;
+}
+
+.triage-result-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 60px;
+  text-align: center;
+}
+
+.triage-icon-circle {
+  width: 90px;
+  height: 90px;
+  background-color: #3AA600;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.triage-icon-circle i {
+  color: #FFFFFF;
+  font-size: 50px;
+  line-height: 1;
+}
+
+.triage-title {
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: #000000;
+  margin-bottom: 12px;
+}
+
+.triage-subtitle {
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 14px;
+  color: #555555;
+  margin-bottom: 40px;
+}
+
+.triage-info-box {
+  background-color: #8C8987;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 500px;
+  padding: 0 24px;
+}
+
+.triage-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+}
+
+.triage-info-row:not(:last-child) {
+  border-bottom: 1px solid #FFFFFF;
+}
+
+.info-label {
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+.info-value {
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+.back-link-container {
+  text-align: center;
+  margin-top: 40px;
+}
+
+.back-link {
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 14px;
+  color: var(--sep-maroon);
+  text-decoration: underline;
+  font-weight: 600;
+}

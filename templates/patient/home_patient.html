@@ -1,129 +1,288 @@
 {% extends "patient/base_patient.html" %}
-{% load components %}
+{% load static %}
 
-{% block title %}Página inicial{% endblock %}
+{% block title %}Página Inicial{% endblock %}
+
+{% block extra_css %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'core/css/teacher_home.css' %}">
+  <link rel="stylesheet" href="{% static 'core/css/patient_home.css' %}?v=10">
+{% endblock %}
 
 {% block content %}
-<section class="greeting">
-  <h1>Olá, {{ request.user.first_name|default:"paciente" }}!</h1>
-  <p class="greeting-subtitle">Página inicial - Paciente</p>
-</section>
 
-{% if home_error %}
-{% include "components/error_state.html" with message=home_error retry_url=request.path %}
-{% else %}
-<section class="summary" aria-labelledby="summary-title">
-  <h2 id="summary-title" class="visually-hidden">Resumo</h2>
-  <ul class="summary-list">
-    <li class="indicator">
-      <span class="indicator-label">Sessões realizadas</span>
-      <strong class="indicator-value">{{ sessions_done }}</strong>
-    </li>
-    <li class="indicator">
-      <span class="indicator-label">Status da triagem</span>
-      <strong class="indicator-value">{{ triage_status }}</strong>
-    </li>
-    <li class="indicator">
-      <span class="indicator-label">Próxima sessão</span>
-      <strong class="indicator-value">{{ next_session }}</strong>
-    </li>
-    <li class="indicator">
-      <span class="indicator-label">Faltas</span>
-      <strong class="indicator-value">{{ absences }}</strong>
-    </li>
-  </ul>
-</section>
+  <!-- ══════════════════════════════════════
+       MOBILE HOME
+       ══════════════════════════════════════ -->
+  <div class="d-block d-md-none mobile-maroon-bg">
+    <!-- Header Mobile -->
+    <div class="mobile-header">
+      <a href="{% url 'patient:home' %}" class="mobile-back"></a>
+      <span class="mobile-greeting">Olá, {{ request.user.first_name|default:"Paciente" }}!</span>
+      <div class="mobile-icons d-flex align-items-center gap-3">
+        <i class="bi bi-bell"></i>
+        <form method="post" action="{% url 'logout' %}" class="m-0 p-0 d-inline-flex">
+          {% csrf_token %}
+          <button type="submit" class="p-0 border-0 bg-transparent text-white d-flex align-items-center" style="line-height: 1;">
+            <i class="bi bi-person-circle" style="font-size: 24px;"></i>
+          </button>
+        </form>
+      </div>
+    </div>
 
-<div class="panel">
-  {% section title="Atividades recentes" class="activities" id="activities-title" %}
-  <ul class="activity-list">
-    {% for activity in activities %}
-    <li class="activity activity-{{ activity.kind }}">
-      <h3 class="activity-section">{{ activity.section }}</h3>
-      {% if activity.label %}
-      {% include "components/badge.html" with label=activity.label level=activity.level %}
-      {% endif %}
-      <p class="activity-title">{{ activity.title }}</p>
-      {% if activity.detail %}
-      <p class="activity-detail">{{ activity.detail }}</p>
-      {% endif %}
-      <a class="activity-link" href="{{ activity.url }}" aria-label="{{ activity.link_label }}">
-        <span aria-hidden="true">&rsaquo;</span>
+    <!-- Stat Cards -->
+    <div class="px-3 pt-3 pb-1">
+      <div class="patient-stats-grid">
+        <div class="p-stat-box p-stat-green">
+          <div class="p-stat-label">Sessões<br>realizadas</div>
+          <div class="p-stat-value">7</div>
+        </div>
+        <div class="p-stat-box p-stat-red">
+          <div class="p-stat-label">Status da<br>triagem</div>
+          <div class="p-stat-value">Concluída</div>
+        </div>
+        <div class="p-stat-box p-stat-orange">
+          <div class="p-stat-label">Próxima<br>sessão</div>
+          <div class="p-stat-value">Hoje</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Alerta Pendente -->
+    <div class="px-3 mt-4 pb-4">
+      <div class="p-alert-box">
+        <div class="p-alert-header">
+          <i class="bi bi-exclamation-triangle-fill"></i> Alerta pendente
+        </div>
+        <p class="p-alert-text"><strong>3 declarações</strong> aguardando emissão</p>
+        <button class="p-alert-btn">Gerar declarações</button>
+      </div>
+    </div>
+  </div> <!-- fim fundo vinho mobile -->
+
+  <!-- Conteúdo abaixo do fundo vinho -->
+  <div class="d-block d-md-none px-3 mt-4">
+
+    <!-- Nav de serviços -->
+    <div class="d-flex justify-content-between align-items-baseline mb-2">
+      <h2 class="p-section-title">Opções de Serviço</h2>
+      <a href="#" class="p-see-all">Ver todos<i class="bi bi-chevron-right ms-1" style="font-size:10px;"></i></a>
+    </div>
+
+    <div class="patient-mobile-nav">
+      <a href="{% url 'patient:home' %}" class="p-nav-tab active">Página inicial</a>
+      <a href="{% url 'patient:triagens' %}" class="p-nav-tab">Triagens</a>
+      <a href="{% url 'patient:agendamentos' %}" class="p-nav-tab">Agendamentos</a>
+      <a href="{% url 'patient:historico' %}" class="p-nav-tab">Histórico</a>
+      <a href="{% url 'patient:contato' %}" class="p-nav-tab">Contato</a>
+    </div>
+
+    <div class="p-nav-divider"></div>
+
+    <!-- Atividade Recente -->
+    <h3 class="p-activity-section-title">Atividade Recente</h3>
+
+    <!-- Mocks fixos para demonstração visual -->
+    <div class="p-activity-card">
+      <div class="p-activity-header">
+        <span class="p-activity-category">Agenda geral</span>
+        <span class="p-badge p-badge-warning">Atualizado</span>
+      </div>
+      <div class="p-activity-title">Sessão remarcada</div>
+      <div class="p-activity-desc">Sala 2 - 15:00</div>
+      <div class="p-activity-divider"></div>
+      <a href="#" class="p-activity-footer">
+        <i class="bi bi-chevron-right"></i>
       </a>
-    </li>
-    {% endfor %}
-  </ul>
-  {% endsection %}
+    </div>
 
-  {% section title="Calendário" class="calendar" id="calendar-title" %}
-  <form class="calendar-nav" method="get" action="">
-    <a
-      class="calendar-previous"
-      href="?ano={{ previous_month|date:'Y' }}&amp;mes={{ previous_month|date:'n' }}"
-      aria-label="Mês anterior"
-    >&lsaquo;</a>
+    <div class="p-activity-card">
+      <div class="p-activity-header">
+        <span class="p-activity-category">Declarações</span>
+        <span class="p-badge p-badge-success">Concluído</span>
+      </div>
+      <div class="p-activity-title">Declaração emitida</div>
+      <div class="p-activity-desc">Paciente - Y</div>
+      <div class="p-activity-divider"></div>
+      <a href="#" class="p-activity-footer">
+        <i class="bi bi-chevron-right"></i>
+      </a>
+    </div>
 
-    <label class="visually-hidden" for="calendar-month">Mês</label>
-    <select id="calendar-month" name="mes">
-      {% for number, name in calendar_months %}
-      <option value="{{ number }}" {% if number == calendar_month %}selected{% endif %}>
-        {{ name }}
-      </option>
-      {% endfor %}
-    </select>
+    <div class="p-activity-card">
+      <div class="p-activity-header">
+        <span class="p-activity-category">Salas</span>
+        <span class="p-badge p-badge-success">Disponível</span>
+      </div>
+      <div class="p-activity-title">Sala 3 liberada</div>
+      <div class="p-activity-desc">Disponível às 16:00</div>
+      <div class="p-activity-divider"></div>
+      <a href="#" class="p-activity-footer">
+        <i class="bi bi-chevron-right"></i>
+      </a>
+    </div>
 
-    <label class="visually-hidden" for="calendar-year">Ano</label>
-    <select id="calendar-year" name="ano">
-      {% for year in calendar_years %}
-      <option value="{{ year }}" {% if year == calendar_year %}selected{% endif %}>
-        {{ year }}
-      </option>
-      {% endfor %}
-    </select>
+  </div> <!-- fim mobile conteúdo -->
 
-    <button type="submit">Ver</button>
 
-    <a
-      class="calendar-next"
-      href="?ano={{ next_month|date:'Y' }}&amp;mes={{ next_month|date:'n' }}"
-      aria-label="Próximo mês"
-    >&rsaquo;</a>
-  </form>
+  <!-- ══════════════════════════════════════
+       DESKTOP HOME
+       ══════════════════════════════════════ -->
+  <div class="d-none d-md-block container-fluid px-lg-4 mt-4 mb-5">
 
-  <table class="calendar-grid">
-    <caption class="visually-hidden">
-      Suas sessões no mês selecionado
-    </caption>
-    <thead>
-      <tr>
-        <th scope="col" abbr="Domingo">Dom</th>
-        <th scope="col" abbr="Segunda-feira">Seg</th>
-        <th scope="col" abbr="Terça-feira">Ter</th>
-        <th scope="col" abbr="Quarta-feira">Qua</th>
-        <th scope="col" abbr="Quinta-feira">Qui</th>
-        <th scope="col" abbr="Sexta-feira">Sex</th>
-        <th scope="col" abbr="Sábado">Sáb</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for week in calendar_weeks %}
-      <tr>
-        {% for day in week %}
-        <td
-          class="day{% if not day.in_month %} day-outside-month{% endif %}{% if day.has_event %} day-with-event{% endif %}"
-          {% if day.today %}aria-current="date"{% endif %}
-        >
-          <time datetime="{{ day.date|date:'Y-m-d' }}">{{ day.date|date:"j" }}</time>
-          {% if day.has_event %}
-          <span class="visually-hidden">com sessão</span>
-          {% endif %}
-        </td>
-        {% endfor %}
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  {% endsection %}
-</div>
-{% endif %}
+    <!-- Saudação -->
+    <section class="greeting-section">
+      <h1 class="greeting-title">Olá, {{ request.user.first_name|default:"paciente" }}!</h1>
+      <p class="greeting-subtitle">Página inicial - Paciente</p>
+    </section>
+
+    {% if home_error %}
+      <div class="alert alert-danger">{{ home_error }}</div>
+    {% else %}
+
+    <!-- Cards de estatística -->
+    <div class="row g-4 mb-5">
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="stat-label">Sessões realizadas</div>
+          <div class="stat-value">{{ sessions_done|default:"7" }}</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="stat-label">Status da triagem</div>
+          <div class="stat-value">{{ triage_status|default:"Concluída" }}</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="stat-label">Próxima sessão</div>
+          <div class="stat-value">{{ next_session|default:"Hoje" }}</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="stat-label">Faltas</div>
+          <div class="stat-value">{{ absences|default:"0" }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Grid Principal (Atividades / Calendário) -->
+    <div class="row g-4">
+
+      <!-- Coluna Esquerda: Atividades recentes -->
+      <div class="col-12 col-lg-6">
+        <div class="activities-container">
+          <h2 class="section-title">Atividades recentes</h2>
+
+          <div class="activity-list">
+            {% for act in activities %}
+            <div class="activity-item">
+              <i class="bi bi-{% if act.kind == 'history' %}calendar-check{% elif act.kind == 'appointment' %}journal-check{% else %}door-open{% endif %} activity-icon"></i>
+              <div class="activity-content">
+                <div class="activity-title">{{ act.title }}</div>
+                {% if act.detail %}
+                  <div class="activity-detail">{{ act.detail }}</div>
+                {% endif %}
+              </div>
+            </div>
+            {% empty %}
+            <div class="activity-item">
+              <i class="bi bi-calendar-check activity-icon"></i>
+              <div class="activity-content">
+                <div class="activity-title">Sessão concluída</div>
+                <div class="activity-detail">Semana passada - 10:00</div>
+              </div>
+            </div>
+            <div class="activity-item">
+              <i class="bi bi-journal-check activity-icon"></i>
+              <div class="activity-content">
+                <div class="activity-title">Sessão agendada</div>
+                <div class="activity-detail">Hoje às 14:20</div>
+              </div>
+            </div>
+            <div class="activity-item">
+              <i class="bi bi-door-open activity-icon"></i>
+              <div class="activity-content">
+                <div class="activity-title">Triagem revisada</div>
+                <div class="activity-detail">Encaminhada ao acompanhamento</div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Coluna Direita: Calendário -->
+      <div class="col-12 col-lg-6">
+        <div class="calendar-container">
+          <h2 class="section-title">Calendário</h2>
+
+          <div class="calendar-wrapper">
+            <div class="calendar-card">
+              <form method="get" action="">
+                <div class="d-flex align-items-center justify-content-between">
+                  <a href="?ano={{ previous_month|date:'Y' }}&amp;mes={{ previous_month|date:'n' }}" class="cal-nav-btn" aria-label="Mês anterior">
+                    <i class="bi bi-chevron-left"></i>
+                  </a>
+                  <div class="d-flex gap-2">
+                    <select class="cal-select" name="mes" onchange="this.form.submit()">
+                      {% for number, name in calendar_months %}
+                      <option value="{{ number }}" {% if number == calendar_month %}selected{% endif %}>
+                        {{ name|slice:":3"|title }}
+                      </option>
+                      {% endfor %}
+                    </select>
+                    <select class="cal-select" name="ano" onchange="this.form.submit()">
+                      {% for year in calendar_years %}
+                      <option value="{{ year }}" {% if year == calendar_year %}selected{% endif %}>
+                        {{ year }}
+                      </option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <a href="?ano={{ next_month|date:'Y' }}&amp;mes={{ next_month|date:'n' }}" class="cal-nav-btn" aria-label="Próximo mês">
+                    <i class="bi bi-chevron-right"></i>
+                  </a>
+                </div>
+              </form>
+
+              <div class="calendar-grid mt-2">
+                <div class="cal-header">Su</div>
+                <div class="cal-header">Mo</div>
+                <div class="cal-header">Tu</div>
+                <div class="cal-header">We</div>
+                <div class="cal-header">Th</div>
+                <div class="cal-header">Fr</div>
+                <div class="cal-header">Sa</div>
+
+                {% for week in calendar_weeks %}
+                  {% for day in week %}
+                  <div class="cal-day {% if not day.in_month %}cal-empty{% endif %} {% if day.has_event and day.in_month %}cal-highlight-dark{% endif %} {% if day.today %}cal-highlight-light{% endif %}">
+                    {% if day.in_month %}<span>{{ day.date|date:"j" }}</span>{% endif %}
+                    {% if day.in_month and day.has_available %}<span class="cal-dot dot-green"></span>{% endif %}
+                    {% if day.in_month and day.has_session %}<span class="cal-dot dot-red"></span>{% endif %}
+                    {% if day.in_month and day.has_pending %}<span class="cal-dot dot-orange"></span>{% endif %}
+                  </div>
+                  {% endfor %}
+                {% endfor %}
+              </div>
+            </div>
+
+            <!-- Legenda abaixo do calendário -->
+            <div class="cal-legend-pill mt-3">
+              <span class="legend-item green">● Disponível</span>
+              <span class="legend-item red">● Agendado</span>
+              <span class="legend-item orange">● Pendente</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    {% endif %}
+  </div> <!-- fim desktop -->
+
 {% endblock %}

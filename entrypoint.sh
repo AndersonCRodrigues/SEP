@@ -17,5 +17,9 @@ else
     echo "🚀 Ambiente de Produção detectado. Pulando comandos de setup iniciais."
 fi
 
-echo "🟢 Iniciando o servidor Gunicorn..."
-exec gunicorn --bind 0.0.0.0:8000 --workers 3 config.wsgi:application
+echo "🟢 Iniciando o servidor..."
+if [ $# -gt 0 ]; then
+    exec "$@"
+else
+    exec gunicorn --bind 0.0.0.0:8000 --workers 3 config.wsgi:application
+fi

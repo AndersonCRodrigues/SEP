@@ -1,7 +1,7 @@
 # Refs: https://www.docker.com/blog/how-to-dockerize-django-app/ 
 #Nao sei qual versão de python estamos usando então coloquei a que usei no momento e usei a versao slim para pesar menos
 #Estágio de Construção
-FROM python:3.12-slim AS builder
+FROM python:3.12-slim-bookworm AS builder
 
 #Cria e seta a pasta app como workdir
 WORKDIR /app
@@ -12,7 +12,7 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
 # Atualiza o apt(pip do linux), instala os compiladores base, remove o cache criado durante as instalações
-RUN apt-get update \
+RUN apt-get update -o Acquire::Max-FutureTime=8640000 -o Acquire::Check-Valid-Until=false \
     && apt-get install -y --no-install-recommends gcc libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
@@ -23,12 +23,12 @@ RUN pip install --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt
 
 #Estagio de produção
-FROM python:3.12-slim AS app
+FROM python:3.12-slim-bookworm AS app
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 # Intala apenas a biblioteca de execução do PostgreSQL
-RUN apt-get update \
+RUN apt-get update -o Acquire::Max-FutureTime=8640000 -o Acquire::Check-Valid-Until=false \
     && apt-get install -y --no-install-recommends libpq5 \
     && rm -rf /var/lib/apt/lists/*
 # Cria o uusu;ario não-root
@@ -55,9 +55,9 @@ ENTRYPOINT ["/app/entrypoint.sh"]
 
 # Estagio do banco: a imagem oficial do Postgres nao traz o pg_cron, que e o
 # agendador usado para a retencao de 1 ano do log de seguranca.
-FROM postgres:16 AS db
+FROM postgres:16-bookworm AS db
 
-RUN apt-get update \
+RUN apt-get update -o Acquire::Max-FutureTime=8640000 -o Acquire::Check-Valid-Until=false \
     && apt-get install -y --no-install-recommends postgresql-16-cron \
     && rm -rf /var/lib/apt/lists/*
 

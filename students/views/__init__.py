@@ -6,12 +6,19 @@ from .account import (
     cadastrar_aluno,
 )
 from .feedbacks import StudentFeedbacksView
+from .front import (
+    EncaminhamentosAlunoView,
+    FeedbacksAlunoView,
+    TriagemAlunoView,
+)
 from .home import HomeEstudanteView
 from .records import StudentRecordsView
 from .referrals import StudentReferralsView
 from .triages import StudentTriagesView, TriageCompletedView
 
 __all__ = [
+    "EncaminhamentosAlunoView",
+    "FeedbacksAlunoView",
     "HomeEstudanteView",
     "MeuProfessorView",
     "PainelEstudanteView",
@@ -22,5 +29,6 @@ __all__ = [
     "StudentReferralsView",
     "StudentTriagesView",
     "TriageCompletedView",
+    "TriagemAlunoView",
     "cadastrar_aluno",
 ]

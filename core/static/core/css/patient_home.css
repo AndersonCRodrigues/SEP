@@ -1,0 +1,665 @@
+/**
+ * patient_home.css - Dashboard do Paciente
+ * Design baseado no novo Figma
+ */
+
+:root {
+  --sep-maroon: #6D1D20;
+  --sep-maroon-dark: #591619;
+}
+
+/* ── Saudação ── */
+.greeting-section {
+  margin-bottom: 30px;
+}
+.greeting-title {
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--sep-maroon);
+  margin-bottom: 4px;
+}
+.greeting-subtitle {
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 13px;
+  color: var(--sep-maroon);
+  opacity: 0.8;
+}
+
+/* ── Cards de Estatística ── */
+.stat-card {
+  background-color: var(--sep-maroon);
+  color: #fff;
+  border-radius: 16px;
+  padding: 18px 14px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 110px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+.stat-label {
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  line-height: 1.2;
+}
+.stat-value {
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 40px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+/* ── Layout Principal em 2 Colunas ── */
+.activities-container {
+  padding-right: 40px;
+}
+
+.section-title {
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--sep-maroon);
+  margin-bottom: 20px;
+}
+
+/* ── Atividades Recentes ── */
+.activity-list {
+  display: flex;
+  flex-direction: column;
+}
+.activity-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px 0;
+  border-bottom: 1px solid #c0c0c0;
+}
+.activity-item:first-child {
+  padding-top: 0;
+}
+.activity-icon {
+  font-size: 20px;
+  color: #333;
+  margin-top: 2px;
+}
+.activity-content {
+  flex: 1;
+}
+.activity-title {
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #000;
+  margin-bottom: 4px;
+}
+.activity-detail {
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 12px;
+  color: var(--sep-maroon);
+  opacity: 0.8;
+}
+
+/* ── Calendário ── */
+.calendar-container {
+  margin-left: -12px;
+  padding-left: 24px;
+  border-left: 3px solid var(--sep-maroon);  /* linha vermelha */
+}
+
+.calendar-wrapper {
+  margin-left: 50px;
+}
+
+/* Caixa do calendário — design do aluno */
+.calendar-card {
+  background: #FFFFFF;
+  border: 2.5px solid #A59C97;
+  border-radius: 36px;
+  padding: 20px 24px;
+  width: 100%;
+  max-width: 340px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+/* Botões de navegação (< >) */
+.cal-nav-btn {
+  background: none;
+  border: none;
+  font-size: 0.9rem;
+  color: #555;
+  padding: 4px 8px;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: background 0.15s;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+}
+.cal-nav-btn:hover { background: #f0f0f0; }
+
+/* Selects de mês/ano */
+.cal-select {
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 2px 6px;
+  font-size: 0.75rem;
+  color: #333;
+  background: #fff;
+  cursor: pointer;
+}
+
+/* Grid */
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  text-align: center;
+}
+
+.cal-header {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #aaa;
+  padding: 2px 0 6px;
+}
+
+/* Dias */
+.cal-day {
+  font-size: 0.75rem;
+  padding: 3px 2px 2px;
+  color: #333;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-height: 28px;
+  border-radius: 6px;
+}
+
+.cal-highlight-dark {
+  background-color: #2d2d2d;
+  color: #fff !important;
+  border-radius: 6px;
+  font-weight: 700;
+}
+
+.cal-highlight-light {
+  background-color: #f3f3f3;
+  color: #333;
+  border-radius: 6px;
+  font-weight: 700;
+}
+
+.cal-empty { min-height: 28px; }
+
+/* Pontos coloridos */
+.cal-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dot-green  { background: #3AA600; }
+.dot-red    { background: #BE4A4F; }
+.dot-orange { background: #DB8D10; }
+
+/* Legenda em pílula */
+.cal-legend-pill {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  background: #FFFFFF;
+  border: 1px solid #CCC;
+  border-radius: 20px;
+  padding: 5px 16px;
+  width: max-content;
+  margin: 12px auto 0;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  color: #4A4A4A;
+}
+.legend-item.green  { color: #3AA600; }
+.legend-item.red    { color: #BE4A4F; }
+.legend-item.orange { color: #DB8D10; }
+
+/* Responsivo */
+@media (max-width: 992px) {
+  .main-grid {
+    grid-template-columns: 1fr;
+  }
+  .main-grid::before {
+    display: none;
+  }
+  .calendar-container {
+    padding-left: 0;
+    border-left: none;
+  }
+}
+@media (max-width: 768px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+
+.calendar-card {
+  background: #fff;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 16px;
+  padding: 16px 20px;
+  max-width: 360px;
+  margin-left: 130px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+}
+
+.calendar-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.calendar-nav a {
+  color: #333;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 18px;
+  padding: 4px 8px;
+  line-height: 1;
+}
+.calendar-nav select {
+  border: 1.5px solid #d0d0d0;
+  border-radius: 8px;
+  padding: 4px 6px;
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 13px;
+  color: #222;
+  outline: none;
+  background-color: #fff;
+  width: auto;
+  min-width: 70px;
+  -webkit-appearance: auto;
+  appearance: auto;
+}
+.cal-selects {
+  display: flex;
+  gap: 10px;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px 2px;
+  text-align: center;
+}
+.cal-header {
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  color: #aaa;
+  margin-bottom: 4px;
+}
+
+/* ── Célula do dia (com numero + dots) ── */
+.cal-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 2px 0;
+  cursor: default;
+}
+.cal-day-num {
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 12px;
+  color: var(--sep-maroon);
+  font-weight: 600;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+.day-outside-month .cal-day-num {
+  color: #ccc;
+  font-weight: 400;
+}
+.day-highlighted .cal-day-num {
+  background-color: #1C1C1E;
+  color: #fff;
+  font-weight: 700;
+  border-radius: 10px;
+}
+.day-current .cal-day-num {
+  border: 1.5px solid var(--sep-maroon);
+  font-weight: 700;
+}
+
+/* ── Pontinhos coloridos ── */
+.day-dots {
+  display: flex;
+  gap: 2px;
+  justify-content: center;
+  min-height: 7px;
+}
+.dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+.dot-green  { background-color: #3AA600; }
+.dot-red    { background-color: #E53935; }
+.dot-orange { background-color: #FB8C00; }
+
+/* ── Legenda (pill com borda, fora do card) ── */
+.cal-legend-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 14px;
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: #333;
+  border: 1.5px solid #d0d0d0;
+  border-radius: 20px;
+  padding: 6px 20px;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+}
+.cal-legend-box .dot {
+  width: 8px;
+  height: 8px;
+}
+
+/* Responsivo */
+@media (max-width: 992px) {
+  .main-grid {
+    grid-template-columns: 1fr;
+  }
+  .main-grid::before {
+    display: none;
+  }
+  .calendar-container {
+    padding-left: 0;
+  }
+}
+
+/* ════════════════════════════════════════
+   MOBILE (Paciente Home)
+   ════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  body {
+    background-color: #F8F9FA; /* light grey background matching print */
+  }
+
+  /* ─── Fundo Vinho e Header Mobile ─────────────── */
+  .mobile-maroon-bg {
+    background-color: #6D1D20;
+    border-bottom-left-radius: 30px;
+    border-bottom-right-radius: 30px;
+    padding-bottom: 20px;
+  }
+
+  .mobile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 20px 10px 20px;
+  }
+
+  .mobile-back::before {
+    content: "\F284"; /* chevron-left bootstrap icon */
+    font-family: "bootstrap-icons";
+    font-size: 28px;
+    color: #fff;
+    font-weight: bold;
+  }
+  .mobile-back {
+    text-decoration: none;
+  }
+
+  .mobile-greeting {
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: #fff;
+    flex-grow: 1;
+    margin-left: 10px;
+  }
+
+  .mobile-icons i {
+    font-size: 22px;
+    color: #fff;
+  }
+
+  /* ─── Stat Cards Mobile ─────────────── */
+  .patient-stats-grid {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    padding: 0 10px;
+  }
+
+  .p-stat-box {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 12px 6px;
+    border-radius: 16px;
+    text-align: center;
+    color: #fff;
+    font-family: 'Museo Sans', sans-serif;
+    min-height: 80px;
+  }
+
+  .p-stat-green   { background: #556B2F; } /* Dark olive green */
+  .p-stat-red     { background: #A92024; } /* Red */
+  .p-stat-orange  { background: #BA681F; } /* Orange/Gold */
+
+  .p-stat-label {
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.1;
+    margin-bottom: 6px;
+  }
+
+  .p-stat-value {
+    font-size: 20px;
+    font-weight: 900;
+    line-height: 1;
+  }
+
+  /* ─── Alerta Pendente ─────────────── */
+  .p-alert-box {
+    background: #FFF;
+    border: none;
+    border-left: 8px solid #E89C1E;
+    border-radius: 12px;
+    padding: 20px 16px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  }
+
+  .p-alert-header {
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 800;
+    color: #F39C12;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .p-alert-text {
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 14px;
+    color: #333;
+    margin: 0 0 18px 0;
+  }
+
+  .p-alert-btn {
+    background: #6D1D20;
+    color: #FFF;
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    border: none;
+    border-radius: 20px;
+    padding: 12px 0;
+    width: 100%;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .p-alert-btn:hover {
+    background: #591619;
+  }
+
+  /* ─── Navegação Mobile ─────────────── */
+  .p-section-title {
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 17px;
+    font-weight: 800;
+    color: #000;
+    margin: 0;
+  }
+
+  .p-see-all {
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: #444;
+    text-decoration: none;
+  }
+
+  .patient-mobile-nav {
+    display: flex;
+    overflow-x: auto;
+    gap: 12px;
+    padding-bottom: 4px;
+    margin-top: 10px;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .patient-mobile-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .p-nav-tab {
+    white-space: nowrap;
+    padding: 6px 18px;
+    border-radius: 20px;
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    color: #111;
+    background: #D9D9D9;
+    text-decoration: none;
+    border: none;
+  }
+
+  .p-nav-divider {
+    border-top: 2px solid #6D1D20;
+    margin: 16px 0 20px 0;
+  }
+
+  /* ─── Atividade Recente ─────────────── */
+  .p-activity-section-title {
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 800;
+    color: #6D1D20;
+    margin-bottom: 12px;
+  }
+
+  .p-activity-card {
+    background: #E0E0E0;
+    border-radius: 12px;
+    padding: 14px 16px 10px 16px;
+    margin-bottom: 16px;
+  }
+
+  .p-activity-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .p-activity-category {
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 800;
+    color: #6D1D20;
+  }
+
+  .p-badge {
+    display: inline-block;
+    text-align: center;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 10px;
+    font-weight: 800;
+  }
+  .p-badge-success { background: #B3D8A8; color: #2D5A27; }
+  .p-badge-warning { background: #EAD0A3; color: #7F5816; }
+  .p-badge-secondary { background: #D5D5D5; color: #555; }
+
+  .p-activity-title {
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 800;
+    color: #000;
+    margin-bottom: 4px;
+  }
+
+  .p-activity-desc {
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 14px;
+    color: #444;
+  }
+
+  .p-activity-divider {
+    border-top: 1px solid #6D1D20;
+    margin: 12px 0 8px 0;
+  }
+
+  .p-activity-footer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    text-decoration: none;
+  }
+
+  .p-activity-footer i {
+    color: #6D1D20;
+    font-size: 18px;
+    font-weight: 900;
+  }
+}

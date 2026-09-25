@@ -7,7 +7,6 @@ from django.utils import timezone
 from django.utils.html import format_html
 from localflavor.br.br_states import STATE_CHOICES
 from localflavor.br.forms import BRCPFField
-
 from core.fields import format_cep, only_digits
 from core.models import CustomUser
 from core.validators import NO_NUMBER, validate_letters, validate_phone
@@ -218,30 +217,31 @@ class RegistrationStepForm(forms.Form):
 
 
 class FullNameForm(RegistrationStepForm):
-    first_name = forms.CharField(
-        label="Nome",
-        max_length=150,
+    name = forms.CharField(
+        label="Nome completo",
+        max_length=300,
         validators=[validate_letters],
         widget=forms.TextInput(
             attrs={
-                "placeholder": "Nome",
-                "autocomplete": "given-name",
+                "placeholder": "Ex: João da Silva",
+                "autocomplete": "name",
                 "data-only": "letters",
             }
         ),
     )
-    last_name = forms.CharField(
-        label="Sobrenome",
-        max_length=150,
-        validators=[validate_letters],
-        widget=forms.TextInput(
-            attrs={
-                "placeholder": "Sobrenome",
-                "autocomplete": "family-name",
-                "data-only": "letters",
-            }
-        ),
-    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        name = cleaned_data.get("name", "").strip()
+        if name:
+            parts = name.split(maxsplit=1)
+            cleaned_data["first_name"] = parts[0]
+            if len(parts) > 1:
+                cleaned_data["last_name"] = parts[1]
+            else:
+                self.add_error("name", "Por favor, informe também o sobrenome.")
+        cleaned_data.pop("name", None)
+        return cleaned_data
 
 
 class SocialIdentityForm(RegistrationStepForm):
@@ -266,7 +266,6 @@ class SocialIdentityForm(RegistrationStepForm):
             }
         ),
     )
-
 
 class CpfForm(RegistrationStepForm):
     cpf = BRCPFField(
@@ -403,6 +402,28 @@ class AddressForm(RegistrationStepForm):
         return cleaned_data
 
 
+class LogradouroForm(RegistrationStepForm):
+    """Etapa de endereço: logradouro + número + CEP."""
+    logradouro = forms.CharField(
+        label="Endereço",
+        max_length=200,
+        widget=forms.TextInput(
+            attrs={"placeholder": "Ex: Rua das Flores, 123"}
+        ),
+    )
+
+
+class BairroForm(RegistrationStepForm):
+    """Etapa de bairro."""
+    bairro = forms.CharField(
+        label="Bairro",
+        max_length=100,
+        widget=forms.TextInput(
+            attrs={"placeholder": "Ex: Centro"}
+        ),
+    )
+
+
 class AccompaniedForm(RegistrationStepForm):
     is_accompanied = forms.TypedChoiceField(
         label="O paciente está acompanhado?",
@@ -448,4 +469,93 @@ class GuardianRelationshipForm(RegistrationStepForm):
                 "data-only": "letters",
             }
         ),
+    )
+
+
+class GenderForm(RegistrationStepForm):
+    gender_identity = forms.ChoiceField(
+        label="Gênero/Identidade de Gênero",
+        choices=[
+            ("Masculino", "Masculino"),
+            ("Feminino", "Feminino"),
+            ("Homem Transexual", "Homem Transexual"),
+            ("Mulher Transexual", "Mulher Transexual"),
+            ("Não-binário", "Não-binário"),
+            ("Outro", "Outro"),
+        ],
+        widget=forms.RadioSelect,
+    )
+
+
+class RaceForm(RegistrationStepForm):
+    race = forms.ChoiceField(
+        label="Cor/Raça do paciente",
+        choices=[
+            ("Branca", "Branca"),
+            ("Preta", "Preta"),
+            ("Parda", "Parda"),
+            ("Amarela", "Amarela"),
+            ("Indígena", "Indígena"),
+        ],
+        widget=forms.RadioSelect,
+    )
+
+
+class NaturalnessForm(RegistrationStepForm):
+    naturalness = forms.CharField(
+        label="Naturalidade do paciente",
+        max_length=100,
+        required=False,
+        widget=forms.TextInput(attrs={"placeholder": "Ex: Rio de Janeiro"}),
+    )
+
+
+class SchoolingForm(RegistrationStepForm):
+    schooling = forms.CharField(
+        label="Grau de escolaridade",
+        max_length=100,
+        required=False,
+        widget=forms.TextInput(attrs={"placeholder": "Ex: Ensino Médio Completo"}),
+    )
+
+
+class ReligionForm(RegistrationStepForm):
+    religion = forms.CharField(
+        label="Religião",
+        max_length=100,
+        required=False,
+        widget=forms.TextInput(attrs={"placeholder": "Ex: Católica, Evangélica"}),
+    )
+
+
+class MaritalStatusForm(RegistrationStepForm):
+    marital_status = forms.ChoiceField(
+        label="Estado civil do paciente",
+        choices=[
+            ("Solteiro(a)", "Solteiro(a)"),
+            ("Casado(a)", "Casado(a)"),
+            ("Separado(a)", "Separado(a)"),
+            ("Divorciado(a)", "Divorciado(a)"),
+            ("Viúvo(a)", "Viúvo(a)"),
+        ],
+        widget=forms.RadioSelect,
+        required=False,
+    )
+
+
+class ProfessionForm(RegistrationStepForm):
+    profession = forms.CharField(
+        label="Profissão atual do paciente",
+        max_length=150,
+        required=False,
+        widget=forms.TextInput(attrs={"placeholder": "Ex: Professor"}),
+    )
+
+
+class OccupationForm(RegistrationStepForm):
+    occupation = forms.CharField(
+        label="Ocupação atual do paciente",
+        max_length=150,
+        required=False,
+        widget=forms.TextInput(attrs={"placeholder": "Ex: Autônomo"}),
     )

@@ -11,7 +11,15 @@ from django.views.generic import DetailView, ListView, TemplateView, UpdateView
 from core.models import CustomUser
 from core.utils import sincronizar_grupo
 from patient.models import Patient
-from students.models import Advising, StudentActivity, advisees_visible_to
+from django.utils.timesince import timesince
+
+from patient.models import ProgressNote
+from students.models import (
+    Advising,
+    CaseAssignment,
+    StudentActivity,
+    advisees_visible_to,
+)
 
 from .forms import (
     PerfilProfessorForm,
@@ -197,7 +205,10 @@ class PainelProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView)
     template_name = "teacher/teacher_panel.html"
 
     def test_func(self):
-        return self.request.user.role == CustomUser.Role.PROFESSOR
+        return self.request.user.role in (
+            CustomUser.Role.PROFESSOR,
+            CustomUser.Role.SUPERVISOR,
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -205,7 +216,12 @@ class PainelProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView)
 
         professor = get_object_or_404(Teacher, pk=self.request.user.pk)
 
-        context["alunos_vinculados"] = professor.current_advisees.all()
+        if professor.role == CustomUser.Role.SUPERVISOR:
+            context["alunos_vinculados"] = Student.objects.filter(
+                current_advisor__isnull=False
+            )
+        else:
+            context["alunos_vinculados"] = professor.current_advisees.all()
         # Professor só recebe o que o Supervisor escolheu especificamente
         # pra ele — isso é responsible_teachers no Patient, não o Referral
         # em si (que é área-based e é coisa de Supervisor).
@@ -722,3 +738,78 @@ class DefinirTriagemView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
             messages.warning(request, "Nenhum aluno foi selecionado.")
 
         return redirect("teacher:triagens")
+
+
+# ---------------------------------------------------------------------------
+# Telas do front: mesma área, desenho novo. Ficam em rota própria para não
+# competirem com as telas que já têm consulta e recorte por visibilidade.
+# ---------------------------------------------------------------------------
+
+
+class ProntuariosProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    template_name = "teacher/teacher_records.html"
+
+    def test_func(self):
+        return self.request.user.role in (
+            CustomUser.Role.PROFESSOR,
+            CustomUser.Role.SUPERVISOR,
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        professor = get_object_or_404(Teacher, pk=self.request.user.pk)
+
+        casos = (
+            CaseAssignment.objects.open()
+            .filter(student__current_advisor=professor)
+            .select_related("patient", "student")
+            .order_by("-start_date")
+        )
+
+        enriquecidos = []
+        for caso in casos:
+            ultima_nota = (
+                ProgressNote.objects.filter(patient=caso.patient, student=caso.student)
+                .order_by("-updated_at")
+                .first()
+            )
+            caso.ultima_evolucao = (
+                timesince(ultima_nota.updated_at) + " atrás" if ultima_nota else None
+            )
+            caso.pendente_revisao = (
+                ultima_nota.pending_confirmation if ultima_nota else False
+            )
+            enriquecidos.append(caso)
+
+        context["casos"] = enriquecidos
+        return context
+
+
+class PresencaProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    template_name = "teacher/teacher_presence.html"
+
+    def test_func(self):
+        return self.request.user.role in (
+            CustomUser.Role.PROFESSOR,
+            CustomUser.Role.SUPERVISOR,
+        )
+
+
+class AreaAtuacaoProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    template_name = "teacher/teacher_area.html"
+
+    def test_func(self):
+        return self.request.user.role in (
+            CustomUser.Role.PROFESSOR,
+            CustomUser.Role.SUPERVISOR,
+        )
+
+
+class TeacherAssignTriageView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    template_name = "teacher/teacher_assign_triage.html"
+
+    def test_func(self):
+        return self.request.user.role in (
+            CustomUser.Role.PROFESSOR,
+            CustomUser.Role.SUPERVISOR,
+        )
