@@ -7,68 +7,39 @@
   <li class="breadcrumb-item active" aria-current="page">Painel do Professor</li>
 {% endblock %}
 
-{% block page_title %}Painel do Professor{% endblock %}
+<div class="col-12 col-md-6">
+    <section class="card h-100">
+        <div class="card-body">
+            <h2 class="h5 card-title">Pacientes Encaminhados a Mim</h2>
+            {% if pacientes_encaminhados %}
+            <ul class="list-group list-group-flush">
+                {% for paciente in pacientes_encaminhados %}
+                <li class="list-group-item px-0">{{ paciente.nome_completo }}</li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="card-text text-body-secondary mb-0">Nenhum paciente encaminhado a você ainda.</p>
+            {% endif %}
+        </div>
+    </section>
+</div>
 
-{% block content %}
-<div class="row g-3">
-    
-    <!-- Card 1: Meus Alunos -->
-    <div class="col-12 col-md-6">
-        <section class="card h-100">
-            <div class="card-body">
-                <h2 class="h5 card-title mb-3">Meus Alunos Orientandos</h2>
-                
-                {% if alunos_vinculados %}
-                    <ul class="list-group list-group-flush">
-                        {% for aluno in alunos_vinculados %}
-                            <li class="list-group-item px-0 border-0">
-                                {{ aluno.nome_completo }} — {{ aluno.matricula }}
-                            </li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <!-- Injeção do componente de estado vazio -->
-                    {% include "components/empty_state.html" with message="Você ainda não tem alunos vinculados." %}
-                {% endif %}
-            </div>
-        </section>
-    </div>
-
-    <!-- Card 2: Vincular Aluno -->
-    <div class="col-12 col-md-6">
-        <section class="card h-100">
-            <div class="card-body">
-                <h2 class="h5 card-title mb-3">Alunos Disponíveis pra Vincular</h2>
-                
-                {% if alunos_disponiveis %}
-                    <!-- Salvamos a URL em uma variável para passar ao componente limpa -->
-                    {% url 'teacher:vincular_aluno' as vincular_url %}
-                    {% include "components/form.html" with form=form_vincular action_url=vincular_url submit_label="Vincular Aluno" %}
-                {% else %}
-                    <!-- Injeção do componente de estado vazio -->
-                    {% include "components/empty_state.html" with message="Não há alunos disponíveis no momento." %}
-                {% endif %}
-            </div>
-        </section>
-    </div>
-
-    <!-- Card 3: Lançar Horas -->
-    <div class="col-12 col-md-6">
-        <section class="card h-100">
-            <div class="card-body">
-                <h2 class="h5 card-title mb-3">Lançar Horas</h2>
-                
-                {% if alunos_vinculados %}
-                    <!-- Salvamos a URL em uma variável para passar ao componente limpa -->
-                    {% url 'teacher:lancar_horas' as lancar_url %}
-                    {% include "components/form.html" with form=form_horas action_url=lancar_url submit_label="Registrar Horas" %}
-                {% else %}
-                    <!-- Injeção do componente de estado vazio -->
-                    {% include "components/empty_state.html" with message="Vincule um aluno antes de lançar horas." %}
-                {% endif %}
-            </div>
-        </section>
-    </div>
+<div class="col-12 col-md-6">
+    <section class="card h-100">
+        <div class="card-body">
+            <h2 class="h5 card-title">Alunos Disponíveis pra Vincular</h2>
+            {% if alunos_disponiveis %}
+            <form method="post" action="{% url 'teacher:vincular_aluno' %}">
+                {% csrf_token %}
+                {{ form_vincular.as_p }}
+                <button type="submit" class="btn btn-primary">Vincular Aluno</button>
+            </form>
+            {% else %}
+            <p class="card-text text-body-secondary mb-0">Não há alunos disponíveis no momento.</p>
+            {% endif %}
+        </div>
+    </section>
+</div>
 
 </div>
 {% endblock %}
