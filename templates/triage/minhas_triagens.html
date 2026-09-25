@@ -24,7 +24,7 @@
                         <td>{{ triagem.created_at }}</td>
                         <td><span class="badge text-bg-secondary">{{ triagem.get_status_display }}</span></td>
                         <td class="text-end">
-                            <a href="{% url 'triage_detail_student' triagem.pk %}" class="btn btn-outline-primary btn-sm">Ver</a>
+                            <a href="{% url 'triage:triage_detail_student' triagem.pk %}" class="btn btn-outline-primary btn-sm">Ver</a>
                         </td>
                     </tr>
                     {% empty %}

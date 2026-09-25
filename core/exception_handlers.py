@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.shortcuts import redirect
 
 from core.models import CustomUser
@@ -16,7 +17,11 @@ HOME_BY_ROLE = {
 
 def custom_permission_denied_view(request, exception):
     if not request.user.is_authenticated:
+        messages.error(request, "Sua sessão expirou. Entre novamente para continuar.")
         return redirect("login")
+
+    detalhe = next((str(arg) for arg in getattr(exception, "args", ()) if arg), "")
+    messages.error(request, detalhe or "Você não tem acesso a essa página.")
 
     if request.user.is_superuser:
         return redirect("superadmin:home")

@@ -1,9 +1,11 @@
-import os
-import string
-import secrets
 import logging
-from django.core.mail import send_mail
+import os
+import secrets
+import string
+
 from django.conf import settings
+from django.core.mail import send_mail
+
 from audit.models import SecurityLog
 
 logger = logging.getLogger(__name__)

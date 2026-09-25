@@ -1,10 +1,12 @@
+import re
+
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from core.models import CustomUser
-from teacher.models import Teacher
+
 from areas.models import AreaActing
-from students.models import StudentActivity, PerformanceReview
-import re
+from core.models import CustomUser
+from students.models import PerformanceReview, StudentActivity
+from teacher.models import Teacher
 
 
 class VincularAlunoForm(forms.Form):
@@ -117,6 +119,7 @@ class StudentActivityForm(forms.ModelForm):
         if commit:
             instance.save()
         return instance
+
 
 class PerformanceReviewForm(forms.ModelForm):
     class Meta:

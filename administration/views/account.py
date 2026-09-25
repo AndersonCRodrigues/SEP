@@ -4,6 +4,7 @@ from django.core.exceptions import PermissionDenied
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView, UpdateView
+
 from core.models import CustomUser
 from core.utils import sincronizar_grupo
 from core.notifications import enviar_credenciais_por_telefone

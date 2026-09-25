@@ -1,11 +1,13 @@
+from decimal import Decimal
+
 from django.db import transaction
+from django.db.models import Count
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.utils import timezone
-from decimal import Decimal
 
-from django.db.models import Count
 from core.models import CustomUser
+
 from .models import Advising, CaseAssignment, Student, StudentActivity, current_term
 
 ACTIVITY_TYPE_BY_APPOINTMENT_KIND = {

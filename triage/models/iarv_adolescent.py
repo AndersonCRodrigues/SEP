@@ -1,8 +1,8 @@
 from django.db import models
 
 from .iarv_base import (
-    BaseIarv,
     ORDINAL_VALIDATORS,
+    BaseIarv,
     ProtectionScale,
     RiskScale,
     RiskSeverity,

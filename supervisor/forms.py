@@ -1,7 +1,8 @@
 from django import forms
+
 from core.forms import PERSONAL_FIELDS
-from teacher.models import Teacher
 from teacher.forms import ProfessorCreationForm
+from teacher.models import Teacher
 
 
 class SupervisorCreationForm(ProfessorCreationForm):

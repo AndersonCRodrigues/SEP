@@ -3,7 +3,9 @@ from urllib.parse import quote
 from django.conf import settings
 from django.db import DatabaseError
 from django.views.generic import TemplateView
+
 from core.fields import only_digits
+
 from ..models import Patient
 from .access import PatientOnly
 

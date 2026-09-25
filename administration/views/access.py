@@ -1,4 +1,5 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+
 from core.models import CustomUser
 from documents.models import AttendanceCertificate
 from patient.models import Patient

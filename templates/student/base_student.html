@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title_suffix %} | SEP Maricá{% endblock %}
+
+{% block brand %}
+<a class="navbar-brand brand" href="{% url 'students:home' %}">
+  <span class="brand-name">SEP Maricá</span>
+  <span class="brand-institution">Universidade de Vassouras</span>
+</a>
+{% endblock %}
+
+{% block main_nav %}
+{% with current=request.resolver_match.url_name %}
+<nav class="main-nav" aria-label="Navegação principal">
+  <ul class="navbar-nav">
+    <li class="nav-item">
+      <a
+        class="nav-link"
+        href="{% url 'students:home' %}"
+        {% if current == 'home' %}aria-current="page"{% endif %}
+      >Página inicial</a>
+    </li>
+    <li class="nav-item">
+      <a
+        class="nav-link"
+        href="{% url 'students:prontuarios' %}"
+        {% if current == 'prontuarios' %}aria-current="page"{% endif %}
+      >Prontuários</a>
+    </li>
+    <li class="nav-item">
+      <a
+        class="nav-link"
+        href="{% url 'students:triagens' %}"
+        {% if current == 'triagens' or current == 'triagem_concluida' %}aria-current="page"{% endif %}
+      >Triagens</a>
+    </li>
+    <li class="nav-item">
+      <a
+        class="nav-link"
+        href="{% url 'students:feedbacks' %}"
+        {% if current == 'feedbacks' %}aria-current="page"{% endif %}
+      >Feedbacks</a>
+    </li>
+    <li class="nav-item">
+      <a
+        class="nav-link"
+        href="{% url 'students:encaminhamentos' %}"
+        {% if current == 'encaminhamentos' %}aria-current="page"{% endif %}
+      >Encaminhamentos</a>
+    </li>
+
+    <li class="nav-item">
+      <a
+        class="nav-link"
+        href="{% url 'triage:minhas_triagens' %}"
+        
+      >Minhas triagens</a>
+    </li>
+  </ul>
+</nav>
+{% endwith %}
+{% endblock %}
+
+{% block user_links %}
+{# TODO: botões sem lógica; ficam para fazer #}
+<li class="nav-item">
+  <button type="button" class="header-action" aria-label="Mensagens">
+    <span aria-hidden="true">✉</span>
+  </button>
+</li>
+<li class="nav-item">
+  <button type="button" class="header-action" aria-label="Notificações">
+    <span aria-hidden="true">🔔</span>
+  </button>
+</li>
+<li class="nav-item">
+  <button type="button" class="header-action" aria-label="Minha conta">
+    <span aria-hidden="true">👤</span>
+  </button>
+</li>
+{% endblock %}
+
+{% block footer %}
+<footer class="site-footer">
+  <p>Univassouras</p>
+</footer>
+{% endblock %}

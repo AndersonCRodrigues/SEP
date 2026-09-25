@@ -3,10 +3,12 @@ Refs.:
 https://docs.djangoproject.com/en/6.0/howto/custom-management-commands/
 """
 
-import random
 import os
-from django.core.management.base import BaseCommand
+import random
+
 from django.core.exceptions import ValidationError
+from django.core.management.base import BaseCommand
+
 from areas.models import AreaActing
 from core.models import CustomUser
 from core.utils import sincronizar_grupo

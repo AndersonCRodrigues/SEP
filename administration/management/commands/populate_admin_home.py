@@ -1,7 +1,9 @@
 import os
 from datetime import date, datetime, time, timedelta
+
 from django.core.management.base import BaseCommand
 from django.utils import timezone
+
 from areas.models import AreaActing
 from core.models import CustomUser
 from documents.models import AttendanceCertificate, InternshipDeclaration
