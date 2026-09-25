@@ -1,5 +1,10 @@
 {% extends "administration/base_admin.html" %}
 {% load components %}
+{% load static %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'core/css/administrativo/administrativo_home.css' %}">
+{% endblock %}
 
 {% block title %}Página inicial{% endblock %}
 
@@ -25,7 +30,7 @@
       <strong class="indicator-value">{{ pending_declarations }}</strong>
     </li>
     <li class="indicator">
-      <span class="indicator-label">Atestados emitidos</span>
+      <span class="indicator-label">Atendimentos emitidos</span>
       <strong class="indicator-value">{{ certificates_issued }}</strong>
     </li>
   </ul>
@@ -36,11 +41,25 @@
   <ul class="activity-list">
     {% for activity in recent_activities %}
     <li class="activity activity-{{ activity.kind }}">
-      <h3 class="activity-title">{{ activity.title }}</h3>
-      <p class="activity-detail">{{ activity.detail }}</p>
-      <time class="activity-date" datetime="{{ activity.when|date:'Y-m-d' }}">
-        {{ activity.when|date:"d/m/Y" }}
-      </time>
+      <!-- Ícone condicional do Figma -->
+      {% if activity.kind == 'session' or activity.kind == 'agenda' %}
+        <svg class="activity-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+        </svg>
+      {% elif activity.kind == 'declaration' or activity.kind == 'document' %}
+        <svg class="activity-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>
+      {% else %}
+        <svg class="activity-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5m0 0h4"></path>
+        </svg>
+      {% endif %}
+
+      <div class="activity-content">
+        <h3 class="activity-title">{{ activity.title }}</h3>
+        <p class="activity-detail">{{ activity.detail }}</p>
+      </div>
     </li>
     {% empty %}
     <li class="activity-empty">
@@ -51,73 +70,75 @@
   {% endsection %}
 
   {% section title="Calendário" class="calendar" id="calendar-title" %}
-  <form class="calendar-nav" method="get" action="">
-    <a
-      class="calendar-previous"
-      href="?ano={{ previous_month|date:'Y' }}&amp;mes={{ previous_month|date:'n' }}"
-      aria-label="Mês anterior"
-    >&lsaquo;</a>
+  <div class="calendar-card">
+    <form class="calendar-nav" method="get" action="">
+      <a
+        class="calendar-previous"
+        href="?ano={{ previous_month|date:'Y' }}&amp;mes={{ previous_month|date:'n' }}"
+        aria-label="Mês anterior"
+      >&lt;</a>
 
-    <label class="visually-hidden" for="calendar-month">Mês</label>
-    <select id="calendar-month" name="mes">
-      {% for number, name in calendar_months %}
-      <option value="{{ number }}" {% if number == calendar_month %}selected{% endif %}>
-        {{ name }}
-      </option>
-      {% endfor %}
-    </select>
-
-    <label class="visually-hidden" for="calendar-year">Ano</label>
-    <select id="calendar-year" name="ano">
-      {% for year in calendar_years %}
-      <option value="{{ year }}" {% if year == calendar_year %}selected{% endif %}>
-        {{ year }}
-      </option>
-      {% endfor %}
-    </select>
-
-    <button type="submit">Ver</button>
-
-    <a
-      class="calendar-next"
-      href="?ano={{ next_month|date:'Y' }}&amp;mes={{ next_month|date:'n' }}"
-      aria-label="Próximo mês"
-    >&rsaquo;</a>
-  </form>
-
-  <table class="calendar-grid">
-    <caption class="visually-hidden">
-      Agendamentos do mês selecionado
-    </caption>
-    <thead>
-      <tr>
-        <th scope="col" abbr="Domingo">Dom</th>
-        <th scope="col" abbr="Segunda-feira">Seg</th>
-        <th scope="col" abbr="Terça-feira">Ter</th>
-        <th scope="col" abbr="Quarta-feira">Qua</th>
-        <th scope="col" abbr="Quinta-feira">Qui</th>
-        <th scope="col" abbr="Sexta-feira">Sex</th>
-        <th scope="col" abbr="Sábado">Sáb</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for week in calendar_weeks %}
-      <tr>
-        {% for day in week %}
-        <td
-          class="day{% if not day.in_month %} day-outside-month{% endif %}{% if day.has_event %} day-with-event{% endif %}"
-          {% if day.today %}aria-current="date"{% endif %}
-        >
-          <time datetime="{{ day.date|date:'Y-m-d' }}">{{ day.date|date:"j" }}</time>
-          {% if day.has_event %}
-          <span class="visually-hidden">com agendamento</span>
-          {% endif %}
-        </td>
+      <label class="visually-hidden" for="calendar-month">Mês</label>
+      <select id="calendar-month" name="mes">
+        {% for number, name in calendar_months %}
+        <option value="{{ number }}" {% if number == calendar_month %}selected{% endif %}>
+          {{ name }}
+        </option>
         {% endfor %}
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+      </select>
+
+      <label class="visually-hidden" for="calendar-year">Ano</label>
+      <select id="calendar-year" name="ano">
+        {% for year in calendar_years %}
+        <option value="{{ year }}" {% if year == calendar_year %}selected{% endif %}>
+          {{ year }}
+        </option>
+        {% endfor %}
+      </select>
+
+      <button type="submit">Ver</button>
+
+      <a
+        class="calendar-next"
+        href="?ano={{ next_month|date:'Y' }}&amp;mes={{ next_month|date:'n' }}"
+        aria-label="Próximo mês"
+      >&gt;</a>
+    </form>
+
+    <table class="calendar-grid">
+      <caption class="visually-hidden">
+        Agendamentos do mês selecionado
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col" abbr="Domingo">Dom</th>
+          <th scope="col" abbr="Segunda-feira">Seg</th>
+          <th scope="col" abbr="Terça-feira">Ter</th>
+          <th scope="col" abbr="Quarta-feira">Qua</th>
+          <th scope="col" abbr="Quinta-feira">Qui</th>
+          <th scope="col" abbr="Sexta-feira">Sex</th>
+          <th scope="col" abbr="Sábado">Sáb</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for week in calendar_weeks %}
+        <tr>
+          {% for day in week %}
+          <td
+            class="day{% if not day.in_month %} day-outside-month{% endif %}{% if day.has_event %} day-with-event{% endif %}"
+            {% if day.today %}aria-current="date"{% endif %}
+          >
+            <time datetime="{{ day.date|date:'Y-m-d' }}">{{ day.date|date:"j" }}</time>
+            {% if day.has_event %}
+            <span class="visually-hidden">com agendamento</span>
+            {% endif %}
+          </td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
   {% endsection %}
 </div>
 {% endblock %}

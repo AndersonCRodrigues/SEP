@@ -1,20 +1,26 @@
-{% extends "base.html" %}
+{% extends "administration/base_admin.html" %}
+{% load static %}
 
 {% block title %}Cadastro de paciente{% endblock %}
-
 {% block title_suffix %} | SEP Maricá{% endblock %}
 
 {% block site_header %}{% endblock %}
-
 {% block page_header %}{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'core/css/administrativo/cadastro_paciente.css' %}">
+{% endblock %}
 
 {% block content %}
 <div class="registration">
+  <!-- ── Barra Lateral Esquerda (Vinho) ── -->
   <aside class="registration-progress" aria-label="Progresso do cadastro">
     <p class="registration-brand">
       <span class="registration-icon" aria-hidden="true"></span>
-      <strong class="registration-name">Cadastro</strong>
-      <span class="registration-subtitle">Ficha do paciente</span>
+      <span class="registration-brand-text">
+        <strong class="registration-name">Pré-cadastro</strong>
+        <span class="registration-subtitle">Ficha do paciente</span>
+      </span>
     </p>
 
     <ol class="progress-sections">
@@ -32,40 +38,53 @@
     </ol>
   </aside>
 
+  <!-- ── Área Principal de Perguntas ── -->
   <section class="question" aria-labelledby="question-title">
-    <p class="question-counter">{{ step.section }} · pergunta {{ number }} de {{ total }}</p>
+    <div>
+      <p class="question-counter">{{ step.section }} · pergunta {{ number }} de {{ total }}</p>
 
-    <h1 id="question-title" class="question-title">
-      <span class="question-icon question-icon-{{ step.icon }}" aria-hidden="true"></span>
-      {{ step.title }}
-    </h1>
+      <h1 id="question-title" class="question-title">
+        <span class="question-icon question-icon-{{ step.icon }}" aria-hidden="true"></span>
+        <span>{{ step.title }}</span>
+      </h1>
 
-    <form class="question-form" method="post" novalidate>
-      {% csrf_token %}
+      <form class="question-form" method="post" novalidate>
+        {% csrf_token %}
 
-      {% for field in form %}
-      <div class="question-field question-field-{{ field.name }}">
-        <label
-          for="{{ field.id_for_label }}"
-          {% if form.fields|length == 1 %}class="visually-hidden"{% endif %}
-        >{{ field.label }}</label>
-        {{ field }}
-        {{ field.errors }}
-      </div>
-      {% endfor %}
+        <div class="question-fields">
+          {% for field in form %}
+          <div class="question-field question-field-{{ field.name }}">
+            <label
+              for="{{ field.id_for_label }}"
+              {% if form.fields|length == 1 %}class="visually-hidden"{% endif %}
+            >{{ field.label }}</label>
 
-      <div class="question-actions">
-        <button
-          type="submit"
-          name="action"
-          value="back"
-          class="question-back"
-          formnovalidate
-          {% if is_first %}disabled{% endif %}
-        >Voltar</button>
-        <button type="submit" name="action" value="next" class="question-next">Avançar</button>
-      </div>
-    </form>
+            {{ field }}
+            
+            {% if field.errors %}
+              <div class="field-errors">
+                {{ field.errors }}
+              </div>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+
+        <!-- ── Botões de Ação ── -->
+        <div class="question-actions">
+          <button
+            type="submit"
+            name="action"
+            value="back"
+            class="question-back"
+            formnovalidate
+            {% if is_first %}disabled{% endif %}
+          >Voltar</button>
+
+          <button type="submit" name="action" value="next" class="question-next">Avançar</button>
+        </div>
+      </form>
+    </div>
   </section>
 </div>
 {% endblock %}

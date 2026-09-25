@@ -1,9 +1,76 @@
 {% extends "administration/base_admin.html" %}
+{% load static %}
 
-{% block title %}Pacientes{% endblock %}
+{% block title %}Pacientes | SEP Maricá{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'core/css/administrativo/pacientes_lista.css' %}">
+{% endblock %}
 
 {% block content %}
-<h1>Pacientes</h1>
+<div class="patients-container">
+  <!-- ── Cabeçalho da Página ── -->
+  <header class="patients-header">
+    <div class="patients-title-group">
+      <h1>Pacientes</h1>
+      <p class="patients-subtitle">Gestão de fichas e pré-cadastros do sistema</p>
+    </div>
+  </header>
 
-<a class="new-registration" href="{% url 'administration:cadastrar_paciente' %}">+ Novo Cadastro</a>
+  <!-- ── Barra de Busca e Filtros ── -->
+  <div class="patients-toolbar">
+    <form method="get" class="search-form">
+      <div class="search-input-wrapper">
+        <input 
+          type="text" 
+          name="q" 
+          placeholder="Buscar por nome, CPF ou código..." 
+          value="{{ request.GET.q|default:'' }}"
+        >
+      </div>
+    </form>
+  </div>
+
+  <!-- ── Tabela de Pacientes ── -->
+  <div class="patients-card">
+    {% if patients %}
+      <table class="patients-table">
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Nome Completo</th>
+            <th>CPF</th>
+            <th>Data de Cadastro</th>
+            <th class="text-right">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for patient in patients %}
+          <tr>
+            <td class="patient-id">#{{ patient.pk }}</td>
+            <td class="patient-name">
+              <strong>{{ patient.get_full_name }}</strong>
+            </td>
+            <td>{{ patient.cpf|default:"—" }}</td>
+            <td>{{ patient.created_at|date:"d/m/Y H:i" }}</td>
+            <td class="text-right">
+              <a href="#" class="btn-action">Ver ficha</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <!-- Estado Vazio (Sem registros) -->
+      <div class="patients-empty">
+        <div class="empty-icon">📁</div>
+        <h3>Nenhum paciente encontrado</h3>
+        <p>Comece realizando o pré-cadastro de um novo paciente no sistema.</p>
+        <a class="btn-new-registration" href="{% url 'administration:cadastrar_paciente' %}">
+          + Novo Cadastro
+        </a>
+      </div>
+    {% endif %}
+  </div>
+</div>
 {% endblock %}

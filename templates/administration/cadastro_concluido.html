@@ -1,12 +1,18 @@
 {% extends "administration/base_admin.html" %}
+{% load static %}
 
 {% block title %}Cadastro concluído{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'core/css/administrativo/cadastro_paciente.css' %}">
+{% endblock %}
 
 {% block main_nav %}{% endblock %}
 
 {% block content %}
 <section class="registration-completed" aria-labelledby="completed-title">
-  <span class="completed-icon" aria-hidden="true"></span>
+  <div class="completed-icon" aria-hidden="true"></div>
+  
   <h1 id="completed-title" class="completed-title">Cadastro concluído com sucesso!</h1>
 
   <dl class="completed-summary">
