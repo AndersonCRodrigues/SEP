@@ -1,6 +1,7 @@
 from django.apps import apps
 from django.contrib.auth.models import Group, Permission
 from django.core.management.base import BaseCommand
+
 from core.models import CustomUser
 from core.permissions import BusinessRulesMixin
 from core.user_management import MANAGEABLE_ROLES_BY

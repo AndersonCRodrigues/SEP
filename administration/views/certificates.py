@@ -2,7 +2,9 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.urls import reverse, reverse_lazy
 from django.views.generic import FormView, View
+
 from documents.models import AttendanceCertificate
+
 from ..forms import MedicalCertificateForm
 from .access import CanIssueCertificates
 

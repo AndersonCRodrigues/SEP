@@ -1,11 +1,12 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+
 from areas.models import AreaActing
 from patient.models import Patient
 from students.models import Student
 from teacher.models import Teacher
-from .models import CustomUser
 
+from .models import CustomUser
 
 PERSONAL_FIELDS = (
     "email",

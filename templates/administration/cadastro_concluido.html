@@ -1,31 +1,75 @@
 {% extends "administration/base_admin.html" %}
+{% load static %}
 
 {% block title %}Cadastro concluído{% endblock %}
 
-{% block main_nav %}{% endblock %}
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'core/css/administrativo/cadastro_paciente.css' %}">
+{% endblock %}
+
+{% block title_suffix %} | SEP Maricá{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'core/css/mobile_patient_registration.css' %}?v=4">
+{% endblock %}
+
+{% block site_header %}{% endblock %}
+{% block page_header %}{% endblock %}
 
 {% block content %}
-<section class="registration-completed" aria-labelledby="completed-title">
-  <span class="completed-icon" aria-hidden="true"></span>
-  <h1 id="completed-title" class="completed-title">Cadastro concluído com sucesso!</h1>
+<!-- MOBILE LAYOUT -->
+<div class="mobile-wizard">
+  
+  <!-- Header Vinho -->
+  <header class="mobile-header">
+    <div class="mobile-header-top">
+      <div class="mobile-header-left">
+        <button class="mobile-back-btn" onclick="window.location.href='{% url 'administration:home' %}'">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+        <span class="mobile-greeting">Olá, Usuário!</span>
+      </div>
+      <div class="mobile-header-right">
+        <button class="mobile-icon-btn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
+        </button>
+        <button class="mobile-icon-btn profile-btn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
 
-  <dl class="completed-summary">
-    <div class="completed-row">
-      <dt>Paciente</dt>
-      <dd>{{ patient.get_full_name }} #{{ patient.pk }}</dd>
+  <!-- Success Content -->
+  <div class="mobile-success-container">
+    
+    <!-- Circulo Verde e Check -->
+    <div class="success-icon">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="12" r="12" fill="#3AA100" />
+        <path d="M7 12.5L10.5 16L17 8" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
     </div>
-    <div class="completed-row">
-      <dt>Cadastrado por</dt>
-      <dd>{{ patient.registered_by.get_full_name|default:"—" }}</dd>
-    </div>
-    <div class="completed-row">
-      <dt>Concluído em</dt>
-      <dd>
-        <time datetime="{{ patient.created_at|date:'c' }}">{{ patient.created_at|date:"d/m/Y à\s H:i" }}</time>
-      </dd>
-    </div>
-  </dl>
 
-  <a class="completed-continue" href="{% url 'administration:pacientes' %}">Continuar</a>
-</section>
+    <h1 class="success-title">Seu cadastro foi concluído</h1>
+    <p class="success-subtitle">
+      Preenchido em {{ patient.created_at|date:"d/m/Y" }} e já encaminhado<br>para acompanhamento.
+    </p>
+
+  </div>
+
+  <!-- Footer Logo -->
+  <footer class="mobile-footer">
+    <img src="{% static 'core/images/logo_univassouras_white.png' %}" alt="Univassouras" class="mobile-footer-logo">
+  </footer>
+
+</div>
 {% endblock %}

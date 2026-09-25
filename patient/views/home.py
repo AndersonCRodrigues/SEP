@@ -2,8 +2,10 @@ from django.db import DatabaseError
 from django.urls import reverse
 from django.utils import timezone
 from django.views.generic import TemplateView
+
 from core.month_calendar import displayed_month, month_calendar, month_range
 from scheduling.models import Appointment
+
 from ..models import Patient
 from .access import PatientOnly
 from .sessions import (

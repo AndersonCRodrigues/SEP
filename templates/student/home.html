@@ -1,5 +1,10 @@
 {% extends "student/base_student.html" %}
 {% load components %}
+{% load static %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'core/css/student_home.css' %}" />
+{% endblock %}
 
 {% block title %}Página inicial{% endblock %}
 
@@ -10,7 +15,7 @@
 {% block page_title %}Olá, {{ request.user.first_name|default:"aluno" }}!{% endblock %}
 
 {% block page_actions %}
-<a class="new-triage" href="{% url 'fila_triagem' %}">Fazer triagem</a>
+<a class="new-triage" href="{% url 'triage:fila_triagem' %}">Fazer triagem</a>
 {% endblock %}
 
 {% block content %}

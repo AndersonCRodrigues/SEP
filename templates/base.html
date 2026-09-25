@@ -10,6 +10,7 @@
     integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
     integrity="sha384-tViUnnbYAV00FLIhhi3v/dWt3Jxw4gZQcNoSCxCIFNJVCx7/D55/wXsrNIRANwdD" crossorigin="anonymous" />
+  <link rel="stylesheet" href="{% static 'core/css/base.css' %}" />
   {% block extra_css %}{% endblock %}
 </head>
 
@@ -18,13 +19,14 @@
   <!-- HEADER ESTRUTURAL: marca + navegacao principal + acoes de usuario, tudo na mesma barra -->
   {% block site_header %}
   <header>
-    <nav class="navbar navbar-expand-lg bg-dark" data-bs-theme="dark">
+    <nav class="sep-navbar navbar navbar-expand-lg" data-bs-theme="dark">
       <div class="container-fluid">
 
         <!-- Marca / nome do sistema -->
         {% block brand %}
-        <a class="navbar-brand" href="{% url 'home_redirect' %}">
-          <i class="bi bi-mortarboard-fill"></i> Sistema SEP
+        <a class="navbar-brand brand" href="{% url 'home_redirect' %}">
+          <span class="brand-name">SEP Maricá</span>
+          <img src="{% static 'core/images/logo-home-aluno-vassouras.png' %}" alt="Univassouras" />
         </a>
         {% endblock %}
 

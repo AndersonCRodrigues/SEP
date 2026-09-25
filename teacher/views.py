@@ -1,22 +1,34 @@
-from supervisor.views.mocks import teacher_permissions
-from django.shortcuts import render, redirect, get_object_or_404
-from students.models import Advising, advisees_visible_to
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.models import Q
-from django.utils import timezone
-from django.views.generic import ListView, DetailView, TemplateView, UpdateView
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
-from .forms import ProfessorCreationForm, PerfilProfessorForm
-from .models import Teacher
-from core.utils import sincronizar_grupo
-from django.core.exceptions import ValidationError
+from django.utils import timezone
+from django.views.generic import DetailView, ListView, TemplateView, UpdateView
+
 from core.models import CustomUser
-from .forms import VincularAlunoForm
-from students.models import StudentActivity
-from .forms import StudentActivityForm, PerformanceReviewForm
+from core.utils import sincronizar_grupo
+from patient.models import Patient
+from django.utils.timesince import timesince
+
+from patient.models import ProgressNote
+from students.models import (
+    Advising,
+    CaseAssignment,
+    StudentActivity,
+    advisees_visible_to,
+)
+
+from .forms import (
+    PerfilProfessorForm,
+    PerformanceReviewForm,
+    ProfessorCreationForm,
+    StudentActivityForm,
+    VincularAlunoForm,
+)
+from .models import Teacher
 
 
 class HomeProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
@@ -154,7 +166,7 @@ class HomeProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
 @login_required
 def cadastrar_professor(request):
     if not request.user.has_perm("teacher.add_teacher"):
-        raise PermissionDenied("Apenas Coordenadores podem cadastrar Professores.")
+        raise PermissionDenied("Apenas Supervisores podem cadastrar Professores.")
 
     if request.method == "POST":
         form = ProfessorCreationForm(request.POST)
@@ -166,11 +178,7 @@ def cadastrar_professor(request):
     else:
         form = ProfessorCreationForm()
 
-    return render(
-        request,
-        "teacher/cadastro.html",
-        {"form": form, "permissoes": teacher_permissions()},
-    )
+    return render(request, "teacher/cadastro.html", {"form": form})
 
 
 class PerfilProfessorView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
@@ -190,10 +198,80 @@ class PerfilProfessorView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         return get_object_or_404(Teacher, pk=self.request.user.pk)
 
 
+class PainelProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    """Painel do Professor. Supervisor tem o painel próprio em
+    supervisor:orientacao — não reaproveita mais essa view/template."""
+
+    template_name = "teacher/teacher_panel.html"
+
+    def test_func(self):
+        return self.request.user.role in (
+            CustomUser.Role.PROFESSOR,
+            CustomUser.Role.SUPERVISOR,
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        from students.models import Student
+
+        professor = get_object_or_404(Teacher, pk=self.request.user.pk)
+
+        if professor.role == CustomUser.Role.SUPERVISOR:
+            context["alunos_vinculados"] = Student.objects.filter(
+                current_advisor__isnull=False
+            )
+        else:
+            context["alunos_vinculados"] = professor.current_advisees.all()
+        # Professor só recebe o que o Supervisor escolheu especificamente
+        # pra ele — isso é responsible_teachers no Patient, não o Referral
+        # em si (que é área-based e é coisa de Supervisor).
+        context["pacientes_encaminhados"] = Patient.objects.filter(
+            responsible_teachers=professor
+        )
+        context["alunos_disponiveis"] = Student.objects.filter(
+            current_advisor__isnull=True
+        )
+        context["form_vincular"] = VincularAlunoForm()
+        context["form_horas"] = StudentActivityForm(user=professor)
+        return context
+
+
+# COMENTADO a pedido do front (validação de 12/09): a decisão do Card 1 é
+# que cada papel tenha uma única tela inicial (ver "Mapa de Rotas e
+# Permissões", seção Card 1). teacher:home já absorveu resumo/atividades/
+# calendário; falta só decidir onde os dois formulários abaixo (Vincular
+# Aluno, Lançar Horas) vão morar antes de remover isto de vez. Comentado, não
+# apagado, pra não perder a implementação. A rota em urls.py e o link na
+# sidebar também estão comentados -- ver esses dois arquivos.
+#
+# class PainelProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+#     template_name = "teacher/teacher_panel.html"
+#
+#     def test_func(self):
+#         return self.request.user.role in (
+#             CustomUser.Role.PROFESSOR,
+#             CustomUser.Role.SUPERVISOR,
+#         )
+#
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         from students.models import Student
+#
+#         professor = get_object_or_404(Teacher, pk=self.request.user.pk)
+#         context["alunos_vinculados"] = professor.current_advisees.all()
+#
+#         context["alunos_disponiveis"] = Student.objects.filter(
+#             current_advisor__isnull=True
+#         )
+#         context["form_vincular"] = VincularAlunoForm()
+#         context["form_horas"] = StudentActivityForm(user=professor)
+#         return context
+
+
 def _painel_redirect_for(user):
     if user.role == CustomUser.Role.SUPERVISOR:
         return "supervisor:orientacao"
-    return "teacher:home"
+    return "teacher:painel"
 
 
 @login_required
@@ -204,7 +282,7 @@ def vincular_aluno(request):
     )
     if not is_authorized:
         raise PermissionDenied(
-            "Apenas Professores e Coordenadores podem vincular Alunos."
+            "Apenas Professores e Supervisores podem vincular Alunos."
         )
 
     professor = get_object_or_404(Teacher, pk=request.user.pk)
@@ -234,7 +312,7 @@ def lancar_horas(request):
         CustomUser.Role.SUPERVISOR,
     )
     if not is_authorized:
-        raise PermissionDenied("Apenas Professores e Coordenadores podem lançar horas.")
+        raise PermissionDenied("Apenas Professores e Supervisores podem lançar horas.")
 
     if request.method == "POST":
         professor = get_object_or_404(Teacher, pk=request.user.pk)
@@ -626,6 +704,7 @@ class DefinirTriagemView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
         return Patient.objects.visible_to(self.request.user)
 
     def get_context_data(self, **kwargs):
+
         context = super().get_context_data(**kwargs)
         alunos = advisees_visible_to(self.request.user).order_by(
             "first_name", "last_name"
@@ -659,3 +738,78 @@ class DefinirTriagemView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
             messages.warning(request, "Nenhum aluno foi selecionado.")
 
         return redirect("teacher:triagens")
+
+
+# ---------------------------------------------------------------------------
+# Telas do front: mesma área, desenho novo. Ficam em rota própria para não
+# competirem com as telas que já têm consulta e recorte por visibilidade.
+# ---------------------------------------------------------------------------
+
+
+class ProntuariosProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    template_name = "teacher/teacher_records.html"
+
+    def test_func(self):
+        return self.request.user.role in (
+            CustomUser.Role.PROFESSOR,
+            CustomUser.Role.SUPERVISOR,
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        professor = get_object_or_404(Teacher, pk=self.request.user.pk)
+
+        casos = (
+            CaseAssignment.objects.open()
+            .filter(student__current_advisor=professor)
+            .select_related("patient", "student")
+            .order_by("-start_date")
+        )
+
+        enriquecidos = []
+        for caso in casos:
+            ultima_nota = (
+                ProgressNote.objects.filter(patient=caso.patient, student=caso.student)
+                .order_by("-updated_at")
+                .first()
+            )
+            caso.ultima_evolucao = (
+                timesince(ultima_nota.updated_at) + " atrás" if ultima_nota else None
+            )
+            caso.pendente_revisao = (
+                ultima_nota.pending_confirmation if ultima_nota else False
+            )
+            enriquecidos.append(caso)
+
+        context["casos"] = enriquecidos
+        return context
+
+
+class PresencaProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    template_name = "teacher/teacher_presence.html"
+
+    def test_func(self):
+        return self.request.user.role in (
+            CustomUser.Role.PROFESSOR,
+            CustomUser.Role.SUPERVISOR,
+        )
+
+
+class AreaAtuacaoProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    template_name = "teacher/teacher_area.html"
+
+    def test_func(self):
+        return self.request.user.role in (
+            CustomUser.Role.PROFESSOR,
+            CustomUser.Role.SUPERVISOR,
+        )
+
+
+class TeacherAssignTriageView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    template_name = "teacher/teacher_assign_triage.html"
+
+    def test_func(self):
+        return self.request.user.role in (
+            CustomUser.Role.PROFESSOR,
+            CustomUser.Role.SUPERVISOR,
+        )

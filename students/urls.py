@@ -1,4 +1,5 @@
 from django.urls import path
+
 from . import views
 
 app_name = "students"
@@ -22,4 +23,13 @@ urlpatterns = [
         name="encaminhamentos",
     ),
     path("feedbacks/", views.StudentFeedbacksView.as_view(), name="feedbacks"),
+    # Telas do front, em rota própria enquanto o desenho não é portado para as
+    # telas acima, que já têm consulta e recorte por visibilidade.
+    path("area/triagens/", views.TriagemAlunoView.as_view(), name="area_triagens"),
+    path(
+        "area/encaminhamentos/",
+        views.EncaminhamentosAlunoView.as_view(),
+        name="area_encaminhamentos",
+    ),
+    path("area/feedbacks/", views.FeedbacksAlunoView.as_view(), name="area_feedbacks"),
 ]

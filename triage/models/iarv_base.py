@@ -2,9 +2,9 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import Q
 
+from core.constants import VISIBLE_TO_AUTHOR
 from core.models import CustomUser
 from core.permissions import ALL, BusinessRulesMixin, RoleScopedQuerySet
-from core.constants import VISIBLE_TO_AUTHOR
 
 Role = CustomUser.Role
 

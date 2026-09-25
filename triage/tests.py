@@ -1,16 +1,17 @@
 from django.core.exceptions import ValidationError
 from django.test import SimpleTestCase, TestCase
+
 from patient.models import Patient
 from students.models import Student
 
 from .forms import (
-    IarvAdultForm,
     IarvAdolescentForm,
+    IarvAdultForm,
     IarvChildForm,
 )
 from .models import (
-    IarvAdult,
     IarvAdolescent,
+    IarvAdult,
     IarvChild,
     TriageRecord,
 )

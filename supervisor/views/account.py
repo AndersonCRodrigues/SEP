@@ -9,6 +9,7 @@ from django.views.generic import ListView, UpdateView
 
 from core.mixins import GroupRequiredMixin
 from core.models import CustomUser
+from core.notifications import enviar_credenciais_por_telefone
 from core.utils import sincronizar_grupo
 from students.models import Student
 from teacher.forms import PerfilProfessorForm
@@ -75,19 +76,30 @@ def cadastrar_supervisor(request):
 
             senha_temporaria = gerar_senha_temporaria()
             user.set_password(senha_temporaria)
+            user.must_change_password = True
 
             user.save()
             form.save_m2m()
 
             sincronizar_grupo(user)
 
-            enviar_email_credenciais(user, senha_temporaria)
+            email_ok = enviar_email_credenciais(user, senha_temporaria)
+            telefone_ok = enviar_credenciais_por_telefone(user, senha_temporaria)
 
-            messages.success(
-                request,
-                f"Coordenador {user.get_full_name()} cadastrado e e-mail enviado com sucesso!",
-            )
-            return redirect("superadmin:painel")
+            if email_ok and telefone_ok:
+                messages.success(
+                    request,
+                    f"Coordenador {user.get_full_name()} cadastrado e credenciais "
+                    "enviadas com sucesso!",
+                )
+            else:
+                messages.warning(
+                    request,
+                    f"Coordenador {user.get_full_name()} cadastrado, mas houve falha ao "
+                    "enviar as credenciais. Verifique o log de auditoria e informe a senha "
+                    "manualmente se necessario.",
+                )
+            return redirect("superadmin:home")
     else:
         form = SupervisorCreationForm()
 

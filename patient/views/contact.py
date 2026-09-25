@@ -3,7 +3,9 @@ from urllib.parse import quote
 from django.conf import settings
 from django.db import DatabaseError
 from django.views.generic import TemplateView
+
 from core.fields import only_digits
+
 from ..models import Patient
 from .access import PatientOnly
 
@@ -23,11 +25,35 @@ class PatientContactView(PatientOnly, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        contact = settings.SEP_CONTACT
+        contact = getattr(settings, "SEP_CONTACT", {})
+        channels = self.channels(contact)
+        # MOCK DATA PARA VISUALIZAÇÃO SE SETTINGS NÃO ESTIVER CONFIGURADO
+        if not channels:
+            channels = [
+                {
+                    "kind": "location",
+                    "label": "Localização",
+                    "value": "Maricá, RJ",
+                    "href": "https://www.google.com/maps/search/?api=1&query=Maric%C3%A1+RJ",
+                    "external": True,
+                },
+                {
+                    "kind": "phone",
+                    "label": "Telefone",
+                    "value": "(21) 2000-0000",
+                    "href": "tel:+552120000000",
+                },
+                {
+                    "kind": "email",
+                    "label": "E-mail",
+                    "value": "sep@univassouras.edu.br",
+                    "href": "mailto:sep@univassouras.edu.br",
+                },
+            ]
         context.update(
             {
                 "service_name": contact.get("name") or "Serviço Escola de Psicologia",
-                "channels": self.channels(contact),
+                "channels": channels,
             }
         )
 

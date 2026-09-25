@@ -27,7 +27,7 @@ class StudentTriagesView(StudentOnly, TemplateView):
                 "waiting_label": updated_label(paciente.created_at, now).replace(
                     "Atualizado", "Aguardando"
                 ),
-                "start_url": reverse("create_triage", args=[paciente.pk]),
+                "start_url": reverse("triage:create_triage", args=[paciente.pk]),
             }
             for paciente in waiting_patients()
         ]

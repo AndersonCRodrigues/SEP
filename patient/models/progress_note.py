@@ -1,8 +1,10 @@
 from django.conf import settings
 from django.db import models
 from django.db.models import Q
+
 from core.models import CustomUser
 from core.permissions import ALL, BusinessRulesMixin, RoleScopedQuerySet
+
 from .patient import Patient, with_open_case
 
 Role = CustomUser.Role

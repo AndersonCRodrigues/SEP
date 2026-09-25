@@ -39,9 +39,18 @@ STEPS = (
         "calendar",
         forms.BirthDateForm,
     ),
+    Step("genero", "Identificação", "Gênero/Identidade de Gênero", "person", forms.GenderForm),
+    Step("raca", "Identificação", "Cor/Raça", "person", forms.RaceForm),
+    Step("naturalidade", "Identificação", "Naturalidade", "person", forms.NaturalnessForm),
+    Step("escolaridade", "Identificação", "Escolaridade", "person", forms.SchoolingForm),
+    Step("religiao", "Identificação", "Religião", "person", forms.ReligionForm),
+    Step("estado-civil", "Identificação", "Estado civil", "person", forms.MaritalStatusForm),
     Step("telefone", "Contatos", "Telefone de contato", "phone", forms.PhoneForm),
     Step("email", "Contatos", "E-mail de contato", "phone", forms.EmailForm),
-    Step("endereco", "Endereço", "Endereço do paciente", "address", forms.AddressForm),
+    Step("logradouro", "Endereço", "Endereço completo", "address", forms.LogradouroForm),
+    Step("bairro", "Endereço", "Bairro", "address", forms.BairroForm),
+    Step("profissao", "Identificação", "Profissão", "person", forms.ProfessionForm),
+    Step("ocupacao", "Identificação", "Ocupação atual", "person", forms.OccupationForm),
     Step(
         "acompanhante",
         "Acompanhante",
@@ -150,6 +159,12 @@ class PatientRegistration:
             form = step.form_class(data=self.answer(step))
             form.is_valid()
             values.update(form.cleaned_data)
+
+        # Preenche os campos do endereço que não são mais perguntados no mobile
+        values.setdefault("cep", "24900-000")
+        values.setdefault("numero", "S/N")
+        values.setdefault("cidade", "Maricá")
+        values.setdefault("estado", "RJ")
 
         Patient(**values).full_clean(exclude=["password"])
         patient = Patient.objects.create_with_credentials(

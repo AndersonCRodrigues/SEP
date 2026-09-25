@@ -1,80 +1,59 @@
-from django.shortcuts import render, get_object_or_404, redirect
-from django.urls import reverse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import PermissionDenied, ValidationError
+from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.http import HttpResponseForbidden
+from django.shortcuts import get_object_or_404, redirect, render
 
+from areas.models import AreaActing
+from core.constants import TriageStatus
+from core.models import CustomUser
 from patient.models import Patient
 from students.models import Student
 from teacher.models import Teacher
-from areas.models import AreaActing
-from core.models import CustomUser
-from core.constants import TriageStatus
-from triage.models import TriageRecord, TriageFeedback, Referral
+from triage.models import Referral, TriageFeedback, TriageRecord
+
 from .forms import (
-    IarvAdultForm,
-    IarvAdolescentForm,
-    IarvChildForm,
     TriageRecordForm,
+    TriageRegistration,
+    get_iarv_form_class,
+    get_iarv_form_class_for_instance,
 )
 
 Role = CustomUser.Role
-
-
-def get_iarv_form_class(patient):
-    age = patient.current_age
-
-    if age is None:
-        raise ValidationError(
-            "A data de nascimento do paciente é obrigatória para selecionar o questionário IARV."
-        )
-
-    if age < 13:
-        return IarvChildForm
-
-    if age <= 17:
-        return IarvAdolescentForm
-
-    return IarvAdultForm
-
-
-def sem_data_de_nascimento(request, patient):
-    messages.error(
-        request,
-        f"A triagem de {patient.get_full_name()} precisa da data de nascimento, "
-        "que ainda não está no cadastro do paciente.",
-    )
-
-
-def get_iarv_form_class_for_instance(iarv):
-    if isinstance(iarv, IarvChildForm.Meta.model):
-        return IarvChildForm
-    if isinstance(iarv, IarvAdolescentForm.Meta.model):
-        return IarvAdolescentForm
-    return IarvAdultForm
 
 
 @login_required
 def minhas_triagens(request):
     """
     Lista as triagens do próprio Aluno, pra ele conseguir voltar depois e
-    ver o parecer do Supervisor
+    ver o parecer do Supervisor 
     """
     if request.user.role != Role.ALUNO:
-        raise PermissionDenied("Apenas Alunos podem acessar as próprias triagens.")
+        return HttpResponseForbidden("Apenas Alunos podem acessar as próprias triagens.")
 
-    triagens = TriageRecord.objects.filter(student_author_id=request.user.pk).order_by(
-        "-created_at"
-    )
+    triagens = TriageRecord.objects.filter(
+        student_author_id=request.user.pk
+    ).order_by("-created_at")
 
     return render(request, "triage/minhas_triagens.html", {"triagens": triagens})
 
 
 @login_required
+def triagem_concluida(request, pk):
+    """Tela de confirmação exibida logo após o Aluno criar a ficha."""
+    triage = get_object_or_404(TriageRecord, pk=pk)
+
+    if triage.student_author_id != request.user.pk:
+        return HttpResponseForbidden("Você não tem acesso a essa triagem.")
+
+    return render(request, "triage/triagem_concluida.html", {"triage": triage})
+
+
+@login_required
 def fila_triagem(request):
     if request.user.role != Role.ALUNO:
-        raise PermissionDenied("Apenas Alunos podem acessar a fila de triagem.")
+        return HttpResponseForbidden("Apenas Alunos podem acessar a fila de triagem.")
 
     pacientes_aguardando = Patient.objects.awaiting_triage()
 
@@ -85,58 +64,113 @@ def fila_triagem(request):
     )
 
 
-@login_required
-def create_triage(request, patient_id):
-    patient = get_object_or_404(
-        Patient,
-        pk=patient_id,
-    )
+def to_triage_step(patient_id, step):
+    return redirect("triage:create_triage_step", patient_id=patient_id, step=step.slug)
 
-    try:
-        student_author = Student.objects.get(pk=request.user.pk)
-    except Student.DoesNotExist:
-        raise PermissionDenied("Apenas alunos podem criar uma ficha de triagem.")
 
-    try:
-        iarv_form_class = get_iarv_form_class(patient)
-    except ValidationError:
-        sem_data_de_nascimento(request, patient)
-        return redirect("students:triagens")
-
-    if request.method == "POST":
-        triage_form = TriageRecordForm(request.POST)
-        iarv_form = iarv_form_class(request.POST)
-
-        if triage_form.is_valid() and iarv_form.is_valid():
-            with transaction.atomic():
-                triage_record = triage_form.save(commit=False)
-
-                triage_record.patient = patient
-                triage_record.student_author = student_author
-                triage_record.save()
-
-                iarv = iarv_form.save(commit=False)
-                iarv.triage_record = triage_record
-                iarv.save()
-
-            return redirect("students:triagem_concluida", pk=triage_record.pk)
-
-    else:
-        triage_form = TriageRecordForm()
-        iarv_form = iarv_form_class()
-
-    context = {
-        "patient": patient,
-        "triage_form": triage_form,
-        "iarv_form": iarv_form,
-        "patient_age": patient.current_age,
-    }
-
+def render_triage_step(request, wizard, step, form):
     return render(
         request,
         "triage/create_triage.html",
-        context,
+        {
+            "patient": wizard.patient,
+            "patient_age": wizard.patient.current_age,
+            "form": form,
+            "step": step,
+            "number": wizard.number(step),
+            "total": len(wizard.steps()),
+            "is_first": step == wizard.steps()[0],
+            "sections": wizard.sections(step),
+        },
     )
+
+
+def _ensure_can_create_triage(request, patient):
+    """Levanta HttpResponseForbidden se o usuário não pode criar triagem para esse paciente."""
+    if request.user.role != Role.ALUNO:
+        return HttpResponseForbidden("Apenas alunos podem criar uma ficha de triagem.")
+    if patient.flow_status not in ("", Patient.FlowStatus.AWAITING_TRIAGE):
+        return HttpResponseForbidden("Esse paciente não está aguardando triagem.")
+    return None
+
+
+@login_required
+def create_triage_start(request, patient_id):
+    patient = get_object_or_404(Patient, pk=patient_id)
+
+    forbidden = _ensure_can_create_triage(request, patient)
+    if forbidden:
+        return forbidden
+
+    try:
+        wizard = TriageRegistration.start(request.session, patient)
+        first_step = wizard.steps()[0]
+    except ValidationError as error:
+        messages.error(request, str(error))
+        return redirect("triage:fila_triagem")
+
+    return to_triage_step(patient_id, first_step)
+
+
+@login_required
+def create_triage_step(request, patient_id, step):
+    patient = get_object_or_404(Patient, pk=patient_id)
+
+    forbidden = _ensure_can_create_triage(request, patient)
+    if forbidden:
+        return forbidden
+
+    wizard = TriageRegistration(request.session, patient)
+
+    try:
+        steps = wizard.steps()
+    except ValidationError as error:
+        messages.error(request, str(error))
+        return redirect("triage:fila_triagem")
+
+    current = wizard.step(step)
+    if current is None:
+        return to_triage_step(patient_id, steps[0])
+
+    if request.method == "POST":
+        if request.POST.get("action") == "back":
+            previous, _ = wizard.neighbours(current)
+            wizard.save(current, request.POST)
+            return to_triage_step(patient_id, previous or current)
+
+        form_class = wizard.field_form_class(current)
+        form = form_class(data=request.POST)
+        if not form.is_valid():
+            return render_triage_step(request, wizard, current, form)
+
+        wizard.save(current, request.POST)
+        _, following = wizard.neighbours(current)
+        if following:
+            return to_triage_step(patient_id, following)
+
+        pending = wizard.first_unanswered()
+        if pending:
+            return to_triage_step(patient_id, pending)
+
+        try:
+            student_author = Student.objects.get(pk=request.user.pk)
+        except Student.DoesNotExist:
+            return HttpResponseForbidden("Apenas alunos podem criar uma ficha de triagem.")
+
+        try:
+            triage_record = wizard.complete(student_author)
+        except ValidationError:
+            messages.error(request, "Revise os dados e tente novamente.")
+            return to_triage_step(patient_id, steps[0])
+
+        return redirect("triage:triagem_concluida", pk=triage_record.pk)
+
+    if wizard.is_ahead(current):
+        return to_triage_step(patient_id, wizard.first_unanswered())
+
+    form_class = wizard.field_form_class(current)
+    form = form_class(initial=wizard.answer(current))
+    return render_triage_step(request, wizard, current, form)
 
 
 @login_required
@@ -144,33 +178,20 @@ def edit_triage(request, pk):
     triage = get_object_or_404(TriageRecord, pk=pk)
     user = request.user
 
-    is_dono_aluno = user.role == Role.ALUNO and triage.student_author_id == user.pk
+    is_dono_aluno = (user.role == Role.ALUNO and triage.student_author_id == user.pk)
     is_staff = user.role in [Role.SUPERVISOR, Role.PROFESSOR]
 
     if is_dono_aluno:
         if not triage.editable_fields_for(user):
-            raise PermissionDenied("Essa triagem não pode mais ser editada pelo aluno.")
+            return HttpResponseForbidden("Essa triagem não pode mais ser editada pelo aluno.")
     elif is_staff:
         if not TriageRecord.objects.visible_to(user).filter(pk=triage.pk).exists():
-            raise PermissionDenied("Você não tem permissão para editar esta triagem.")
+            return HttpResponseForbidden("Você não tem permissão para editar esta triagem.")
     else:
-        raise PermissionDenied("Você não tem acesso a essa triagem.")
-
-    destino = (
-        "triage_detail_student"
-        if user.role == Role.ALUNO
-        else "triage_detail_supervisor"
-    )
+        return HttpResponseForbidden("Você não tem acesso a essa triagem.")
 
     iarv = triage.get_iarv()
-    if iarv:
-        iarv_form_class = get_iarv_form_class_for_instance(iarv)
-    else:
-        try:
-            iarv_form_class = get_iarv_form_class(triage.patient)
-        except ValidationError:
-            sem_data_de_nascimento(request, triage.patient)
-            return redirect(destino, pk=pk)
+    iarv_form_class = get_iarv_form_class_for_instance(iarv) if iarv else get_iarv_form_class(triage.patient)
 
     if request.method == "POST":
         triage_form = TriageRecordForm(request.POST, instance=triage)
@@ -181,7 +202,10 @@ def edit_triage(request, pk):
                 triage_form.save()
                 iarv_form.save()
             messages.success(request, "Triagem atualizada com sucesso.")
-            return redirect(destino, pk=pk)
+            
+            if user.role == Role.ALUNO:
+                return redirect("triage:triage_detail_student", pk=pk)
+            return redirect("triage:triage_detail_supervisor", pk=pk)
     else:
         triage_form = TriageRecordForm(instance=triage)
         iarv_form = iarv_form_class(instance=iarv)
@@ -190,7 +214,6 @@ def edit_triage(request, pk):
         "triage": triage,
         "triage_form": triage_form,
         "iarv_form": iarv_form,
-        "cancel_url": reverse(destino, args=[pk]),
     }
 
     return render(request, "triage/edit_triage.html", context)
@@ -199,9 +222,6 @@ def edit_triage(request, pk):
 @login_required
 def submit_triage(request, pk):
     """Aluno envia a própria triagem OPEN pro Supervisor (OPEN -> SUBMITTED)."""
-    if request.user.role != Role.ALUNO:
-        raise PermissionDenied("Apenas Alunos podem enviar a própria triagem.")
-
     triage = get_object_or_404(TriageRecord, pk=pk)
 
     try:
@@ -211,14 +231,11 @@ def submit_triage(request, pk):
     except ValidationError as e:
         messages.error(request, str(e))
 
-    return redirect("triage_detail_student", pk=pk)
+    return redirect("triage:triage_detail_student", pk=pk)
 
 
 @login_required
 def lock_triage_editing(request, pk):
-    if request.user.role != Role.SUPERVISOR:
-        raise PermissionDenied("Apenas a Coordenação pode fechar a edição da triagem.")
-
     triage = get_object_or_404(TriageRecord, pk=pk)
     try:
         with transaction.atomic():
@@ -226,27 +243,27 @@ def lock_triage_editing(request, pk):
         messages.success(request, "Aluno não pode editar mais essa triagem.")
     except ValidationError as e:
         messages.error(request, str(e))
-
-    return redirect("triage_detail_supervisor", pk=pk)
+        
+    return redirect("triage:triage_detail_supervisor", pk=pk)
 
 
 @login_required
 def triage_detail_student(request, pk):
     """View exclusiva para visualização do Aluno."""
     if request.user.role != Role.ALUNO:
-        raise PermissionDenied("Apenas alunos podem acessar esta visão.")
+        return HttpResponseForbidden("Apenas alunos podem acessar esta visão.")
 
     triage = get_object_or_404(TriageRecord, pk=pk)
-
+    
     if triage.student_author_id != request.user.pk:
-        raise PermissionDenied("Você não tem acesso a essa triagem.")
+        return HttpResponseForbidden("Você não tem acesso a essa triagem.")
 
     triage.refresh_from_db()
     iarv = triage.get_iarv()
 
     # Prepara os formulários com os dados preenchidos e desabilita todos os inputs
     triage_form = TriageRecordForm(instance=triage)
-
+    
     iarv_form = None
     if iarv:
         iarv_form_class = get_iarv_form_class_for_instance(iarv)
@@ -258,7 +275,7 @@ def triage_detail_student(request, pk):
 
     for form in forms_to_disable:
         for field in form.fields.values():
-            field.widget.attrs["disabled"] = "disabled"
+            field.widget.attrs['disabled'] = 'disabled'
 
     context = {
         "paciente": triage.patient.nome_completo,
@@ -266,44 +283,35 @@ def triage_detail_student(request, pk):
         "iarv": iarv,
         "triage_form": triage_form,
         "iarv_form": iarv_form,
-        "pode_submeter": (
-            triage.student_author_id == request.user.pk and triage.is_open
-        ),
-        "pode_editar": (
-            triage.student_author_id == request.user.pk
-            and bool(triage.editable_fields_for(request.user))
-        ),
+        "pode_submeter": (triage.student_author_id == request.user.pk and triage.is_open),
+        "pode_editar": (triage.student_author_id == request.user.pk and bool(triage.editable_fields_for(request.user))),
     }
 
     return render(request, "triage/triage_detail_student.html", context)
-
 
 @login_required
 def triage_detail_supervisor(request, pk):
     """View exclusiva para visualização do Supervisor/Professor."""
     if request.user.role not in [Role.SUPERVISOR, Role.PROFESSOR]:
-        raise PermissionDenied(
-            "Apenas supervisores ou professores podem acessar esta visão."
-        )
+        return HttpResponseForbidden("Apenas supervisores ou professores podem acessar esta visão.")
 
     triage = get_object_or_404(TriageRecord, pk=pk)
 
     if not TriageRecord.objects.visible_to(request.user).filter(pk=triage.pk).exists():
-        raise PermissionDenied("Você não tem acesso a essa triagem.")
+        return HttpResponseForbidden("Você não tem acesso a essa triagem.")
 
     triage.refresh_from_db()
     iarv = triage.get_iarv()
-    iarv_updated = iarv.updated_at if iarv and hasattr(iarv, "updated_at") else None
+    iarv_updated = iarv.updated_at if iarv and hasattr(iarv, 'updated_at') else None
 
     pode_travar_edicao = (
-        triage.status == TriageStatus.SUBMITTED and request.user.role == Role.SUPERVISOR
+        triage.status == TriageStatus.SUBMITTED 
+        and request.user.role == Role.SUPERVISOR
     )
-
+    
     editada_pos_envio = False
     if pode_travar_edicao and triage.submitted_at:
-        if triage.updated_at > triage.submitted_at:
-            editada_pos_envio = True
-        elif iarv_updated and iarv_updated > triage.submitted_at:
+        if triage.updated_at > triage.submitted_at or iarv_updated and iarv_updated > triage.submitted_at:
             editada_pos_envio = True
 
     context = {
@@ -322,14 +330,14 @@ def triage_detail_supervisor(request, pk):
 
 @login_required
 def create_feedback(request, pk):
-    """Cria o parecer/feedback (Professor, herdado por Supervisor)."""
+  
     triage = get_object_or_404(TriageRecord, pk=pk)
 
     if not TriageFeedback.can_be_created_by(request.user):
-        raise PermissionDenied("Você não pode enviar parecer pra essa triagem.")
+        return HttpResponseForbidden("Você não pode enviar parecer pra essa triagem.")
 
     if not TriageRecord.objects.visible_to(request.user).filter(pk=triage.pk).exists():
-        raise PermissionDenied("Você não tem acesso a essa triagem.")
+        return HttpResponseForbidden("Você não tem acesso a essa triagem.")
 
     if request.method == "POST":
         content = request.POST.get("content", "").strip()
@@ -342,7 +350,7 @@ def create_feedback(request, pk):
             messages.success(request, "Parecer enviado.")
         else:
             messages.error(request, "O parecer não pode ficar em branco.")
-        return redirect("triage_detail_supervisor", pk=pk)
+        return redirect("triage:triage_detail_supervisor", pk=pk)
 
     return render(request, "triage/create_feedback.html", {"triage": triage})
 
@@ -350,12 +358,12 @@ def create_feedback(request, pk):
 @login_required
 def create_referral(request, pk):
     if request.user.role != Role.SUPERVISOR:
-        raise PermissionDenied("Você não pode fazer o encaminhamento dessa triagem.")
+        return HttpResponseForbidden("Você não pode fazer o encaminhamento dessa triagem.")
 
     referral_for_screening = get_object_or_404(TriageRecord, pk=pk)
 
     if not Referral.can_be_created_by(request.user, triage=referral_for_screening):
-        raise PermissionDenied("Essa triagem ainda não foi submetida.")
+        return HttpResponseForbidden("Essa triagem ainda não foi submetida.")
 
     all_areas = AreaActing.objects.all()
     for area in all_areas:

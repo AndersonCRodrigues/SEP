@@ -1,0 +1,883 @@
+{% extends "home.html" %}
+{% load static %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'core/css/student_triage.css' %}">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* ── NOVO LAYOUT TRIAGEM DESKTOP ── */
+    .triage-wizard-container {
+      background: #FFFFFF;
+      border-radius: 20px;
+      overflow: hidden;
+      max-width: 860px;
+      margin: 24px auto 40px auto;
+      display: flex;
+      min-height: 500px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    }
+
+    /* PAINEL ESQUERDO (VINHO) */
+    .wizard-sidebar {
+      width: 260px;
+      background-color: #6D1D20;
+      padding: 28px 22px;
+      color: #FFF;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .wizard-profile {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 36px;
+    }
+
+    .wizard-profile-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: #E25C5C;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .wizard-profile-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .wizard-profile-name {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 500;
+      font-size: 14px;
+      line-height: 1.2;
+    }
+
+    .wizard-profile-id {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.7);
+      margin-top: 4px;
+    }
+
+    .wizard-menu-item {
+      margin-bottom: 18px;
+    }
+
+    .wizard-menu-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .wizard-progress-row {
+      display: flex;
+      gap: 6px;
+    }
+
+    .wizard-progress-segment {
+      flex: 1;
+      height: 4px;
+      border-radius: 2px;
+      background-color: rgba(255, 255, 255, 0.3);
+      transition: background-color 0.3s;
+    }
+
+    .wizard-progress-segment.active {
+      background-color: #E25C5C;
+    }
+
+    /* PAINEL DIREITO (BRANCO) */
+    .wizard-content {
+      flex: 1;
+      background-color: #FFF;
+      padding: 36px 48px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .wizard-step {
+      display: none;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .wizard-step.active {
+      display: flex;
+    }
+
+    .wizard-step-meta {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 16px;
+    }
+
+    .wizard-question-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 24px;
+      font-weight: 800;
+      color: #000;
+      line-height: 1.2;
+      margin-bottom: 22px;
+    }
+
+    /* Tipos de Input */
+    .wizard-textarea {
+      width: 100%;
+      height: 220px;
+      border: 1px solid #CCC;
+      border-radius: 8px;
+      padding: 16px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 15px;
+      background-color: #F9F9F9;
+      resize: none;
+      outline: none;
+    }
+    
+    .wizard-textarea::placeholder {
+      color: #999;
+      font-weight: 500;
+    }
+
+    .wizard-textarea:focus {
+      border-color: #6D1D20;
+    }
+
+    .wizard-bool-btn {
+      background-color: #DCDCDC;
+      border-radius: 30px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      color: #000;
+      width: 100%;
+      max-width: 300px;
+      padding: 12px;
+      border: none;
+      margin: 0 auto 16px auto;
+      display: block;
+      cursor: pointer;
+      transition: background-color 0.2s, color 0.2s;
+    }
+
+    .wizard-bool-btn:hover {
+      background-color: #CCC;
+    }
+
+    .wizard-bool-btn.selected {
+      background-color: #E53935;
+      color: #FFF;
+    }
+
+    .wizard-radio-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-width: 500px;
+    }
+
+    .wizard-radio-option {
+      background-color: #FFF;
+      border: 1px solid #F0F0F0;
+      border-radius: 12px;
+      padding: 16px 20px;
+      font-size: 15px;
+      font-family: 'Museo Sans', sans-serif;
+      font-weight: 500;
+      color: #333;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+
+    .wizard-radio-option:hover {
+      border-color: #CCC;
+    }
+
+    .wizard-radio-option input[type="radio"] {
+      display: none;
+    }
+
+    .radio-red-line {
+      width: 4px;
+      height: 18px;
+      background-color: #6D1D20;
+      border-radius: 2px;
+      margin-right: 12px;
+    }
+
+    .wizard-radio-option input[type="radio"]:checked + .radio-red-line {
+      background-color: #E25C5C;
+    }
+
+    .wizard-actions {
+      margin-top: auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 40px;
+    }
+
+    .btn-wizard-back {
+      background-color: #A39F9D;
+      color: #FFF;
+      font-family: 'Museo Sans', sans-serif;
+      font-weight: 700;
+      font-size: 16px;
+      padding: 12px 40px;
+      border-radius: 24px;
+      border: none;
+      text-decoration: none;
+      display: inline-block;
+      cursor: pointer;
+    }
+
+    .btn-wizard-next {
+      background-color: #6D1D20;
+      color: #FFF;
+      font-family: 'Museo Sans', sans-serif;
+      font-weight: 700;
+      font-size: 16px;
+      padding: 12px 40px;
+      border-radius: 24px;
+      border: none;
+      text-decoration: none;
+      display: inline-block;
+      cursor: pointer;
+    }
+    /* ---- MOBILE ADAPTATIONS ---- */
+    @media (max-width: 767px) {
+      body {
+        background-color: #F8F9FA !important;
+      }
+      .sep-navbar { display: none !important; }
+      
+      /* Forçar remoção de margens e paddings do Bootstrap no container principal */
+      main.container, main.container-fluid, 
+      main.py-4, main.py-5, main.pt-4, main.pt-5,
+      .container.py-4, .container-fluid.py-4 { 
+        padding: 0 !important; 
+        margin: 0 !important; 
+        max-width: 100% !important;
+      }
+      
+      .triage-wizard-container {
+        margin: 0;
+        border-radius: 0;
+        box-shadow: none;
+        flex-direction: column;
+      }
+      .wizard-sidebar { display: none; }
+      
+      .wizard-content {
+        padding: 0 20px 40px 20px;
+      }
+      .wizard-step-meta { display: none; }
+      .wizard-question-title {
+        font-size: 22px;
+        text-align: left;
+        margin-top: 10px;
+        margin-bottom: 25px;
+      }
+
+      /* Inputs do Mobile (plain gray box with static vertical line) */
+      .wizard-textarea, .wizard-input {
+        background-color: #DFDFDF;
+        background-image: linear-gradient(var(--sep-maroon), var(--sep-maroon));
+        background-size: 2px 36px;
+        background-repeat: no-repeat;
+        background-position: 20px center;
+        border: none;
+        border-radius: 15px;
+        padding: 20px 20px 20px 35px;
+        font-size: 14px;
+        height: auto;
+        min-height: 80px;
+        outline: none;
+        -webkit-appearance: none;
+        appearance: none;
+        box-shadow: none;
+      }
+      .wizard-textarea:focus, .wizard-input:focus {
+        border: none;
+        outline: none;
+        box-shadow: none;
+      }
+
+      /* Radio List Mobile */
+      .wizard-radio-list { gap: 16px; }
+      .wizard-radio-option {
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      }
+
+      /* Sim/Não mobile */
+      .wizard-bool-btn {
+        background-color: #DFDFDF;
+        border-radius: 16px;
+        font-size: 18px;
+        padding: 16px;
+        margin-bottom: 20px;
+        max-width: 100%;
+      }
+
+      /* Actions mobile */
+      .wizard-actions {
+        padding-top: 20px;
+        gap: 15px;
+      }
+      .btn-wizard-back, .btn-wizard-next {
+        flex: 1;
+        padding: 14px 0;
+        border-radius: 15px;
+        text-align: center;
+        font-size: 15px;
+      }
+      .btn-wizard-back { background-color: #A39F9D; }
+
+      /* Mobile Header e Componentes Extras */
+      .triage-m-header {
+        background-color: var(--sep-maroon);
+        padding: 30px 24px 24px 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        color: white;
+        border-bottom-left-radius: 45px;
+        border-bottom-right-radius: 45px;
+        margin-bottom: 25px;
+        margin-top: 0 !important;
+        margin-left: -20px;
+        margin-right: -20px;
+      }
+      .triage-m-header-top {
+        display: flex;
+      }
+      .triage-m-header-bottom {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .triage-m-header a.back-btn {
+        color: white;
+        font-size: 32px;
+        line-height: 1;
+        text-decoration: none;
+        -webkit-text-stroke: 2px white; /* faz a seta ficar mais grossa */
+      }
+      .triage-m-greeting {
+        font-family: 'Museo Sans', sans-serif;
+        font-weight: 800;
+        font-size: 24px;
+      }
+      .triage-m-icons {
+        display: flex;
+        gap: 16px;
+        font-size: 24px;
+      }
+      
+      .triage-m-patient-pill {
+        border: 1px solid #802626;
+        background-color: #F5F0EB;
+        border-radius: 12px;
+        padding: 12px 20px;
+        margin-bottom: 25px;
+      }
+      .triage-m-patient-pill .lbl {
+        font-family: 'Museo Sans', sans-serif;
+        font-size: 13px;
+        color: #777;
+        margin-bottom: 4px;
+        font-weight: 600;
+      }
+      .triage-m-patient-pill .val {
+        font-family: 'Museo Sans', sans-serif;
+        font-size: 16px;
+        font-weight: 800;
+        color: #802626;
+      }
+
+      .triage-m-progress-bar {
+        height: 14px;
+        background-color: #E2CDCD;
+        border-radius: 7px;
+        width: 100%;
+        margin-bottom: 30px;
+        overflow: hidden;
+      }
+      .triage-m-progress-fill {
+        height: 100%;
+        background-color: var(--sep-maroon);
+        width: 5%; /* updated dynamically */
+        border-radius: 7px;
+        transition: width 0.3s;
+      }
+    }
+  </style>
+{% endblock %}
+
+{% block home_content %}
+<div>
+
+  <div class="triage-wizard-container">
+    
+    <!-- LATERAL VINHO -->
+    <div class="wizard-sidebar">
+      
+      <!-- Perfil -->
+      <div class="wizard-profile">
+        <div class="wizard-profile-avatar">
+          {{ patient.nome_completo|default:"José Santos"|slice:":1" }}S
+        </div>
+        <div class="wizard-profile-info">
+          <div class="wizard-profile-name">{{ patient.nome_completo|default:"José Santos" }}</div>
+          <div class="wizard-profile-id">#{{ patient.pk|default:"9872736" }}</div>
+        </div>
+      </div>
+
+      <!-- Menu Identificação -->
+      <div class="wizard-menu-item">
+        <div class="wizard-menu-title">Identificação</div>
+        <div class="wizard-progress-row" id="prog-identificacao">
+          <div class="wizard-progress-segment active"></div>
+          <div class="wizard-progress-segment"></div>
+          <div class="wizard-progress-segment"></div>
+          <div class="wizard-progress-segment"></div>
+        </div>
+      </div>
+
+      <div class="wizard-menu-item">
+        <div class="wizard-menu-title">Vínculo institucional</div>
+        <div class="wizard-progress-row" id="prog-vinculo">
+          <div class="wizard-progress-segment"></div>
+          <div class="wizard-progress-segment"></div>
+          <div class="wizard-progress-segment"></div>
+        </div>
+      </div>
+
+      <div class="wizard-menu-item">
+        <div class="wizard-menu-title">Contexto clínico</div>
+        <div class="wizard-progress-row" id="prog-contexto">
+          <div class="wizard-progress-segment"></div>
+          <div class="wizard-progress-segment"></div>
+          <div class="wizard-progress-segment"></div>
+        </div>
+      </div>
+
+      <div class="wizard-menu-item">
+        <div class="wizard-menu-title">Rede de apoio</div>
+        <div class="wizard-progress-row" id="prog-rede">
+          <div class="wizard-progress-segment"></div>
+          <div class="wizard-progress-segment"></div>
+          <div class="wizard-progress-segment"></div>
+        </div>
+      </div>
+
+      <div class="wizard-menu-item">
+        <div class="wizard-menu-title">Encerramento</div>
+        <div class="wizard-progress-row" id="prog-encerramento">
+          <div class="wizard-progress-segment"></div>
+          <div class="wizard-progress-segment"></div>
+          <div class="wizard-progress-segment"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- CONTEÚDO PRINCIPAL (BRANCO) -->
+    <div class="wizard-content">
+      
+      <!-- Componentes Exclusivos do Mobile -->
+      <div class="d-block d-md-none">
+        <div class="triage-m-header">
+          <div class="triage-m-header-top">
+            <a href="javascript:history.back()" class="back-btn"><i class="bi bi-chevron-left"></i></a>
+          </div>
+          <div class="triage-m-header-bottom">
+            <div class="triage-m-greeting">Olá, Usuário!</div>
+            <div class="triage-m-icons">
+              <i class="bi bi-bell-fill"></i>
+              <i class="bi bi-person-circle"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="triage-m-patient-pill">
+          <div class="lbl">Paciente</div>
+          <div class="val">{{ patient.nome_completo|default:"Maria Oliveira da Silva" }}</div>
+        </div>
+
+        <div class="triage-m-progress-bar">
+          <div class="triage-m-progress-fill" id="m-progress-fill"></div>
+        </div>
+      </div>
+      
+      <!-- Passo 1 -->
+      <div class="wizard-step active" id="step-1">
+        <div class="wizard-step-meta">Identificação &middot; pergunta 1 de 25</div>
+        <h1 class="wizard-question-title">Como chegou até o Serviço Escola de Psicologia?</h1>
+        <div class="wizard-radio-list mt-3">
+          <label class="wizard-radio-option">
+            <input type="radio" name="como_chegou" value="demanda">
+            <div class="radio-red-line"></div> Demanda espontânea
+          </label>
+          <label class="wizard-radio-option">
+            <input type="radio" name="como_chegou" value="encaminhado">
+            <div class="radio-red-line"></div> Encaminhado ou indicado por
+          </label>
+        </div>
+      </div>
+
+      <!-- Passo 2: Nome da pessoa que indicou -->
+      <div class="wizard-step" id="step-2">
+        <div class="wizard-step-meta">Identificação &middot; pergunta 2 de 25</div>
+        <div class="d-block d-md-none text-center mb-1" style="font-size:14px;color:#555;">Informe abaixo</div>
+        <h1 class="wizard-question-title" style="text-align:center; font-weight:900;">Nome da pessoa que indicou</h1>
+        <textarea class="wizard-textarea" placeholder=""></textarea>
+      </div>
+
+      <!-- Passo 3: Tem familiar -->
+      <div class="wizard-step" id="step-3">
+        <div class="wizard-step-meta">Identificação &middot; pergunta 3 de 25</div>
+        <h1 class="wizard-question-title" style="text-align:center;">Tem algum familiar em atendimento no SEP?</h1>
+        <div class="mt-4">
+          <button type="button" class="wizard-bool-btn">Sim</button>
+          <button type="button" class="wizard-bool-btn">Não</button>
+        </div>
+      </div>
+
+      <!-- Passo 4: Nome do Familiar -->
+      <div class="wizard-step" id="step-4">
+        <div class="wizard-step-meta">Identificação &middot; pergunta 4 de 25</div>
+        <div class="d-block d-md-none text-center mb-1" style="font-size:14px;color:#555;">Abaixo informe o</div>
+        <h1 class="wizard-question-title" style="text-align: center; font-weight:900;">Nome do Familiar</h1>
+        <textarea class="wizard-textarea" placeholder=""></textarea>
+      </div>
+
+      <!-- Passo 5: Grau de parentesco -->
+      <div class="wizard-step" id="step-5">
+        <div class="wizard-step-meta">Identificação &middot; pergunta 5 de 25</div>
+        <div class="d-block d-md-none text-center mb-1" style="font-size:14px;color:#555;">Abaixo informe o</div>
+        <h1 class="wizard-question-title" style="text-align: center; font-weight:900;">Grau de parentesco</h1>
+        <textarea class="wizard-textarea" placeholder=""></textarea>
+      </div>
+
+      <!-- Passo 6: É aluno? -->
+      <div class="wizard-step" id="step-6">
+        <div class="wizard-step-meta">Vínculo institucional &middot; pergunta 6 de 25</div>
+        <h1 class="wizard-question-title">É aluno da Universidade de Vassouras?</h1>
+        <div class="mt-4">
+          <button type="button" class="wizard-bool-btn">Sim</button>
+          <button type="button" class="wizard-bool-btn">Não</button>
+        </div>
+      </div>
+
+      <!-- Passo 7: O curso e o período -->
+      <div class="wizard-step" id="step-7">
+        <div class="wizard-step-meta">Vínculo institucional &middot; pergunta 7 de 25</div>
+        <div class="d-block d-md-none text-center mb-1" style="font-size:14px;color:#555;">Abaixo informe o</div>
+        <h1 class="wizard-question-title" style="text-align:center; font-weight:900;">O curso e o período</h1>
+        <textarea class="wizard-textarea" placeholder=""></textarea>
+      </div>
+
+      <!-- Passo 8: Relação pessoal com SEP -->
+      <div class="wizard-step" id="step-8">
+        <div class="wizard-step-meta">Vínculo institucional &middot; pergunta 8 de 25</div>
+        <h1 class="wizard-question-title">É parente ou tem alguma relação pessoal próxima com algum aluno que exerce atividades no SEP atualmente? Quem?</h1>
+        <textarea class="wizard-textarea" placeholder=""></textarea>
+      </div>
+
+      <!-- Passo 9: Queixa principal -->
+      <div class="wizard-step" id="step-9">
+        <div class="wizard-step-meta">Contexto clínico &middot; pergunta 9 de 25</div>
+        <div class="d-block d-md-none text-center mb-1" style="font-size:14px;color:#555;">Abaixo informe a</div>
+        <h1 class="wizard-question-title" style="text-align:center; font-weight:900;">Queixa principal do paciente</h1>
+        <div style="position:relative;">
+          <textarea class="wizard-textarea counted-textarea" id="queixa-textarea" placeholder="" maxlength="200" style="padding-bottom:30px; min-height:120px;"></textarea>
+          <div class="char-counter" style="position:absolute; bottom:15px; right:20px; font-size:14px; color:#000;">0/200</div>
+        </div>
+      </div>
+
+      <!-- Passo 10: Evolução da queixa -->
+      <div class="wizard-step" id="step-10">
+        <div class="wizard-step-meta">Contexto clínico &middot; pergunta 10 de 25</div>
+        <div class="d-block d-md-none text-center mb-1" style="font-size:14px;color:#555;">Abaixo informe a</div>
+        <h1 class="wizard-question-title" style="text-align:center; font-weight:900;">Evolução da queixa</h1>
+        <textarea class="wizard-textarea" placeholder=""></textarea>
+      </div>
+
+      <!-- Passo 11: Histórico saúde mental -->
+      <div class="wizard-step" id="step-11">
+        <div class="wizard-step-meta">Contexto clínico &middot; pergunta 11 de 25</div>
+        <h1 class="wizard-question-title">Histórico de tratamento em saúde mental atual ou anterior</h1>
+        <div style="position:relative;">
+          <textarea class="wizard-textarea counted-textarea" placeholder="" maxlength="200" style="padding-bottom:30px; min-height:120px;"></textarea>
+          <div class="char-counter" style="position:absolute; bottom:15px; right:20px; font-size:14px; color:#000;">0/200</div>
+        </div>
+      </div>
+
+      <!-- Passo 12: Histórico médico -->
+      <div class="wizard-step" id="step-12">
+        <div class="wizard-step-meta">Contexto clínico &middot; pergunta 12 de 25</div>
+        <h1 class="wizard-question-title">Histórico de tratamento médico do paciente</h1>
+        <div style="position:relative;">
+          <textarea class="wizard-textarea counted-textarea" placeholder="" maxlength="200" style="padding-bottom:30px; min-height:120px;"></textarea>
+          <div class="char-counter" style="position:absolute; bottom:15px; right:20px; font-size:14px; color:#000;">0/200</div>
+        </div>
+      </div>
+
+      <!-- Passo 13: Tem vínculo rede básica -->
+      <div class="wizard-step" id="step-13">
+        <div class="wizard-step-meta">Rede de apoio &middot; pergunta 13 de 25</div>
+        <h1 class="wizard-question-title">Tem vínculo com a rede de atenção básica do município?</h1>
+        <div class="mt-4">
+          <button type="button" class="wizard-bool-btn">Sim</button>
+          <button type="button" class="wizard-bool-btn">Não</button>
+        </div>
+      </div>
+
+      <!-- Passo 14: Especifique vínculo -->
+      <div class="wizard-step" id="step-14">
+        <div class="wizard-step-meta">Rede de apoio &middot; pergunta 14 de 25</div>
+        <h1 class="wizard-question-title">Especifique o vínculo com o município</h1>
+        <textarea class="wizard-textarea" placeholder=""></textarea>
+      </div>
+
+      <!-- Passo 15: Frequenta equipamento público -->
+      <div class="wizard-step" id="step-15">
+        <div class="wizard-step-meta">Rede de apoio &middot; pergunta 15 de 25</div>
+        <h1 class="wizard-question-title">Frequenta algum equipamento público do município de Maricá?</h1>
+        <div class="mt-4">
+          <button type="button" class="wizard-bool-btn">Sim</button>
+          <button type="button" class="wizard-bool-btn">Não</button>
+        </div>
+      </div>
+
+      <!-- Passo 16: Especifique equipamento público -->
+      <div class="wizard-step" id="step-16">
+        <div class="wizard-step-meta">Rede de apoio &middot; pergunta 16 de 25</div>
+        <h1 class="wizard-question-title">Especifique o equipamento público que frequenta</h1>
+        <div style="position:relative;">
+          <textarea class="wizard-textarea counted-textarea" placeholder="" maxlength="200" style="padding-bottom:30px; min-height:120px;"></textarea>
+          <div class="char-counter" style="position:absolute; bottom:15px; right:20px; font-size:14px; color:#000;">0/200</div>
+        </div>
+      </div>
+
+      <!-- Passo 17: Breve histórico familiar -->
+      <div class="wizard-step" id="step-17">
+        <div class="wizard-step-meta">Rede de apoio &middot; pergunta 17 de 25</div>
+        <h1 class="wizard-question-title">Breve histórico familiar</h1>
+        <textarea class="wizard-textarea" placeholder=""></textarea>
+      </div>
+
+      <!-- Passo 18: Rede de Suporte Social -->
+      <div class="wizard-step" id="step-18">
+        <div class="wizard-step-meta">Rede de apoio &middot; pergunta 18 de 25</div>
+        <h1 class="wizard-question-title">Rede de Suporte Social</h1>
+        <div style="position:relative;">
+          <textarea class="wizard-textarea counted-textarea" placeholder="" maxlength="200" style="padding-bottom:30px; min-height:120px;"></textarea>
+          <div class="char-counter" style="position:absolute; bottom:15px; right:20px; font-size:14px; color:#000;">0/200</div>
+        </div>
+      </div>
+
+      <!-- Passo 19: Expectativa de atendimento -->
+      <div class="wizard-step" id="step-19">
+        <div class="wizard-step-meta">Encerramento &middot; pergunta 19 de 25</div>
+        <h1 class="wizard-question-title">Qual é a sua expectativa em relação ao atendimento psicológico?</h1>
+        <textarea class="wizard-textarea" placeholder=""></textarea>
+      </div>
+
+      <!-- Passo 20: Outras informações -->
+      <div class="wizard-step" id="step-20">
+        <div class="wizard-step-meta">Encerramento &middot; pergunta 20 de 25</div>
+        <h1 class="wizard-question-title">Outras informações relevantes:</h1>
+        <div style="position:relative;">
+          <textarea class="wizard-textarea counted-textarea" placeholder="" maxlength="200" style="padding-bottom:30px; min-height:120px;"></textarea>
+          <div class="char-counter" style="position:absolute; bottom:15px; right:20px; font-size:14px; color:#000;">0/200</div>
+        </div>
+      </div>
+
+      <!-- Passo 21: Dias e horários -->
+      <div class="wizard-step" id="step-21">
+        <div class="wizard-step-meta">Encerramento &middot; pergunta 21 de 25</div>
+        <h1 class="wizard-question-title">Dias e horários disponíveis para Atendimento:</h1>
+        <div class="wizard-radio-list mt-3">
+          <label class="wizard-radio-option">
+            <input type="radio" name="horario" value="h1">
+            <div class="radio-red-line"></div> Horário 1
+          </label>
+          <label class="wizard-radio-option">
+            <input type="radio" name="horario" value="h2">
+            <div class="radio-red-line"></div> Horário 2
+          </label>
+          <label class="wizard-radio-option">
+            <input type="radio" name="horario" value="h3">
+            <div class="radio-red-line"></div> Horário 3
+          </label>
+        </div>
+      </div>
+
+      <!-- Passo 22: Grupo sala de espera -->
+      <div class="wizard-step" id="step-22">
+        <div class="wizard-step-meta">Encerramento &middot; pergunta 22 de 25</div>
+        <h1 class="wizard-question-title">Gostaria de ser convidado para participar de algum grupo de sala de espera?</h1>
+        <div class="mt-4">
+          <button type="button" class="wizard-bool-btn">Sim</button>
+          <button type="button" class="wizard-bool-btn">Não</button>
+        </div>
+      </div>
+
+      <!-- Passo 23: Resumo e impressões -->
+      <div class="wizard-step" id="step-23">
+        <div class="wizard-step-meta">Encerramento &middot; pergunta 23 de 25</div>
+        <h1 class="wizard-question-title" style="text-transform: uppercase; letter-spacing: 1px; font-weight:900;">Resumo e impressões</h1>
+        <div style="position:relative;">
+          <textarea class="wizard-textarea counted-textarea" placeholder="" maxlength="300" style="padding-bottom:30px; min-height:160px;"></textarea>
+          <div class="char-counter" style="position:absolute; bottom:15px; right:20px; font-size:14px; color:#000;">0/300</div>
+        </div>
+      </div>
+
+      <!-- Passo 24: Como foi responder -->
+      <div class="wizard-step" id="step-24">
+        <div class="wizard-step-meta">Encerramento &middot; pergunta 24 de 25</div>
+        <h1 class="wizard-question-title">Como foi para você responder a essas perguntas hoje?</h1>
+        <textarea class="wizard-textarea" placeholder=""></textarea>
+      </div>
+
+      <!-- Passo 25: Entrevistado por (FINAL) -->
+      <div class="wizard-step" id="step-25">
+        <div class="wizard-step-meta">Encerramento &middot; pergunta 25 de 25</div>
+        <h1 class="wizard-question-title">Entrevistado por:</h1>
+        <textarea class="wizard-textarea" placeholder=""></textarea>
+      </div>
+
+      <!-- Botões de Ação Globais -->
+      <div class="wizard-actions">
+        <button type="button" class="btn-wizard-back" id="btn-back" style="visibility: hidden;">Voltar</button>
+        <button type="button" class="btn-wizard-next" id="btn-next">Avançar</button>
+      </div>
+
+    </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    let currentStep = 1;
+    const totalSteps = 25;
+    const btnBack = document.getElementById('btn-back');
+    const btnNext = document.getElementById('btn-next');
+
+    // Mapa: cada seção tem { progId, start, end }
+    const sections = [
+      { progId: 'prog-identificacao', start: 1,  end: 5  },
+      { progId: 'prog-vinculo',       start: 6,  end: 8  },
+      { progId: 'prog-contexto',      start: 9,  end: 12 },
+      { progId: 'prog-rede',          start: 13, end: 18 },
+      { progId: 'prog-encerramento',  start: 19, end: 25 },
+    ];
+
+    function updateWizard() {
+      // Mostra só o step atual
+      for (let i = 1; i <= totalSteps; i++) {
+        const el = document.getElementById('step-' + i);
+        if (el) {
+          if (i === currentStep) el.classList.add('active');
+          else el.classList.remove('active');
+        }
+      }
+
+      // Atualiza barras de progresso de cada seção
+      sections.forEach(function(sec) {
+        const row = document.getElementById(sec.progId);
+        if (!row) return;
+        const segs = row.querySelectorAll('.wizard-progress-segment');
+        const stepsInSection = sec.end - sec.start + 1;
+        // Quantos passos desta seção já foram completados/ativos
+        let filled = 0;
+        if (currentStep > sec.end) {
+          // Seção totalmente concluída
+          filled = segs.length;
+        } else if (currentStep >= sec.start) {
+          // Seção ativa: preenche proporcionalmente
+          const stepInSec = currentStep - sec.start; // 0-indexed dentro da seção
+          filled = Math.round((stepInSec / stepsInSection) * segs.length);
+          if (filled === 0) filled = 1; // mostra ao menos 1 ativa quando entrar na seção
+        }
+        segs.forEach(function(seg, idx) {
+          if (idx < filled) seg.classList.add('active');
+          else seg.classList.remove('active');
+        });
+      });
+
+      // Botões
+      btnBack.style.visibility = (currentStep === 1) ? 'hidden' : 'visible';
+      btnNext.textContent = (currentStep === totalSteps) ? 'Finalizar' : 'Avançar';
+      
+      // Update mobile progress
+      const mProg = document.getElementById('m-progress-fill');
+      if (mProg) {
+        mProg.style.width = ((currentStep / totalSteps) * 100) + '%';
+      }
+    }
+
+    btnNext.addEventListener('click', function() {
+      if (currentStep < totalSteps) {
+        currentStep++;
+        updateWizard();
+      } else {
+        window.location.href = '/triage/ui-test/success/';
+      }
+    });
+
+    btnBack.addEventListener('click', function() {
+      if (currentStep > 1) {
+        currentStep--;
+        updateWizard();
+      }
+    });
+
+    // Toggle selected nos botões Sim/Não (por grupo de step)
+    document.querySelectorAll('.wizard-step').forEach(function(step) {
+      const boolBtns = step.querySelectorAll('.wizard-bool-btn');
+      boolBtns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          boolBtns.forEach(function(b) { b.classList.remove('selected'); });
+          this.classList.add('selected');
+        });
+      });
+    });
+
+    // Contador de caracteres (genérico)
+    document.querySelectorAll('.counted-textarea').forEach(function(ta) {
+      const counter = ta.parentElement.querySelector('.char-counter');
+      if (counter) {
+        ta.addEventListener('input', function() {
+          const max = ta.getAttribute('maxlength');
+          counter.textContent = ta.value.length + '/' + max;
+        });
+      }
+    });
+
+    // Init
+    updateWizard();
+  });
+</script>
+{% endblock %}

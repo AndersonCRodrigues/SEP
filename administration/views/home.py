@@ -2,10 +2,12 @@ from datetime import datetime, time
 
 from django.utils import timezone
 from django.views.generic import TemplateView
+
 from core.month_calendar import displayed_month, month_calendar, month_range
 from documents.models import AttendanceCertificate, InternshipDeclaration
 from scheduling.models import Appointment, Room, RoomBooking
 from scheduling.occupancy import busy_until
+
 from .access import AdministrativeOnly
 
 

@@ -1,0 +1,124 @@
+/* ==========================================
+   STATUS DOS SERVIDORES - FIGMA COMPATIBLE
+   ========================================== */
+
+/* Banner do Título Principal */
+.page-header-banner {
+  background-color: #611e25;
+  color: #ffffff;
+  text-align: center;
+  border-radius: 50px;
+  padding: 1rem 2rem;
+  margin-bottom: 2rem;
+}
+
+.page-header-banner h1,
+.page-header-banner h2 {
+  color: #ffffff;
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+/* Contêiner Externo / Card Principal */
+.servers-container {
+  background-color: #ffffff;
+  border: 1.5px solid #dcd3d1;
+  border-radius: 20px;
+  padding: 1.5rem 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+/* Estrutura da Tabela */
+.table-servers {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 0.85rem; /* Espaçamento vertical entre os cards */
+  margin-top: -0.5rem;
+}
+
+/* Cabeçalho da Tabela */
+.table-servers thead th {
+  border: none;
+  background: transparent;
+  color: #1a1a1a;
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 0.5rem 1.25rem;
+}
+
+/* Linhas / Cards individuais dos servidores */
+.table-servers tbody tr {
+  background-color: #e3e3e3;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.table-servers tbody tr:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+.table-servers tbody td {
+  border: none;
+  padding: 1.1rem 1.25rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  vertical-align: middle;
+}
+
+/* Arredondamento das extremidades do card de cada linha */
+.table-servers tbody tr td:first-child {
+  border-top-left-radius: 14px;
+  border-bottom-left-radius: 14px;
+}
+
+.table-servers tbody tr td:last-child {
+  border-top-right-radius: 14px;
+  border-bottom-right-radius: 14px;
+}
+
+/* Tratamento para o Servidor Off-line / Indisponível */
+.table-servers tbody tr.table-danger,
+.table-servers tbody tr.server-offline {
+  background-color: #fce8e6;
+}
+
+/* Badges / Pílulas de Status */
+.badge-status {
+  display: inline-block;
+  padding: 0.4rem 1.25rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border-radius: 20px;
+  text-align: center;
+  color: #ffffff !important;
+  min-width: 100px;
+}
+
+.badge-status-ok,
+.badge.text-bg-success {
+  background-color: #3cae12 !important;
+}
+
+.badge-status-warning,
+.badge.text-bg-danger {
+  background-color: #cc2a2a !important;
+}
+
+/* Responsividade simples para telas menores */
+@media (max-width: 768px) {
+  .servers-container {
+    padding: 1rem;
+    overflow-x: auto;
+  }
+  
+  .page-header-banner {
+    border-radius: 20px;
+    padding: 0.75rem;
+  }
+
+  .page-header-banner h1 {
+    font-size: 1.25rem;
+  }
+}

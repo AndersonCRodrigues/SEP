@@ -1,0 +1,159 @@
+/* ═══════════════════════════════════════════
+   administrativo_salas.css
+   ═══════════════════════════════════════════ */
+
+:root {
+  --sep-maroon: #6D1D20;
+  --sep-card-gray: #D9D9D9;
+  --status-red: #D21B1B;
+  --status-green: #28A745;
+  --status-orange: #E09100;
+  --status-gray: #777777;
+  --font-main: 'Museo Sans', "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+}
+
+/* ── Banner Superior ── */
+.page-banner {
+  display: block;
+  width: 100%;
+  max-width: 820px;
+  margin: 0 auto 3rem;
+  text-align: center;
+  background-color: var(--sep-maroon);
+  color: #FFFFFF;
+  font-family: var(--font-main);
+  font-size: 1.75rem;
+  font-weight: 800;
+  padding: 1.1rem 2rem;
+  border-radius: 999px;
+  box-shadow: 0 4px 12px rgba(109, 29, 32, 0.15);
+}
+
+/* ── Grelha de Salas (Largura expandida para proporção horizontal) ── */
+.rooms-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px 28px;
+  max-width: 1280px; /* Expandido de 1100px para evitar compressão */
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  list-style: none;
+}
+
+/* ── Card Individual da Sala ── */
+.room {
+  background-color: var(--sep-card-gray) !important;
+  border-radius: 20px;
+  padding: 24px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  height: 160px; /* Altura fixa proporcional ao protótipo */
+  box-sizing: border-box;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+/* ── Círculo Preenchido com Ícone Vazado de Porta ── */
+.room-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+  flex-shrink: 0;
+  background-color: var(--status-green); /* Padrão */
+  
+  /* Máscara SVG para desenhar a porta em branco dentro do círculo */
+  -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M18 20V6a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v14'/><path d='M2 20h20'/><circle cx='14' cy='12' r='1' fill='black'/></svg>") no-repeat center / 22px 22px;
+  mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M18 20V6a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v14'/><path d='M2 20h20'/><circle cx='14' cy='12' r='1' fill='black'/></svg>") no-repeat center / 22px 22px;
+}
+
+/* Cores do círculo do ícone por estado */
+.room-occupied .room-icon,
+.room-busy .room-icon,
+.room-indisponivel .room-icon {
+  background-color: var(--status-red) !important;
+}
+
+.room-available .room-icon,
+.room-free .room-icon,
+.room-disponivel .room-icon {
+  background-color: var(--status-green) !important;
+}
+
+.room-maintenance .room-icon,
+.room-manutencao .room-icon {
+  background-color: var(--status-orange) !important;
+}
+
+.room-inactive .room-icon,
+.room-inativa .room-icon {
+  background-color: var(--status-gray) !important;
+}
+
+/* ── Nome da Sala ── */
+.room-name {
+  font-family: var(--font-main);
+  font-size: 20px;
+  font-weight: 800;
+  color: #FFFFFF !important; /* Cor branca idêntica ao Figma */
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+  margin: 0 0 4px 0;
+  line-height: 1.2;
+}
+
+.room-activity {
+  font-size: 14px;
+  font-weight: 500;
+  color: #FFFFFF;
+  margin-left: 4px;
+}
+
+/* ── Estilização do Badge / Rótulo de Status ── */
+.room .badge,
+.room span {
+  font-family: var(--font-main);
+  font-size: 13px;
+  font-weight: 700;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Cores do texto de legenda por estado */
+.room-occupied .badge,
+.room-occupied span:not(.room-activity),
+.room-busy .badge,
+.room-busy span:not(.room-activity),
+.room-indisponivel .badge,
+.room-indisponivel span:not(.room-activity) {
+  color: var(--status-red) !important;
+}
+
+.room-available .badge,
+.room-available span:not(.room-activity),
+.room-free .badge,
+.room-free span:not(.room-activity),
+.room-disponivel .badge,
+.room-disponivel span:not(.room-activity) {
+  color: var(--status-green) !important;
+}
+
+.room-maintenance .badge,
+.room-maintenance span:not(.room-activity),
+.room-manutencao .badge,
+.room-manutencao span:not(.room-activity) {
+  color: var(--status-orange) !important;
+}
+
+.room-inactive .badge,
+.room-inactive span:not(.room-activity),
+.room-inativa .badge,
+.room-inativa span:not(.room-activity) {
+  color: var(--status-gray) !important;
+}

@@ -1,0 +1,54 @@
+{% extends "superadmin/base_superadmin.html" %}
+{% load static %}
+
+{% block extra_css %}
+  <!-- CSS exclusivo para a página de permissões -->
+  <link rel="stylesheet" href="{% static 'core/css/superadmin/role_permissions.css' %}">
+{% endblock %}
+
+{% block title %}Permissões por Perfil | Sistema SEP{% endblock %}
+
+{% block breadcrumbs %}
+{{ block.super }}
+<li class="breadcrumb-item"><a href="{% url 'superadmin:home' %}">Superadmin</a></li>
+<li class="breadcrumb-item active" aria-current="page">Permissões</li>
+{% endblock %}
+
+{% block content %}
+<!-- Banner Superior (Oval Vinho) -->
+<div class="permissions-header-banner">
+    <h1>Permissões por perfil</h1>
+</div>
+
+<!-- Container Principal -->
+<div class="permissions-container">
+    <table class="table-permissions">
+        <thead>
+            <tr>
+                <th style="width: 30%;">Perfil:</th>
+                <th style="width: 55%;">Escopo de acesso:</th>
+                <th style="width: 15%;"></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for escopo in escopos %}
+            <tr>
+                <td class="role-name">{{ escopo.get_role_display }}</td>
+                <td class="role-scope">{{ escopo.escopo_acesso }}</td>
+                <td class="text-end">
+                    <a href="{% url 'superadmin:permissao_editar' escopo.pk %}" class="btn-editar-pill">
+                        Editar
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3">
+                    {% include "components/empty_state.html" with message="Nenhum escopo cadastrado." %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

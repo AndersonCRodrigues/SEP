@@ -1,8 +1,11 @@
 import logging
+
 from django.conf import settings
 from django.contrib.auth.models import Group
 from django.core.mail import send_mail
+
 from audit.models import SecurityLog
+
 from .models import CustomUser
 
 logger = logging.getLogger(__name__)
@@ -72,5 +75,5 @@ def send_temporary_password_email(user, temporary_password, usuario_responsavel=
             action=SecurityLog.Action.CREATE,
             target_model=user.__class__.__name__,
             target_id=str(user.pk),
-            detail=f"Falha SMTP ao enviar e-mail de credenciais para {user.email}: {str(e)}",
+            detail=f"Falha SMTP ao enviar e-mail de credenciais para {user.email}: {e!s}",
         )

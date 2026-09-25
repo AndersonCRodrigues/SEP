@@ -92,6 +92,48 @@ class Patient(BusinessRulesMixin, CustomUser):
         null=True,
         verbose_name="Identidade de gênero",
     )
+    race = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+        verbose_name="Cor/Raça",
+    )
+    naturalness = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name="Naturalidade",
+    )
+    schooling = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name="Escolaridade",
+    )
+    religion = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name="Religião",
+    )
+    marital_status = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+        verbose_name="Estado civil",
+    )
+    profession = models.CharField(
+        max_length=150,
+        blank=True,
+        null=True,
+        verbose_name="Profissão",
+    )
+    occupation = models.CharField(
+        max_length=150,
+        blank=True,
+        null=True,
+        verbose_name="Ocupação atual",
+    )
 
     ALLOWED_TRANSITIONS = {
         "": (FlowStatus.AWAITING_TRIAGE, FlowStatus.IN_TRIAGE, FlowStatus.IN_TREATMENT),

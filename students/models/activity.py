@@ -1,10 +1,13 @@
 from decimal import Decimal
+
 from django.conf import settings
 from django.db import models
 from django.db.models import Q, Sum, UniqueConstraint, Value
 from django.db.models.functions import Coalesce
 from django.utils import timezone
+
 from core.models import CustomUser
+
 from .base import AdviseeRecord
 
 Role = CustomUser.Role
@@ -97,7 +100,7 @@ class StudentActivity(AdviseeRecord):
         if category is not None:
             linhas = linhas.filter(category=category)
         return linhas.aggregate(
-            total=Coalesce(Sum("hours_worked"), Value(Decimal("0")))
+            total=Coalesce(Sum("hours_worked"), Value(Decimal(0)))
         )["total"]
 
     def __str__(self):
