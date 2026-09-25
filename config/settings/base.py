@@ -53,6 +53,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -173,9 +174,16 @@ LANGUAGE_CODE = "en-us"
 TIME_ZONE = "America/Sao_Paulo"
 USE_I18N = True
 USE_TZ = True
+
 STATIC_URL = "static/"
+STATICFILES_DIRS = [BASE_DIR / "static", BASE_DIR / "core" / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
-STATICFILES_DIRS = [BASE_DIR / "core" / "static"]
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 
 AUTH_USER_MODEL = "core.CustomUser"
@@ -227,5 +235,16 @@ __all__ = [
     "TIME_ZONE",
     "USE_I18N",
     "USE_TZ",
+    "STATIC_URL",
+    "STATICFILES_DIRS",
+    "STATIC_ROOT",
+    "STORAGES",
+    "AUTH_USER_MODEL",
+    "LOGIN_URL",
+    "LOGIN_REDIRECT_URL",
+    "MESSAGE_TAGS",
+    "CRISPY_ALLOWED_TEMPLATE_PACKS",
+    "CRISPY_TEMPLATE_PACK",
+    "SEP_CONTACT",
     "WSGI_APPLICATION",
 ]

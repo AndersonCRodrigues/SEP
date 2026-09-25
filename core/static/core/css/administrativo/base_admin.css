@@ -1,0 +1,300 @@
+/* ═══════════════════════════════════════════
+   base_admin.css — Estilos Globais do Sistema
+   ═══════════════════════════════════════════ */
+
+:root {
+  --sep-maroon: #6D1D20;
+  --sep-maroon-dark: #541618;
+  --sep-black: #000000;
+  --sep-gray-card: #D9D9D9;
+  --sep-gray-input: #E0E0E0;
+  --sep-gray-border: #A59C97;
+  --sep-text-muted: #777777;
+
+  --status-success: #3aa655;
+  --status-danger: #d9524a;
+  --status-warning: #e0a233;
+  --status-neutral: #8a8f98;
+
+  --radius-lg: 20px;
+  --radius-md: 12px;
+  --radius-pill: 999px;
+
+  --font-main: 'Museo Sans', "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+}
+
+html {
+  height: 100%;
+}
+
+/* ── Base / Body ── */
+body {
+  font-family: var(--font-main);
+  color: var(--sep-black);
+  background-color: #ffffff;
+  margin: 0;
+
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+main,
+.admin-content {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 5rem 22px 4rem;
+  box-sizing: border-box;
+  flex: 1 0 auto;
+}
+
+/* ── Top Navigation (Navbar Raiz) ── */
+header nav.navbar.bg-dark,
+.admin-navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  background-color: var(--sep-maroon) !important;
+  color: #ffffff;
+  padding: 0.85rem 2rem;
+}
+
+.navbar-brand.brand,
+.admin-navbar__brand {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+  text-decoration: none;
+  color: #ffffff;
+}
+
+.brand-name {
+  font-family: var(--font-main);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.brand-institution {
+  font-family: var(--font-main);
+  font-size: 10px;
+  font-weight: 400;
+  opacity: 0.85;
+}
+
+.main-nav .navbar-nav,
+.admin-navbar__links {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 28px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.main-nav .nav-link,
+.admin-navbar__links a {
+  color: #ffffff;
+  font-family: var(--font-main);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  padding: 0;
+}
+
+.main-nav .nav-link:hover,
+.main-nav .nav-link[aria-current="page"],
+.admin-navbar__links a:hover,
+.admin-navbar__links a.active {
+  opacity: 0.85;
+  text-decoration: underline;
+}
+
+.header-action,
+.admin-navbar__actions .icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #ffffff;
+  color: var(--sep-maroon);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.header-action:hover,
+.admin-navbar__actions .icon-btn:hover {
+  opacity: 0.9;
+}
+
+.admin-navbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Site Footer ── */
+.site-footer,
+.admin-footer {
+  background-color: var(--sep-maroon);
+  padding: 20px 0;
+  text-align: center;
+  color: #ffffff;
+  font-family: var(--font-main);
+  font-weight: 700;
+  
+  margin-top: auto;
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.site-footer p,
+.admin-footer p {
+  margin: 0;
+}
+
+/* ── Cabeçalhos e Banners de Páginas ── */
+.page-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.75rem;
+  flex-wrap: wrap;
+}
+
+.page-title {
+  font-family: var(--font-main);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--sep-maroon);
+  margin: 0;
+}
+
+.page-banner {
+  display: block;
+  width: 100%;
+  text-align: center;
+  background: var(--sep-maroon);
+  color: #ffffff;
+  font-family: var(--font-main);
+  font-size: 1.5rem;
+  font-weight: 700;
+  padding: 1.1rem 1.5rem;
+  border-radius: var(--radius-pill);
+  margin: 0 0 2.25rem;
+  box-sizing: border-box;
+}
+
+/* ── Botões Padrão ── */
+.btn-wine {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  background: var(--sep-maroon);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 0.65rem 1.4rem;
+  font-family: var(--font-main);
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.btn-wine:hover {
+  background: var(--sep-maroon-dark);
+}
+
+/* ── Badges / Pílulas de Status ── */
+.badge {
+  display: inline-block;
+  padding: 0.3rem 0.9rem;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-main);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #ffffff;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.badge-success { background-color: var(--status-success); }
+.badge-neutral { background-color: var(--status-neutral); }
+.badge-danger  { background-color: var(--status-danger); }
+.badge-warning { background-color: var(--status-warning); }
+
+/* ── Tabelas Molduradas ── */
+.table-container {
+  border: 1px solid var(--sep-gray-border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  background: #ffffff;
+}
+
+.data-table,
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 0.65rem;
+}
+
+.data-table thead th,
+table thead th {
+  text-align: left;
+  font-family: var(--font-main);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--sep-black);
+  padding: 0 1.25rem 0.5rem;
+}
+
+.data-table tbody tr:not(.event-detail),
+table tbody tr:not(.event-detail) {
+  background: var(--sep-gray-card);
+}
+
+.data-table tbody td,
+table tbody td {
+  padding: 0.9rem 1.25rem;
+  font-family: var(--font-main);
+  font-size: 0.9rem;
+  vertical-align: middle;
+}
+
+.data-table tbody td:first-child,
+table tbody td:first-child {
+  border-top-left-radius: var(--radius-md);
+  border-bottom-left-radius: var(--radius-md);
+}
+
+.data-table tbody td:last-child,
+table tbody td:last-child {
+  border-top-right-radius: var(--radius-md);
+  border-bottom-right-radius: var(--radius-md);
+  text-align: right;
+}
+
+/* ── Utilitário de acessibilidade ── */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

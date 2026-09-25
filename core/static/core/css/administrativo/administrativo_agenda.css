@@ -1,0 +1,82 @@
+/* ═══════════════════════════════════════════
+   administrativo_agenda.css — Agenda de Atendimentos
+   ═══════════════════════════════════════════ */
+
+.schedule-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.schedule-filters .filter {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin: 0;
+}
+
+.schedule-filters label {
+  font-family: var(--font-main);
+  font-size: 0.78rem;
+  color: var(--sep-text-muted);
+  font-weight: 700;
+}
+
+.schedule-filters select {
+  border: none;
+  background: var(--sep-gray-input);
+  border-radius: var(--radius-md);
+  padding: 0.55rem 0.9rem;
+  font-family: var(--font-main);
+  font-size: 0.88rem;
+  color: var(--sep-black);
+  min-width: 9rem;
+}
+
+.schedule-filters button[type="submit"] {
+  background: var(--sep-maroon);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 0.6rem 1.4rem;
+  font-family: var(--font-main);
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.schedule-filters button[type="submit"]:hover {
+  background: var(--sep-maroon-dark);
+}
+
+/* Linha expansível de detalhes */
+tr.event-detail td {
+  padding-top: 0;
+  padding-bottom: 0.5rem;
+  background: transparent !important;
+}
+
+tr.event-detail summary {
+  cursor: pointer;
+  color: var(--sep-text-muted);
+  font-family: var(--font-main);
+  font-size: 0.8rem;
+}
+
+tr.event-detail dl {
+  margin: 0.5rem 1.25rem 0.75rem;
+  font-family: var(--font-main);
+  font-size: 0.85rem;
+}
+
+tr.event-detail dt {
+  font-weight: 700;
+  color: var(--sep-black);
+}
+
+tr.event-detail dd {
+  margin: 0 0 0.5rem;
+  color: var(--sep-text-muted);
+}

@@ -1,0 +1,205 @@
+/* ═══════════════════════════════════════════════════════════════
+   pacientes_lista.css — Listagem de Pacientes (SEP Maricá)
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  --sep-maroon: #6D1D20;
+  --sep-maroon-hover: #541618;
+  --sep-bg: #F8F9FA;
+  --sep-border: #E2E8F0;
+  --sep-text: #1E293B;
+  --sep-muted: #64748B;
+}
+
+body {
+  background-color: var(--sep-bg) !important;
+}
+
+.patients-container {
+  max-width: 1100px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+/* ── Cabeçalho ── */
+
+
+
+.patients-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 28px;
+}
+
+
+.patients-title-group h1 {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--sep-maroon);
+  margin: 0 0 4px 0;
+}
+
+.patients-subtitle {
+  font-size: 14px;
+  color: var(--sep-muted);
+  margin: 0;
+}
+
+/* ── Botão Novo Cadastro ── */
+.btn-new-registration {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--sep-maroon);
+  color: #FFFFFF !important;
+  font-size: 15px;
+  font-weight: 700;
+  padding: 12px 24px;
+  border-radius: 999px;
+  text-decoration: none !important;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(109, 29, 32, 0.2);
+}
+
+.btn-new-registration:hover {
+  background-color: var(--sep-maroon-hover);
+  transform: translateY(-1px);
+}
+
+.btn-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+/* ── Barra de Busca ── */
+.patients-toolbar {
+  margin-bottom: 20px;
+}
+
+.search-input-wrapper {
+  position: relative;
+  max-width: 420px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  opacity: 0.5;
+}
+
+.search-input-wrapper input {
+  width: 100%;
+  height: 46px;
+  padding: 0 16px 0 44px;
+  background-color: #FFFFFF;
+  border: 1px solid var(--sep-border);
+  border-radius: 12px;
+  font-size: 14px;
+  color: var(--sep-text);
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease;
+}
+
+.search-input-wrapper input:focus {
+  border-color: var(--sep-maroon);
+}
+
+/* ── Tabela e Card Container ── */
+.patients-card {
+  background-color: #FFFFFF;
+  border-radius: 16px;
+  border: 1px solid var(--sep-border);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+  overflow: hidden;
+}
+
+.patients-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 14px;
+}
+
+.patients-table th {
+  background-color: #F8FAFC;
+  color: var(--sep-muted);
+  font-weight: 700;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--sep-border);
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+}
+
+.patients-table td {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--sep-border);
+  color: var(--sep-text);
+}
+
+.patients-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.patients-table tbody tr:hover {
+  background-color: #F8FAFC;
+}
+
+.patient-id {
+  font-weight: 700;
+  color: var(--sep-muted);
+  font-size: 13px;
+}
+
+.patient-name strong {
+  color: var(--sep-text);
+  font-size: 15px;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.btn-action {
+  color: var(--sep-maroon);
+  font-weight: 700;
+  text-decoration: none;
+  font-size: 13px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.btn-action:hover {
+  background-color: rgba(109, 29, 32, 0.08);
+}
+
+/* ── Estado Vazio (Sem Pacientes) ── */
+.patients-empty {
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.empty-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.6;
+}
+
+.patients-empty h3 {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--sep-text);
+  margin: 0 0 8px 0;
+}
+
+.patients-empty p {
+  color: var(--sep-muted);
+  font-size: 14px;
+  margin: 0 0 24px 0;
+}
