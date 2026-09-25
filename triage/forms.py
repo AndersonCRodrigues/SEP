@@ -93,11 +93,16 @@ class TriageRegistration:
     def __init__(self, session, patient):
         self.session = session
         self.patient = patient
-        self.answers = session.get(SESSION_KEY, {})
+        self.session_key = self._session_key(patient.pk)
+        self.answers = session.get(self.session_key, {})
+
+    @staticmethod
+    def _session_key(patient_id):
+        return f"{SESSION_KEY}:{patient_id}"
 
     @classmethod
     def start(cls, session, patient):
-        session[SESSION_KEY] = {}
+        session[cls._session_key(patient.pk)] = {}
         return cls(session, patient)
 
     @property
@@ -140,7 +145,7 @@ class TriageRegistration:
         self.answers[step.slug] = {
             name: data.get(name, "") for name in form_class.base_fields
         }
-        self.session[SESSION_KEY] = self.answers
+        self.session[self.session_key] = self.answers
 
     def first_unanswered(self):
         return next(
@@ -195,11 +200,12 @@ class TriageRegistration:
 
         iarv_form = self.iarv_form_class(data=self._merged_data("iarv"))
         if not iarv_form.is_valid():
+            triage_record.delete()
             raise ValidationError(iarv_form.errors)
 
         iarv = iarv_form.save(commit=False)
         iarv.triage_record = triage_record
         iarv.save()
 
-        self.session.pop(SESSION_KEY, None)
+        self.session.pop(self.session_key, None)
         return triage_record
