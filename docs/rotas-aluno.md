@@ -305,3 +305,53 @@ no layout anterior.
    alinhar as duas consultas com a decisão.
 5. **Mecanismos misturados.** `perfil/` está em grupo do Django e o resto da área
    na role; as rotas de `/triage/` conferem role na mão, sem mixin.
+
+## 10. Como popular o banco para testar
+
+Todos os comandos de seed só rodam com `NODE_ENV=dev` — fora disso eles avisam e
+não criam nada. Rodando pelo container:
+
+```bash
+docker exec django-docker python manage.py populate_users
+docker exec django-docker python manage.py populate_student_home
+docker exec django-docker python manage.py populate_triage_flow
+```
+
+A ordem importa: `populate_users` cria a base (áreas, professor, alunos,
+pacientes) de que os outros dois dependem, e `populate_triage_flow` procura o
+`aluno.demo@teste.com` que o `populate_student_home` cria.
+
+| Conta | Senha | Para quê |
+|---|---|---|
+| `aluno.demo@teste.com` | `Aluno@123` | O aluno com dados em todas as telas |
+| `aluno.vazio@teste.com` | `Aluno@123` | O mesmo conjunto de telas nos estados vazios |
+
+### Comportamento esperado
+
+| Tela | O que deve aparecer |
+|---|---|
+| Página inicial | Os quatro indicadores preenchidos, três atividades recentes (triagem pendente, encaminhamento ativo e feedback) e o calendário com as sessões do mês. "Faltas" fica em 1: o seed cria um atendimento com falta do aluno |
+| Prontuários e evolução | Três pacientes: Ana Beatriz como "Revisar", Rafael Nunes como "Pendente" e Lucas Prado com "Sem evolução registrada" |
+| Triagens a realizar | Helena Martins, Caio Ferraz e Iara Monteiro entram na fila pelo `populate_triage_flow`. Iara vem com o `flow_status` vazio do cadastro legado, de propósito: é a prova de que o registro antigo aparece na fila |
+| Triagem concluída | O `populate_student_home` imprime o link pronto, no formato `/students/triagens/<pk>/concluida/` |
+| Encaminhamentos recebidos | Três linhas: uma "Pendente" (o caso recebido hoje) e duas "Ativo" |
+| Feedbacks recebidos | Quatro linhas: três pareceres de triagem, um de cada selo ("Novo", "Lida" e "Editada"), mais a confirmação de um prontuário |
+
+Dois números dessa tela não são do seed, e sim do banco inteiro: a fila e o
+indicador "Triagens pendentes" contam **todo** paciente aguardando triagem, o que
+inclui os genéricos que o `populate_users` cria (`pa@teste.com` e os seguintes).
+E a fila é viva — o paciente sai dela assim que alguém abre a ficha dele, porque
+criar a ficha já move o fluxo para "Em triagem".
+
+### O que testar no fluxo da triagem
+
+O `populate_triage_flow` monta a ficha em cada estado e imprime o link de cada
+uma no fim: uma **aberta** (o aluno edita e envia), uma **enviada** (esperando a
+coordenação) e uma **com parecer e edição fechada** (o aluno não edita mais).
+
+Uma diferença entre os pacientes que vale saber antes de testar: só o
+`populate_triage_flow` grava data de nascimento. Os pacientes que o
+`populate_users` cria não têm, e o formulário IARV precisa da idade — clicar em
+"Iniciar" num deles mostra o aviso "A triagem de X precisa da data de
+nascimento..." e devolve para a fila, em vez de abrir a ficha. É o
+comportamento esperado, não falha.

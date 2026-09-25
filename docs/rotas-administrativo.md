@@ -344,3 +344,56 @@ indicadores à mão, em vez de usar `summary_list.html`.
    `administration/base_admin.html` não carrega Bootstrap; hoje ele estende
    `base.html`, que carrega. A nota deve sair na próxima passagem por aquele
    documento.
+
+## 8. Como popular o banco para testar
+
+Todos os comandos de seed só rodam com `NODE_ENV=dev` — fora disso eles avisam e
+não criam nada. Rodando pelo container:
+
+```bash
+docker exec django-docker python manage.py populate_users
+docker exec django-docker python manage.py populate_admin_home
+```
+
+`populate_users` cria os usuários base; sem um Administrativo, um Professor e uma
+área, o segundo comando para e manda rodar o primeiro. Por padrão o
+`populate_admin_home` **apaga a demonstração anterior** — salas, reservas,
+atendimentos, atestados e declarações — antes de recriar. `--manter` acrescenta
+sem apagar, mas aí os nomes de sala repetem.
+
+| Conta | Senha | Para quê |
+|---|---|---|
+| `ad@teste.com` | `Senha123!` | O Administrativo; há mais cinco (`ad1@` … `ad5@teste.com`) para testar em dois navegadores |
+
+### Comportamento esperado
+
+O próprio comando imprime o resumo do que a página inicial deve exibir: **Salas
+ocupadas 5/7, Atendimentos hoje 18, Declarações pendentes 3, Atestados emitidos
+7**. Se a home mostrar outra coisa, o seed não rodou ou algo apagou os dados.
+
+| Tela | O que deve aparecer |
+|---|---|
+| Página inicial | Os quatro indicadores acima, as cinco atividades recentes (agendamentos criados, documentos emitidos e salas liberadas, misturados por data) e o calendário do mês |
+| Pacientes | Todos os pacientes do banco, com CPF mascarado, situação do fluxo e data de cadastro. A busca aceita nome ou CPF — com ou sem pontuação, porque a comparação é por dígitos — e o filtro corta por situação |
+| Agenda | Abre em "Hoje" com os 18 atendimentos, os passados como "Compareceu" e os futuros como "Agendado". Os filtros de período, situação, tipo e sala são independentes e ignoram valor fora da lista |
+| Salas | Sete cartões utilizáveis, cinco deles "Ocupada até HH:MM", mais duas salas fora de uso: uma em manutenção e uma inativa. Duas reservas encerradas aparecem como "Sala liberada" nas atividades da home |
+| Declarações | As declarações de comparecimento e as de estágio numa lista só, ordenadas por data, com selo verde para emitida e vermelho para pendente. A tela é de leitura: o botão de gerar não tem lógica |
+| Atestados | Os sete atestados emitidos hoje na lista da direita, e o formulário à esquerda |
+
+### O que testar no formulário de atestado
+
+É a tela com mais regra da área. Escolher a pessoa carrega, no segundo campo, só
+os atendimentos dela **com presença registrada** — a lista vem do endpoint
+`/administration/atestados/atendimentos/`, que usa o mesmo método do formulário,
+então não adianta forjar o `appointment` no POST. Emitir cria o atestado já
+emitido, com a data e a hora do atendimento no texto, e a pessoa passa a aparecer
+na lista dos recentes.
+
+### O que testar no assistente de cadastro
+
+`/administration/cadastrar-paciente/` redireciona para a primeira etapa e guarda
+as respostas na sessão. Vale testar três coisas: digitar a URL de uma etapa
+adiante devolve para a primeira pendente; "voltar" guarda o que foi digitado sem
+exigir acerto; e responder "não" em "está acompanhado?" descarta as respostas de
+responsável e parentesco. No fim, o paciente é criado com senha temporária
+enviada por e-mail e a tela de cadastro concluído aparece.

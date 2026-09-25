@@ -267,3 +267,47 @@ registrada em `componentes.md`.
    triagem "Concluída", sem tela que explique o encerramento do acompanhamento.
 6. **`patient/views/profile.py`.** Tem uma `enviar_email` vazia, sem rota. Ou
    ganha função, ou sai.
+
+## 8. Como popular o banco para testar
+
+Todos os comandos de seed só rodam com `NODE_ENV=dev` — fora disso eles avisam e
+não criam nada. Rodando pelo container:
+
+```bash
+docker exec django-docker python manage.py populate_users
+docker exec django-docker python manage.py populate_patient_home
+```
+
+`populate_users` cria a base (área, professor, aluno) de que o segundo depende.
+O paciente de demonstração é recriado a cada execução: o comando apaga as
+sessões, solicitações, triagens e o caso dele antes de montar tudo de novo, então
+dá para rodar quantas vezes quiser sem duplicar.
+
+| Conta | Senha | Para quê |
+|---|---|---|
+| `paciente.demo@teste.com` | `Paciente@123` | O paciente com as cinco telas preenchidas |
+
+### Comportamento esperado
+
+| Tela | O que deve aparecer |
+|---|---|
+| Página inicial | "Sessões realizadas" em 3, "Faltas" em 1, "Próxima sessão" em "Hoje" e "Triagem" como **Concluída** — o seed encaminha a triagem e designa o aluno, então o paciente termina em atendimento. Abaixo, as três atividades e o calendário do mês |
+| Meus agendamentos | Quatro sessões futuras, uma por semana. A primeira aparece como confirmada, porque o seed registra a confirmação de presença pelo professor. Abaixo, duas solicitações já respondidas: uma "Aceita" e uma "Recusada", cada uma com a resposta do Administrativo |
+| Solicitar horário | O formulário aberto, com a data mínima em hoje. Enviar leva de volta aos agendamentos com a solicitação "Pendente"; tentar enviar uma segunda é recusado com "Você já tem uma solicitação de horário pendente." |
+| Histórico de sessões | Quatro sessões passadas, uma delas com o selo "Faltou". Abrir uma leva ao detalhe com tipo, duração, quem atendeu e a frase da situação |
+| Minhas triagens | Duas linhas: uma "Encerrada" (a antiga, de mais de um ano) e uma "Encaminhada" (a atual). Abrir a encaminhada mostra também o professor responsável |
+| Contato | O aluno que atende o paciente, com as iniciais, e os canais de `settings.SEP_CONTACT` |
+
+### O que testar nos estados vazios
+
+Não há seed de paciente vazio. Para ver os vazios, entre com qualquer paciente
+criado pelo `populate_users` (`pa@teste.com`, senha `Senha123!`): ele nasce
+aguardando triagem, sem sessão nem solicitação. A tela de triagens é a mais
+interessante nesse caso — ela mostra "Há uma triagem em andamento..." em vez de
+"Você ainda não tem triagem concluída." assim que o paciente entra em triagem,
+que é a única parte da tela que olha o `flow_status`.
+
+Atenção a um efeito colateral entre áreas: o `populate_admin_home` apaga todos
+os agendamentos, salas e documentos antes de recriar os dele. Rodar aquele
+comando depois deste esvazia as telas de agendamento e histórico do paciente de
+demonstração; basta rodar o `populate_patient_home` de novo.

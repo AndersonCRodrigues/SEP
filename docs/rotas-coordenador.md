@@ -323,3 +323,50 @@ indicadores, `components/summary_list.html`; vazio e erro, `empty_state.html` e
 6. **Nome do papel.** Interface e código novo dizem Coordenador; pasta, rota,
    namespace, grupo e role ainda dizem Supervisor. A troca completa é uma task
    própria, porque atravessa migração de grupo e de dados.
+
+## 10. Como popular o banco para testar
+
+Todos os comandos de seed só rodam com `NODE_ENV=dev` — fora disso eles avisam e
+não criam nada. Rodando pelo container:
+
+```bash
+docker exec django-docker python manage.py populate_users
+docker exec django-docker python manage.py populate_coordinator_home
+docker exec django-docker python manage.py populate_triage_flow
+```
+
+`populate_users` cria a base de que os outros dependem. O terceiro é opcional
+aqui, e serve para uma coisa específica: ele deixa uma ficha **aberta**, que é o
+único jeito de ver a situação "Em triagem" na tela de feedback.
+
+| Conta | Senha | Para quê |
+|---|---|---|
+| `coordenador.demo@teste.com` | `Coordenador@123` | O Coordenador com as seis telas preenchidas |
+| `prof.coord1@teste.com` … `prof.coord3@teste.com` | `Coordenador@123` | Os professores que aparecem na listagem e no encaminhamento |
+| `aluno.coord1@teste.com` … `aluno.coord3@teste.com` | `Coordenador@123` | Os alunos autores das triagens da fila |
+
+### Comportamento esperado
+
+| Tela | O que deve aparecer |
+|---|---|
+| Página inicial | Os quatro indicadores preenchidos, três atividades recentes e o calendário. Dos três professores que o seed cria, um nasce sem orientando e por isso não entra em "Professores ativos" |
+| Professores cadastrados | Três linhas, uma delas com o selo "Sem alunos" |
+| Alunos cadastrados | Três linhas, uma delas com "Sem orientador" |
+| Triagens para analisar | Três situações de uma vez: uma "Analisar", uma "Atrasada" (o seed recua a criação em 3 dias, além do prazo de 24h do mock) e uma "Editada" (já analisada) |
+| Novo encaminhamento | As triagens concluídas na lista da esquerda, os professores filtráveis por área e, em Encaminhamentos recentes, um "Pendente" e um "Concluído" — o segundo já tem aluno designado ao caso |
+| Feedback sobre triagens | A triagem do Rafael Nunes como "Enviado", as demais como "Pendente" e, se o `populate_triage_flow` tiver rodado, a ficha aberta do aluno como "Em triagem", sem link para escrever |
+
+Uma observação que muda a leitura dos números: o Coordenador enxerga **tudo**
+(`VISIBLE_TO[SUPERVISOR] = ALL`). Rodar outros seeds no mesmo banco acrescenta
+linhas às telas de triagens, encaminhamentos e feedbacks, e os indicadores da
+página inicial sobem junto — num banco que já tinha o seed do Aluno e o do fluxo
+de triagem, "Feedbacks a enviar" passa de 6. A tabela acima descreve o que **este
+seed** põe na tela, não o total do banco.
+
+### O que testar depois de popular
+
+O caminho completo do papel: abrir uma triagem em "Triagens para analisar", ir a
+"Novo encaminhamento", escolher o paciente, filtrar os professores pela área e
+confirmar. A triagem passa a "Encaminhada", o paciente ganha responsáveis e a
+linha aparece em Encaminhamentos recentes. Na tela de feedback, "Escrever" só
+aparece nas triagens que o aluno já finalizou.
