@@ -1,0 +1,241 @@
+{% extends "home.html" %}
+{% load static %}
+
+{% block extra_css %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'core/css/teacher_presence.css' %}">
+  <link rel="stylesheet" href="{% static 'core/css/teacher_home.css' %}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+{% endblock %}
+
+{% block home_title %}Presença e feedback{% endblock %}
+
+{% block home_content %}
+<div class="col-12">
+
+  {# ── Header mobile ── #}
+  <div class="mobile-header d-flex d-md-none">
+    <a href="{% url 'teacher:home' %}" class="mobile-back">&#8249;</a>
+    <span class="mobile-greeting">Olá, Professor!</span>
+    <div class="mobile-icons d-flex align-items-center gap-3">
+      <i class="bi bi-bell"></i>
+      <form method="post" action="{% url 'logout' %}" class="m-0 p-0 d-inline-flex">
+        {% csrf_token %}
+        <button type="submit" class="p-0 border-0 bg-transparent text-white d-flex align-items-center" style="line-height: 1;">
+          <i class="bi bi-person-circle" style="font-size: 24px;"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  {# ── Título pill — só mobile ── #}
+  <div class="presence-title-pill d-md-none">
+    Presença
+  </div>
+
+  {# ── Título pill desktop ── #}
+  <div class="presence-title-pill d-none d-md-block">
+    Presença e feedback
+  </div>
+
+  {# ── DESKTOP: tabela com header e linhas ── #}
+  <div class="d-none d-md-block">
+    <div class="presence-header">
+      <div>Aluno:</div>
+      <div>Supervisão:</div>
+      <div>Presença:</div>
+      <div></div>
+    </div>
+
+    <div class="presence-container">
+      <div class="presence-list">
+        {% if alunos %}
+          {% for aluno in alunos %}
+            <!-- Lógica de dados reais no futuro -->
+          {% endfor %}
+        {% else %}
+          <div class="presence-row">
+            <div>Mariana Costa</div>
+            <div>Hoje - 10:00</div>
+            <div><span class="badge-presente">Presente</span></div>
+            <div class="text-end"><a href="#" class="btn-feedback">feedback</a></div>
+          </div>
+          <div class="presence-row">
+            <div>Pedro Alves</div>
+            <div>Hoje - 10:00</div>
+            <div><span class="badge-presente">Presente</span></div>
+            <div class="text-end"><a href="#" class="btn-feedback">feedback</a></div>
+          </div>
+          <div class="presence-row">
+            <div>João Ribeiro</div>
+            <div>Hoje - 11:00</div>
+            <div><span class="badge-faltou">Faltou</span></div>
+            <div class="text-end"><a href="#" class="btn-feedback">feedback</a></div>
+          </div>
+          <div class="presence-row">
+            <div>Beatriz Lima</div>
+            <div>Hoje - 12:00</div>
+            <div><span class="badge-marcar">Marcar</span></div>
+            <div class="text-end"><a href="#" class="btn-feedback">feedback</a></div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  {# ── MOBILE: cards de presença ── #}
+  <div class="d-block d-md-none m-presence-list">
+    {% if alunos %}
+      {% for aluno in alunos %}
+        <div class="m-presence-card" data-student="{{ aluno.nome_completo }}">
+          <div class="m-presence-info">
+            <span class="m-presence-name">{{ aluno.nome_completo }}</span>
+            <span class="m-presence-detail"><i class="bi bi-person"></i> Aluna Marina Costa</span>
+            <span class="m-presence-detail"><i class="bi bi-calendar3"></i> Recebida às <strong>14:20</strong></span>
+          </div>
+          <div class="m-presence-actions">
+            <div class="m-presence-status m-status-verde">Presença</div>
+            <a href="#" class="m-btn-feedback" data-student="{{ aluno.nome_completo }}">feedback</a>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      {# Dados mock #}
+      <div class="m-presence-card" data-student="Lucas Santos Melo">
+        <div class="m-presence-info">
+          <span class="m-presence-name">Lucas Santos Melo</span>
+          <span class="m-presence-detail"><i class="bi bi-person"></i> Aluna Marina Costa</span>
+          <span class="m-presence-detail"><i class="bi bi-calendar3"></i> Recebida às <strong>14:20</strong></span>
+        </div>
+        <div class="m-presence-actions">
+          <div class="m-presence-status m-status-verde">Presença</div>
+          <a href="#" class="m-btn-feedback" data-student="Lucas Santos Melo">feedback</a>
+        </div>
+      </div>
+      <div class="m-presence-card" data-student="Lucas Santos Melo">
+        <div class="m-presence-info">
+          <span class="m-presence-name">Lucas Santos Melo</span>
+          <span class="m-presence-detail"><i class="bi bi-person"></i> Aluna Marina Costa</span>
+          <span class="m-presence-detail"><i class="bi bi-calendar3"></i> Recebida às <strong>14:20</strong></span>
+        </div>
+        <div class="m-presence-actions">
+          <div class="m-presence-status m-status-laranja">Marcar</div>
+          <a href="#" class="m-btn-feedback" data-student="Lucas Santos Melo">feedback</a>
+        </div>
+      </div>
+      <div class="m-presence-card" data-student="Lucas Santos Melo">
+        <div class="m-presence-info">
+          <span class="m-presence-name">Lucas Santos Melo</span>
+          <span class="m-presence-detail"><i class="bi bi-person"></i> Aluna Marina Costa</span>
+          <span class="m-presence-detail"><i class="bi bi-calendar3"></i> Recebida às <strong>14:20</strong></span>
+        </div>
+        <div class="m-presence-actions">
+          <div class="m-presence-status m-status-vermelho">Faltou</div>
+          <a href="#" class="m-btn-feedback" data-student="Lucas Santos Melo">feedback</a>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+
+  {# ── Avaliação mobile (oculta até clicar no card) ── #}
+  <div class="m-eval-section d-block d-md-none" id="m-eval-section" style="display: none !important;">
+    <div class="m-eval-title">Avaliação de desempenho prático - <span id="m-eval-student-name"></span></div>
+    <div class="m-eval-container">
+      <div class="m-eval-criteria">
+        <div class="m-eval-criterion">
+          <span>Condução clínica</span>
+          <i class="bi bi-star m-eval-star"></i>
+        </div>
+        <div class="m-eval-criterion">
+          <span>Registro de evolução</span>
+          <i class="bi bi-star m-eval-star"></i>
+        </div>
+        <div class="m-eval-criterion">
+          <span>Postura ética</span>
+          <i class="bi bi-star m-eval-star"></i>
+        </div>
+      </div>
+      <textarea class="m-eval-textarea" placeholder="Feedback clínico para o aluno"></textarea>
+      <div class="m-eval-actions">
+        <button type="button" class="m-btn-enviar">Enviar</button>
+      </div>
+    </div>
+  </div>
+
+  {# ── Avaliação desktop (oculta até clicar) ── #}
+  <div class="d-none d-md-block">
+    <div class="eval-title" id="eval-title-container" style="display: none;">Avaliação de desempenho prático - <span id="eval-student-name"></span></div>
+    <div class="eval-container" id="eval-form-container" style="display: none;">
+      <div class="eval-criteria-row">
+        <div class="eval-criterion">
+          Condução clínica
+          <i class="bi bi-star eval-star"></i>
+        </div>
+        <div class="eval-criterion">
+          Registro de evolução
+          <i class="bi bi-star eval-star"></i>
+        </div>
+        <div class="eval-criterion">
+          Postura ética
+          <i class="bi bi-star eval-star"></i>
+        </div>
+      </div>
+      <textarea class="eval-textarea" placeholder="Feedback clínico para o aluno..."></textarea>
+      <div class="eval-actions">
+        <button type="button" class="btn-enviar-aval">Enviar avaliação</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+  {{ block.super }}
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+
+      // ── Desktop: botões feedback ──
+      const feedbackButtons = document.querySelectorAll(".btn-feedback");
+      const evalTitleContainer = document.getElementById("eval-title-container");
+      const evalFormContainer = document.getElementById("eval-form-container");
+      const evalStudentNameSpan = document.getElementById("eval-student-name");
+
+      feedbackButtons.forEach(button => {
+        button.addEventListener("click", function(e) {
+          e.preventDefault();
+          const row = this.closest(".presence-row");
+          const studentName = row.querySelector("div:first-child").innerText.trim();
+          evalStudentNameSpan.innerText = studentName;
+          evalTitleContainer.style.display = "block";
+          evalFormContainer.style.display = "block";
+          evalTitleContainer.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+      });
+
+      // ── Mobile: clicar no card abre avaliação ──
+      const mCards = document.querySelectorAll(".m-presence-card");
+      const mEvalSection = document.getElementById("m-eval-section");
+      const mEvalStudentName = document.getElementById("m-eval-student-name");
+
+      mCards.forEach(card => {
+        card.addEventListener("click", function(e) {
+          e.preventDefault();
+          const studentName = this.dataset.student;
+          mEvalStudentName.innerText = studentName;
+          mEvalSection.style.display = "block";
+          mEvalSection.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+      });
+
+      // ── Stars: toggle fill ──
+      document.querySelectorAll(".eval-star, .m-eval-star").forEach(star => {
+        star.addEventListener("click", function() {
+          const isFilled = this.classList.contains("bi-star-fill");
+          this.classList.toggle("bi-star-fill", !isFilled);
+          this.classList.toggle("bi-star", isFilled);
+        });
+      });
+    });
+  </script>
+{% endblock %}

@@ -3,91 +3,151 @@
 
 {% block extra_css %}
   {{ block.super }}
-  <link rel="stylesheet" href="{% static 'core/css/student_triage.css' %}">
+  <link rel="stylesheet" href="{% static 'core/css/teacher_home.css' %}">
+  <link rel="stylesheet" href="{% static 'core/css/student_triage.css' %}?v=6">
 {% endblock %}
 
 {% block home_title %}Triagens a realizar{% endblock %}
 
 {% block home_content %}
-<div class="col-12 mt-4 mb-5">
+<div class="col-12">
 
-  <div class="triage-title-pill">
-    Triagens a realizar
-  </div>
+  {# ── MOBILE ── #}
+  <div class="d-block d-md-none px-0">
 
-  <div class="triage-wrapper">
-    <div class="triage-header">
-      <div>Nome do paciente:</div>
-      <div>Encaminhado por:</div>
-      <div>Data do encaminhamento:</div>
-      <div></div>
+    {# Header Mobile #}
+    <div class="mobile-header">
+      <a href="{% url 'students:home' %}" class="mobile-back"></a>
+      <span class="mobile-greeting">Olá, Aluno!</span>
+      <div class="mobile-icons d-flex align-items-center gap-3">
+        <i class="bi bi-bell"></i>
+        <form method="post" action="{% url 'logout' %}" class="m-0 p-0 d-inline-flex">
+          {% csrf_token %}
+          <button type="submit" class="p-0 border-0 bg-transparent text-white d-flex align-items-center" style="line-height: 1;">
+            <i class="bi bi-person-circle" style="font-size: 24px;"></i>
+          </button>
+        </form>
+      </div>
     </div>
 
-    <div class="triage-container">
+    {# Título pill #}
+    <div class="m-triage-title-pill">Triagens a realizar</div>
 
-      {% if triagens %}
-        {% for triagem in triagens %}
-        <div class="triage-row">
-          <div>{{ triagem.paciente_nome }} #{{ triagem.paciente_id }}</div>
-          <div>{{ triagem.encaminhado_por }}</div>
-          <div>{{ triagem.data_encaminhamento }}</div>
-          <div class="text-end">
-            <a href="#" class="btn-iniciar">Iniciar</a>
+    {# Lista de Triagens #}
+    <div class="m-triage-list">
+
+      {% if casos_abertos %}
+        {% for caso in casos_abertos %}
+        <div class="m-triage-card">
+          <div class="m-triage-card-left">
+            <div class="m-triage-patient-name">{{ caso.patient.nome_completo }}</div>
+            <div class="m-triage-patient-id">ID: #{{ caso.patient.pk }}</div>
+            <div class="m-triage-info">
+              <i class="bi bi-person-fill"></i>
+              Encaminhado por: <strong>{{ caso.responsible }}</strong>
+            </div>
+            <div class="m-triage-info">
+              <i class="bi bi-calendar3"></i>
+              {{ caso.start_date|date:"d/m/Y" }} - {{ caso.start_date|date:"H:i" }}h
+            </div>
+          </div>
+          <div class="m-triage-card-right">
+            <a href="/triage/create/{{ caso.patient.pk }}/" class="m-btn-iniciar">Iniciar</a>
           </div>
         </div>
         {% endfor %}
       {% else %}
-        {# Dados mock — substituir por {% for %} quando o backend estiver pronto #}
-        <div class="triage-row">
-          <div>José Santos #9872736</div>
-          <div>Prof.º Jorge Junior</div>
-          <div>24/07/2026 - 11:39h</div>
-          <div class="text-end"><a href="#" class="btn-iniciar">Iniciar</a></div>
+        {# Dados mock baseados no print #}
+        <div class="m-triage-card">
+          <div class="m-triage-card-left">
+            <div class="m-triage-patient-name">Lucas Santos Melo</div>
+            <div class="m-triage-patient-id">ID: #2973749</div>
+            <div class="m-triage-info"><i class="bi bi-person"></i> Encaminhado por: <strong>Prof.º Jorge Junior</strong></div>
+            <div class="m-triage-info"><i class="bi bi-calendar-event"></i> 24/07/2026 - 11:39h</div>
+          </div>
+          <div class="m-triage-card-right">
+            <a href="{% url 'triage:fila_triagem' %}" class="m-btn-iniciar">Iniciar</a>
+          </div>
         </div>
-        <div class="triage-row">
-          <div>José Santos #9872736</div>
-          <div>Prof.º Jorge Junior</div>
-          <div>24/07/2026 - 11:39h</div>
-          <div class="text-end"><a href="#" class="btn-iniciar">Iniciar</a></div>
+
+        <div class="m-triage-card">
+          <div class="m-triage-card-left">
+            <div class="m-triage-patient-name">Ana Beatriz Rocha</div>
+            <div class="m-triage-patient-id">ID: #2973750</div>
+            <div class="m-triage-info"><i class="bi bi-person"></i> Encaminhado por: <strong>Prof.ª Carina Silva</strong></div>
+            <div class="m-triage-info"><i class="bi bi-calendar-event"></i> 24/07/2026 - 12:15h</div>
+          </div>
+          <div class="m-triage-card-right">
+            <a href="{% url 'triage:fila_triagem' %}" class="m-btn-iniciar">Iniciar</a>
+          </div>
         </div>
-        <div class="triage-row">
-          <div>José Santos #9872736</div>
-          <div>Prof.º Jorge Junior</div>
-          <div>24/07/2026 - 11:39h</div>
-          <div class="text-end"><a href="#" class="btn-iniciar">Iniciar</a></div>
+
+        <div class="m-triage-card">
+          <div class="m-triage-card-left">
+            <div class="m-triage-patient-name">Mariana Oliveira da Silva</div>
+            <div class="m-triage-patient-id">ID: #2973752</div>
+            <div class="m-triage-info"><i class="bi bi-person"></i> Encaminhado por: <strong>Prof.ª Helena Costa</strong></div>
+            <div class="m-triage-info"><i class="bi bi-calendar-event"></i> 24/07/2026 - 14:30h</div>
+          </div>
+          <div class="m-triage-card-right">
+            <a href="{% url 'triage:fila_triagem' %}" class="m-btn-iniciar">Iniciar</a>
+          </div>
         </div>
-        <div class="triage-row">
-          <div>José Santos #9872736</div>
-          <div>Prof.º Jorge Junior</div>
-          <div>24/07/2026 - 11:39h</div>
-          <div class="text-end"><a href="#" class="btn-iniciar">Iniciar</a></div>
-        </div>
-        <div class="triage-row">
-          <div>José Santos #9872736</div>
-          <div>Prof.º Jorge Junior</div>
-          <div>24/07/2026 - 11:39h</div>
-          <div class="text-end"><a href="#" class="btn-iniciar">Iniciar</a></div>
-        </div>
-        <div class="triage-row">
-          <div>José Santos #9872736</div>
-          <div>Prof.º Jorge Junior</div>
-          <div>24/07/2026 - 11:39h</div>
-          <div class="text-end"><a href="#" class="btn-iniciar">Iniciar</a></div>
-        </div>
-        <div class="triage-row">
-          <div>José Santos #9872736</div>
-          <div>Prof.º Jorge Junior</div>
-          <div>24/07/2026 - 11:39h</div>
-          <div class="text-end"><a href="#" class="btn-iniciar">Iniciar</a></div>
-        </div>
-        <div class="triage-row">
-          <div>José Santos #9872736</div>
-          <div>Prof.º Jorge Junior</div>
-          <div>24/07/2026 - 11:39h</div>
-          <div class="text-end"><a href="#" class="btn-iniciar">Iniciar</a></div>
+
+        <div class="m-triage-card">
+          <div class="m-triage-card-left">
+            <div class="m-triage-patient-name">Roberto Alves Dias</div>
+            <div class="m-triage-patient-id">ID: #2973753</div>
+            <div class="m-triage-info"><i class="bi bi-person"></i> Encaminhado por: <strong>Prof.º Jorge Junior</strong></div>
+            <div class="m-triage-info"><i class="bi bi-calendar-event"></i> 24/07/2026 - 15:15h</div>
+          </div>
+          <div class="m-triage-card-right">
+            <a href="{% url 'triage:fila_triagem' %}" class="m-btn-iniciar">Iniciar</a>
+          </div>
         </div>
       {% endif %}
 
+    </div>{# fim m-triage-list #}
+
+  </div>{# fim mobile #}
+
+  {# ── DESKTOP ── #}
+  <div class="d-none d-md-block mt-4 mb-5">
+    <div class="triage-title-pill">Triagens a realizar</div>
+    <div class="triage-wrapper">
+      <div class="triage-header">
+        <div>Nome do paciente:</div>
+        <div>Área de atuação:</div>
+        <div>Início do caso:</div>
+        <div></div>
+      </div>
+      <div class="triage-container">
+        {% if casos_abertos %}
+          {% for caso in casos_abertos %}
+          <div class="triage-row">
+            <div>{{ caso.patient.nome_completo }} #{{ caso.patient.pk }}</div>
+            <div>{{ caso.acting_area }}</div>
+            <div>{{ caso.start_date|date:"d/m/Y" }}</div>
+            <div class="text-end">
+              <a href="/triage/create/{{ caso.patient.pk }}/" class="btn-iniciar">Iniciar</a>
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="triage-row">
+            <div>José Santos #9872736</div><div>Prof.º Jorge Junior</div><div>24/07/2026 - 11:39h</div>
+            <div class="text-end"><a href="{% url 'triage:fila_triagem' %}" class="btn-iniciar">Iniciar</a></div>
+          </div>
+          <div class="triage-row">
+            <div>Camila Duarte #4471736</div><div>Prof.ª Ana Lima</div><div>12/08/2026 - 09:15h</div>
+            <div class="text-end"><a href="{% url 'triage:fila_triagem' %}" class="btn-iniciar">Iniciar</a></div>
+          </div>
+          <div class="triage-row">
+            <div>Rafael Nunes #3390214</div><div>Prof.º Jorge Junior</div><div>01/09/2026 - 14:00h</div>
+            <div class="text-end"><a href="{% url 'triage:fila_triagem' %}" class="btn-iniciar">Iniciar</a></div>
+          </div>
+        {% endif %}
+      </div>
     </div>
   </div>
 

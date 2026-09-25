@@ -1,6 +1,6 @@
-/* ═══════════════════════════════════════════
-   student_home.css  —  Dashboard do Aluno
-   ═══════════════════════════════════════════ */
+/**
+ *    student_home.css  —  Dashboard do Aluno
+ */
 
 :root {
   --sep-maroon: #6D1D20;
@@ -8,7 +8,9 @@
   --sep-gray-card: #D9D9D9;
 }
 
-/* ── Saudação ── */
+/* ════════════════════════════════════════
+   DESKTOP
+   ════════════════════════════════════════ */
 .student-greeting {
   font-family: 'Museo Sans', sans-serif;
   font-size: 24px;
@@ -25,7 +27,6 @@
   margin: 0 0 1.5rem 0;
 }
 
-/* ── Cards de estatística ── */
 .stat-card {
   background-color: var(--sep-maroon);
   color: #FFFFFF;
@@ -54,7 +55,6 @@
   line-height: 1;
 }
 
-/* ── Título de seção ── */
 .section-title {
   font-family: 'Museo Sans', sans-serif;
   font-size: 18px;
@@ -62,7 +62,6 @@
   color: var(--sep-maroon);
 }
 
-/* ── Cards de atividade ── */
 .activity-card {
   background: #E1E1E1;
   border-radius: 16px;
@@ -106,14 +105,10 @@
   line-height: 1;
 }
 
-/* Badges */
 .badge-revisar  { background: #E2ADAD; color: var(--sep-maroon); font-size: 12px; font-weight: 600; padding: 4px 0; border-radius: 20px; font-family: 'Museo Sans', sans-serif; white-space: nowrap; text-align: center; display: inline-block; min-width: 90px; }
 .badge-concluido{ background: #A9D18E; color: #2D6A2D;            font-size: 12px; font-weight: 600; padding: 4px 0; border-radius: 20px; font-family: 'Museo Sans', sans-serif; white-space: nowrap; text-align: center; display: inline-block; min-width: 90px; }
 .badge-enviar   { background: #F5C6A0; color: #7B3D00;            font-size: 12px; font-weight: 600; padding: 4px 0; border-radius: 20px; font-family: 'Museo Sans', sans-serif; white-space: nowrap; text-align: center; display: inline-block; min-width: 90px; }
 
-/* ── Calendário ── */
-
-/* Título em botão marrom arredondado */
 .cal-title-btn {
   background-color: var(--sep-maroon);
   color: #FFFFFF;
@@ -126,10 +121,9 @@
   display: inline-block;
 }
 
-/* Caixa do calendário */
 .calendar-card {
   background: #FFFFFF;
-  border: 2px solid #A59C97;
+  border: 1px solid #CCC;
   border-radius: 28px;
   padding: 20px 24px;
   width: 100%;
@@ -140,7 +134,6 @@
   gap: 12px;
 }
 
-/* Botões de navegação (< >) */
 .cal-nav-btn {
   background: none;
   border: none;
@@ -153,7 +146,6 @@
 }
 .cal-nav-btn:hover { background: #f0f0f0; }
 
-/* Selects de mês/ano */
 .cal-select {
   border: 1px solid #ccc;
   border-radius: 6px;
@@ -190,37 +182,15 @@
   border-radius: 6px;
 }
 
-/* Dias destacados */
-.cal-highlight-dark {
-  background-color: #2d2d2d;
-  color: #fff !important;
-  border-radius: 6px;
-  font-weight: 700;
-}
-
-.cal-highlight-light {
-  background-color: #f3f3f3;
-  color: #333;
-  border-radius: 6px;
-  font-weight: 700;
-}
-
+.cal-highlight-dark { background-color: #2d2d2d; color: #fff !important; border-radius: 6px; font-weight: 700; }
+.cal-highlight-light { background-color: #f3f3f3; color: #333; border-radius: 6px; font-weight: 700; }
 .cal-empty { min-height: 28px; }
 
-/* Pontos coloridos */
-.cal-dot {
-  display: inline-block;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
+.cal-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 .dot-green  { background: #3AA600; }
 .dot-red    { background: #BE4A4F; }
 .dot-orange { background: #DB8D10; }
 
-/* Legenda em pílula */
 .cal-legend-pill {
   display: flex;
   justify-content: center;
@@ -234,15 +204,156 @@
   margin: 0 auto;
 }
 
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-family: 'Museo Sans', sans-serif;
-  font-size: 10px;
-  font-weight: 700;
-  color: #4A4A4A;
-}
+.legend-item { display: flex; align-items: center; gap: 4px; font-family: 'Museo Sans', sans-serif; font-size: 10px; font-weight: 700; color: #4A4A4A; }
 .legend-item.green { color: #3AA600; }
 .legend-item.red   { color: #BE4A4F; }
 .legend-item.orange{ color: #DB8D10; }
+
+
+/* ════════════════════════════════════════
+   MOBILE (Aluno Home)
+   ════════════════════════════════════════ */
+@media (max-width: 768px) {
+  
+  body {
+    background-color: #F2F0EE;
+  }
+
+  /* Container mobile do aluno: remove padding lateral para os cards ficarem iguais ao do professor */
+  .d-block.d-md-none.px-3 {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  /* Cabeçalho de Opções de Serviço e abas ficam com padding lateral */
+  .student-mobile-nav,
+  .d-flex.justify-content-between.align-items-baseline,
+  .m-alert-box,
+  .m-feedback-student {
+    margin-left: 16px;
+    margin-right: 16px;
+  }
+
+  /* Nav Tabs Horizontais (Opções de Serviço) */
+  .student-mobile-nav {
+    display: flex;
+    overflow-x: auto;
+    gap: 8px;
+    padding-bottom: 8px;
+    margin-bottom: 4px;
+    scrollbar-width: none; /* Firefox */
+  }
+  .student-mobile-nav::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
+  }
+
+  .s-nav-tab {
+    background: #EAEAEA;
+    color: #666;
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 8px 18px;
+    border-radius: 20px;
+    text-decoration: none;
+    white-space: nowrap;
+    border: 1px solid transparent;
+  }
+
+  .s-nav-tab.active {
+    background: #D5D5D5;
+    color: #333;
+  }
+
+  .s-nav-divider {
+    border-top: 2px solid var(--sep-maroon);
+    margin: 0 -16px 20px -16px;
+    opacity: 1;
+  }
+
+  /* Alerta Pendente */
+  .m-alert-box {
+    background: #FFFFFF;
+    border: 2px solid #DB8D10;
+    border-radius: 16px;
+    padding: 16px;
+  }
+
+  .m-alert-header {
+    color: #DB8D10;
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+
+  .m-alert-text {
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 13px;
+    color: #333;
+    margin-bottom: 16px;
+  }
+
+  .m-alert-btn {
+    background: var(--sep-maroon);
+    color: #FFF;
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    border: none;
+    border-radius: 24px;
+    padding: 10px 0;
+    width: 90%;
+    margin: 0 auto;
+    display: block;
+    cursor: pointer;
+  }
+
+  /* Card Feedback do Supervisor */
+  .m-feedback-student {
+    background: #FFFFFF;
+    border: 1px solid var(--sep-maroon);
+    border-left: 5px solid var(--sep-maroon);
+    border-radius: 12px;
+    padding: 16px 20px;
+  }
+
+  .m-feedback-student-title {
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--sep-maroon);
+    margin-bottom: 12px;
+  }
+
+  .m-feedback-student-prof {
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 800;
+    color: #000;
+    margin-bottom: 4px;
+  }
+
+  .m-feedback-student-quote {
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    color: #666;
+    margin-bottom: 0;
+  }
+
+  .m-feedback-student-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--sep-maroon);
+  }
+
+  .m-feedback-student-footer i {
+    font-size: 18px;
+    font-weight: 900;
+  }
+}

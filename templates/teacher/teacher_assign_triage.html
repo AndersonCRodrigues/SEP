@@ -1,0 +1,83 @@
+{% extends "home.html" %}
+{% load static %}
+
+{% block extra_css %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'core/css/teacher_assign_triage.css' %}">
+  <link rel="stylesheet" href="{% static 'core/css/teacher_home.css' %}">
+{% endblock %}
+
+{% block home_title %}Escolha da triagem{% endblock %}
+
+{% block home_content %}
+<div class="col-12">
+
+  {# ── Header mobile (só aparece em telas pequenas) ── #}
+  <div class="mobile-header d-flex d-md-none">
+    <a href="{% url 'teacher:home' %}" class="mobile-back">&#8249;</a>
+    <span class="mobile-greeting">Olá, Professor!</span>
+    <div class="mobile-icons d-flex align-items-center gap-3">
+      <i class="bi bi-bell"></i>
+      <form method="post" action="{% url 'logout' %}" class="m-0 p-0 d-inline-flex">
+        {% csrf_token %}
+        <button type="submit" class="p-0 border-0 bg-transparent text-white d-flex align-items-center" style="line-height: 1;">
+          <i class="bi bi-person-circle" style="font-size: 24px;"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  {# ── Título pill ── #}
+  <div class="triage-title-pill">
+    Escolha da triagem
+  </div>
+
+  <div class="assign-container">
+    
+    <div class="patient-card">
+      <div class="patient-card-header">Paciente</div>
+      <div class="patient-card-main">
+        <strong class="patient-card-name">José Santos</strong>
+        <span class="patient-card-id">#99999</span>
+      </div>
+      <div class="patient-card-footer">
+        <span class="patient-card-label">Triagem recebida:</span>
+        <span class="patient-card-date">12/08/2026</span>
+      </div>
+    </div>
+
+    <form method="post" action="#">
+      {% csrf_token %}
+      
+      <div class="student-list">
+        
+        <label class="student-row">
+          <input type="checkbox" name="students" value="1" class="student-checkbox">
+          <span class="student-name">Marina Costa</span>
+        </label>
+
+        <label class="student-row">
+          <input type="checkbox" name="students" value="2" class="student-checkbox">
+          <span class="student-name">Pedro Alves</span>
+        </label>
+
+        <label class="student-row">
+          <input type="checkbox" name="students" value="3" class="student-checkbox">
+          <span class="student-name">João Ribeiro</span>
+        </label>
+
+        <label class="student-row">
+          <input type="checkbox" name="students" value="4" class="student-checkbox">
+          <span class="student-name">Beatriz Lima</span>
+        </label>
+
+      </div>
+
+      <div class="text-center">
+        <button type="submit" class="btn-confirm">Confirmar</button>
+      </div>
+    </form>
+
+  </div>
+</div>
+{% endblock %}
