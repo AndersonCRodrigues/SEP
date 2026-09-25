@@ -1,11 +1,15 @@
 from django.urls import path
+
 from . import views
+
+app_name = "triage"
 
 
 urlpatterns = [
     path("minhas-triagens/", views.minhas_triagens, name="minhas_triagens"),
     path("fila/", views.fila_triagem, name="fila_triagem"),
-    path("create/<int:patient_id>/", views.create_triage, name="create_triage"),
+    path("create/<int:patient_id>/", views.create_triage_start, name="create_triage"),
+    path("create/<int:patient_id>/<slug:step>/", views.create_triage_step, name="create_triage_step"),
     path("concluida/<int:pk>/", views.triagem_concluida, name="triagem_concluida"),
     path("edit/<int:pk>/", views.edit_triage, name="edit_triage"),
     path("submit/<int:pk>/", views.submit_triage, name="submit_triage"),

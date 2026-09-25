@@ -1,8 +1,10 @@
-from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.core.exceptions import ValidationError
+from django.shortcuts import redirect, render
 from django.views.generic import DetailView, TemplateView, View
+
 from patient.models import Patient
+
 from ..patient_registration import STEPS, PatientRegistration
 from .access import AdministrativeOnly, CanRegisterPatients
 

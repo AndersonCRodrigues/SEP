@@ -1,7 +1,9 @@
 from django.utils import timezone
 from django.views.generic import TemplateView
+
 from core.month_calendar import MONTH_NAMES
 from scheduling.models import Appointment, Room
+
 from .access import AdministrativeOnly
 from .dates import day_label, period_range
 

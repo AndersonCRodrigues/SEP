@@ -1,6 +1,8 @@
-from .base import *
 import os
+
 from django.core.exceptions import ImproperlyConfigured
+
+from .base import *
 
 # Debug = False na produção
 DEBUG = False

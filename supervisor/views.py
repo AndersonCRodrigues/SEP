@@ -1,26 +1,26 @@
 from itertools import chain
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import PermissionDenied
-from django.shortcuts import render, redirect, get_object_or_404
-from django.urls import reverse_lazy
 from django.contrib.auth.mixins import PermissionRequiredMixin
-from django.views.generic import ListView, TemplateView, CreateView, UpdateView
-from core.models import CustomUser
-from core.mixins import GroupRequiredMixin
-from teacher.models import Teacher
-from students.models import Student
-from areas.models import AreaActing
-from .forms import SupervisorCreationForm
+from django.core.exceptions import PermissionDenied
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse_lazy
+from django.views.generic import CreateView, ListView, TemplateView, UpdateView
+
 from areas.forms import AreaAtuacaoForm
-from core.utils import sincronizar_grupo
-from .utils import gerar_senha_temporaria, enviar_email_credenciais
-from teacher.forms import PerfilProfessorForm
-
-
-from teacher.forms import VincularAlunoForm, StudentActivityForm
-from triage.models import Referral, TriageRecord
+from areas.models import AreaActing
 from core.constants import TriageStatus
+from core.mixins import GroupRequiredMixin
+from core.models import CustomUser
+from core.utils import sincronizar_grupo
+from students.models import Student
+from teacher.forms import PerfilProfessorForm, StudentActivityForm, VincularAlunoForm
+from teacher.models import Teacher
+from triage.models import Referral, TriageRecord
+
+from .forms import SupervisorCreationForm
+from .utils import enviar_email_credenciais, gerar_senha_temporaria
 
 
 def usuarios_alunos_e_professores():
@@ -155,6 +155,8 @@ class PainelOrientacaoSupervisorView(GroupRequiredMixin, TemplateView):
         context["form_vincular"] = VincularAlunoForm()
         context["form_horas"] = StudentActivityForm(user=supervisor)
         return context
+
+
 class PerfilSupervisorView(GroupRequiredMixin, UpdateView):
     required_group = "Supervisor"
     model = Teacher

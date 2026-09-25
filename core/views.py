@@ -1,11 +1,12 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.views import LoginView, LogoutView
+from django.contrib.auth.views import LoginView, LogoutView, PasswordChangeView
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views import View
+
 from core.models import CustomUser
+
 from .forms import LoginEmailOuMatriculaForm
-from django.contrib.auth.views import PasswordChangeView
 
 
 class ForcePasswordChangeView(LoginRequiredMixin, PasswordChangeView):

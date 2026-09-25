@@ -1,8 +1,10 @@
 from django.conf import settings
 from django.db import models
 from django.db.models import UniqueConstraint
+
 from core.models import CustomUser
 from teacher.models import Teacher
+
 from .base import AdviseeRecord
 
 Role = CustomUser.Role
