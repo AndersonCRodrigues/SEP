@@ -69,9 +69,9 @@ def cadastrar_supervisor(request):
             # 1. Pausa o salvamento no banco para gerarmos a senha
             user = form.save(commit=False)
 
-            # 2. Gera e criptografa a senha temporária
             senha_temporaria = gerar_senha_temporaria()
             user.set_password(senha_temporaria)
+            user.must_change_password = True
 
             # 3. Salva o usuário e os campos ManyToMany do formulário
             user.save()

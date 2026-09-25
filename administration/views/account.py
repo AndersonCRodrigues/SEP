@@ -48,7 +48,10 @@ def cadastrar_administrativo(request):
 
             senha_temporaria = gerar_senha_temporaria()
             user.set_password(senha_temporaria)
-            user.save()
+            user.must_change_password = True
+            user.save()   
+
+               
 
             sincronizar_grupo(user)
 
