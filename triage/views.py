@@ -17,34 +17,12 @@ from .forms import (
     IarvAdolescentForm,
     IarvChildForm,
     TriageRecordForm,
+    get_iarv_form_class,
+    get_iarv_form_class_for_instance,
+    TriageRegistration,
 )
 
 Role = CustomUser.Role
-
-
-def get_iarv_form_class(patient):
-    age = patient.current_age
-
-    if age is None:
-        raise ValidationError(
-            "A data de nascimento do paciente é obrigatória para selecionar o questionário IARV."
-        )
-
-    if age < 13:
-        return IarvChildForm
-
-    if age <= 17:
-        return IarvAdolescentForm
-
-    return IarvAdultForm
-
-
-def get_iarv_form_class_for_instance(iarv):
-    if isinstance(iarv, IarvChildForm.Meta.model):
-        return IarvChildForm
-    if isinstance(iarv, IarvAdolescentForm.Meta.model):
-        return IarvAdolescentForm
-    return IarvAdultForm
 
 
 @login_required
@@ -79,7 +57,9 @@ def fila_triagem(request):
     if request.user.role != Role.ALUNO:
         return HttpResponseForbidden("Apenas Alunos podem acessar a fila de triagem.")
 
-    pacientes_aguardando = Patient.objects.filter(flow_status="")
+    pacientes_aguardando = Patient.objects.filter(
+        flow_status=Patient.FlowStatus.AWAITING_TRIAGE
+    )
 
     return render(
         request,
@@ -88,54 +68,98 @@ def fila_triagem(request):
     )
 
 
-@login_required
-def create_triage(request, patient_id):
-    patient = get_object_or_404(
-        Patient,
-        pk=patient_id,
-    )
+def to_triage_step(patient_id, step):
+    return redirect("create_triage_step", patient_id=patient_id, step=step.slug)
 
-    try:
-        student_author = Student.objects.get(pk=request.user.pk)
-    except Student.DoesNotExist:
-        raise ValidationError("Apenas alunos podem criar uma ficha de triagem.")
 
-    iarv_form_class = get_iarv_form_class(patient)
-
-    if request.method == "POST":
-        triage_form = TriageRecordForm(request.POST)
-        iarv_form = iarv_form_class(request.POST)
-
-        if triage_form.is_valid() and iarv_form.is_valid():
-            with transaction.atomic():
-                triage_record = triage_form.save(commit=False)
-
-                triage_record.patient = patient
-                triage_record.student_author = student_author
-                triage_record.save()
-
-                iarv = iarv_form.save(commit=False)
-                iarv.triage_record = triage_record
-                iarv.save()
-
-            return redirect("triagem_concluida", pk=triage_record.pk)
-
-    else:
-        triage_form = TriageRecordForm()
-        iarv_form = iarv_form_class()
-
-    context = {
-        "patient": patient,
-        "triage_form": triage_form,
-        "iarv_form": iarv_form,
-        "patient_age": patient.current_age,
-    }
-
+def render_triage_step(request, wizard, step, form):
     return render(
         request,
         "triage/create_triage.html",
-        context,
+        {
+            "patient": wizard.patient,
+            "patient_age": wizard.patient.current_age,
+            "form": form,
+            "step": step,
+            "number": wizard.number(step),
+            "total": len(wizard.steps()),
+            "is_first": step == wizard.steps()[0],
+            "sections": wizard.sections(step),
+        },
     )
+
+
+@login_required
+def create_triage_start(request, patient_id):
+    if request.user.role != Role.ALUNO:
+        return HttpResponseForbidden("Apenas alunos podem criar uma ficha de triagem.")
+
+    patient = get_object_or_404(Patient, pk=patient_id)
+
+    try:
+        wizard = TriageRegistration.start(request.session, patient)
+        first_step = wizard.steps()[0]
+    except ValidationError as error:
+        messages.error(request, str(error))
+        return redirect("fila_triagem")
+
+    return to_triage_step(patient_id, first_step)
+
+
+@login_required
+def create_triage_step(request, patient_id, step):
+    patient = get_object_or_404(Patient, pk=patient_id)
+    wizard = TriageRegistration(request.session, patient)
+
+    try:
+        steps = wizard.steps()
+    except ValidationError as error:
+        messages.error(request, str(error))
+        return redirect("fila_triagem")
+
+    current = wizard.step(step)
+    if current is None:
+        return to_triage_step(patient_id, steps[0])
+
+    if request.method == "POST":
+        if request.POST.get("action") == "back":
+            previous, _ = wizard.neighbours(current)
+            wizard.save(current, request.POST)
+            return to_triage_step(patient_id, previous or current)
+
+        form_class = wizard.field_form_class(current)
+        form = form_class(data=request.POST)
+        if not form.is_valid():
+            return render_triage_step(request, wizard, current, form)
+
+        wizard.save(current, request.POST)
+        _, following = wizard.neighbours(current)
+        if following:
+            return to_triage_step(patient_id, following)
+
+        pending = wizard.first_unanswered()
+        if pending:
+            return to_triage_step(patient_id, pending)
+
+        try:
+            student_author = Student.objects.get(pk=request.user.pk)
+        except Student.DoesNotExist:
+            return HttpResponseForbidden("Apenas alunos podem criar uma ficha de triagem.")
+
+        try:
+            triage_record = wizard.complete(student_author)
+        except ValidationError:
+            messages.error(request, "Revise os dados e tente novamente.")
+            return to_triage_step(patient_id, steps[0])
+
+        return redirect("triagem_concluida", pk=triage_record.pk)
+
+    if wizard.is_ahead(current):
+        return to_triage_step(patient_id, wizard.first_unanswered())
+
+    form_class = wizard.field_form_class(current)
+    form = form_class(initial=wizard.answer(current))
+    return render_triage_step(request, wizard, current, form)
 
 
 @login_required
@@ -297,7 +321,7 @@ def triage_detail_supervisor(request, pk):
 
 @login_required
 def create_feedback(request, pk):
-    """Cria o parecer/feedback (Professor, herdado por Supervisor)."""
+  
     triage = get_object_or_404(TriageRecord, pk=pk)
 
     if not TriageFeedback.can_be_created_by(request.user):
@@ -396,4 +420,3 @@ def create_referral(request, pk):
     }
 
     return render(request, "triage/create_referral.html", context)
-
