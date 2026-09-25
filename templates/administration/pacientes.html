@@ -1,9 +1,50 @@
 {% extends "administration/base_admin.html" %}
+{% load components %}
 
 {% block title %}Pacientes{% endblock %}
 
 {% block content %}
-<h1>Pacientes</h1>
+<div class="patients-header">
+  <h1>Pacientes</h1>
 
-<a class="new-registration" href="{% url 'administration:cadastrar_paciente' %}">+ Novo Cadastro</a>
+  <a class="new-registration" href="{% url 'administration:cadastrar_paciente' %}">+ Novo Cadastro</a>
+</div>
+
+{% section title="Filtros" class="filters" id="filters-title" %}
+<form class="patient-filters" method="get" action="">
+  <p class="filter">
+    <label for="filter-search">Buscar por nome ou CPF</label>
+    <input type="search" id="filter-search" name="q" value="{{ search }}" />
+  </p>
+  <p class="filter">
+    <label for="filter-situation">Situação</label>
+    <select id="filter-situation" name="situacao">
+      <option value="">Todas</option>
+      {% for value, label in situations %}
+      <option value="{{ value }}" {% if situation_filter == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </p>
+  <button type="submit">Filtrar</button>
+</form>
+{% endsection %}
+
+{% if patients_error %}
+{% include "components/error_state.html" with message=patients_error retry_url=request.path %}
+{% elif patients %}
+{% data_table columns=columns label="Pacientes cadastrados" %}
+{% for row in patients %}
+<tr class="patient">
+  <td class="patient-name">{{ row.name }}</td>
+  <td class="patient-cpf">{{ row.cpf }}</td>
+  <td class="patient-situation">
+    {% include "components/badge.html" with label=row.label level=row.level %}
+  </td>
+  <td class="patient-registered">{{ row.registered_at|date:"d/m/Y" }}</td>
+</tr>
+{% endfor %}
+{% enddata_table %}
+{% else %}
+{% include "components/empty_state.html" with message="Nenhum paciente encontrado." %}
+{% endif %}
 {% endblock %}

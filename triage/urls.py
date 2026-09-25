@@ -6,7 +6,6 @@ urlpatterns = [
     path("minhas-triagens/", views.minhas_triagens, name="minhas_triagens"),
     path("fila/", views.fila_triagem, name="fila_triagem"),
     path("create/<int:patient_id>/", views.create_triage, name="create_triage"),
-    path("concluida/<int:pk>/", views.triagem_concluida, name="triagem_concluida"),
     path("edit/<int:pk>/", views.edit_triage, name="edit_triage"),
     path("submit/<int:pk>/", views.submit_triage, name="submit_triage"),
     path("feedback/<int:pk>/", views.create_feedback, name="create_feedback"),

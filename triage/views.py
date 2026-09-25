@@ -72,17 +72,6 @@ def minhas_triagens(request):
 
 
 @login_required
-def triagem_concluida(request, pk):
-    """Tela de confirmação exibida logo após o Aluno criar a ficha."""
-    triage = get_object_or_404(TriageRecord, pk=pk)
-
-    if triage.student_author_id != request.user.pk:
-        raise PermissionDenied("Você não tem acesso a essa triagem.")
-
-    return render(request, "triage/triagem_concluida.html", {"triage": triage})
-
-
-@login_required
 def fila_triagem(request):
     if request.user.role != Role.ALUNO:
         raise PermissionDenied("Apenas Alunos podem acessar a fila de triagem.")
@@ -130,7 +119,7 @@ def create_triage(request, patient_id):
                 iarv.triage_record = triage_record
                 iarv.save()
 
-            return redirect("triagem_concluida", pk=triage_record.pk)
+            return redirect("students:triagem_concluida", pk=triage_record.pk)
 
     else:
         triage_form = TriageRecordForm()
