@@ -207,5 +207,6 @@ class TriageRegistration:
         iarv.triage_record = triage_record
         iarv.save()
 
+        triage_record.submit(student_author)
         self.session.pop(self.session_key, None)
         return triage_record
