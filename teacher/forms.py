@@ -6,6 +6,7 @@ from areas.models import AreaActing
 from students.models import StudentActivity
 import re
 
+
 class VincularAlunoForm(forms.Form):
     aluno = forms.ModelChoiceField(queryset=None, label="Aluno Disponível")
     periodo = forms.CharField(
@@ -32,18 +33,20 @@ class VincularAlunoForm(forms.Form):
 
 
 class ProfessorCreationForm(UserCreationForm):
-    acting_area = forms.ModelChoiceField(
+    # Teacher.clean() exige ao menos uma area: opcional aqui passava a
+    # validacao e so estourava depois.
+    acting_areas = forms.ModelMultipleChoiceField(
         queryset=AreaActing.objects.all(),
-        label="Área de Atuação / Abordagem Teórica",
-        empty_label="Selecione uma área...",
-        required=False,
+        widget=forms.CheckboxSelectMultiple,
+        label="Áreas de Atuação / Abordagem Teórica",
     )
 
     class Meta:
         model = Teacher
         fields = (
             "email",
-            "nome_completo",
+            "first_name",
+            "last_name",
             "cpf",
             "telefone",
             "data_nascimento",
@@ -56,7 +59,7 @@ class ProfessorCreationForm(UserCreationForm):
             "cep",
             "matricula",
             "crp",
-            "acting_area",
+            "acting_areas",
         )
 
     def __init__(self, *args, **kwargs):
@@ -66,9 +69,9 @@ class ProfessorCreationForm(UserCreationForm):
     def save(self, commit=True):
         professor = super().save(commit=False)
         professor.role = CustomUser.Role.PROFESSOR
-        professor.acting_area = self.cleaned_data.get("acting_area")
         if commit:
             professor.save()
+            professor.acting_areas.set(self.cleaned_data["acting_areas"])
         return professor
 
     def clean_matricula(self):
@@ -87,8 +90,12 @@ class ProfessorCreationForm(UserCreationForm):
 class PerfilProfessorForm(forms.ModelForm):
     class Meta:
         model = Teacher
-        fields = ["acting_area"]
-        labels = {"acting_area": "Área de Atuação / Abordagem Teórica"}
+        fields = ["acting_areas"]
+        labels = {"acting_areas": "Áreas de Atuação / Abordagens Teóricas"}
+        widgets = {
+            "acting_areas": forms.CheckboxSelectMultiple(),
+        }
+
 
 class StudentActivityForm(forms.ModelForm):
     class Meta:
@@ -104,7 +111,9 @@ class StudentActivityForm(forms.ModelForm):
         from students.models import Student
 
         if user.role == CustomUser.Role.SUPERVISOR:
-            self.fields["student"].queryset = Student.objects.filter(current_advisor__isnull=False)
+            self.fields["student"].queryset = Student.objects.filter(
+                current_advisor__isnull=False
+            )
         else:
             self.fields["student"].queryset = user.current_advisees.all()
 

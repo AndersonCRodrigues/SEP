@@ -169,16 +169,19 @@
               <a class="nav-link" href="{% url 'teacher:painel' %}">Meus alunos</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#">Prontuários</a>
+              <a class="nav-link {% if request.resolver_match.view_name == 'teacher:prontuarios' %}active{% endif %}"
+                 href="{% url 'teacher:prontuarios' %}">Prontuários</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#">Presença</a>
+              <a class="nav-link {% if request.resolver_match.view_name == 'teacher:presenca' %}active{% endif %}"
+                 href="{% url 'teacher:presenca' %}">Presença</a>
             </li>
             <li class="nav-item">
               <a class="nav-link" href="#">Avaliações</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#">Área de atuação</a>
+              <a class="nav-link {% if request.resolver_match.view_name == 'teacher:area' %}active{% endif %}"
+                 href="{% url 'teacher:area' %}">Área de atuação</a>
             </li>
             {% endif %}
 
@@ -204,10 +207,23 @@
             {% if request.user.role == 'PA' %}
             <li class="nav-item">
               <a class="nav-link {% if request.resolver_match.view_name == 'patient:home' %}active{% endif %}"
-                 href="{% url 'patient:home' %}">Página Inicial</a>
+                 href="{% url 'patient:home' %}">Página inicial</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="{% url 'patient:edit_data' %}">Meus Dados</a>
+              <a class="nav-link {% if 'agendamentos' in request.resolver_match.view_name %}active{% endif %}"
+                 href="{% url 'patient:agendamentos' %}">Agendamentos</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link {% if 'historico' in request.resolver_match.view_name %}active{% endif %}"
+                 href="{% url 'patient:historico' %}">Histórico</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link {% if 'triagens' in request.resolver_match.view_name %}active{% endif %}"
+                 href="{% url 'patient:triagens' %}">Triagem</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link {% if request.resolver_match.view_name == 'patient:contato' %}active{% endif %}"
+                 href="{% url 'patient:contato' %}">Contato</a>
             </li>
             {% endif %}
 

@@ -1,7 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.views.generic import TemplateView, UpdateView
 from django.urls import reverse_lazy
@@ -9,10 +8,32 @@ from .forms import AlunoCreationForm
 from .models import Student
 from core.utils import sincronizar_grupo
 from core.mixins import GroupRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from core.models import CustomUser
 
 
-class HomeEstudanteView(LoginRequiredMixin, TemplateView):
-    template_name = "student/home_student.html"
+class HomeEstudanteView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    template_name = "student/home.html"
+
+    def test_func(self):
+        return self.request.user.role == CustomUser.Role.ALUNO
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        try:
+            student = Student.objects.get(pk=self.request.user.pk)
+            # Triagens pendentes = pacientes vinculados ao aluno que ainda estão na fase de triagem (ou aguardando)
+            context["triagens_pendentes"] = student.open_cases.filter(
+                patient__flow_status__in=["AGUARDANDO_TRIAGEM", "EM_TRIAGEM"]
+            ).count()
+            # Pacientes ativos = pacientes vinculados ao aluno que estão em atendimento
+            context["pacientes_ativos"] = student.open_cases.filter(
+                patient__flow_status="IN_TREATMENT"
+            ).count()
+        except Student.DoesNotExist:
+            context["triagens_pendentes"] = 0
+            context["pacientes_ativos"] = 0
+        return context
 
 
 @login_required
@@ -37,7 +58,8 @@ class PerfilAlunoView(GroupRequiredMixin, UpdateView):
     required_group = "Students"
     model = Student
     fields = [
-        "nome_completo",
+        "first_name",
+        "last_name",
         "telefone",
         "logradouro",
         "numero",
@@ -48,14 +70,17 @@ class PerfilAlunoView(GroupRequiredMixin, UpdateView):
         "cep",
     ]
     template_name = "student/perfil.html"
-    success_url = reverse_lazy("students:perfil")
+    success_url = reverse_lazy("students:home")
 
     def get_object(self, queryset=None):
         return get_object_or_404(Student, pk=self.request.user.pk)
 
 
-class MeuProfessorView(LoginRequiredMixin, TemplateView):
+class MeuProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = "student/meu_professor.html"
+
+    def test_func(self):
+        return self.request.user.role == CustomUser.Role.ALUNO
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -64,17 +89,41 @@ class MeuProfessorView(LoginRequiredMixin, TemplateView):
         return context
 
 
-class PainelEstudanteView(LoginRequiredMixin, TemplateView):
+class PainelEstudanteView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = "student/student_panel.html"
 
+    def test_func(self):
+        return self.request.user.role == CustomUser.Role.ALUNO
 
-class TriagemAlunoView(LoginRequiredMixin, TemplateView):
+
+class TriagemAlunoView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = "student/student_triage.html"
 
+    def test_func(self):
+        return self.request.user.role == CustomUser.Role.ALUNO
 
-class EncaminhamentosAlunoView(LoginRequiredMixin, TemplateView):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        try:
+            student = Student.objects.get(pk=self.request.user.pk)
+            # Busca os casos abertos do aluno para mostrar os pacientes disponíveis
+            context["casos_abertos"] = student.open_cases.select_related(
+                "patient", "acting_area"
+            )
+        except Student.DoesNotExist:
+            context["casos_abertos"] = []
+        return context
+
+
+class EncaminhamentosAlunoView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = "student/student_referral.html"
 
+    def test_func(self):
+        return self.request.user.role == CustomUser.Role.ALUNO
 
-class FeedbacksAlunoView(LoginRequiredMixin, TemplateView):
+
+class FeedbacksAlunoView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = "student/student_feedback.html"
+
+    def test_func(self):
+        return self.request.user.role == CustomUser.Role.ALUNO

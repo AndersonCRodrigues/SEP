@@ -14,6 +14,8 @@ from areas.models import AreaActing
 from .forms import SupervisorCreationForm
 from areas.forms import AreaAtuacaoForm
 from core.utils import sincronizar_grupo
+from .utils import gerar_senha_temporaria, enviar_email_credenciais
+from teacher.forms import PerfilProfessorForm
 
 
 def usuarios_alunos_e_professores():
@@ -24,8 +26,8 @@ def usuarios_alunos_e_professores():
     alunos = Student.objects.filter(role=CustomUser.Role.ALUNO)
     professores = Teacher.objects.filter(
         role__in=[CustomUser.Role.PROFESSOR, CustomUser.Role.SUPERVISOR]
-    )
-    return sorted(chain(alunos, professores), key=lambda u: u.nome_completo)
+    ).prefetch_related("acting_areas")
+    return sorted(chain(alunos, professores), key=lambda u: u.get_full_name())
 
 
 class PainelSupervisorView(GroupRequiredMixin, ListView):
@@ -59,9 +61,27 @@ def cadastrar_supervisor(request):
     if request.method == "POST":
         form = SupervisorCreationForm(request.POST)
         if form.is_valid():
-            user = form.save()
+            # 1. Pausa o salvamento no banco para gerarmos a senha
+            user = form.save(commit=False)
+
+            # 2. Gera e criptografa a senha temporária
+            senha_temporaria = gerar_senha_temporaria()
+            user.set_password(senha_temporaria)
+
+            # 3. Salva o usuário e os campos ManyToMany do formulário
+            user.save()
+            form.save_m2m()
+
+            # 4. Sincroniza os grupos
             sincronizar_grupo(user)
-            messages.success(request, "Supervisor cadastrado com sucesso!")
+
+            # 5. Dispara o e-mail com as credenciais
+            enviar_email_credenciais(user, senha_temporaria)
+
+            messages.success(
+                request,
+                f"Supervisor {user.get_full_name()} cadastrado e e-mail enviado com sucesso!",
+            )
             return redirect("superadmin:painel")
     else:
         form = SupervisorCreationForm()
@@ -90,3 +110,27 @@ class EditarAreaView(PermissionRequiredMixin, UpdateView):
     form_class = AreaAtuacaoForm
     template_name = "supervisor/area_form.html"
     success_url = reverse_lazy("supervisor:areas")
+
+
+class PerfilSupervisorView(GroupRequiredMixin, UpdateView):
+    required_group = "Supervisor"
+    model = Teacher
+    form_class = PerfilProfessorForm
+    template_name = "supervisor/perfil.html"
+    success_url = reverse_lazy("supervisor:home")
+
+    def get_object(self, queryset=None):
+        user = self.request.user
+
+        try:
+            return Teacher.objects.get(pk=user.pk)
+        except Teacher.DoesNotExist:
+            teacher = Teacher(customuser_ptr_id=user.pk)
+            teacher.__dict__.update(user.__dict__)
+            teacher.role = CustomUser.Role.SUPERVISOR
+            teacher.save()
+            return teacher
+
+    def form_valid(self, form):
+        messages.success(self.request, "Perfil atualizado com sucesso!")
+        return super().form_valid(form)

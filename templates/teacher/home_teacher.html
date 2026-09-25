@@ -10,12 +10,199 @@
 
 {% block home_content %}
 <div class="col-12">
-  {# ── Saudação e breadcrumb ── #}
-  <h1 class="teacher-greeting">Olá, professor!</h1>
-  <p class="teacher-breadcrumb">Página inicial - Professor</p>
 
-  {# ── Cards de estatística ── #}
-  <div class="row g-2 mb-4">
+  {# ── Header mobile com Fundo Vinho e Calendário ── #}
+  <div class="d-block d-md-none mobile-maroon-bg">
+    <div class="mobile-header">
+      <a href="#" class="mobile-back">&#8249;</a>
+      <span class="mobile-greeting">Olá, Professor!</span>
+      <div class="mobile-icons d-flex align-items-center gap-3">
+        <i class="bi bi-bell"></i>
+        <form method="post" action="{% url 'logout' %}" class="m-0 p-0 d-inline-flex">
+          {% csrf_token %}
+          <button type="submit" class="p-0 border-0 bg-transparent text-white d-flex align-items-center" style="line-height: 1;">
+            <i class="bi bi-person-circle" style="font-size: 24px;"></i>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <div class="px-3 pt-3 pb-1">
+      <div class="calendar-card">
+        <!-- Header: < Month Year > -->
+        <div class="d-flex justify-content-between align-items-center px-2">
+          <button class="cal-nav-btn">&lt;</button>
+          <div class="d-flex gap-2 align-items-center">
+            <select class="cal-select">
+              <option>Sep</option>
+            </select>
+            <select class="cal-select">
+              <option>2025</option>
+            </select>
+          </div>
+          <button class="cal-nav-btn">&gt;</button>
+        </div>
+
+        <!-- Grid -->
+        <div class="calendar-grid mt-2">
+          <div class="cal-header">Su</div>
+          <div class="cal-header">Mo</div>
+          <div class="cal-header">Tu</div>
+          <div class="cal-header">We</div>
+          <div class="cal-header">Th</div>
+          <div class="cal-header">Fr</div>
+          <div class="cal-header">Sa</div>
+
+          <div class="cal-empty"></div>
+          <div class="cal-day"><span>1</span><span class="cal-dot dot-red"></span></div>
+          <div class="cal-day"><span>2</span><span class="cal-dot dot-red"></span></div>
+          <div class="cal-day"><span>3</span><span class="cal-dot dot-green"></span></div>
+          <div class="cal-day"><span>4</span><span class="cal-dot dot-green"></span></div>
+          <div class="cal-day"><span>5</span><span class="cal-dot dot-red"></span></div>
+          <div class="cal-day"><span>6</span></div>
+
+          <div class="cal-day"><span>7</span></div>
+          <div class="cal-day"><span>8</span><span class="cal-dot dot-green"></span></div>
+          <div class="cal-day cal-highlight-dark"><span>9</span><span class="cal-dot dot-red"></span></div>
+          <div class="cal-day"><span>10</span><span class="cal-dot dot-green"></span></div>
+          <div class="cal-day"><span>11</span><span class="cal-dot dot-red"></span></div>
+          <div class="cal-day"><span>12</span><span class="cal-dot dot-green"></span></div>
+          <div class="cal-day cal-highlight-dark"><span>13</span></div>
+
+          <div class="cal-day"><span>14</span></div>
+          <div class="cal-day"><span>15</span><span class="cal-dot dot-green"></span></div>
+          <div class="cal-day"><span>16</span><span class="cal-dot dot-orange"></span></div>
+          <div class="cal-day"><span>17</span><span class="cal-dot dot-green"></span></div>
+          <div class="cal-day"><span>18</span></div>
+          <div class="cal-day"><span>19</span><span class="cal-dot dot-green"></span></div>
+          <div class="cal-day"><span>20</span></div>
+
+          <div class="cal-day"><span>21</span></div>
+          <div class="cal-day"><span>22</span><span class="cal-dot dot-orange"></span></div>
+          <div class="cal-day"><span>23</span><span class="cal-dot dot-orange"></span></div>
+          <div class="cal-day"><span>24</span><span class="cal-dot dot-orange"></span></div>
+          <div class="cal-day"><span>25</span></div>
+          <div class="cal-day"><span>26</span></div>
+          <div class="cal-day"><span>27</span></div>
+        </div>
+      </div>
+
+      <!-- Legenda (Usando a imagem fornecida) -->
+      <div class="mt-2 text-center" style="margin-bottom: 0;">
+        <img src="{% static 'core/images/barra-de-atendimento-mobile.png' %}" alt="Legenda: Disponível, Agendado, Pendente" style="width: 100%; max-width: 332px; height: auto;">
+      </div>
+    </div>
+  </div>
+
+  {# ── Nav de opções de serviço (só mobile) ── #}
+  <div class="d-block d-md-none">
+    <div class="d-flex justify-content-between align-items-baseline mb-2">
+      <h2 style="font-family:'Museo Sans',sans-serif;font-size:18px;font-weight:700;color:#000;margin:0;">Opções de Serviço</h2>
+      <a href="#" style="font-family:'Museo Sans',sans-serif;font-size:14px;color:var(--sep-maroon);text-decoration:none;">Ver todos ›</a>
+    </div>
+    <div class="mobile-service-nav">
+      <a href="{% url 'teacher:home' %}" class="service-tab active">Página inicial</a>
+      <a href="{% url 'teacher:painel' %}" class="service-tab">Meus alunos</a>
+      <a href="{% url 'teacher:presenca' %}" class="service-tab">Presença</a>
+      <a href="{% url 'teacher:prontuarios' %}" class="service-tab">Prontuário</a>
+      <a href="{% url 'teacher:area' %}" class="service-tab">Área de atuação</a>
+      <a href="{% url 'teacher:assign_triage' %}" class="service-tab">Triagem</a>
+      <a href="#" class="service-tab">Avaliações</a>
+    </div>
+  </div>
+
+  {# ── Alerta e Estatísticas (Mobile) ── #}
+  <div class="d-block d-md-none mt-3 mb-4">
+    <!-- Alerta Atenção Pendente -->
+    <div class="alert-mobile-new">
+      <div class="alert-title">
+        <i class="bi bi-exclamation-triangle-fill"></i> Atenção Pendente
+      </div>
+      <p class="alert-text">Avaliação de desempenho de <strong>2 alunos</strong> em aberto</p>
+      <a href="#" class="btn-avaliar">Avaliar orientados</a>
+    </div>
+
+    <!-- Cards Estatísticas -->
+    <div class="stats-mobile-grid">
+      <div class="stat-box-green">
+        <span class="stat-label">Alunos<br>orientados</span>
+        <span class="stat-number">{{ alunos_orientados|default:"6" }}</span>
+      </div>
+      <div class="stat-box-red">
+        <span class="stat-label">Pacientes<br>ativos</span>
+        <span class="stat-number">{{ pacientes_ativos|default:"11" }}</span>
+      </div>
+      <div class="stat-box-orange">
+        <span class="stat-label">Presenças<br>hoje</span>
+        <span class="stat-number">{{ presenca_hoje|default:"5/6" }}</span>
+      </div>
+    </div>
+  </div>
+
+  {# ── Atividades recentes mobile (Nova Estrutura) ── #}
+  <div class="d-block d-md-none mt-3">
+    
+    <!-- Card 1 -->
+    <div class="m-activity-card">
+      <div class="m-activity-header">
+        <span class="m-activity-time">09:00 - 10:00</span>
+        <span class="m-badge badge-green">Concluído</span>
+      </div>
+      <div class="m-activity-title">Prontuário atualizado</div>
+      <div class="m-activity-desc">Aluna Marina - paciente X</div>
+      <hr class="m-activity-divider">
+      <div class="m-activity-footer">
+        <i class="bi bi-chevron-right text-maroon"></i>
+      </div>
+    </div>
+
+    <!-- Card 2 -->
+    <div class="m-activity-card">
+      <div class="m-activity-header">
+        <span class="m-activity-time">09:00 - 10:00</span>
+        <span class="m-badge badge-orange">Aguardando</span>
+      </div>
+      <div class="m-activity-title">Presença registrada</div>
+      <div class="m-activity-desc">Supervisão de hoje às 10h</div>
+      <hr class="m-activity-divider">
+      <div class="m-activity-footer">
+        <i class="bi bi-chevron-right text-maroon"></i>
+      </div>
+    </div>
+
+    <!-- Card 3 -->
+    <div class="m-activity-card">
+      <div class="m-activity-header">
+        <span class="m-activity-time">09:00 - 10:00</span>
+        <span class="m-badge badge-red">Pendente</span>
+      </div>
+      <div class="m-activity-title">Feedback clínico enviado</div>
+      <div class="m-activity-desc">Aluno Pedro</div>
+      <hr class="m-activity-divider">
+      <div class="m-activity-footer">
+        <i class="bi bi-chevron-right text-maroon"></i>
+      </div>
+    </div>
+
+    <!-- Card 4 (Feedback enviado) -->
+    <div class="m-feedback-card">
+      <div class="m-feedback-title">Feedback enviado!</div>
+      <div class="m-feedback-author">Prof. Dr. Roberto (Psicanálise)</div>
+      <div class="m-feedback-quote">"Ajustar observações sobre a aliança terapêutica na sessão de 02/09."</div>
+      <div class="m-feedback-footer">
+        <span>Ver feedback completo</span>
+        <i class="bi bi-chevron-right text-maroon"></i>
+      </div>
+    </div>
+
+  </div>
+
+  {# ── Saudação desktop ── #}
+  <h1 class="teacher-greeting d-none d-md-block">Olá, professor!</h1>
+  <p class="teacher-breadcrumb d-none d-md-block">Página inicial - Professor</p>
+
+  {# ── Cards de estatística desktop (4 colunas, só desktop) ── #}
+  <div class="row g-2 mb-4 d-none d-md-flex">
     <div class="col-6 col-md-3">
       <div class="stat-card">
         <p class="stat-label">Alunos orientados</p>
@@ -42,10 +229,10 @@
     </div>
   </div>
 
-  <div class="row">
-    {# ── Atividades recentes ── #}
+  <div class="row d-none d-md-flex">
+    {# ── Atividades recentes (só desktop) ── #}
     <div class="col-12 col-lg-8 mb-4">
-      <h2 class="section-title mb-3">Atividades recentes</h2>
+      <h2 class="section-title">Atividades recentes</h2>
       
       {% if atividades %}
         {% for atividade in atividades %}
@@ -88,7 +275,7 @@
       {% endif %}
     </div>
 
-    {# ── Calendário ── #}
+    {# ── Calendário desktop ── #}
     <div class="col-12 col-lg-4 d-flex flex-column align-items-center mb-4">
       <div class="cal-title-btn mb-3">Calendário</div>
       
@@ -96,11 +283,11 @@
         <!-- Header: < Month Year > -->
         <div class="d-flex justify-content-between align-items-center px-2">
           <button class="cal-nav-btn">&lt;</button>
-          <div class="d-flex gap-2">
-            <select class="cal-select border-0 bg-transparent fw-bold" style="font-size: 1rem;">
+          <div class="d-flex gap-2 align-items-center">
+            <select class="cal-select">
               <option>Sep</option>
             </select>
-            <select class="cal-select border-0 bg-transparent fw-bold" style="font-size: 1rem;">
+            <select class="cal-select">
               <option>2025</option>
             </select>
           </div>
@@ -164,5 +351,6 @@
       </div>
     </div>
   </div>
+
 </div>
 {% endblock %}

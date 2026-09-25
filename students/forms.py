@@ -9,7 +9,8 @@ class AlunoCreationForm(UserCreationForm):
         model = Student
         fields = (
             "email",
-            "nome_completo",
+            "first_name",
+            "last_name",
             "cpf",
             "telefone",
             "logradouro",

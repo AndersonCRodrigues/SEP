@@ -17,4 +17,14 @@ urlpatterns = [
     path("superadmin/", include("superadmin.urls")),
     path("patient/", include("patient.urls")),
     path("triage/", include("triage.urls")),
+]
+
+urlpatterns += [
+    path(
+        "trocar-senha/",
+        core_views.ForcePasswordChangeView.as_view(),
+        name="force_password_change",
+    ),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+handler403 = "core.exception_handlers.custom_permission_denied_view"

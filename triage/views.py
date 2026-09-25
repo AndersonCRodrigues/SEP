@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, PermissionDenied
 from django.db import transaction
 from patient.models import Patient
 from students.models import Student
@@ -39,7 +39,7 @@ def create_triage(request, patient_id):
     try:
         student_author = Student.objects.get(pk=request.user.pk)
     except Student.DoesNotExist:
-        raise ValidationError("Apenas alunos podem criar uma ficha de triagem.")
+        raise PermissionDenied("Apenas alunos podem criar uma ficha de triagem.")
 
     iarv_form_class = get_iarv_form_class(patient)
 

@@ -1,0 +1,3 @@
+[tool.ruff.lint.per-file-ignores]
+"config/settings/dev.py" = ["F403", "F405"]
+"config/settings/prod.py" = ["F403", "F405"]

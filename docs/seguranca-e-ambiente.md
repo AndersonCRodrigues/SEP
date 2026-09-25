@@ -159,15 +159,31 @@ esses arquivos de existirem no repositório. Foi removida.
 Vale também para subpacotes: `management/`, `management/commands/` e
 `models/` quando o model vira pacote.
 
-### `constants.py` para quebrar ciclo entre apps
+### `core/constants.py` para quebrar ciclo entre apps
 
-`patient.PatientQuerySet.visible_to` precisa filtrar paciente por triagem aberta,
-mas `triage/models/triage_record.py` importa `patient.models.Patient`. Importar de
-volta criaria ciclo.
+`patient.PatientQuerySet` precisa filtrar paciente por triagem que o aluno ainda
+enxerga, mas `triage/models/triage_record.py` importa `patient.models.Patient` —
+para a FK e para o mapa `FLOW_BY_TRIAGE_STATUS`. Importar de volta fecha o ciclo.
 
-A saída é `triage/constants.py`, sem dependência de model. **Quando dois apps
-precisam se conhecer, extraia o pedaço sem dependência** em vez de importar
-`models` dos dois lados.
+A primeira tentativa foi `triage/constants.py`: o pedaço sem dependência de model,
+dentro do próprio app. Funcionava, mas **por acidente** — bastava alguém
+acrescentar um import ali para o projeto parar de subir. O ciclo continuava no
+grafo; só não doía.
+
+Hoje `TriageStatus` e `VISIBLE_TO_AUTHOR` moram em `core/constants.py`. A regra:
+
+> **Quando dois apps precisam se conhecer, extraia o pedaço sem dependência — e
+> ponha no kernel, não em um dos dois lados.**
+
+Vale para *value object*: enum, constante, função pura. **Não vale para model com
+tabela.** Mover `Patient` ou `Student` para o `core` resolveria o import e
+destruiria a resposta a "de quem é esta tabela" — o `areas/` ficaria vazio e o
+`core` viraria dono de metade do domínio. O `Role` (Fase 8) e o `TriageStatus`
+subiram porque não têm tabela; os models ficam onde estão.
+
+`probe_arquitetura.py` trava se alguém reintroduzir ciclo — o teste percorre os
+imports reais dos `models/` de cada app e ignora FK por string, que o Django
+resolve depois e por isso não forma ciclo.
 
 ---
 

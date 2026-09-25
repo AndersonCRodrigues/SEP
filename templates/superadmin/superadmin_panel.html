@@ -36,7 +36,7 @@
                     {% for usuario in todos_usuarios %}
                     <tr>
                         <td>{{ usuario.id }}</td>
-                        <td>{{ usuario.nome_completo }}</td>
+                        <td>{{ usuario.get_full_name }}</td>
                         <td>{{ usuario.email }}</td>
                         <td><span class="badge text-bg-primary">{{ usuario.get_role_display }}</span></td>
                         <td>

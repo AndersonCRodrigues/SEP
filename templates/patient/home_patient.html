@@ -1,29 +1,129 @@
-{% extends "home.html" %}
+{% extends "patient/base_patient.html" %}
+{% load components %}
 
-{% block home_title %}Meus Agendamentos{% endblock %}
+{% block title %}Página inicial{% endblock %}
 
-{% block home_content %}
-<div class="col-12 col-md-6">
-    <div class="card h-100">
-        <div class="card-body">
-            <h2 class="h5 card-title">Meus agendamentos</h2>
-        </div>
-        <ul class="list-group list-group-flush">
-            {% for agendamento in agendamentos %}
-            <li class="list-group-item">{{ agendamento.data }} — {{ agendamento.descricao }}</li>
-            {% empty %}
-            <li class="list-group-item text-body-secondary">Nenhum agendamento no momento.</li>
-            {% endfor %}
-        </ul>
-    </div>
+{% block content %}
+<section class="greeting">
+  <h1>Olá, {{ request.user.first_name|default:"paciente" }}!</h1>
+  <p class="greeting-subtitle">Página inicial - Paciente</p>
+</section>
+
+{% if home_error %}
+{% include "components/error_state.html" with message=home_error retry_url=request.path %}
+{% else %}
+<section class="summary" aria-labelledby="summary-title">
+  <h2 id="summary-title" class="visually-hidden">Resumo</h2>
+  <ul class="summary-list">
+    <li class="indicator">
+      <span class="indicator-label">Sessões realizadas</span>
+      <strong class="indicator-value">{{ sessions_done }}</strong>
+    </li>
+    <li class="indicator">
+      <span class="indicator-label">Status da triagem</span>
+      <strong class="indicator-value">{{ triage_status }}</strong>
+    </li>
+    <li class="indicator">
+      <span class="indicator-label">Próxima sessão</span>
+      <strong class="indicator-value">{{ next_session }}</strong>
+    </li>
+    <li class="indicator">
+      <span class="indicator-label">Faltas</span>
+      <strong class="indicator-value">{{ absences }}</strong>
+    </li>
+  </ul>
+</section>
+
+<div class="panel">
+  {% section title="Atividades recentes" class="activities" id="activities-title" %}
+  <ul class="activity-list">
+    {% for activity in activities %}
+    <li class="activity activity-{{ activity.kind }}">
+      <h3 class="activity-section">{{ activity.section }}</h3>
+      {% if activity.label %}
+      {% include "components/badge.html" with label=activity.label level=activity.level %}
+      {% endif %}
+      <p class="activity-title">{{ activity.title }}</p>
+      {% if activity.detail %}
+      <p class="activity-detail">{{ activity.detail }}</p>
+      {% endif %}
+      <a class="activity-link" href="{{ activity.url }}" aria-label="{{ activity.link_label }}">
+        <span aria-hidden="true">&rsaquo;</span>
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
+  {% endsection %}
+
+  {% section title="Calendário" class="calendar" id="calendar-title" %}
+  <form class="calendar-nav" method="get" action="">
+    <a
+      class="calendar-previous"
+      href="?ano={{ previous_month|date:'Y' }}&amp;mes={{ previous_month|date:'n' }}"
+      aria-label="Mês anterior"
+    >&lsaquo;</a>
+
+    <label class="visually-hidden" for="calendar-month">Mês</label>
+    <select id="calendar-month" name="mes">
+      {% for number, name in calendar_months %}
+      <option value="{{ number }}" {% if number == calendar_month %}selected{% endif %}>
+        {{ name }}
+      </option>
+      {% endfor %}
+    </select>
+
+    <label class="visually-hidden" for="calendar-year">Ano</label>
+    <select id="calendar-year" name="ano">
+      {% for year in calendar_years %}
+      <option value="{{ year }}" {% if year == calendar_year %}selected{% endif %}>
+        {{ year }}
+      </option>
+      {% endfor %}
+    </select>
+
+    <button type="submit">Ver</button>
+
+    <a
+      class="calendar-next"
+      href="?ano={{ next_month|date:'Y' }}&amp;mes={{ next_month|date:'n' }}"
+      aria-label="Próximo mês"
+    >&rsaquo;</a>
+  </form>
+
+  <table class="calendar-grid">
+    <caption class="visually-hidden">
+      Suas sessões no mês selecionado
+    </caption>
+    <thead>
+      <tr>
+        <th scope="col" abbr="Domingo">Dom</th>
+        <th scope="col" abbr="Segunda-feira">Seg</th>
+        <th scope="col" abbr="Terça-feira">Ter</th>
+        <th scope="col" abbr="Quarta-feira">Qua</th>
+        <th scope="col" abbr="Quinta-feira">Qui</th>
+        <th scope="col" abbr="Sexta-feira">Sex</th>
+        <th scope="col" abbr="Sábado">Sáb</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for week in calendar_weeks %}
+      <tr>
+        {% for day in week %}
+        <td
+          class="day{% if not day.in_month %} day-outside-month{% endif %}{% if day.has_event %} day-with-event{% endif %}"
+          {% if day.today %}aria-current="date"{% endif %}
+        >
+          <time datetime="{{ day.date|date:'Y-m-d' }}">{{ day.date|date:"j" }}</time>
+          {% if day.has_event %}
+          <span class="visually-hidden">com sessão</span>
+          {% endif %}
+        </td>
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endsection %}
 </div>
-
-<div class="col-12 col-md-6">
-    <div class="card h-100">
-        <div class="card-body">
-            <h2 class="h5 card-title">Meus dados</h2>
-            <a href="{% url 'patient:edit_data' %}" class="btn btn-primary">Editar meus dados</a>
-        </div>
-    </div>
-</div>
+{% endif %}
 {% endblock %}
