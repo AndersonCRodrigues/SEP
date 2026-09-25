@@ -35,8 +35,9 @@ class VincularAlunoForm(forms.Form):
 
 
 class ProfessorCreationForm(UserCreationForm):
-    # Teacher.clean() exige ao menos uma area: opcional aqui passava a
-    # validacao e so estourava depois.
+    password1 = None
+    password2 = None
+
     acting_areas = forms.ModelMultipleChoiceField(
         queryset=AreaActing.objects.all(),
         widget=forms.CheckboxSelectMultiple,
@@ -52,13 +53,6 @@ class ProfessorCreationForm(UserCreationForm):
             "cpf",
             "telefone",
             "data_nascimento",
-            "logradouro",
-            "numero",
-            "complemento",
-            "bairro",
-            "cidade",
-            "estado",
-            "cep",
             "matricula",
             "crp",
             "acting_areas",
@@ -69,7 +63,7 @@ class ProfessorCreationForm(UserCreationForm):
         self.instance.role = CustomUser.Role.PROFESSOR
 
     def save(self, commit=True):
-        professor = super().save(commit=False)
+        professor = forms.ModelForm.save(self, commit=False)
         professor.role = CustomUser.Role.PROFESSOR
         if commit:
             professor.save()

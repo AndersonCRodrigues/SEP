@@ -174,6 +174,9 @@ TIME_ZONE = "America/Sao_Paulo"
 USE_I18N = True
 USE_TZ = True
 STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_DIRS = [BASE_DIR / "core" / "static"]
+
 
 AUTH_USER_MODEL = "core.CustomUser"
 LOGIN_URL = "login"

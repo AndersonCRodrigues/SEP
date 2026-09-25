@@ -1,4 +1,9 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'core/css/student_panel.css' %}" />
+{% endblock %}
 
 {% block title %}Área do Estudante | Sistema SEP{% endblock %}
 

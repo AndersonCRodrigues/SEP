@@ -1,0 +1,182 @@
+{% extends "home.html" %}
+{% load static %}
+
+{% block extra_css %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'core/css/teacher_records.css' %}">
+  <link rel="stylesheet" href="{% static 'core/css/teacher_home.css' %}">
+{% endblock %}
+
+{% block home_title %}Prontuários e evolução{% endblock %}
+
+{% block home_content %}
+<div class="col-12">
+
+  {# ── Header mobile ── #}
+  <div class="mobile-header d-flex d-md-none">
+    <a href="{% url 'teacher:home' %}" class="mobile-back">&#8249;</a>
+    <span class="mobile-greeting">Olá, Professor!</span>
+    <div class="mobile-icons d-flex align-items-center gap-3">
+      <i class="bi bi-bell"></i>
+      <form method="post" action="{% url 'logout' %}" class="m-0 p-0 d-inline-flex">
+        {% csrf_token %}
+        <button type="submit" class="p-0 border-0 bg-transparent text-white d-flex align-items-center" style="line-height: 1;">
+          <i class="bi bi-person-circle" style="font-size: 24px;"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  {# ── Título pill — só mobile ── #}
+  <div class="records-title-pill d-md-none">
+    Prontuários
+  </div>
+
+  {# ── Título pill desktop ── #}
+  <div class="records-title-pill d-none d-md-block">
+    Prontuários
+  </div>
+
+  {# ── DESKTOP: tabela com header e linhas ── #}
+  <div class="d-none d-md-block">
+    <div class="records-header">
+      <div>Pacientes:</div>
+      <div>Aluno responsável:</div>
+      <div>Última evolução:</div>
+      <div></div>
+    </div>
+
+    <div class="records-container">
+      <div class="records-list">
+
+        {% if casos %}
+          {% for caso in casos %}
+          <div class="records-row">
+            <div>{{ caso.patient.nome_completo }} #{{ caso.patient.pk }}</div>
+            <div>{{ caso.student.nome_completo }}</div>
+            <div>
+              {% if caso.ultima_evolucao %}
+                {{ caso.ultima_evolucao }}
+              {% else %}
+                Sem evolução
+              {% endif %}
+            </div>
+            <div class="text-end">
+              {% if caso.pendente_revisao %}
+                <span class="badge-pendente">Pendente</span>
+              {% else %}
+                <span class="badge-revisar">Revisar</span>
+              {% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="records-row">
+            <div>José Santos #9872736</div>
+            <div>Mariana Costa</div>
+            <div>Atualizado há 2h</div>
+            <div class="text-end"><span class="badge-revisar">Revisar</span></div>
+          </div>
+          <div class="records-row">
+            <div>Camila Duarte #4471736</div>
+            <div>Pedro Alves</div>
+            <div>Atualizado há 1 dia</div>
+            <div class="text-end"><span class="badge-pendente">Pendente</span></div>
+          </div>
+          <div class="records-row">
+            <div>Rafael Nunes #3390214</div>
+            <div>João Ribeiro</div>
+            <div>Atualizado há 3 dias</div>
+            <div class="text-end"><span class="badge-pendente">Pendente</span></div>
+          </div>
+          <div class="records-row">
+            <div>Ana Beatriz #5528871</div>
+            <div>Mariana Costa</div>
+            <div>Atualizado hoje</div>
+            <div class="text-end"><span class="badge-revisar">Revisar</span></div>
+          </div>
+        {% endif %}
+
+      </div>
+    </div>
+  </div>
+
+  {# ── MOBILE: cards compactos ── #}
+  <div class="d-block d-md-none px-3">
+    <div class="m-records-wrapper">
+      <div class="records-list">
+        {% if casos %}
+          {% for caso in casos %}
+        <div class="records-row">
+          <div class="record-info">
+            <span class="record-name">{{ caso.patient.nome_completo }}</span>
+            <span class="record-date">
+              <i class="bi bi-calendar3"></i>
+              {% if caso.ultima_evolucao %}{{ caso.ultima_evolucao }}{% else %}Sem evolução{% endif %}
+            </span>
+          </div>
+          {% if caso.pendente_revisao %}
+            <span class="badge-pendente">Pendente</span>
+          {% else %}
+            <span class="badge-revisar">Verificar</span>
+          {% endif %}
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="records-row">
+          <div class="record-info">
+            <span class="record-name">Lucas Santos Melo</span>
+            <span class="record-date"><i class="bi bi-calendar3"></i> 24/07/2026 - 11:39h</span>
+          </div>
+          <span class="badge-revisar">Verificar</span>
+        </div>
+        <div class="records-row">
+          <div class="record-info">
+            <span class="record-name">Lucas Santos Melo</span>
+            <span class="record-date"><i class="bi bi-calendar3"></i> 24/07/2026 - 11:39h</span>
+          </div>
+          <span class="badge-pendente">Pendente</span>
+        </div>
+        <div class="records-row">
+          <div class="record-info">
+            <span class="record-name">Lucas Santos Melo</span>
+            <span class="record-date"><i class="bi bi-calendar3"></i> 24/07/2026 - 11:39h</span>
+          </div>
+          <span class="badge-revisar">Verificar</span>
+        </div>
+        <div class="records-row">
+          <div class="record-info">
+            <span class="record-name">Lucas Santos Melo</span>
+            <span class="record-date"><i class="bi bi-calendar3"></i> 24/07/2026 - 11:39h</span>
+          </div>
+          <span class="badge-pendente">Pendente</span>
+        </div>
+        <div class="records-row">
+          <div class="record-info">
+            <span class="record-name">Lucas Santos Melo</span>
+            <span class="record-date"><i class="bi bi-calendar3"></i> 24/07/2026 - 11:39h</span>
+          </div>
+          <span class="badge-revisar">Verificar</span>
+        </div>
+        <div class="records-row">
+          <div class="record-info">
+            <span class="record-name">Lucas Santos Melo</span>
+            <span class="record-date"><i class="bi bi-calendar3"></i> 24/07/2026 - 11:39h</span>
+          </div>
+          <span class="badge-pendente">Pendente</span>
+        </div>
+        <div class="records-row">
+          <div class="record-info">
+            <span class="record-name">Lucas Santos Melo</span>
+            <span class="record-date"><i class="bi bi-calendar3"></i> 24/07/2026 - 11:39h</span>
+          </div>
+          <span class="badge-revisar">Verificar</span>
+        </div>
+      {% endif %}
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+

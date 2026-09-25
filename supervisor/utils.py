@@ -19,12 +19,15 @@ def gerar_senha_temporaria(tamanho=8):
 
 def enviar_email_credenciais(user, senha_temporaria, usuario_responsavel=None):
     """
-    Envia o e-mail de boas-vindas com a senha temporária,
-    garantindo resiliência (try/except) e registro de auditoria (US-1.4).
+    Envia o e-mail de boas-vindas com a senha temporaria.
+    Retorna True se enviado com sucesso, False se falhou -- quem
+    chamar deve usar esse retorno pra decidir a mensagem mostrada,
+    em vez de assumir sucesso sempre.
     """
     link_portal = os.getenv("PORTAL_PACIENTE_URL", "URL_NAO_CONFIGURADA")
+    mensagem = f"Ola {user.get_full_name()}, seu cadastro foi realizado. Sua senha temporaria e: {senha_temporaria}. Acesse o portal em {link_portal}."
 
-    mensagem = f"Olá {user.get_full_name()}, seu cadastro foi realizado. Sua senha temporária é: {senha_temporaria}. Acesse o portal do paciente em {link_portal}."
+    target_model = f"{user._meta.app_label}.{type(user).__name__}"
 
     try:
         send_mail(
@@ -34,21 +37,21 @@ def enviar_email_credenciais(user, senha_temporaria, usuario_responsavel=None):
             recipient_list=[user.email],
             fail_silently=False,
         )
-
         SecurityLog.objects.create(
             user=usuario_responsavel or user,
-            action="EMAIL_BOAS_VINDAS_ENVIADO",
-            target_model="Patient",
-            target_id=user.pk,
+            action=SecurityLog.Action.CREATE,
+            detail=f"Email de boas-vindas enviado com sucesso para {user.email}.",
+            target_model=target_model,
+            target_id=str(user.pk),
         )
-
+        return True
     except Exception as e:
         logger.error(f"Erro ao enviar e-mail de credenciais para {user.email}: {e}")
-
         SecurityLog.objects.create(
             user=usuario_responsavel or user,
-            action="FALHA_ENVIO_EMAIL",
-            details=f"Erro SMTP ao tentar notificar {user.email}: {e!s}",
-            target_model="Patient",
-            target_id=user.pk,
+            action=SecurityLog.Action.CREATE,
+            detail=f"Falha ao enviar email de boas-vindas para {user.email}: {e}",
+            target_model=target_model,
+            target_id=str(user.pk),
         )
+        return False

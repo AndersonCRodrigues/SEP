@@ -1,15 +1,86 @@
-{% extends "home.html" %}
+{% extends "base.html" %}
 
-{% block home_title %}Painel Superadmin{% endblock %}
+{% block title %}Início | Sistema SEP{% endblock %}
 
-{% block home_content %}
-<div class="col-12 col-md-6">
-    <div class="card h-100">
-        <div class="card-body">
-            <h2 class="h5 card-title">Painel Superadmin</h2>
-            <p class="card-text">Acesso total às configurações globais do sistema.</p>
-            <a href="{% url 'superadmin:painel' %}" class="btn btn-primary">Acessar Painel Global</a>
-        </div>
+{% block breadcrumbs %}
+{{ block.super }}
+<li class="breadcrumb-item active" aria-current="page">Superadmin</li>
+{% endblock %}
+
+{% block page_title %}Olá, equipe de TI!{% endblock %}
+
+{% block content %}
+
+<div class="row g-3">
+    <div class="col-12 col-md-6 col-lg-3">
+        <section class="card h-100">
+            <div class="card-body">
+                <h2 class="h6 card-title text-body-secondary">Usuários ativos</h2>
+                <p class="display-6 mb-0">{{ active_users }}</p>
+            </div>
+        </section>
+    </div>
+    <div class="col-12 col-md-6 col-lg-3">
+        <section class="card h-100">
+            <div class="card-body">
+                <h2 class="h6 card-title text-body-secondary">Logs hoje</h2>
+                <p class="display-6 mb-0">{{ logs_today }}</p>
+            </div>
+        </section>
+    </div>
+    <div class="col-12 col-md-6 col-lg-3">
+        <section class="card h-100">
+            <div class="card-body">
+                <h2 class="h6 card-title text-body-secondary">Alertas abertos</h2>
+                <p class="display-6 mb-0">{{ open_alerts }}</p>
+            </div>
+        </section>
     </div>
 </div>
+
+<div class="row g-3 mt-1">
+    <div class="col-12 col-lg-7">
+        <section class="card h-100">
+            <div class="card-body">
+                <h2 class="h5 card-title">Atividades recentes</h2>
+                <div class="list-group list-group-flush">
+                    {% for activity in recent_activities %}
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <strong>{{ activity.title }}</strong>
+                
+                            {% if activity.status %}
+                            <span class="badge text-bg-secondary">
+                                {{ activity.status }}
+                            </span>
+                            {% endif %}
+                        </div>
+                
+                        <div class="text-body-secondary small">
+                            {{ activity.when|date:"d/m H:i" }} — {{ activity.detail }}
+                        </div>
+                    </div>
+                
+                    {% empty %}
+                
+                    {% include "components/empty_state.html" with message="Nenhuma atividade recente." %}
+                
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div class="col-12 col-lg-5">
+        {% if alert_server %}
+        {% include "components/alert.html" with level="warning" message=alert_message %}
+        <div class="mt-2">
+            <a href="{% url 'superadmin:servidores' %}" class="btn btn-primary btn-sm">Ver logs de infraestrutura</a>
+        </div>
+        {% else %}
+        {% include "components/alert.html" with level="success" message="Nenhum alerta ativo no momento." %}
+        {% endif %}
+    </div>
+</div>
+
 {% endblock %}
