@@ -2,74 +2,89 @@
 <ul class="nav nav-pills flex-column flex-lg-row gap-2">
   {% if request.user.role == 'SA' %}
   <li class="nav-item">
-    <a
-      class="nav-link {% if current_view == 'superadmin:home' %}active{% endif %}"
-      href="{% url 'superadmin:home' %}"
-      aria-current="{% if current_view == 'superadmin:home' %}page{% else %}false{% endif %}"
-    >
+    <a class="nav-link {% if current_view == 'superadmin:home' %}active{% endif %}" href="{% url 'superadmin:home' %}"
+      aria-current="{% if current_view == 'superadmin:home' %}page{% else %}false{% endif %}">
       <i class="bi bi-house-door me-2"></i>Início
     </a>
   </li>
   <li class="nav-item">
-    <a
-      class="nav-link {% if current_view == 'superadmin:painel' %}active{% endif %}"
-      href="{% url 'superadmin:painel' %}"
-      aria-current="{% if current_view == 'superadmin:painel' %}page{% else %}false{% endif %}"
-    >
-      <i class="bi bi-shield-lock me-2"></i>Painel Global
+    <a class="nav-link {% if current_view == 'superadmin:servidores' %}active{% endif %}"
+      href="{% url 'superadmin:servidores' %}"
+      aria-current="{% if current_view == 'superadmin:servidores' %}page{% else %}false{% endif %}">
+      <i class="bi bi-hdd-network me-2"></i>Servidores
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {% if current_view == 'superadmin:logs' %}active{% endif %}" href="{% url 'superadmin:logs' %}"
+      aria-current="{% if current_view == 'superadmin:logs' %}page{% else %}false{% endif %}">
+      <i class="bi bi-journal-text me-2"></i>Logs
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {% if current_view == 'superadmin:permissoes' %}active{% endif %}"
+      href="{% url 'superadmin:permissoes' %}"
+      aria-current="{% if current_view == 'superadmin:permissoes' %}page{% else %}false{% endif %}">
+      <i class="bi bi-shield-lock me-2"></i>Permissões
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {% if current_view == 'superadmin:backups' %}active{% endif %}"
+      href="{% url 'superadmin:backups' %}"
+      aria-current="{% if current_view == 'superadmin:backups' %}page{% else %}false{% endif %}">
+      <i class="bi bi-archive me-2"></i>Backups
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {% if current_view == 'supervisor:register' %}active{% endif %}"
+      href="{% url 'supervisor:register' %}"
+      aria-current="{% if current_view == 'supervisor:register' %}page{% else %}false{% endif %}">
+      <i class="bi bi-person-plus me-2"></i>Cadastrar Coordenador
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {% if current_view == 'administration:cadastrar' %}active{% endif %}"
+      href="{% url 'administration:cadastrar' %}"
+      aria-current="{% if current_view == 'administration:cadastrar' %}page{% else %}false{% endif %}">
+      <i class="bi bi-person-plus me-2"></i>Cadastrar Administrativo
     </a>
   </li>
   {% endif %}
 
   {% if request.user.role == 'SV' %}
   <li class="nav-item">
-    <a
-      class="nav-link {% if current_view == 'supervisor:home' %}active{% endif %}"
-      href="{% url 'supervisor:home' %}"
-      aria-current="{% if current_view == 'supervisor:home' %}page{% else %}false{% endif %}"
-    >
+    <a class="nav-link {% if current_view == 'supervisor:home' %}active{% endif %}" href="{% url 'supervisor:home' %}"
+      aria-current="{% if current_view == 'supervisor:home' %}page{% else %}false{% endif %}">
       <i class="bi bi-house-door me-2"></i>Início
     </a>
   </li>
   <li class="nav-item">
-    <a
-      class="nav-link {% if current_view == 'supervisor:painel' %}active{% endif %}"
+    <a class="nav-link {% if current_view == 'supervisor:painel' %}active{% endif %}"
       href="{% url 'supervisor:painel' %}"
-      aria-current="{% if current_view == 'supervisor:painel' %}page{% else %}false{% endif %}"
-    >
+      aria-current="{% if current_view == 'supervisor:painel' %}page{% else %}false{% endif %}">
       <i class="bi bi-speedometer2 me-2"></i>Painel do Supervisor
     </a>
   </li>
   <li class="nav-item">
-    <a
-      class="nav-link {% if current_view == 'supervisor:listar_usuarios' %}active{% endif %}"
+    <a class="nav-link {% if current_view == 'supervisor:listar_usuarios' %}active{% endif %}"
       href="{% url 'supervisor:listar_usuarios' %}"
-      aria-current="{% if current_view == 'supervisor:listar_usuarios' %}page{% else %}false{% endif %}"
-    >
+      aria-current="{% if current_view == 'supervisor:listar_usuarios' %}page{% else %}false{% endif %}">
       <i class="bi bi-people me-2"></i>Usuários Cadastrados
     </a>
   </li>
-  
   {% endif %}
 
     {% if request.user.role == 'PR' %}
   <li class="nav-item">
-    <a
-      class="nav-link {% if current_view == 'teacher:home' %}active{% endif %}"
-      href="{% url 'teacher:home' %}"
-      aria-current="{% if current_view == 'teacher:home' %}page{% else %}false{% endif %}"
-    >
+    <a class="nav-link {% if current_view == 'teacher:home' %}active{% endif %}" href="{% url 'teacher:home' %}"
+      aria-current="{% if current_view == 'teacher:home' %}page{% else %}false{% endif %}">
       <i class="bi bi-house-door me-2"></i>Início
     </a>
   </li>
   {% comment %}
   COMENTADO a pedido do front (validação de 12/09): rota teacher:painel comentada em urls.py
   <li class="nav-item">
-    <a
-      class="nav-link {% if current_view == 'teacher:painel' %}active{% endif %}"
-      href="{% url 'teacher:painel' %}"
-      aria-current="{% if current_view == 'teacher:painel' %}page{% else %}false{% endif %}"
-    >
+    <a class="nav-link {% if current_view == 'teacher:painel' %}active{% endif %}" href="{% url 'teacher:painel' %}"
+      aria-current="{% if current_view == 'teacher:painel' %}page{% else %}false{% endif %}">
       <i class="bi bi-clipboard-data me-2"></i>Painel do Professor
     </a>
   </li>
@@ -123,65 +138,56 @@
 
   {% if request.user.role == 'AD' %}
   <li class="nav-item">
-    <a
-      class="nav-link {% if current_view == 'administration:home' %}active{% endif %}"
+    <a class="nav-link {% if current_view == 'administration:home' %}active{% endif %}"
       href="{% url 'administration:home' %}"
-      aria-current="{% if current_view == 'administration:home' %}page{% else %}false{% endif %}"
-    >
+      aria-current="{% if current_view == 'administration:home' %}page{% else %}false{% endif %}">
       <i class="bi bi-house-door me-2"></i>Início
     </a>
   </li>
   <li class="nav-item">
-    <a
-      class="nav-link {% if current_view == 'administration:painel' %}active{% endif %}"
+    <a class="nav-link {% if current_view == 'administration:painel' %}active{% endif %}"
       href="{% url 'administration:painel' %}"
-      aria-current="{% if current_view == 'administration:painel' %}page{% else %}false{% endif %}"
-    >
+      aria-current="{% if current_view == 'administration:painel' %}page{% else %}false{% endif %}">
       <i class="bi bi-folder2-open me-2"></i>Painel Administrativo
     </a>
   </li>
   {% endif %}
 
   {% if request.user.role == 'AL' %}
- <li class="nav-item">
-  <a
+  <li class="nav-item">
+  
     class="nav-link {% if current_view == 'students:home' %}active{% endif %}"
     href="{% url 'students:home' %}"
     aria-current="{% if current_view == 'students:home' %}page{% else %}false{% endif %}"
-  >
+    >
     <i class="bi bi-house-door me-2"></i>Início
-  </a>
-</li>
-
-<li class="nav-item">
-  <a
+    </a>
+  </li>
+  <li class="nav-item">
+  
     class="nav-link {% if current_view == 'students:painel' %}active{% endif %}"
     href="{% url 'students:painel' %}"
     aria-current="{% if current_view == 'students:painel' %}page{% else %}false{% endif %}"
-  >
+    >
     <i class="bi bi-journal-text me-2"></i>Painel do Estudante
-  </a>
-</li>
-
-<li class="nav-item">
-  <a
+    </a>
+  </li>
+  <li class="nav-item">
+  
     class="nav-link {% if current_view == 'minhas_triagens' %}active{% endif %}"
     href="{% url 'triage:minhas_triagens' %}"
     aria-current="{% if current_view == 'minhas_triagens' %}page{% else %}false{% endif %}"
-  >
+    >
     <i class="bi bi-clipboard-check me-2"></i>Minhas Triagens
-  </a>
-</li>
+    </a>
   </li>
+  
   {% endif %}
 
   {% if request.user.role == 'PA' %}
   <li class="nav-item">
-    <a
-      class="nav-link {% if current_view == 'patient:home' %}active{% endif %}"
-      href="{% url 'patient:home' %}"
-      aria-current="{% if current_view == 'patient:home' %}page{% else %}false{% endif %}"
-    >
+    <a class="nav-link {% if current_view == 'patient:home' %}active{% endif %}" href="{% url 'patient:home' %}"
+      aria-current="{% if current_view == 'patient:home' %}page{% else %}false{% endif %}">
       <i class="bi bi-house-door me-2"></i>Início
     </a>
   </li>

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Permissões por Perfil | Sistema SEP{% endblock %}
+
+{% block breadcrumbs %}
+{{ block.super }}
+<li class="breadcrumb-item"><a href="{% url 'superadmin:home' %}">Superadmin</a></li>
+<li class="breadcrumb-item active" aria-current="page">Permissões</li>
+{% endblock %}
+
+{% block page_title %}Permissões por perfil{% endblock %}
+
+{% block content %}
+<section class="card">
+    <div class="card-body">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Perfil</th>
+                    <th>Escopo de acesso</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for escopo in escopos %}
+                <tr>
+                    <td>{{ escopo.get_role_display }}</td>
+                    <td>{{ escopo.escopo_acesso }}</td>
+                    <td><a href="{% url 'superadmin:permissao_editar' escopo.pk %}"
+                            class="btn btn-sm btn-outline-secondary">Editar</a></td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3">{% include "components/empty_state.html" with message="Nenhum escopo cadastrado." %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

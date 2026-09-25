@@ -22,6 +22,9 @@ STUDENT = "student"
 
 
 class AdministrativoCreationForm(UserCreationForm):
+    password1 = None
+    password2 = None
+
     class Meta:
         model = CustomUser
         fields = (
@@ -30,13 +33,6 @@ class AdministrativoCreationForm(UserCreationForm):
             "last_name",
             "cpf",
             "telefone",
-            "logradouro",
-            "numero",
-            "complemento",
-            "bairro",
-            "cidade",
-            "estado",
-            "cep",
             "matricula",
         )
 
@@ -45,7 +41,7 @@ class AdministrativoCreationForm(UserCreationForm):
         self.instance.role = CustomUser.Role.ADMINISTRATIVO
 
     def save(self, commit=True):
-        user = super().save(commit=False)
+        user = forms.ModelForm.save(self, commit=False)
         user.role = CustomUser.Role.ADMINISTRATIVO
         if commit:
             user.save()
