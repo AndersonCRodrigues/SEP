@@ -1,0 +1,429 @@
+/**
+ * teacher_presence.css - Presença e Feedback (Professor)
+ */
+
+:root {
+  --sep-maroon: #6D1D20;
+  --sep-green: #3c9c08;
+  --sep-red: #b52b2b;
+  --sep-black: #000000;
+  --sep-gray: #8c8c8c;
+}
+
+/* Page title pill */
+.presence-title-pill {
+  background-color: var(--sep-maroon);
+  color: #FFFFFF;
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  text-align: center;
+  border-radius: 50px;
+  padding: 12px 0;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto 24px auto;
+}
+
+/* Table header row */
+.presence-header {
+  display: grid;
+  grid-template-columns: 2.5fr 2fr 2fr 1fr;
+  padding: 0 12px 10px 12px;
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: #000;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.presence-header > div:nth-child(2) { text-align: center; }
+.presence-header > div:nth-child(3) { text-align: center; }
+
+/* Main container */
+.presence-container {
+  background-color: #FFFFFF;
+  border: 1px solid #A59C97;
+  border-radius: 16px;
+  padding: 16px 24px;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto 32px auto;
+}
+
+/* List of rows */
+.presence-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Individual row */
+.presence-row {
+  display: grid;
+  grid-template-columns: 2.5fr 2fr 2fr 1fr;
+  align-items: center;
+  background-color: #E6E6E6;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: #000;
+  width: 100%;
+}
+
+.presence-row > div:nth-child(2) { text-align: center; }
+.presence-row > div:nth-child(3) { text-align: center; }
+
+/* Status badges */
+.badge-presente {
+  background: var(--sep-green);
+  color: #FFFFFF;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 0;
+  min-width: 85px;
+  text-align: center;
+  border-radius: 20px;
+  font-family: 'Museo Sans', sans-serif;
+  white-space: nowrap;
+  display: inline-block;
+}
+
+.badge-faltou {
+  background: var(--sep-red);
+  color: #FFFFFF;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 0;
+  min-width: 85px;
+  text-align: center;
+  border-radius: 20px;
+  font-family: 'Museo Sans', sans-serif;
+  white-space: nowrap;
+  display: inline-block;
+}
+
+.badge-marcar {
+  background: var(--sep-black);
+  color: #FFFFFF;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 0;
+  min-width: 85px;
+  text-align: center;
+  border-radius: 20px;
+  font-family: 'Museo Sans', sans-serif;
+  white-space: nowrap;
+  display: inline-block;
+}
+
+/* Feedback button */
+.btn-feedback {
+  background: var(--sep-gray);
+  color: #FFFFFF;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 4px 16px;
+  border-radius: 20px;
+  font-family: 'Museo Sans', sans-serif;
+  text-decoration: none;
+  display: inline-block;
+}
+
+/* --- Evaluation Section --- */
+
+.eval-title {
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  color: #000;
+  max-width: 800px;
+  margin: 0 auto 10px auto;
+  padding-left: 12px;
+}
+
+.eval-container {
+  background-color: #FFFFFF;
+  border: 1px solid #A59C97;
+  border-radius: 16px;
+  padding: 16px 24px;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Criteria row */
+.eval-criteria-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.eval-criterion {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: #000;
+}
+
+.eval-star {
+  color: var(--sep-maroon);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* Textarea */
+.eval-textarea {
+  width: 100%;
+  background-color: #D9D9D9;
+  border: none;
+  border-radius: 12px;
+  padding: 12px;
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 11px;
+  color: #555;
+  min-height: 60px;
+  resize: vertical;
+  margin-bottom: 16px;
+}
+
+.eval-textarea:focus {
+  outline: none;
+}
+
+/* Submit button */
+.eval-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-enviar-aval {
+  background: var(--sep-maroon);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 10px;
+  padding: 6px 24px;
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-enviar-aval:hover {
+  background: #551618;
+}
+
+/* ════════════════════════════════════════
+   MOBILE — Presença
+   ════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  /* Fundo creme na tela */
+  main .container-fluid {
+    background-color: #F2F0EE !important;
+  }
+
+  /* Pill de título */
+  .presence-title-pill {
+    border-radius: 30px !important;
+    width: auto !important;
+    max-width: none !important;
+    margin: 28px 20px 24px 20px !important;
+    font-size: 20px !important;
+    padding: 14px 0 !important;
+  }
+
+  /* Lista de cards */
+  .m-presence-list {
+    display: flex;
+    flex-direction: column;
+    gap: 24px !important;
+    padding: 0 16px 28px 16px;
+  }
+
+  /* Card individual */
+  .m-presence-card {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    background: #D9D9D9;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 14px;
+    gap: 10px;
+    cursor: pointer;
+    margin-bottom: 24px; /* Fallback caso gap falhe */
+    transition: opacity 0.15s;
+  }
+
+  .m-presence-card:last-child {
+    margin-bottom: 0;
+  }
+
+  .m-presence-card:active { opacity: 0.8; }
+
+  /* Informações do aluno */
+  .m-presence-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    flex: 1;
+  }
+
+  .m-presence-name {
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: #333;
+    display: block;
+    margin-bottom: 4px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid #E8E8E8;
+  }
+
+  .m-presence-detail {
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 11px;
+    color: #666;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  /* Container de ações (status + feedback empilhados) */
+  .m-presence-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  /* Retângulo de status */
+  .m-presence-status {
+    width: 68px;
+    height: 32px;
+    border-radius: 8px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: #FFFFFF;
+    text-align: center;
+  }
+
+  .m-status-verde    { background: #3AA600; }
+  .m-status-laranja  { background: #DB8D10; }
+  .m-status-vermelho { background: #c94040; }
+
+  /* Botão feedback ao lado */
+  .m-btn-feedback {
+    background: #8c8c8c;
+    color: #FFFFFF;
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 20px;
+    text-decoration: none;
+    display: inline-block;
+    white-space: nowrap;
+  }
+
+  /* ── Seção de avaliação mobile ── */
+  .m-eval-section {
+    padding: 0 16px 40px 16px;
+  }
+
+  .m-eval-title {
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    color: #000;
+    margin-bottom: 10px;
+    line-height: 1.4;
+  }
+
+  .m-eval-container {
+    background: transparent;
+    border: 2px solid #A8A09B;
+    border-radius: 24px;
+    padding: 24px 16px 16px 16px;
+  }
+
+  .m-eval-criteria {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 4px;
+    margin-bottom: 24px;
+  }
+
+  .m-eval-criterion {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: #000;
+    text-align: center;
+  }
+
+  .m-eval-star {
+    color: var(--sep-maroon);
+    font-size: 20px;
+    cursor: pointer;
+  }
+
+  .bi-star-fill { color: var(--sep-maroon); }
+
+  .m-eval-textarea {
+    width: 100%;
+    background: #EAEAEA;
+    border: 1px solid #CCCCCC;
+    border-radius: 24px;
+    padding: 12px 16px;
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 12px;
+    color: #666;
+    min-height: 48px;
+    resize: none;
+    margin-bottom: 16px;
+  }
+
+  .m-eval-textarea:focus { outline: none; }
+
+  .m-eval-actions { display: flex; justify-content: flex-end; }
+
+  .m-btn-enviar {
+    background: #601F22;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 20px;
+    padding: 6px 32px;
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .m-btn-enviar:hover { background: #551618; }
+}
+

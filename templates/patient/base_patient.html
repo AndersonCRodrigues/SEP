@@ -14,39 +14,19 @@
 <nav class="main-nav" aria-label="Navegação principal">
   <ul class="navbar-nav">
     <li class="nav-item">
-      <a
-        class="nav-link"
-        href="{% url 'patient:home' %}"
-        {% if current == 'home' %}aria-current="page"{% endif %}
-      >Página inicial</a>
+      <a class="nav-link {% if current == 'home' %}active{% endif %}" href="{% url 'patient:home' %}">Página inicial</a>
     </li>
     <li class="nav-item">
-      <a
-        class="nav-link"
-        href="{% url 'patient:agendamentos' %}"
-        {% if current == 'agendamentos' or current == 'solicitar_horario' %}aria-current="page"{% endif %}
-      >Agendamentos</a>
+      <a class="nav-link {% if current == 'agendamentos' or current == 'solicitar_horario' %}active{% endif %}" href="{% url 'patient:agendamentos' %}">Agendamentos</a>
     </li>
     <li class="nav-item">
-      <a
-        class="nav-link"
-        href="{% url 'patient:historico' %}"
-        {% if current == 'historico' or current == 'historico_detalhe' %}aria-current="page"{% endif %}
-      >Histórico</a>
+      <a class="nav-link {% if current == 'historico' or current == 'historico_detalhe' %}active{% endif %}" href="{% url 'patient:historico' %}">Histórico</a>
     </li>
     <li class="nav-item">
-      <a
-        class="nav-link"
-        href="{% url 'patient:triagens' %}"
-        {% if current == 'triagens' or current == 'triagem_detalhe' %}aria-current="page"{% endif %}
-      >Triagem</a>
+      <a class="nav-link {% if current == 'triagens' or current == 'triagem_detalhe' %}active{% endif %}" href="{% url 'patient:triagens' %}">Triagem</a>
     </li>
     <li class="nav-item">
-      <a
-        class="nav-link"
-        href="{% url 'patient:contato' %}"
-        {% if current == 'contato' %}aria-current="page"{% endif %}
-      >Contato</a>
+      <a class="nav-link {% if current == 'contato' %}active{% endif %}" href="{% url 'patient:contato' %}">Contato</a>
     </li>
   </ul>
 </nav>
@@ -54,20 +34,19 @@
 {% endblock %}
 
 {% block user_links %}
-{# TODO: botões sem lógica; ficam para fazer #}
 <li class="nav-item">
-  <button type="button" class="header-action" aria-label="Mensagens">
-    <span aria-hidden="true">✉</span>
+  <button type="button" class="nav-icon-btn" aria-label="Mensagens">
+    <i class="bi bi-envelope"></i>
   </button>
 </li>
-<li class="nav-item">
-  <button type="button" class="header-action" aria-label="Notificações">
-    <span aria-hidden="true">🔔</span>
+<li class="nav-item ms-2">
+  <button type="button" class="nav-icon-btn" aria-label="Notificações">
+    <i class="bi bi-bell"></i>
   </button>
 </li>
-<li class="nav-item">
-  <button type="button" class="header-action" aria-label="Minha conta">
-    <span aria-hidden="true">👤</span>
+<li class="nav-item ms-2">
+  <button type="button" class="nav-icon-btn" aria-label="Minha conta">
+    <i class="bi bi-person-circle"></i>
   </button>
 </li>
 {% endblock %}
@@ -75,7 +54,7 @@
 {% block page_header %}{% endblock %}
 
 {% block footer %}
-<footer class="site-footer">
-  <p>Univassouras</p>
+<footer class="sep-footer text-center">
+  <img src="/static/core/images/logo-home-aluno-vassouras-rodape.png" alt="Univassouras" style="height: 30px;">
 </footer>
 {% endblock %}

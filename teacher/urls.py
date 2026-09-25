@@ -6,8 +6,7 @@ app_name = "teacher"
 
 urlpatterns = [
     path("", views.HomeProfessorView.as_view(), name="home"),
-    # COMENTADO a pedido do front (validação de 12/09) -- ver nota em views.py
-    # path("painel/", views.PainelProfessorView.as_view(), name="painel"),
+    path("painel/", views.PainelProfessorView.as_view(), name="painel"),
     path("cadastrar/", views.cadastrar_professor, name="cadastrar"),
     path("perfil/", views.PerfilProfessorView.as_view(), name="perfil"),
     path("vincular-aluno/", views.vincular_aluno, name="vincular_aluno"),
@@ -40,5 +39,23 @@ urlpatterns = [
         "triagens/<int:patient_id>/",
         views.DefinirTriagemView.as_view(),
         name="triagem_definir",
+    ),
+    # Telas do front, em rota própria enquanto o desenho não é portado para as
+    # telas acima, que já têm consulta e recorte por visibilidade.
+    path(
+        "area/prontuarios/",
+        views.ProntuariosProfessorView.as_view(),
+        name="area_prontuarios",
+    ),
+    path("area/presenca/", views.PresencaProfessorView.as_view(), name="area_presenca"),
+    path(
+        "area/atuacao/",
+        views.AreaAtuacaoProfessorView.as_view(),
+        name="area_atuacao",
+    ),
+    path(
+        "area/triagem/atribuir/",
+        views.TeacherAssignTriageView.as_view(),
+        name="assign_triage",
     ),
 ]

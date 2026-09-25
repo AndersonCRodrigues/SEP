@@ -1,4 +1,9 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'core/css/teacher_home.css' %}" />
+{% endblock %}
 
 {% block title %}Painel do Professor | Sistema SEP{% endblock %}
 {% block breadcrumbs %}

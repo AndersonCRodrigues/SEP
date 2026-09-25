@@ -1,45 +1,175 @@
-{% extends "base.html" %}
+{% extends "home.html" %}
+{% load static %}
 
-{% block title %}Painel do Professor | Sistema SEP{% endblock %}
-
-{% block breadcrumbs %}
-  <li class="breadcrumb-item"><a href="{% url 'home_redirect' %}">Página inicial</a></li>
-  <li class="breadcrumb-item active" aria-current="page">Painel do Professor</li>
+{% block extra_css %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'core/css/teacher_panel.css' %}">
+  <link rel="stylesheet" href="{% static 'core/css/teacher_home.css' %}">
 {% endblock %}
 
-<div class="col-12 col-md-6">
-    <section class="card h-100">
-        <div class="card-body">
-            <h2 class="h5 card-title">Pacientes Encaminhados a Mim</h2>
-            {% if pacientes_encaminhados %}
-            <ul class="list-group list-group-flush">
-                {% for paciente in pacientes_encaminhados %}
-                <li class="list-group-item px-0">{{ paciente.nome_completo }}</li>
-                {% endfor %}
-            </ul>
-            {% else %}
-            <p class="card-text text-body-secondary mb-0">Nenhum paciente encaminhado a você ainda.</p>
-            {% endif %}
-        </div>
-    </section>
-</div>
+{% block home_title %}Meus alunos{% endblock %}
 
-<div class="col-12 col-md-6">
-    <section class="card h-100">
-        <div class="card-body">
-            <h2 class="h5 card-title">Alunos Disponíveis pra Vincular</h2>
-            {% if alunos_disponiveis %}
-            <form method="post" action="{% url 'teacher:vincular_aluno' %}">
-                {% csrf_token %}
-                {{ form_vincular.as_p }}
-                <button type="submit" class="btn btn-primary">Vincular Aluno</button>
-            </form>
-            {% else %}
-            <p class="card-text text-body-secondary mb-0">Não há alunos disponíveis no momento.</p>
-            {% endif %}
+{% block home_content %}
+<div class="col-12">
+
+  {# ── Header mobile (só aparece em telas pequenas) ── #}
+  <div class="mobile-header d-flex d-md-none">
+    <a href="{% url 'teacher:home' %}" class="mobile-back">&#8249;</a>
+    <span class="mobile-greeting">Olá, Professor!</span>
+    <div class="mobile-icons d-flex align-items-center gap-3">
+      <i class="bi bi-bell"></i>
+      <form method="post" action="{% url 'logout' %}" class="m-0 p-0 d-inline-flex">
+        {% csrf_token %}
+        <button type="submit" class="p-0 border-0 bg-transparent text-white d-flex align-items-center" style="line-height: 1;">
+          <i class="bi bi-person-circle" style="font-size: 24px;"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  {# ── Título pill — só mobile ── #}
+  <div class="panel-title-pill d-md-none">
+    Meus alunos
+  </div>
+
+  {# ── Título pill desktop ── #}
+  <div class="panel-title-pill d-none d-md-block">
+    Meus alunos
+  </div>
+
+  {# ── DESKTOP: tabela com header e linhas ── #}
+  <div class="d-none d-md-block">
+    <div class="panel-container">
+      <div class="panel-header">
+        <div>Nome do aluno:</div>
+        <div>Curso e período:</div>
+        <div>Pacientes sob orientação:</div>
+        <div></div>
+      </div>
+
+      <div class="panel-list">
+        {% if alunos_vinculados %}
+          {% for aluno in alunos_vinculados %}
+          <div class="panel-row">
+            <div>{{ aluno.nome_completo }}</div>
+            <div>Psicologia - 8º período</div>
+            <div>{{ aluno.open_cases.count }} pacientes ativos</div>
+            <div class="text-end">
+              <a href="#" class="btn-ver-perfil">Ver perfil</a>
+            </div>
+          </div>
+          {% endfor %}
+          <div class="panel-row empty-row"></div>
+          <div class="panel-row empty-row"></div>
+          <div class="panel-row empty-row"></div>
+        {% else %}
+          <div class="panel-row">
+            <div>Marina Costa</div>
+            <div>Psicologia - 8º período</div>
+            <div>3 pacientes ativos</div>
+            <div class="text-end"><a href="#" class="btn-ver-perfil">Ver perfil</a></div>
+          </div>
+          <div class="panel-row">
+            <div>Pedro Alves</div>
+            <div>Psicologia - 7º período</div>
+            <div>4 pacientes ativos</div>
+            <div class="text-end"><a href="#" class="btn-ver-perfil">Ver perfil</a></div>
+          </div>
+          <div class="panel-row">
+            <div>João Ribeiro</div>
+            <div>Psicologia - 9º período</div>
+            <div>2 pacientes ativos</div>
+            <div class="text-end"><a href="#" class="btn-ver-perfil">Ver perfil</a></div>
+          </div>
+          <div class="panel-row">
+            <div>Beatriz Lima</div>
+            <div>Psicologia - 6º período</div>
+            <div>5 pacientes ativos</div>
+            <div class="text-end"><a href="#" class="btn-ver-perfil">Ver perfil</a></div>
+          </div>
+          <div class="panel-row">
+            <div>Carla Mendes</div>
+            <div>Psicologia - 8º período</div>
+            <div>4 pacientes ativos</div>
+            <div class="text-end"><a href="#" class="btn-ver-perfil">Ver perfil</a></div>
+          </div>
+          <div class="panel-row">
+            <div>Rafael Souza</div>
+            <div>Psicologia - 7º período</div>
+            <div>3 pacientes ativos</div>
+            <div class="text-end"><a href="#" class="btn-ver-perfil">Ver perfil</a></div>
+          </div>
+          <div class="panel-row empty-row"></div>
+          <div class="panel-row empty-row"></div>
+          <div class="panel-row empty-row"></div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="panel-actions">
+      <a href="{% url 'teacher:assign_triage' %}" class="btn-selecionar">Selecionar alunos</a>
+    </div>
+  </div>
+
+  {# ── MOBILE: lista de alunos ── #}
+  <div class="d-block d-md-none" style="margin: 0 -24px -24px -24px;">
+    <div class="m-student-list">
+      {% if alunos_vinculados %}
+        {% for aluno in alunos_vinculados %}
+        <div class="m-student-row">
+          <div class="m-student-info">
+            <span class="m-student-name">{{ aluno.nome_completo }}</span>
+            <span class="m-student-detail"><i class="bi bi-person"></i> Curso: Psicologia – 8º período</span>
+            <span class="m-student-detail"><i class="bi bi-folder"></i> {{ aluno.open_cases.count }} pacientes ativos</span>
+          </div>
+          <a href="#" class="m-btn-ver">Ver</a>
         </div>
-    </section>
-</div>
+        {% endfor %}
+      {% else %}
+        <div class="m-student-row">
+          <div class="m-student-info">
+            <span class="m-student-name">Marina Costa</span>
+            <span class="m-student-detail"><i class="bi bi-person"></i> Curso: Psicologia – 8º período</span>
+            <span class="m-student-detail"><i class="bi bi-folder"></i> 3 pacientes ativos</span>
+          </div>
+          <a href="#" class="m-btn-ver">Ver</a>
+        </div>
+        <div class="m-student-row">
+          <div class="m-student-info">
+            <span class="m-student-name">Pedro Alves</span>
+            <span class="m-student-detail"><i class="bi bi-person"></i> Curso: Psicologia – 7º período</span>
+            <span class="m-student-detail"><i class="bi bi-folder"></i> 4 pacientes ativos</span>
+          </div>
+          <a href="#" class="m-btn-ver">Ver</a>
+        </div>
+        <div class="m-student-row">
+          <div class="m-student-info">
+            <span class="m-student-name">João Ribeiro</span>
+            <span class="m-student-detail"><i class="bi bi-person"></i> Curso: Psicologia – 8º período</span>
+            <span class="m-student-detail"><i class="bi bi-folder"></i> 3 pacientes ativos</span>
+          </div>
+          <a href="#" class="m-btn-ver">Ver</a>
+        </div>
+        <div class="m-student-row">
+          <div class="m-student-info">
+            <span class="m-student-name">Beatriz Lima</span>
+            <span class="m-student-detail"><i class="bi bi-person"></i> Curso: Psicologia – 8º período</span>
+            <span class="m-student-detail"><i class="bi bi-folder"></i> 3 pacientes ativos</span>
+          </div>
+          <a href="#" class="m-btn-ver">Ver</a>
+        </div>
+        <div class="m-student-row">
+          <div class="m-student-info">
+            <span class="m-student-name">Carla Mendes</span>
+            <span class="m-student-detail"><i class="bi bi-person"></i> Curso: Psicologia – 8º período</span>
+            <span class="m-student-detail"><i class="bi bi-folder"></i> 3 pacientes ativos</span>
+          </div>
+          <a href="#" class="m-btn-ver">Ver</a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
 
 </div>
 {% endblock %}
+
