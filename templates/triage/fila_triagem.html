@@ -11,7 +11,7 @@
             {% for paciente in pacientes_aguardando %}
             <li class="list-group-item d-flex justify-content-between align-items-center px-0">
                 {{ paciente.nome_completo }}
-                <a href="{% url 'create_triage' paciente.pk %}" class="btn btn-primary btn-sm">Iniciar Triagem</a>
+                <a href="{% url 'triage:create_triage' paciente.pk %}" class="btn btn-primary btn-sm">Iniciar Triagem</a>
             </li>
             {% empty %}
             <li class="list-group-item px-0 text-body-secondary">Nenhum paciente aguardando triagem.</li>
