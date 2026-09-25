@@ -39,6 +39,14 @@ def get_iarv_form_class(patient):
     return IarvAdultForm
 
 
+def sem_data_de_nascimento(request, patient):
+    messages.error(
+        request,
+        f"A triagem de {patient.get_full_name()} precisa da data de nascimento, "
+        "que ainda não está no cadastro do paciente.",
+    )
+
+
 def get_iarv_form_class_for_instance(iarv):
     if isinstance(iarv, IarvChildForm.Meta.model):
         return IarvChildForm
@@ -100,7 +108,11 @@ def create_triage(request, patient_id):
     except Student.DoesNotExist:
         raise PermissionDenied("Apenas alunos podem criar uma ficha de triagem.")
 
-    iarv_form_class = get_iarv_form_class(patient)
+    try:
+        iarv_form_class = get_iarv_form_class(patient)
+    except ValidationError:
+        sem_data_de_nascimento(request, patient)
+        return redirect("students:triagens")
 
     if request.method == "POST":
         triage_form = TriageRecordForm(request.POST)
@@ -155,12 +167,21 @@ def edit_triage(request, pk):
     else:
         raise PermissionDenied("Você não tem acesso a essa triagem.")
 
-    iarv = triage.get_iarv()
-    iarv_form_class = (
-        get_iarv_form_class_for_instance(iarv)
-        if iarv
-        else get_iarv_form_class(triage.patient)
+    destino = (
+        "triage_detail_student"
+        if user.role == Role.ALUNO
+        else "triage_detail_supervisor"
     )
+
+    iarv = triage.get_iarv()
+    if iarv:
+        iarv_form_class = get_iarv_form_class_for_instance(iarv)
+    else:
+        try:
+            iarv_form_class = get_iarv_form_class(triage.patient)
+        except ValidationError:
+            sem_data_de_nascimento(request, triage.patient)
+            return redirect(destino, pk=pk)
 
     if request.method == "POST":
         triage_form = TriageRecordForm(request.POST, instance=triage)
@@ -171,10 +192,7 @@ def edit_triage(request, pk):
                 triage_form.save()
                 iarv_form.save()
             messages.success(request, "Triagem atualizada com sucesso.")
-
-            if user.role == Role.ALUNO:
-                return redirect("triage_detail_student", pk=pk)
-            return redirect("triage_detail_supervisor", pk=pk)
+            return redirect(destino, pk=pk)
     else:
         triage_form = TriageRecordForm(instance=triage)
         iarv_form = iarv_form_class(instance=iarv)
@@ -183,12 +201,7 @@ def edit_triage(request, pk):
         "triage": triage,
         "triage_form": triage_form,
         "iarv_form": iarv_form,
-        "cancel_url": reverse(
-            "triage_detail_student"
-            if user.role == Role.ALUNO
-            else "triage_detail_supervisor",
-            args=[pk],
-        ),
+        "cancel_url": reverse(destino, args=[pk]),
     }
 
     return render(request, "triage/edit_triage.html", context)
