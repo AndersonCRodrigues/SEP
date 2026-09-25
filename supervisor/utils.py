@@ -1,9 +1,11 @@
-import os
-import string
-import secrets
 import logging
-from django.core.mail import send_mail
+import os
+import secrets
+import string
+
 from django.conf import settings
+from django.core.mail import send_mail
+
 from audit.models import SecurityLog
 
 logger = logging.getLogger(__name__)
@@ -46,7 +48,7 @@ def enviar_email_credenciais(user, senha_temporaria, usuario_responsavel=None):
         SecurityLog.objects.create(
             user=usuario_responsavel or user,
             action="FALHA_ENVIO_EMAIL",
-            details=f"Erro SMTP ao tentar notificar {user.email}: {str(e)}",
+            details=f"Erro SMTP ao tentar notificar {user.email}: {e!s}",
             target_model="Patient",
             target_id=user.pk,
         )

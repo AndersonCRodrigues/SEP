@@ -1,0 +1,15 @@
+<section class="summary"{% if id %} aria-labelledby="{{ id }}"{% endif %}>
+    <h2 class="visually-hidden"{% if id %} id="{{ id }}"{% endif %}>{{ title|default:"Resumo" }}</h2>
+    <ul class="summary-list">
+        {% for indicator in indicators %}
+        <li class="indicator">
+            <span class="indicator-label">{{ indicator.label }}</span>
+            <strong class="indicator-value">{{ indicator.value }}</strong>
+        </li>
+        {% empty %}
+        <li class="indicator-empty">
+            {% include "components/empty_state.html" with message=empty_message %}
+        </li>
+        {% endfor %}
+    </ul>
+</section>

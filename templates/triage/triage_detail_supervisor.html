@@ -35,22 +35,22 @@
         <section class="card">
             <div class="card-body d-flex flex-wrap gap-2">
                 {% if pode_editar %}
-                <a href="{% url 'edit_triage' triage.pk %}" class="btn btn-outline-secondary">Editar Ficha</a>
+                <a href="{% url 'triage:edit_triage' triage.pk %}" class="btn btn-outline-secondary">Editar Ficha</a>
                 {% endif %}
 
                 {% if pode_dar_feedback %}
-                <a href="{% url 'create_feedback' triage.pk %}" class="btn btn-outline-primary">Enviar Parecer</a>
+                <a href="{% url 'triage:create_feedback' triage.pk %}" class="btn btn-outline-primary">Enviar Parecer</a>
                 {% endif %}
 
                 {% if pode_travar_edicao %}
-                <form method="post" action="{% url 'lock_triage_editing' triage.pk %}">
+                <form method="post" action="{% url 'triage:lock_triage_editing' triage.pk %}">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-outline-warning">Finalizar Edição do Aluno</button>
                 </form>
                 {% endif %}
 
                 {% if pode_encaminhar %}
-                <a href="{% url 'create_referral' triage.pk %}" class="btn btn-primary">Encaminhar</a>
+                <a href="{% url 'triage:create_referral' triage.pk %}" class="btn btn-primary">Encaminhar</a>
                 {% endif %}
             </div>
         </section>

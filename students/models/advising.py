@@ -3,9 +3,11 @@ from django.core.validators import RegexValidator
 from django.db import models, transaction
 from django.db.models import Q, UniqueConstraint
 from django.utils import timezone
+
 from core.models import CustomUser
 from core.permissions import ALL, BusinessRulesMixin, RoleScopedQuerySet
 from teacher.models import Teacher
+
 from .scoping import current_term
 from .student import Student
 

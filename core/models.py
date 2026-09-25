@@ -1,8 +1,9 @@
-from django.db import models
-from django.core.exceptions import ValidationError
 from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ValidationError
+from django.db import models
 from django.utils.translation import gettext_lazy as _
-from localflavor.br.models import BRStateField, BRPostalCodeField
+from localflavor.br.models import BRPostalCodeField, BRStateField
+
 from .fields import (
     DigitsBRCPFField,
     collapse_spaces,
