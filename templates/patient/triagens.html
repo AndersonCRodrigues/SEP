@@ -1,36 +1,124 @@
 {% extends "patient/base_patient.html" %}
 {% load components %}
+{% load static %}
 
 {% block title %}Minhas triagens{% endblock %}
 
+{% block extra_css %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'core/css/patient_home.css' %}?v=13"> <!-- herdar header mobile -->
+  <style>
+    @media (max-width: 767.98px) {
+      html, body { background-color: #F8F9FA !important; }
+      .sep-navbar  { display: none !important; }
+      main > .container-fluid { padding: 0 !important; }
+    }
+  </style>
+{% endblock %}
+
 {% block content %}
-<h1 class="page-banner">Minhas triagens</h1>
 
-{% if triages_error %}
-{% include "components/error_state.html" with message=triages_error retry_url=request.path %}
-{% else %}
-{% if in_progress and triages %}
-<p class="triage-progress" role="status">{{ in_progress_message }}</p>
-{% endif %}
+<!-- ══════════════════════════════════════
+     MOBILE TRIAGEM (MOCK DO DETALHE)
+     ══════════════════════════════════════ -->
+<div class="d-block d-md-none" style="min-height: 100vh; display: flex; flex-direction: column; background-color: #F8F9FA;">
+  
+  <!-- Header Mobile -->
+  <div class="mobile-header" style="background-color: #6D1D20; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; padding-bottom: 20px;">
+    <a href="{% url 'patient:home' %}" class="mobile-back"></a>
+    <span class="mobile-greeting">Olá, {{ request.user.first_name|default:"Paciente" }}!</span>
+    <div class="mobile-icons d-flex align-items-center gap-3">
+      <i class="bi bi-bell"></i>
+      <form method="post" action="{% url 'logout' %}" class="m-0 p-0 d-inline-flex">
+        {% csrf_token %}
+        <button type="submit" class="p-0 border-0 bg-transparent text-white d-flex align-items-center" style="line-height: 1;">
+          <i class="bi bi-person-circle" style="font-size: 24px;"></i>
+        </button>
+      </form>
+    </div>
+  </div>
 
-{% section title="Triagens concluídas" class="triages" id="triages-title" %}
-<ul class="triage-list">
-  {% for item in triages %}
-  <li class="triage">
-    <h3 class="triage-title">
-      Triagem de <time datetime="{{ item.created_at|date:'Y-m-d' }}">{{ item.created_at|date:"d/m/Y" }}</time>
-    </h3>
-    {% include "components/badge.html" with label=item.label level=item.level %}
-    <a class="triage-link" href="{% url 'patient:triagem_detalhe' item.pk %}">
-      Ver detalhes<span class="visually-hidden"> da triagem de {{ item.created_at|date:"d/m/Y" }}</span>
-    </a>
-  </li>
-  {% empty %}
-  <li class="triage-empty">
-    {% include "components/empty_state.html" with message=empty_message %}
-  </li>
-  {% endfor %}
-</ul>
-{% endsection %}
-{% endif %}
+  <div class="px-4 text-center mt-4 flex-grow-1">
+    
+    <!-- Ícone verde de check -->
+    <div style="width: 120px; height: 120px; border-radius: 50%; background-color: #3AA91A; margin: 20px auto 20px auto; display: flex; align-items: center; justify-content: center;">
+      <i class="bi bi-check-lg" style="color: white; font-size: 70px; -webkit-text-stroke: 3px white;"></i>
+    </div>
+
+    <!-- Textos -->
+    <h1 style="font-family: 'Museo Sans', sans-serif; font-size: 22px; font-weight: 800; color: #000; margin-bottom: 10px;">
+      Sua triagem foi concluída
+    </h1>
+    <p style="font-family: 'Museo Sans', sans-serif; font-size: 13px; font-weight: 500; color: #333; margin-bottom: 30px; padding: 0 10px;">
+      Preenchida em {{ triages.0.created_at|date:"d/m/Y"|default:"20/06/2026" }} e já encaminhada para acompanhamento.
+    </p>
+
+    <!-- Caixa cinza de infos -->
+    <div style="background-color: #8E8989; border-radius: 16px; padding: 24px 16px; margin-bottom: 40px; text-align: left;">
+      
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+        <span style="font-family: 'Museo Sans', sans-serif; font-size: 13px; font-weight: 800; color: white;">Encaminhada por:</span>
+        <span style="font-family: 'Museo Sans', sans-serif; font-size: 13px; font-weight: 400; color: #EEE;">{{ triages.0.closed_by|default:"Supervisor Geral" }}</span>
+      </div>
+      <div style="border-bottom: 1px solid white; margin-bottom: 20px;"></div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+        <span style="font-family: 'Museo Sans', sans-serif; font-size: 13px; font-weight: 800; color: white;">Professor responsável:</span>
+        <span style="font-family: 'Museo Sans', sans-serif; font-size: 13px; font-weight: 400; color: #EEE;">
+          {% if triages.0 and triages.0.teachers %}
+            {{ triages.0.teachers|join:", " }}
+          {% else %}
+            Prof. Renata Alves
+          {% endif %}
+        </span>
+      </div>
+      <div style="border-bottom: 1px solid white;"></div>
+
+    </div>
+
+    <!-- Botão Continuar -->
+    <div class="mb-5 pb-4 text-center">
+      <a href="{% url 'patient:home' %}" style="background-color: #6D1D20; color: white; padding: 12px 40px; border-radius: 20px; text-decoration: none; font-weight: 700; font-family: 'Museo Sans', sans-serif; font-size: 14px; display: inline-block;">
+        Continuar
+      </a>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     DESKTOP TRIAGENS (LISTA ORIGINAL)
+     ══════════════════════════════════════ -->
+<div class="d-none d-md-block">
+  <h1 class="page-banner">Minhas triagens</h1>
+
+  {% if triages_error %}
+  {% include "components/error_state.html" with message=triages_error retry_url=request.path %}
+  {% else %}
+  {% if in_progress and triages %}
+  <p class="triage-progress" role="status">{{ in_progress_message }}</p>
+  {% endif %}
+
+  {% section title="Triagens concluídas" class="triages" id="triages-title" %}
+  <ul class="triage-list">
+    {% for item in triages %}
+    <li class="triage">
+      <h3 class="triage-title">
+        Triagem de <time datetime="{{ item.created_at|date:'Y-m-d' }}">{{ item.created_at|date:"d/m/Y" }}</time>
+      </h3>
+      {% include "components/badge.html" with label=item.label level=item.level %}
+      <a class="triage-link" href="{% url 'patient:triagem_detalhe' item.pk %}">
+        Ver detalhes<span class="visually-hidden"> da triagem de {{ item.created_at|date:"d/m/Y" }}</span>
+      </a>
+    </li>
+    {% empty %}
+    <li class="triage-empty">
+      {% include "components/empty_state.html" with message=empty_message %}
+    </li>
+    {% endfor %}
+  </ul>
+  {% endsection %}
+  {% endif %}
+</div>
 {% endblock %}

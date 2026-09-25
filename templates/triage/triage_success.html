@@ -1,0 +1,139 @@
+{% extends "home.html" %}
+{% load static %}
+
+{% block extra_css %}
+  {{ block.super }}
+  <style>
+    .success-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+      min-height: 60vh;
+    }
+
+    .success-icon {
+      width: 90px;
+      height: 90px;
+      background-color: #3AA600;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 28px;
+    }
+
+    .success-icon svg {
+      width: 46px;
+      height: 46px;
+      fill: none;
+      stroke: #ffffff;
+      stroke-width: 4;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .success-title {
+      font-family: 'Museo Sans', sans-serif;
+      font-size: 26px;
+      font-weight: 700;
+      color: #000000;
+      margin-bottom: 28px;
+    }
+
+    .success-summary {
+      width: 100%;
+      max-width: 420px;
+      background-color: #C9C3C3;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 36px;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 20px;
+      font-family: 'Museo Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: #000000;
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+    }
+
+    .summary-row:last-child {
+      border-bottom: none;
+    }
+
+    .summary-label {
+      font-weight: 700;
+    }
+
+    .summary-value {
+      font-weight: 400;
+      text-align: right;
+    }
+
+    .btn-voltar {
+      background-color: #6D1D20;
+      color: #FFFFFF;
+      font-family: 'Museo Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      padding: 14px 32px;
+      border-radius: 30px;
+      border: none;
+      text-decoration: none;
+      transition: background 0.2s ease;
+      display: inline-block;
+    }
+
+    .btn-voltar:hover {
+      background-color: #591619;
+      color: #FFFFFF;
+    }
+  </style>
+{% endblock %}
+
+{% block home_title %}Triagem Concluída{% endblock %}
+
+{% block home_content %}
+<div class="col-12">
+  <div class="success-wrapper">
+
+    <!-- Ícone de check verde -->
+    <div class="success-icon">
+      <svg viewBox="0 0 24 24">
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+    </div>
+
+    <!-- Título -->
+    <h1 class="success-title">Triagem concluída com sucesso!</h1>
+
+    <!-- Resumo -->
+    <div class="success-summary">
+      <div class="summary-row">
+        <span class="summary-label">Paciente</span>
+        <span class="summary-value">{{ triage.patient.nome_completo|default:"José Santos #9872736" }} #{{ triage.patient.pk|default:"" }}</span>
+      </div>
+      <div class="summary-row">
+        <span class="summary-label">Entrevistado por</span>
+        <span class="summary-value">{{ triage.student_author.nome_completo|default:"Aluna Marina Costa" }}</span>
+      </div>
+      <div class="summary-row">
+        <span class="summary-label">Concluído em</span>
+        <span class="summary-value">{{ triage.created_at|date:"d/m/Y"|default:"13/08/2026" }} às {{ triage.created_at|time:"H:i"|default:"12:45" }}</span>
+      </div>
+    </div>
+
+    <!-- Botão de retorno -->
+    <a href="{% url 'students:triagens' %}" class="btn-voltar">
+      Voltar para Triagens a Realizar
+    </a>
+
+  </div>
+</div>
+{% endblock %}

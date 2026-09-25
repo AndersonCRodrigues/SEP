@@ -1,22 +1,34 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from students.models import Advising, advisees_visible_to
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.models import Q
-from django.utils import timezone
-from django.views.generic import ListView, DetailView, TemplateView, UpdateView
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
-from .forms import ProfessorCreationForm, PerfilProfessorForm
-from .models import Teacher
-from core.utils import sincronizar_grupo
-from django.core.exceptions import ValidationError
+from django.utils import timezone
+from django.views.generic import DetailView, ListView, TemplateView, UpdateView
+
 from core.models import CustomUser
-from .forms import VincularAlunoForm
-from students.models import StudentActivity
-from .forms import StudentActivityForm, PerformanceReviewForm
+from core.utils import sincronizar_grupo
 from patient.models import Patient
+from django.utils.timesince import timesince
+
+from patient.models import ProgressNote
+from students.models import (
+    Advising,
+    CaseAssignment,
+    StudentActivity,
+    advisees_visible_to,
+)
+
+from .forms import (
+    PerfilProfessorForm,
+    PerformanceReviewForm,
+    ProfessorCreationForm,
+    StudentActivityForm,
+    VincularAlunoForm,
+)
+from .models import Teacher
 
 
 class HomeProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
@@ -48,12 +60,8 @@ class HomeProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
             mes, ano = hoje.month, hoje.year
 
         data_referencia = date(ano, mes, 1)
-        mes_anterior, ano_anterior = (
-            (12, ano - 1) if mes == 1 else (mes - 1, ano)
-        )
-        mes_seguinte, ano_seguinte = (
-            (1, ano + 1) if mes == 12 else (mes + 1, ano)
-        )
+        mes_anterior, ano_anterior = (12, ano - 1) if mes == 1 else (mes - 1, ano)
+        mes_seguinte, ano_seguinte = (1, ano + 1) if mes == 12 else (mes + 1, ano)
 
         # `scheduled_at` é guardado em UTC (USE_TZ=True), mas o "mês" que o
         # calendário mostra é o mês local (o mesmo usado por
@@ -70,9 +78,7 @@ class HomeProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
             datetime(ano_seguinte, mes_seguinte, 1)
         )
 
-        agendamentos_mes = Appointment.objects.visible_to(
-            self.request.user
-        ).filter(
+        agendamentos_mes = Appointment.objects.visible_to(self.request.user).filter(
             scheduled_at__gte=inicio_mes,
             scheduled_at__lt=inicio_mes_seguinte,
             status=Appointment.Status.SCHEDULED,
@@ -97,7 +103,7 @@ class HomeProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         from patient.models import Patient, ProgressNote
-        from students.models import Attendance, Student
+        from students.models import Attendance
 
         context = super().get_context_data(**kwargs)
         alunos = advisees_visible_to(self.request.user)
@@ -116,9 +122,9 @@ class HomeProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         ).count()
         context["total_para_presenca"] = alunos.count()
 
-        evolucoes_pendentes = ProgressNote.objects.visible_to(
-            self.request.user
-        ).filter(confirmed_at__isnull=True)
+        evolucoes_pendentes = ProgressNote.objects.visible_to(self.request.user).filter(
+            confirmed_at__isnull=True
+        )
         context["avaliacoes_pendentes_total"] = evolucoes_pendentes.count()
 
         atividades = []
@@ -199,7 +205,10 @@ class PainelProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView)
     template_name = "teacher/teacher_panel.html"
 
     def test_func(self):
-        return self.request.user.role == CustomUser.Role.PROFESSOR
+        return self.request.user.role in (
+            CustomUser.Role.PROFESSOR,
+            CustomUser.Role.SUPERVISOR,
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -207,7 +216,12 @@ class PainelProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView)
 
         professor = get_object_or_404(Teacher, pk=self.request.user.pk)
 
-        context["alunos_vinculados"] = professor.current_advisees.all()
+        if professor.role == CustomUser.Role.SUPERVISOR:
+            context["alunos_vinculados"] = Student.objects.filter(
+                current_advisor__isnull=False
+            )
+        else:
+            context["alunos_vinculados"] = professor.current_advisees.all()
         # Professor só recebe o que o Supervisor escolheu especificamente
         # pra ele — isso é responsible_teachers no Patient, não o Referral
         # em si (que é área-based e é coisa de Supervisor).
@@ -220,6 +234,8 @@ class PainelProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView)
         context["form_vincular"] = VincularAlunoForm()
         context["form_horas"] = StudentActivityForm(user=professor)
         return context
+
+
 # COMENTADO a pedido do front (validação de 12/09): a decisão do Card 1 é
 # que cada papel tenha uma única tela inicial (ver "Mapa de Rotas e
 # Permissões", seção Card 1). teacher:home já absorveu resumo/atividades/
@@ -287,7 +303,6 @@ def vincular_aluno(request):
             messages.error(request, "Corrija os erros do formulário de vínculo.")
 
     return redirect(_painel_redirect_for(request.user))
-    
 
 
 @login_required
@@ -314,7 +329,6 @@ def lancar_horas(request):
             messages.error(request, "Corrija os erros do formulário de horas.")
 
     return redirect(_painel_redirect_for(request.user))
-   
 
 
 # ---------------------------------------------------------------------------
@@ -545,10 +559,12 @@ class PresencaFeedbackView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
         )
 
     def get_context_data(self, **kwargs):
-        from students.models import Attendance, PerformanceReview, Student
+        from students.models import Attendance, PerformanceReview
 
         context = super().get_context_data(**kwargs)
-        alunos = advisees_visible_to(self.request.user).order_by("first_name", "last_name")
+        alunos = advisees_visible_to(self.request.user).order_by(
+            "first_name", "last_name"
+        )
 
         # Busca por nome (a pedido do front, 19/09): igual à de "Meus
         # Alunos" -- filtra a lista antes de montar tabela/<select>, além
@@ -573,9 +589,7 @@ class PresencaFeedbackView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
         # isdigit() evita ValueError do Django ao comparar string nao
         # numerica com pk inteiro (ex.: ?aluno=abc manipulado na URL).
         aluno_selecionado = (
-            alunos.filter(pk=aluno_id).first()
-            if aluno_id.isdigit()
-            else None
+            alunos.filter(pk=aluno_id).first() if aluno_id.isdigit() else None
         )
         alunos_para_tabela = [aluno_selecionado] if aluno_selecionado else alunos
 
@@ -690,10 +704,11 @@ class DefinirTriagemView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
         return Patient.objects.visible_to(self.request.user)
 
     def get_context_data(self, **kwargs):
-        from students.models import Student
 
         context = super().get_context_data(**kwargs)
-        alunos = advisees_visible_to(self.request.user).order_by("first_name", "last_name")
+        alunos = advisees_visible_to(self.request.user).order_by(
+            "first_name", "last_name"
+        )
 
         # MOCK: ainda não foi definido como produto/backend que essa tela do
         # Figma mapeia para CaseAssignment (limite de alunos por paciente).
@@ -723,3 +738,78 @@ class DefinirTriagemView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
             messages.warning(request, "Nenhum aluno foi selecionado.")
 
         return redirect("teacher:triagens")
+
+
+# ---------------------------------------------------------------------------
+# Telas do front: mesma área, desenho novo. Ficam em rota própria para não
+# competirem com as telas que já têm consulta e recorte por visibilidade.
+# ---------------------------------------------------------------------------
+
+
+class ProntuariosProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    template_name = "teacher/teacher_records.html"
+
+    def test_func(self):
+        return self.request.user.role in (
+            CustomUser.Role.PROFESSOR,
+            CustomUser.Role.SUPERVISOR,
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        professor = get_object_or_404(Teacher, pk=self.request.user.pk)
+
+        casos = (
+            CaseAssignment.objects.open()
+            .filter(student__current_advisor=professor)
+            .select_related("patient", "student")
+            .order_by("-start_date")
+        )
+
+        enriquecidos = []
+        for caso in casos:
+            ultima_nota = (
+                ProgressNote.objects.filter(patient=caso.patient, student=caso.student)
+                .order_by("-updated_at")
+                .first()
+            )
+            caso.ultima_evolucao = (
+                timesince(ultima_nota.updated_at) + " atrás" if ultima_nota else None
+            )
+            caso.pendente_revisao = (
+                ultima_nota.pending_confirmation if ultima_nota else False
+            )
+            enriquecidos.append(caso)
+
+        context["casos"] = enriquecidos
+        return context
+
+
+class PresencaProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    template_name = "teacher/teacher_presence.html"
+
+    def test_func(self):
+        return self.request.user.role in (
+            CustomUser.Role.PROFESSOR,
+            CustomUser.Role.SUPERVISOR,
+        )
+
+
+class AreaAtuacaoProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    template_name = "teacher/teacher_area.html"
+
+    def test_func(self):
+        return self.request.user.role in (
+            CustomUser.Role.PROFESSOR,
+            CustomUser.Role.SUPERVISOR,
+        )
+
+
+class TeacherAssignTriageView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    template_name = "teacher/teacher_assign_triage.html"
+
+    def test_func(self):
+        return self.request.user.role in (
+            CustomUser.Role.PROFESSOR,
+            CustomUser.Role.SUPERVISOR,
+        )

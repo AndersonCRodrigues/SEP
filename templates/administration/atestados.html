@@ -9,6 +9,305 @@
 
 {% block content %}
 <h1 class="page-banner">Emitir atestados</h1>
+{% block extra_css %}
+<style>
+  .person-picker {
+    position: relative;
+    display: inline-block;
+    width: min(100%, 28rem);
+    vertical-align: top;
+  }
+
+  .person-picker .person-filter {
+    width: 100%;
+  }
+
+  .person-picker select {
+    position: absolute;
+    top: calc(100% + 2px);
+    left: 0;
+    z-index: 10;
+    width: 100%;
+    padding: 0.25rem 0;
+    overflow-y: auto;
+    background-color: var(--bs-body-bg);
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.375rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  }
+
+  .person-picker select:empty {
+    display: none;
+  }
+
+  .person-picker option {
+    padding: 0.375rem 0.75rem;
+    cursor: pointer;
+  }
+
+  .person-picker option:hover {
+    background-color: var(--bs-secondary-bg);
+  }
+
+  .person-picker option:checked {
+    color: #fff;
+    background: var(--bs-primary) linear-gradient(var(--bs-primary), var(--bs-primary));
+  }
+
+  .person-picker .person-filter-status {
+    position: absolute;
+    top: calc(100% + 2px);
+    left: 0;
+    z-index: 10;
+    width: 100%;
+    padding: 0.375rem 0.75rem;
+    color: var(--bs-secondary-color);
+    background-color: var(--bs-body-bg);
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.375rem;
+  }
+
+  .person-picker .person-filter-status:empty {
+    display: none;
+  }
+
+  @media (max-width: 576px) {
+    .person-picker option {
+      padding: 0.375rem 0.5rem;
+      font-size: 0.875rem;
+    }
+  }
+
+  /* Estilos Mobile para Atestados */
+  @media (max-width: 767px) {
+    body { background-color: #F8F9FA !important; }
+    .sep-navbar { display: none !important; }
+    main .container-fluid { padding: 0 !important; }
+
+    /* Header e Pílula */
+    .atestado-m-header {
+      background-color: var(--sep-maroon);
+      padding: 20px 20px 30px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: white;
+      border-bottom-left-radius: 35px;
+      border-bottom-right-radius: 35px;
+      margin-bottom: 25px;
+    }
+    .atestado-m-header a.back-btn {
+      color: white;
+      font-size: 26px;
+      line-height: 1;
+      text-decoration: none;
+    }
+    .atestado-m-greeting {
+      font-family: 'Museo Sans', sans-serif;
+      font-weight: 800;
+      font-size: 18px;
+      flex: 1;
+      margin-left: 10px;
+    }
+    .atestado-m-icons {
+      display: flex;
+      gap: 15px;
+      font-size: 20px;
+    }
+    .atestado-m-pill {
+      background-color: var(--sep-maroon);
+      color: white;
+      font-family: 'Museo Sans', sans-serif;
+      font-size: 18px;
+      font-weight: 800;
+      text-align: center;
+      border-radius: 22px;
+      padding: 12px;
+      margin: 0 20px 20px 20px;
+    }
+
+    /* Container do Formulário */
+    .atestado-m-form {
+      padding: 0 20px 40px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Tipo Documento Toggle */
+    .atestado-m-label {
+      font-family: 'Museo Sans', sans-serif;
+      font-weight: 800;
+      font-size: 14px;
+      color: #000;
+      margin-bottom: 8px;
+    }
+    .atestado-m-toggles {
+      display: flex;
+      gap: 10px;
+    }
+    .atestado-m-toggle {
+      flex: 1;
+      background-color: var(--sep-maroon);
+      color: white;
+      border: none;
+      border-radius: 18px;
+      padding: 10px;
+      font-family: 'Museo Sans', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    /* Inputs parecidos com o mockup (borda e cinza claro) */
+    .atestado-m-input-box {
+      position: relative;
+    }
+    .atestado-m-input {
+      width: 100%;
+      background-color: #F4F4F4;
+      border: 1px solid #000;
+      border-radius: 15px;
+      padding: 16px 16px;
+      font-family: 'Museo Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: #000;
+    }
+    .atestado-m-input::placeholder { color: #000; font-weight: 700; }
+    
+    .atestado-m-input-icon {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #000;
+      font-size: 16px;
+    }
+    
+    textarea.atestado-m-input {
+      min-height: 100px;
+      resize: none;
+    }
+
+    /* Pílulas de Assinatura e Arquivo */
+    .atestado-m-info-pill {
+      background-color: #D9D9D9;
+      border-radius: 12px;
+      padding: 12px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: 'Museo Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: #000;
+      margin-bottom: 5px;
+    }
+    .atestado-m-info-value {
+      font-weight: 800;
+    }
+    
+    .atestado-m-file-pill {
+      background-color: #D9D9D9;
+      border-radius: 12px;
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Museo Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 800;
+      color: #000;
+      margin-bottom: 20px;
+    }
+
+    /* Botão Cadastrar */
+    .atestado-m-submit {
+      background-color: var(--sep-maroon);
+      color: white;
+      font-family: 'Museo Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      border: none;
+      border-radius: 15px;
+      padding: 12px;
+      width: 170px;
+      margin: 0 auto;
+      display: block;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- ======================= -->
+<!-- VERSÃO MOBILE (Mockup)  -->
+<!-- ======================= -->
+<div class="d-block d-md-none">
+  <!-- Header -->
+  <div class="atestado-m-header">
+    <a href="javascript:history.back()" class="back-btn"><i class="bi bi-chevron-left"></i></a>
+    <div class="atestado-m-greeting">
+      Olá, Professor!
+    </div>
+    <div class="atestado-m-icons">
+      <i class="bi bi-bell-fill"></i>
+      <i class="bi bi-person-circle"></i>
+    </div>
+  </div>
+
+  <!-- Pílula de Título -->
+  <div class="atestado-m-pill">
+    Emitir atestados
+  </div>
+
+  <!-- Form Mobile -->
+  <div class="atestado-m-form">
+    
+    <div>
+      <div class="atestado-m-label">Tipo de documento</div>
+      <div class="atestado-m-toggles">
+        <div class="atestado-m-toggle">Atestado</div>
+        <div class="atestado-m-toggle">Declaração</div>
+      </div>
+    </div>
+
+    <!-- Inputs Mockados visualmente iguais ao print -->
+    <div class="atestado-m-input-box">
+      <input type="text" class="atestado-m-input" placeholder="Buscar paciente ou aluno">
+      <i class="bi bi-search atestado-m-input-icon"></i>
+    </div>
+
+    <div class="atestado-m-input-box">
+      <input type="text" class="atestado-m-input" placeholder="Data do atendimento">
+    </div>
+
+    <div class="atestado-m-input-box">
+      <textarea class="atestado-m-input" placeholder="Observações (opcional)"></textarea>
+    </div>
+
+    <div class="atestado-m-info-pill">
+      <span>Assinado por</span>
+      <span class="atestado-m-info-value">Secretaria - Ana Paula</span>
+    </div>
+
+    <div class="atestado-m-file-pill">
+      <i class="bi bi-file-earmark-pdf"></i>
+      Atestado_NomeDoPaciente
+    </div>
+
+    <button class="atestado-m-submit">Cadastrar</button>
+
+  </div>
+
+</div>
+
+<!-- ======================= -->
+<!-- VERSÃO DESKTOP ORIGINAL -->
+<!-- ======================= -->
+<div class="d-none d-md-block">
+<h1 class="certificates-banner">Emitir atestados</h1>
 
 <div class="certificates">
   <div class="certificate-form">

@@ -1,7 +1,9 @@
 from django.db import DatabaseError
 from django.utils import timezone
 from django.views.generic import TemplateView
+
 from documents.models import AttendanceCertificate, InternshipDeclaration
+
 from .access import AdministrativeOnly
 
 

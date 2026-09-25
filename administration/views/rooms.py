@@ -1,7 +1,9 @@
 from django.db import DatabaseError
 from django.views.generic import TemplateView
+
 from scheduling.models import Room
 from scheduling.occupancy import busy_until, running_appointments
+
 from .access import AdministrativeOnly
 
 

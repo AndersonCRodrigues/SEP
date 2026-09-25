@@ -82,7 +82,9 @@ class Command(BaseCommand):
             atividades_criadas += 1
 
         self.stdout.write(
-            self.style.SUCCESS(f"{atividades_criadas} atividade(s) de exemplo criada(s).")
+            self.style.SUCCESS(
+                f"{atividades_criadas} atividade(s) de exemplo criada(s)."
+            )
         )
 
         area = AreaActing.objects.first()
@@ -219,8 +221,7 @@ class Command(BaseCommand):
             except ValidationError as exc:
                 self.stdout.write(
                     self.style.WARNING(
-                        f"Não foi possível criar o caso de "
-                        f"{aluno.nome_completo}: {exc}"
+                        f"Não foi possível criar o caso de {aluno.nome_completo}: {exc}"
                     )
                 )
                 continue

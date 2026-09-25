@@ -1,5 +1,6 @@
 from django.db.models import Q
 from django.utils import timezone
+
 from core.models import CustomUser
 from core.permissions import ALL, RoleScopedQuerySet, effective_role, roles_for
 from teacher.models import Teacher

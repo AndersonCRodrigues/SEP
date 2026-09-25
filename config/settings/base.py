@@ -1,8 +1,9 @@
 import base64
 import os
 from pathlib import Path
-from django.core.exceptions import ImproperlyConfigured
+
 from django.contrib.messages import constants as messages
+from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -182,6 +183,9 @@ STORAGES = {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_DIRS = [BASE_DIR / "core" / "static"]
+
 
 AUTH_USER_MODEL = "core.CustomUser"
 LOGIN_URL = "login"
@@ -210,18 +214,25 @@ SEP_CONTACT = {
 # "Path", "base64" etc. vazem para dev.py/prod.py via `from .base import *`
 # e restringe o wildcard só ao que é de fato uma Django setting.
 __all__ = [
+    "AUTHENTICATION_BACKENDS",
+    "AUTH_PASSWORD_VALIDATORS",
+    "AUTH_USER_MODEL",
     "BASE_DIR",
-    "SECRET_KEY",
+    "CRISPY_ALLOWED_TEMPLATE_PACKS",
+    "CRISPY_TEMPLATE_PACK",
+    "DATABASES",
     "FIELD_ENCRYPTION_KEY",
     "INSTALLED_APPS",
-    "MIDDLEWARE",
-    "AUTHENTICATION_BACKENDS",
-    "ROOT_URLCONF",
-    "TEMPLATES",
-    "WSGI_APPLICATION",
-    "DATABASES",
-    "AUTH_PASSWORD_VALIDATORS",
     "LANGUAGE_CODE",
+    "LOGIN_REDIRECT_URL",
+    "LOGIN_URL",
+    "MESSAGE_TAGS",
+    "MIDDLEWARE",
+    "ROOT_URLCONF",
+    "SECRET_KEY",
+    "SEP_CONTACT",
+    "STATIC_URL",
+    "TEMPLATES",
     "TIME_ZONE",
     "USE_I18N",
     "USE_TZ",
@@ -236,4 +247,5 @@ __all__ = [
     "CRISPY_ALLOWED_TEMPLATE_PACKS",
     "CRISPY_TEMPLATE_PACK",
     "SEP_CONTACT",
+    "WSGI_APPLICATION",
 ]

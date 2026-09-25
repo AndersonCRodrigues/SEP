@@ -2,15 +2,16 @@ from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.db.models import Q
 from django.utils import timezone
+
+from core.constants import VISIBLE_TO_AUTHOR
 from core.fields import collapse_spaces
 from core.managers import CustomUserManager
 from core.models import CustomUser
-from core.validators import validate_letters
 from core.permissions import ALL, BusinessRulesMixin, RoleScopedQuerySet
-from teacher.models import Teacher
-from core.constants import VISIBLE_TO_AUTHOR
-from utils.fields import EncryptedTextField
 from core.utils import generate_temporary_password, send_temporary_password_email
+from core.validators import validate_letters
+from teacher.models import Teacher
+from utils.fields import EncryptedTextField
 
 Role = CustomUser.Role
 
@@ -39,6 +40,9 @@ class PatientQuerySet(RoleScopedQuerySet):
         ),
         Role.PACIENTE: lambda u: Q(pk=u.pk),
     }
+
+    def awaiting_triage(self):
+        return self.filter(flow_status__in=("", Patient.FlowStatus.AWAITING_TRIAGE))
 
 
 # Manager customizado estendendo o CustomUserManager mantido do merge
@@ -88,6 +92,48 @@ class Patient(BusinessRulesMixin, CustomUser):
         blank=True,
         null=True,
         verbose_name="Identidade de gênero",
+    )
+    race = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+        verbose_name="Cor/Raça",
+    )
+    naturalness = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name="Naturalidade",
+    )
+    schooling = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name="Escolaridade",
+    )
+    religion = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name="Religião",
+    )
+    marital_status = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+        verbose_name="Estado civil",
+    )
+    profession = models.CharField(
+        max_length=150,
+        blank=True,
+        null=True,
+        verbose_name="Profissão",
+    )
+    occupation = models.CharField(
+        max_length=150,
+        blank=True,
+        null=True,
+        verbose_name="Ocupação atual",
     )
 
     ALLOWED_TRANSITIONS = {

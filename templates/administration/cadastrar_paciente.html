@@ -1,8 +1,13 @@
 {% extends "administration/base_admin.html" %}
+{% extends "base.html" %}
 {% load static %}
 
 {% block title %}Cadastro de paciente{% endblock %}
 {% block title_suffix %} | SEP Maricá{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'core/css/mobile_patient_registration.css' %}?v=7">
+{% endblock %}
 
 {% block site_header %}{% endblock %}
 {% block page_header %}{% endblock %}
@@ -12,6 +17,7 @@
 {% endblock %}
 
 {% block content %}
+<!-- ====== DESKTOP LAYOUT (original) ====== -->
 <div class="registration">
   <!-- ── Barra Lateral Esquerda (Vinho) ── -->
   <aside class="registration-progress" aria-label="Progresso do cadastro">
@@ -87,6 +93,135 @@
     </div>
   </section>
 </div>
+
+<!-- ====== MOBILE LAYOUT ====== -->
+<div class="mobile-cadastro">
+
+  <!-- Header -->
+  <div class="mobile-header">
+    <div class="mh-left">
+      <form method="post" style="display:flex; align-items:center;">
+        {% csrf_token %}
+        <button type="submit" name="action" value="back" class="mh-back" formnovalidate {% if is_first %}disabled style="opacity:0.5;"{% endif %}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+      </form>
+      <span class="mh-greeting">Olá, {{ request.user.get_short_name|default:"Usuário" }}!</span>
+    </div>
+    <div class="mh-icons">
+      <button class="mh-icon-btn" aria-label="Notificações"><i class="bi bi-bell-fill"></i></button>
+      <button class="mh-icon-btn" aria-label="Perfil"><i class="bi bi-person-circle"></i></button>
+    </div>
+  </div>
+
+  <!-- Stage Pills -->
+  <div class="mobile-stages">
+    {% for section in sections %}
+    <div class="stage-pill {% if section.state == 'current' %}active{% elif section.state == 'done' %}done{% endif %}">
+      Etapa {{ forloop.counter }}
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Question + Form -->
+  <div class="mobile-question{% if step.slug == 'acompanhante' %} step-acompanhante{% endif %}">
+    {% if step.section == "Identificação" and step.slug == "nome" %}
+      <p class="mobile-subtitle">Vamos dar início à triagem!</p>
+      <h1>Qual é o nome do paciente?</h1>
+    {% elif step.section == "Identificação" and step.slug == "nome-social" %}
+      <p class="mobile-subtitle">O paciente possui nome social?</p>
+      <h1>Caso possua, informe-o</h1>
+    {% elif step.section == "Identificação" and step.slug == "nascimento" %}
+      <p class="mobile-subtitle">Informe abaixo a</p>
+      <h1>Data de Nascimento</h1>
+    {% elif step.slug == "genero" %}
+      <h1>Gênero/Identidade de Gênero</h1>
+    {% elif step.slug == "raca" %}
+      <p class="mobile-subtitle">Informe abaixo a</p>
+      <h1>Cor/Raça do paciente</h1>
+    {% elif step.slug == "naturalidade" %}
+      <p class="mobile-subtitle">Informe abaixo a</p>
+      <h1>Naturalidade do paciente</h1>
+    {% elif step.slug == "escolaridade" %}
+      <p class="mobile-subtitle">O paciente possui grau de escolaridade?</p>
+      <h1>Caso possua, informe-o</h1>
+    {% elif step.slug == "religiao" %}
+      <p class="mobile-subtitle">O paciente possui alguma Religião?</p>
+      <h1>Caso possua, informe-o</h1>
+    {% elif step.slug == "estado-civil" %}
+      <h1>Qual é o Estado civil do paciente?</h1>
+    {% elif step.slug == "telefone" %}
+      <p class="mobile-subtitle">Informe abaixo o</p>
+      <h1>Telefone de contato do paciente</h1>
+    {% elif step.slug == "email" %}
+      <p class="mobile-subtitle">Informe abaixo o</p>
+      <h1>E-mail de contato do paciente</h1>
+    {% elif step.slug == "logradouro" %}
+      <p class="mobile-subtitle">O paciente é de Maricá?</p>
+      <h1>Informe endereço completo do paciente</h1>
+    {% elif step.slug == "bairro" %}
+      <p class="mobile-subtitle">Abaixo informe o</p>
+      <h1>Bairro de Maricá que o paciente mora</h1>
+    {% elif step.slug == "profissao" %}
+      <p class="mobile-subtitle">Abaixo informe a</p>
+      <h1>Profissão atual do paciente</h1>
+    {% elif step.slug == "ocupacao" %}
+      <p class="mobile-subtitle">Informe abaixo a</p>
+      <h1>Ocupação atual do paciente</h1>
+    {% elif step.slug == "endereco" %}
+      <p class="mobile-subtitle">Informe abaixo o</p>
+      <h1>Endereço do paciente</h1>
+    {% elif step.slug == "acompanhante" %}
+      <h1>O paciente está acompanhado?</h1>
+    {% elif step.slug == "responsavel" %}
+      <p class="mobile-subtitle">Abaixo informe o</p>
+      <h1>Nome do Responsável</h1>
+    {% elif step.slug == "parentesco" %}
+      <p class="mobile-subtitle">Abaixo informe o</p>
+      <h1>Grau de parentesco</h1>
+    {% else %}
+      <p class="mobile-subtitle">{{ step.section }}</p>
+      <h1>{{ step.title }}</h1>
+    {% endif %}
+
+    <form method="post" novalidate style="display: flex; flex-direction: column; flex: 1;">
+      {% csrf_token %}
+
+      {% for field in form %}
+        <div class="question-field {% if form.fields|length == 1 %}single-field{% endif %}">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {% if step.slug == "nascimento" %}
+          <div style="display: none;">
+            {{ field }}
+          </div>
+          <div class="drum-picker">
+            <div class="drum-highlight"></div>
+            <div class="drum-col" id="drum-month"></div>
+            <div class="drum-col" id="drum-day"></div>
+            <div class="drum-col" id="drum-year"></div>
+          </div>
+          {% else %}
+          {{ field }}
+          {% endif %}
+
+          {{ field.errors }}
+        </div>
+      {% endfor %}
+
+      <div class="mobile-actions">
+        <button type="submit" name="action" value="back" class="btn-mobile-back" formnovalidate {% if is_first %}disabled{% endif %}>Voltar</button>
+        <button type="submit" name="action" value="next" class="btn-mobile-next" formnovalidate>Avançar</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Footer -->
+  <div class="mobile-footer">
+    <img src="{% static 'core/images/logo-home-aluno-vassouras-rodape.png' %}" alt="Univassouras">
+  </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
@@ -110,7 +245,7 @@
 
     const forbidden = {
       digits: /\D/g,
-      letters: /[^\p{L} '’-]/gu,
+      letters: /[^\p{L} ''-]/gu,
     };
 
     document.querySelectorAll("[data-mask]").forEach(function (input) {
@@ -145,6 +280,131 @@
       }
       noNumber.addEventListener("change", syncNumber);
       syncNumber();
+    }
+
+    // Comportamento visual para as listas de rádio no mobile
+    document.querySelectorAll('.mobile-question .question-field ul li').forEach(function(li) {
+      li.addEventListener('click', function() {
+        const radio = li.querySelector('input[type="radio"]');
+        if (radio) {
+          radio.checked = true;
+          // Retira fundo de todos os irmãos
+          li.closest('ul').querySelectorAll('li').forEach(function(sib) {
+            sib.style.backgroundColor = '#FFFFFF';
+          });
+          // Aplica fundo de destaque
+          li.style.backgroundColor = '#f5e8ea';
+        }
+      });
+    });
+
+    // ===== DRUM PICKER DE DATA =====
+    const drumPicker = document.querySelector('.drum-picker');
+    if (drumPicker) {
+      const ITEM_H = 44; // deve bater com o CSS
+
+      // Encontra o input real (pode estar dentro de display:none)
+      const realInput = drumPicker.closest('.question-field')
+        ? drumPicker.closest('.question-field').querySelector('input')
+        : document.querySelector('input[name="data_nascimento"]');
+
+      const colMonth = document.getElementById('drum-month');
+      const colDay   = document.getElementById('drum-day');
+      const colYear  = document.getElementById('drum-year');
+
+      // Estado atual (índices 0-based)
+      let selMonth = 0; // Janeiro
+      let selDay   = 0; // 1
+      let selYear  = 65; // 1995 (1995 - 1930)
+
+      // Popula meses
+      const months = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho',
+                       'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+      months.forEach((m, i) => {
+        const div = document.createElement('div');
+        div.className = 'drum-item';
+        div.textContent = m;
+        colMonth.appendChild(div);
+      });
+
+      // Popula dias
+      for (let i = 1; i <= 31; i++) {
+        const div = document.createElement('div');
+        div.className = 'drum-item';
+        div.textContent = i;
+        colDay.appendChild(div);
+      }
+
+      // Popula anos
+      const currentYear = new Date().getFullYear();
+      for (let i = 1930; i <= currentYear; i++) {
+        const div = document.createElement('div');
+        div.className = 'drum-item';
+        div.textContent = i;
+        colYear.appendChild(div);
+      }
+
+      function getItems(col) {
+        return col.querySelectorAll('.drum-item');
+      }
+
+      function setActive(col, index) {
+        getItems(col).forEach((item, i) => {
+          item.classList.toggle('active', i === index);
+        });
+      }
+
+      function indexFromScroll(col) {
+        return Math.round(col.scrollTop / ITEM_H);
+      }
+
+      function writeToInput() {
+        if (!realInput) return;
+        const mm = String(selMonth + 1).padStart(2, '0');
+        const dd = String(selDay + 1).padStart(2, '0');
+        const yy = 1930 + selYear;
+        realInput.value = `${yy}-${mm}-${dd}`;
+      }
+
+      // Listeners de scroll
+      colMonth.addEventListener('scroll', () => {
+        selMonth = indexFromScroll(colMonth);
+        setActive(colMonth, selMonth);
+        writeToInput();
+      });
+      colDay.addEventListener('scroll', () => {
+        selDay = indexFromScroll(colDay);
+        setActive(colDay, selDay);
+        writeToInput();
+      });
+      colYear.addEventListener('scroll', () => {
+        selYear = indexFromScroll(colYear);
+        setActive(colYear, selYear);
+        writeToInput();
+      });
+
+      // Posiciona na data padrão e escreve no input
+      function init() {
+        colMonth.scrollTop = selMonth * ITEM_H;
+        colDay.scrollTop   = selDay   * ITEM_H;
+        colYear.scrollTop  = selYear  * ITEM_H;
+        setActive(colMonth, selMonth);
+        setActive(colDay,   selDay);
+        setActive(colYear,  selYear);
+        writeToInput();
+      }
+
+      // Esconde o input nativo (mas mantém no DOM para o submit)
+      if (realInput) realInput.style.display = 'none';
+
+      // Garante escrita antes do submit
+      const theForm = drumPicker.closest('form');
+      if (theForm) {
+        theForm.addEventListener('submit', writeToInput);
+      }
+
+      // Inicializa após render
+      setTimeout(init, 50);
     }
   })();
 </script>

@@ -1,0 +1,233 @@
+/**
+ *    student_triage.css  —  Triagens a realizar
+ */
+
+:root {
+  --sep-maroon: #6D1D20;
+}
+
+/* ════════════════════════════════════════
+   DESKTOP
+   ════════════════════════════════════════ */
+.triage-title-pill {
+  background-color: var(--sep-maroon);
+  color: #FFFFFF;
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  text-align: center;
+  border-radius: 40px;
+  padding: 12px 0;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto 36px auto;
+}
+
+.triage-wrapper {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.triage-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 90px;
+  padding: 0 28px 10px 28px;
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #000000;
+}
+
+.triage-container {
+  background: #FFFFFF;
+  border: 1px solid #A59C97;
+  border-radius: 20px;
+  padding: 18px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 480px;
+  overflow-y: auto;
+}
+
+.triage-container::-webkit-scrollbar { width: 6px; }
+.triage-container::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+
+.triage-row {
+  background-color: #E6E6E6;
+  border-radius: 20px;
+  padding: 13px 18px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 90px;
+  align-items: center;
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #000000;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.triage-row:hover {
+  background-color: #D4D4D4;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.btn-iniciar {
+  background-color: #3AA600;
+  color: #FFFFFF;
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 5px 16px;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+
+.btn-iniciar:hover {
+  background-color: #2d8200;
+  color: #FFFFFF;
+}
+
+
+/* ════════════════════════════════════════
+   MOBILE
+   ════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  /* Oculta navbar e footer do desktop */
+  .sep-navbar {
+    display: none !important;
+  }
+  body {
+    padding-bottom: 0 !important;
+    background-color: #F2F0EE;
+  }
+
+  /* ─── Título pill ─────────────────────── */
+  .m-triage-title-pill {
+    background-color: var(--sep-maroon);
+    color: #FFFFFF;
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    text-align: center;
+    border-radius: 40px;
+    padding: 16px 0;
+    margin: 28px 20px 24px 20px;
+    display: block;
+  }
+
+  /* ─── Lista de cards ──────────────────── */
+  .m-triage-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    /* Quebra para fora do padding do container-fluid (px-4 = 24px) e reintroduz 12px */
+    margin-left: -24px;
+    margin-right: -24px;
+    padding: 0 12px 60px 12px;
+    flex: 1;
+  }
+
+  /* ─── Card individual ─────────────────── */
+  .m-triage-card {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    background: #FFFFFF;
+    border: 1px solid #DDDAD7;
+    border-radius: 14px;
+    width: 100%;
+    box-sizing: border-box;
+    gap: 12px;
+  }
+
+  /* ─── Lado esquerdo ───────────────────── */
+  .m-triage-card-left {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .m-triage-patient-name {
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 800;
+    color: #111;
+    line-height: 1.3;
+    margin-bottom: 2px;
+  }
+
+  .m-triage-patient-id {
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    color: #888;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #EAEAEA;
+  }
+
+  .m-triage-info {
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    color: #555;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 3px;
+    line-height: 1.5;
+  }
+
+  .m-triage-info i {
+    font-size: 13px;
+    color: #666;
+    flex-shrink: 0;
+  }
+
+  .m-triage-info strong {
+    font-weight: 800;
+    color: #111;
+  }
+
+  /* ─── Lado direito (botão) ────────────── */
+  .m-triage-card-right {
+    flex-shrink: 0;
+    align-self: center;
+  }
+
+  .m-btn-iniciar {
+    background-color: #3DAA00;
+    color: #FFFFFF;
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    padding: 10px 16px;
+    border-radius: 10px;
+    border: none;
+    text-decoration: none;
+    display: inline-block;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .m-btn-iniciar:hover,
+  .m-btn-iniciar:active {
+    background-color: #2e8800;
+    color: #FFFFFF;
+  }
+
+}

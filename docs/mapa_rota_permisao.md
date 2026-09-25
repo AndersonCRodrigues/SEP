@@ -53,11 +53,20 @@ O Superadmin (superuser) não acessa as telas do Administrativo: o `Administrati
  
 | Rota | View | Mecanismo | Quem acessa |
 |---|---|---|---|
-| home | HomeEstudanteView | LoginRequiredMixin + UserPassesTestMixin | ALUNO, corrigido e testado nesta sessão |
-| painel/ | PainelEstudanteView | LoginRequiredMixin + UserPassesTestMixin | ALUNO, corrigido e testado nesta sessão |
+| home | HomeEstudanteView | StudentOnly (LoginRequiredMixin + UserPassesTestMixin, role ALUNO) | ALUNO |
+| painel/ | PainelEstudanteView | StudentOnly | ALUNO |
 | cadastrar/ | cadastrar_aluno | has_perm("students.add_student") | Supervisor |
-| perfil/ | PerfilAlunoView | GroupRequiredMixin("Students") | Grupo Students |
-| meu-professor/ | MeuProfessorView | LoginRequiredMixin + UserPassesTestMixin | ALUNO, corrigido e testado nesta sessão |
+| perfil/ | PerfilAlunoView | GroupRequiredMixin("Students") | Grupo Students, só o próprio |
+| meu-professor/ | MeuProfessorView | StudentOnly | ALUNO |
+| prontuarios/ | StudentRecordsView | StudentOnly | ALUNO |
+| triagens/ | StudentTriagesView | StudentOnly | ALUNO |
+| triagens/\<pk\>/concluida/ | TriageCompletedView | StudentOnly | ALUNO |
+| encaminhamentos/ | StudentReferralsView | StudentOnly | ALUNO |
+| feedbacks/ | StudentFeedbacksView | StudentOnly | ALUNO |
+
+As rotas valem para WEB e MOBILE: é o mesmo template responsivo, sem rota separada por dispositivo.
+
+O `perfil/` continua no grupo do Django enquanto as outras rotas do Aluno conferem a role — é a mistura de mecanismos já registrada como pendência na legenda.
  
 ## teacher/ (prefixo /teacher/)
  
@@ -107,6 +116,8 @@ Implementado e testado. A decisão é nunca mostrar uma tela de erro visível.
 Quando alguém não autenticado tenta acessar uma rota protegida, é redirecionado para a tela de login. Isso já é o comportamento padrão do Django via LoginRequiredMixin ou UserPassesTestMixin, sem precisar de código customizado.
  
 Quando alguém autenticado tenta acessar uma rota que não é permitida pra role dele, é redirecionado para a home da própria role, através de um handler de 403 customizado.
+
+O redirecionamento sozinho era silencioso: a pessoa pedia uma página e aparecia noutra, sem explicação. Por isso o handler passou a deixar uma mensagem, que o `base.html` já exibe: "Você não tem acesso a essa página." para quem está autenticado, e "Sua sessão expirou. Entre novamente para continuar." para quem não está. É esse o estado de acesso negado — um aviso na página de destino, não uma tela de erro.
  
 A implementação fica em core/exception_handlers.py:
  
