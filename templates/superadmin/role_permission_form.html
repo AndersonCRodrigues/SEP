@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Permissão | Sistema SEP{% endblock %}
+
+{% block breadcrumbs %}
+{{ block.super }}
+<li class="breadcrumb-item"><a href="{% url 'superadmin:home' %}">Superadmin</a></li>
+<li class="breadcrumb-item"><a href="{% url 'superadmin:permissoes' %}">Permissões</a></li>
+<li class="breadcrumb-item active" aria-current="page">Editar</li>
+{% endblock %}
+
+{% block page_title %}Editar permissão — {{ object.get_role_display }}{% endblock %}
+
+{% block content %}
+<section class="card">
+    <div class="card-body">
+        {% include "components/form.html" with form=form submit_label="Salvar" %}
+    </div>
+</section>
+{% endblock %}

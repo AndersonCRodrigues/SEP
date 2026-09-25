@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Detalhe do Log | Sistema SEP{% endblock %}
+
+{% block breadcrumbs %}
+{{ block.super }}
+<li class="breadcrumb-item">
+    <a href="{% url 'superadmin:home' %}">Superadmin</a>
+</li>
+<li class="breadcrumb-item">
+    <a href="{% url 'superadmin:logs' %}">Logs de Segurança</a>
+</li>
+<li class="breadcrumb-item active" aria-current="page">
+    Detalhe
+</li>
+{% endblock %}
+
+{% block page_title %}Detalhe do log{% endblock %}
+
+{% block content %}
+
+<section class="card">
+    <div class="card-body">
+
+        <dl class="row mb-0">
+
+            <dt class="col-sm-3">Data e hora</dt>
+            <dd class="col-sm-9">
+                {{ log.created_at|date:"d/m/Y H:i:s" }}
+            </dd>
+
+            <dt class="col-sm-3">Evento</dt>
+            <dd class="col-sm-9">
+                {{ log.get_action_display }}
+            </dd>
+
+            <dt class="col-sm-3">Usuário</dt>
+            <dd class="col-sm-9">
+                {{ log.user_identifier|default:"-" }}
+            </dd>
+
+            <dt class="col-sm-3">IP</dt>
+            <dd class="col-sm-9">
+                {{ log.ip_address|default:"-" }}
+            </dd>
+
+            <dt class="col-sm-3">Modelo afetado</dt>
+            <dd class="col-sm-9">
+                {{ log.target_model|default:"-" }}
+                {% if log.target_id %}
+                #{{ log.target_id }}
+                {% endif %}
+            </dd>
+
+            <dt class="col-sm-3">Detalhe</dt>
+            <dd class="col-sm-9">
+                {{ log.detail|default:"-" }}
+            </dd>
+
+            <dt class="col-sm-3">Alterações</dt>
+            <dd class="col-sm-9">
+
+                {% if log.changes %}
+
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Campo</th>
+                            <th>Antes</th>
+                            <th>Depois</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for field, change in log.changes.items %}
+                        <tr>
+                            <td>{{ field }}</td>
+                            <td>{{ change.old|default:"-" }}</td>
+                            <td>{{ change.new|default:"-" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                {% else %}
+
+                {% include "components/empty_state.html" with message="Nenhuma alteração registrada." %}
+
+                {% endif %}
+
+            </dd>
+
+        </dl>
+
+    </div>
+</section>
+
+{% endblock %}

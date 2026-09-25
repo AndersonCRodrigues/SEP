@@ -8,7 +8,10 @@ from teacher.models import Teacher
 class SupervisorCreationForm(ProfessorCreationForm):
     class Meta:
         model = Teacher
-        fields = PERSONAL_FIELDS
+        fields = tuple(
+            f for f in PERSONAL_FIELDS
+            if f not in ("logradouro", "numero", "complemento", "bairro", "cidade", "estado", "cep")
+        )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -28,7 +31,7 @@ class SupervisorCreationForm(ProfessorCreationForm):
         return role
 
     def save(self, commit=True):
-        supervisor = super(ProfessorCreationForm, self).save(commit=False)
+        supervisor = forms.ModelForm.save(self, commit=False)
         supervisor.role = Teacher.Role.SUPERVISOR
 
         if commit:
