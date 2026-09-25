@@ -31,6 +31,11 @@ Onde o dado ainda não existe no banco, a tela entra com **dado mockado** e um
 Detalhe de professor e de aluno ficam em `/supervisor/professores/<pk>/` e
 `/supervisor/alunos/<pk>/`, que é para onde o "Editar" da listagem leva.
 
+As duas rotas de cadastro propostas acima não foram criadas: o cadastro de
+professor e o de aluno continuam em `/teacher/cadastrar/` e
+`/students/cadastrar/`, por permissão do Django, e é para lá que os botões da
+área apontam. O mapa do que ficou está em `rotas-coordenador.md`.
+
 O header é o mesmo nas oito telas: marca, seis destinos (Página inicial, Alunos,
 Professores, Triagens, Feedbacks, Encaminhamentos) e três ícones (mensagens,
 notificações, conta).

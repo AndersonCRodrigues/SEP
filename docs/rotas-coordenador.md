@@ -291,15 +291,17 @@ migração de dados. Botão ou link sem lógica leva
 
 As telas novas estendem `supervisor/base_coordinator.html`, que estende
 `base.html` e preenche `brand`, `main_nav` (Página inicial, Alunos, Professores,
-Triagens, Feedbacks, Encaminhamentos), `user_links` e `footer`.
+Triagens, Feedbacks, Encaminhamentos), `user_links` e `footer`. Dos três ícones
+de `user_links`, o de conta leva a `supervisor:perfil` — é o único caminho para o
+perfil na área; mensagens e notificações seguem inertes, com o `TODO`.
 
 Reaproveitados do que já existia: `home_supervisor.html`, `list_users.html`, e os
 cadastros em `teacher/cadastro.html` e `student/cadastro.html`. Novos:
 `base_coordinator.html`, `alunos.html`, `triagens.html`, `triagem_detalhe.html`,
 `encaminhamentos.html`, `feedbacks.html`, `professor_detalhe.html` e
 `aluno_detalhe.html`. Seguem no layout antigo `supervisor_panel.html`,
-`orientacao_panel.html`, `perfil.html`, `area_list.html`, `area_form.html`,
-`cadastro_supervisor.html` e `register.html`.
+`orientacao_panel.html`, `perfil.html`, `area_list.html`, `area_form.html` e
+`cadastro_supervisor.html`.
 
 As listagens usam `{% data_table %}`; os selos, `components/badge.html`; os
 indicadores, `components/summary_list.html`; vazio e erro, `empty_state.html` e

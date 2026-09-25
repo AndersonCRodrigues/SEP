@@ -136,7 +136,7 @@ triagem, e quem pega primeiro cria a ficha. Não existe designação de paciente
 aluno; é a pendência 1 de `fluxos-aluno.md`.
 
 Cada linha leva `start_url = reverse("create_triage", args=[paciente.pk])`, que
-aponta para a ficha em `/triage/create/<paciente>/`.
+aponta para a ficha em `/triage/create/<patient_id>/`.
 
 ### 3.4 `/students/triagens/<pk>/concluida/` — Triagem concluída
 
@@ -198,7 +198,6 @@ Ficam em `triage/urls.py`, sem `app_name` — os nomes são globais. São funç�
 |---|---|---|---|
 | `/triage/fila/` | `fila_triagem` | Mesma fila da tela 3.3, no layout antigo | role `ALUNO`, senão `PermissionDenied` |
 | `/triage/create/<patient_id>/` | `create_triage` | Cria ficha + IARV numa transação | quem existir como `Student` |
-| `/triage/concluida/<pk>/` | `triagem_concluida` | Confirmação logo após criar | só o autor |
 | `/triage/student_detail/<pk>/` | `triage_detail_student` | Ficha em leitura, campos desabilitados | role `ALUNO` e autor |
 | `/triage/edit/<pk>/` | `edit_triage` | Edita ficha + IARV | autor, enquanto `editable_fields_for` devolver campos |
 | `/triage/submit/<pk>/` | `submit_triage` | `OPEN → SUBMITTED` | role `ALUNO`, autor |
@@ -208,11 +207,13 @@ Detalhes que valem registro:
 
 - O formulário IARV é escolhido pela idade do paciente em `get_iarv_form_class`:
   menos de 13 anos é o infantil, até 17 o adolescente, acima disso o adulto.
-  Paciente sem data de nascimento levanta `ValidationError`.
+  Paciente sem data de nascimento levanta `ValidationError`, e `create_triage` e
+  `edit_triage` tratam: avisam pela mensagem e devolvem para a fila ou para o
+  detalhe da triagem, em vez de deixar subir como 500.
 - `create_triage` grava ficha e IARV dentro de `transaction.atomic()` e
-  redireciona para `triagem_concluida`, a tela antiga — não para
-  `students:triagem_concluida`. As duas telas de confirmação convivem; unificar é
-  pendência técnica (seção 9).
+  redireciona para `students:triagem_concluida`. A rota antiga
+  `/triage/concluida/<pk>/` mostrava a mesma confirmação em outro layout e foi
+  removida junto com a view e o template.
 - `submit_triage` é **GET**: o link envia a ficha. Veio assim da `dev` e foi
   mantido de propósito; trocar para POST muda o template e a confirmação.
 - `edit_triage` monta `cancel_url` na view, apontando para
@@ -226,7 +227,7 @@ Detalhes que valem registro:
 ## 5. Ordem dos fluxos
 
 **Triagem.** Página inicial (indicador "Triagens pendentes" ou a atividade
-recente) → Triagens a realizar → "Iniciar" → ficha em `/triage/create/<paciente>/`
+recente) → Triagens a realizar → "Iniciar" → ficha em `/triage/create/<patient_id>/`
 → confirmação → detalhe do Aluno → "Enviar" (`submit_triage`) → a ficha vai para
 a Coordenação.
 
@@ -290,20 +291,17 @@ no layout anterior.
 
 ## 9. Pendências técnicas
 
-1. **Duas telas de "triagem concluída".** `students:triagem_concluida` e a rota
-   global `triagem_concluida` mostram a mesma coisa em layouts diferentes, e
-   `create_triage` redireciona para a antiga. Falta escolher uma.
-2. **Fila sem dono.** Enquanto não houver designação de paciente a aluno, dois
+1. **Fila sem dono.** Enquanto não houver designação de paciente a aluno, dois
    alunos podem abrir a ficha do mesmo paciente. O segundo cria uma segunda
    ficha; nada impede.
-3. **Envio por GET.** `submit_triage` muda estado num GET. Mantido como veio da
+2. **Envio por GET.** `submit_triage` muda estado num GET. Mantido como veio da
    `dev`; trocar exige mudar o template e tratar a confirmação.
-4. **Ficha some depois de fechada, em uma tela só.** Pelo `VISIBLE_TO_AUTHOR`, o
+3. **Ficha some depois de fechada, em uma tela só.** Pelo `VISIBLE_TO_AUTHOR`, o
    Aluno perde o acesso à própria triagem quando ela é fechada ou encaminhada —
    mas `minhas-triagens/` continua listando, porque consulta por autor sem passar
    pelo `visible_to`. Falta decidir se o autor mantém leitura do histórico e
    alinhar as duas consultas com a decisão.
-5. **Mecanismos misturados.** `perfil/` está em grupo do Django e o resto da área
+4. **Mecanismos misturados.** `perfil/` está em grupo do Django e o resto da área
    na role; as rotas de `/triage/` conferem role na mão, sem mixin.
 
 ## 10. Como popular o banco para testar

@@ -135,9 +135,23 @@ como erro. As telas de sala, declaração e agenda tratam.
 
 ### 3.2 `/administration/pacientes/` — Pacientes
 
-`PatientsView` é um `TemplateView` sem consulta nenhuma, e o template tem só o
-título e o link "+ Novo Cadastro". Apesar do nome, a tela **não lista pacientes**
-— é uma porta para o assistente. Está registrado como pendência 1.
+`PatientsView` (`administration/views/patients.py`) lista os pacientes por
+`visible_to`, em ordem alfabética, com nome, **CPF mascarado**, situação do fluxo
+e data de cadastro. O selo sai de `situation()`, que traduz o `flow_status`; o
+cadastro legado, de `flow_status` vazio, entra como "Sem fluxo definido" em vez
+de sair com o selo em branco.
+
+Dois filtros, por query string: `?situacao=` corta pelo fluxo, validado contra
+`FlowStatus.values`, e `?q=` busca por nome ou CPF. A busca de CPF compara
+**dígitos**, não o texto: o campo é gravado com e sem pontuação no banco, então a
+consulta normaliza a coluna com `Replace` aninhado antes de comparar. Digitar
+`12345678901` acha tanto o registro cru quanto o formatado.
+
+A linha não tem ação: o Administrativo não tem tela de detalhe de paciente — a
+única que existe é a de cadastro concluído, que é outra coisa. A ação da página
+continua sendo "+ Novo Cadastro", que abre o assistente.
+
+Falha de banco troca a lista por vazio e preenche `patients_error`.
 
 ### 3.3 O assistente de cadastro de paciente
 
@@ -300,6 +314,7 @@ a data do atendimento e emite.
 | Atestados emitidos | `AttendanceCertificate` do tipo atestado | Real |
 | Atividades recentes | Agendamentos, documentos e salas liberadas | Real |
 | Calendário | `Appointment` do mês | Real |
+| Pacientes: nome, CPF, situação e cadastro | `Patient.visible_to`, com o CPF mascarado na exibição | Real |
 | Pessoas do formulário de atestado | `Patient.visible_to` e `Student` | Real |
 | Atendimentos do formulário de atestado | `Appointment` com presença registrada | Real |
 | Cadastro de paciente | Persiste de verdade, com senha temporária por e-mail | Real |
@@ -316,7 +331,7 @@ e preenche `brand`, `main_nav` (Página inicial, Pacientes, Agenda, Salas,
 Declarações, Atestados), `user_links` e `footer`, além de declarar um bloco
 `page_header` próprio.
 
-Agenda e Declarações usam `{% data_table %}`; os selos são
+Pacientes, Agenda e Declarações usam `{% data_table %}`; os selos são
 `components/badge.html`; vazio e erro, `empty_state.html` e `error_state.html`; o
 formulário de atestado usa `components/form.html`. Salas é marcação própria,
 porque a tela é de cartões e nenhum componente cobre isso. A home escreve os
@@ -324,10 +339,10 @@ indicadores à mão, em vez de usar `summary_list.html`.
 
 ## 7. Pendências técnicas
 
-1. **A tela de Pacientes não lista pacientes.** `PatientsView` não consulta
-   nada; o template tem só o título e o link do assistente. Ou ganha a listagem
-   (com busca, como as do Coordenador), ou o item do menu deveria apontar direto
-   para o cadastro.
+1. **Paciente sem tela de detalhe.** A listagem mostra a situação de cada
+   paciente, mas não há para onde clicar: a única tela de um paciente só é a de
+   cadastro concluído. Falta decidir se o Administrativo abre o cadastro para
+   conferir ou corrigir dado.
 2. **Declarações só de leitura.** A tela lista pendentes e emitidas, mas não há
    como emitir uma declaração — só atestado tem formulário. Falta a tela de
    emissão, ou a decisão de que a declaração nasce em outro lugar.
@@ -340,10 +355,9 @@ indicadores à mão, em vez de usar `summary_list.html`.
    `DatabaseError` e mostram estado de erro; a home não.
 5. **Indicadores da home.** Escritos à mão, fora do `summary_list.html`, como os
    do Paciente.
-6. **Nota desatualizada em `componentes.md`.** Lá está escrito que
-   `administration/base_admin.html` não carrega Bootstrap; hoje ele estende
-   `base.html`, que carrega. A nota deve sair na próxima passagem por aquele
-   documento.
+6. **Salas fora do `data_table`.** A tela de salas é de cartões e não tem
+   componente que a cubra; a marcação é própria. Se aparecer uma segunda tela de
+   cartões, vale extrair o componente em vez de repetir.
 
 ## 8. Como popular o banco para testar
 

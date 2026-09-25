@@ -113,10 +113,9 @@ redirecionamento do `handler403`; sessão expirada cai no login com `next`.
 8. **Telas de detalhe.** Não há frame para detalhe de prontuário, de
    encaminhamento ou de feedback. Definir se entram nesta task ou ficam para a
    próxima.
-9. **Fim da ficha de triagem.** Hoje o envio da ficha redireciona para uma rota
-   que não aceita o parâmetro enviado, e a página quebra. A tela de "Triagem
-   concluída" é o destino natural; falta definir se a correção entra nesta
-   branch ou na branch do fluxo de triagem.
+9. ~~**Fim da ficha de triagem.**~~ Resolvido: criar a ficha leva a
+   `students:triagem_concluida`, e a rota antiga que quebrava foi removida junto
+   com a view e o template. Ver `rotas-aluno.md`.
 10. **Calendário da página inicial.** Definir o que marcar: as sessões do aluno,
     as triagens designadas ou os dois.
 
