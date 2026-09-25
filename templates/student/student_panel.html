@@ -6,7 +6,7 @@
 <header class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="h3 mb-0">Painel do Estudante</h1>
     <div class="d-flex flex-wrap gap-2">
-        <a href="{% url 'minhas_triagens' %}" class="btn btn-primary btn-sm">
+        <a href="{% url 'triage:minhas_triagens' %}" class="btn btn-primary btn-sm">
             <i class="bi bi-file-earmark-text"></i> Minhas Triagens / Feedbacks
         </a>
         <a href="{% url 'students:meu_professor' %}" class="btn btn-outline-primary btn-sm">Meu Professor</a>
@@ -47,7 +47,7 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h2 class="h5 card-title mb-0">Minhas Triagens e Pareceres</h2>
-                    <a href="{% url 'minhas_triagens' %}" class="btn btn-sm btn-link">Ver todas</a>
+                    <a href="{% url 'triage:minhas_triagens' %}" class="btn btn-sm btn-link">Ver todas</a>
                 </div>
                 
                 <div class="list-group list-group-flush">
