@@ -25,6 +25,9 @@ if not SECRET_KEY:
 # qualquer alteração aparece no próximo F5, sem precisar de collectstatic
 # nem de reiniciar o container.
 STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
     "staticfiles": {
         "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
     },
