@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Nova Triagem | Sistema SEP{% endblock %}
+
+{% block content %}
+<h1 class="h3 mb-1">Nova Triagem</h1>
+<p class="text-body-secondary mb-4">Paciente: {{ patient.nome_completo }} ({{ patient_age }} anos)</p>
+
+<div class="row">
+  <div class="col-12 col-lg-3">
+    <ol class="list-group mb-4">
+      {% for section in sections %}
+      <li
+        class="list-group-item d-flex justify-content-between align-items-center
+               {% if section.state == 'current' %}active{% elif section.state == 'done' %}text-success{% endif %}"
+        {% if section.state == "current" %}aria-current="step"{% endif %}
+      >
+        {{ section.name }}
+      </li>
+      {% endfor %}
+    </ol>
+  </div>
+
+  <div class="col-12 col-lg-8">
+    <section class="card">
+      <div class="card-body">
+        <p class="text-body-secondary mb-1">Passo {{ number }} de {{ total }}</p>
+        <h2 class="h5 card-title mb-4">{{ step.title }}</h2>
+
+        <form method="post" novalidate>
+          {% csrf_token %}
+          {{ form.as_p }}
+
+          <div class="d-flex justify-content-between mt-4">
+            <button
+              type="submit"
+              name="action"
+              value="back"
+              class="btn btn-outline-secondary"
+              formnovalidate
+              {% if is_first %}disabled{% endif %}
+            >Voltar</button>
+            <button type="submit" name="action" value="next" class="btn btn-primary">Avançar</button>
+          </div>
+        </form>
+      </div>
+    </section>
+  </div>
+</div>
+{% endblock %}

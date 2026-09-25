@@ -1,0 +1,17 @@
+<table class="table">
+    <thead>
+        <tr>
+            {% for col in columns %}<th>{{ col }}</th>{% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in rows %}
+        <tr>{% for cell in row %}<td>{{ cell }}</td>{% endfor %}</tr>
+        {% empty %}
+        <tr>
+            <td colspan="{{ columns|length }}">{% include "components/empty_state.html" with message=empty_message %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

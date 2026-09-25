@@ -1,7 +1,8 @@
 from django.urls import reverse_lazy
 from django.views.generic import ListView, TemplateView, UpdateView
-from core.models import CustomUser
+
 from core.mixins import GroupRequiredMixin
+from core.models import CustomUser
 
 
 class PainelSuperadminView(GroupRequiredMixin, ListView):

@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Avaliações | Sistema SEP{% endblock %}
+
+{% block breadcrumbs %}
+  <li class="breadcrumb-item"><a href="{% url 'home_redirect' %}">Página inicial</a></li>
+  <li class="breadcrumb-item active" aria-current="page">Avaliações</li>
+{% endblock %}
+
+{% block page_title %}Avaliações{% endblock %}
+
+{% block content %}
+<!-- Subtítulo explicativo -->
+<div class="mb-4">
+    <p class="text-body-secondary mb-0">
+        <i class="bi bi-info-circle"></i> Pacientes encaminhados aguardando definição de aluno responsável.
+    </p>
+</div>
+
+<section class="card">
+    <div class="card-body">
+        <ul class="list-group list-group-flush">
+            {% for paciente in pacientes %}
+            <!-- Adicionado flex-wrap e gap para não quebrar a tela no celular -->
+            <li class="list-group-item px-0 d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div>
+                    <strong>{{ paciente.nome_completo }}</strong>
+                    <span class="text-body-secondary small">#{{ paciente.pk }}</span>
+                    <!-- Adicionado um pequeno espaçamento e o ícone de calendário -->
+                    <div class="text-body-secondary small mt-1">
+                        <i class="bi bi-calendar3"></i> Triagem recebida em {{ paciente.created_at|date:"d/m/Y" }}
+                    </div>
+                </div>
+                <a href="{% url 'teacher:triagem_definir' paciente.pk %}" class="btn btn-primary btn-sm">
+                    Definir quem fará a triagem
+                </a>
+            </li>
+            {% empty %}
+            <li class="list-group-item px-0 border-0">
+                <!-- Injeção do componente de estado vazio -->
+                {% include "components/empty_state.html" with message="Nenhuma avaliação pendente no momento." %}
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</section>
+{% endblock %}

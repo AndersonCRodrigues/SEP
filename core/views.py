@@ -1,10 +1,12 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.views import LoginView, LogoutView
+from django.contrib.auth.views import LoginView, LogoutView, PasswordChangeView
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
-from django.views import View
 from django.utils import timezone
+from django.views import View
+
 from core.models import CustomUser
+
 from .forms import LoginEmailOuMatriculaForm
 
 
@@ -13,6 +15,17 @@ class LandingPageView(View):
         if request.user.is_authenticated:
             return redirect("home_redirect")
         return render(request, "landing.html", {"year": timezone.now().year})
+
+
+class ForcePasswordChangeView(LoginRequiredMixin, PasswordChangeView):
+    template_name = "force_password_change.html"
+    success_url = reverse_lazy("home_redirect")
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        self.request.user.must_change_password = False
+        self.request.user.save(update_fields=["must_change_password"])
+        return response
 
 
 class RedirecionarHomeView(LoginRequiredMixin, View):
@@ -26,6 +39,9 @@ class RedirecionarHomeView(LoginRequiredMixin, View):
     }
 
     def get(self, request, *args, **kwargs):
+        if request.user.must_change_password:
+            return redirect("force_password_change")
+
         if request.user.is_superuser:
             return redirect("superadmin:home")
 
@@ -39,6 +55,7 @@ class RedirecionarHomeView(LoginRequiredMixin, View):
 class CustomLoginView(LoginView):
     template_name = "login.html"
     authentication_form = LoginEmailOuMatriculaForm
+    redirect_authenticated_user = True
 
     def get_success_url(self):
         return reverse_lazy("home_redirect")

@@ -1,0 +1,9 @@
+{% extends "administration/base_admin.html" %}
+
+{% block title %}Pacientes{% endblock %}
+
+{% block content %}
+<h1>Pacientes</h1>
+
+<a class="new-registration" href="{% url 'administration:cadastrar_paciente' %}">+ Novo Cadastro</a>
+{% endblock %}

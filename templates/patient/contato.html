@@ -1,0 +1,53 @@
+{% extends "patient/base_patient.html" %}
+{% load components %}
+
+{% block title %}Métodos de contato{% endblock %}
+
+{% block content %}
+<h1 class="page-banner">Métodos de contato</h1>
+
+<div class="contact-panels">
+  {% section title="Seu atendimento" class="contact-care" id="care-title" %}
+  {% if caregivers_error %}
+  {% include "components/error_state.html" with message=caregivers_error retry_url=request.path %}
+  {% else %}
+  <ul class="caregiver-list">
+    {% for person in caregivers %}
+    <li class="caregiver">
+      <span class="caregiver-initials" aria-hidden="true">{{ person.initials }}</span>
+      <p class="caregiver-name">{{ person.name }}</p>
+      <p class="caregiver-role">Responsável pelo seu atendimento</p>
+      {# TODO: botão sem lógica; fica para fazer #}
+      <button type="button" class="caregiver-message">
+        Enviar mensagem<span class="visually-hidden"> para {{ person.name }}</span>
+      </button>
+    </li>
+    {% empty %}
+    <li class="caregiver-empty">
+      {% include "components/empty_state.html" with message="Ainda não há um aluno responsável pelo seu atendimento." %}
+    </li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+  {% endsection %}
+
+  {% section title=service_name class="contact-service" id="service-title" %}
+  <ul class="channel-list">
+    {% for channel in channels %}
+    <li class="channel channel-{{ channel.kind }}">
+      <span class="channel-label">{{ channel.label }}:</span>
+      <a
+        class="channel-link"
+        href="{{ channel.href }}"
+        {% if channel.external %}target="_blank" rel="noopener noreferrer"{% endif %}
+      >{{ channel.value }}{% if channel.external %}<span class="visually-hidden"> (abre em nova aba)</span>{% endif %}</a>
+    </li>
+    {% empty %}
+    <li class="channel-empty">
+      {% include "components/empty_state.html" with message="Os canais de contato ainda não foram configurados." %}
+    </li>
+    {% endfor %}
+  </ul>
+  {% endsection %}
+</div>
+{% endblock %}

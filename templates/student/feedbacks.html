@@ -1,0 +1,32 @@
+{% extends "student/base_student.html" %}
+{% load components %}
+
+{% block title %}Feedbacks recebidos{% endblock %}
+
+{% block breadcrumbs %}
+<li class="breadcrumb-item"><a href="{% url 'students:home' %}">Página inicial</a></li>
+<li class="breadcrumb-item active" aria-current="page">Feedbacks</li>
+{% endblock %}
+
+{% block page_title %}Feedbacks recebidos{% endblock %}
+
+{% block content %}
+{% if feedbacks_error %}
+{% include "components/error_state.html" with message=feedbacks_error retry_url=request.path %}
+{% elif feedbacks %}
+{% data_table columns=columns label="Feedbacks que você recebeu" %}
+{% for feedback in feedbacks %}
+<tr class="feedback">
+  <td class="feedback-subject">{{ feedback.subject }}</td>
+  <td class="feedback-author">{{ feedback.author }}</td>
+  <td class="feedback-received">{{ feedback.received }}</td>
+  <td class="feedback-status">
+    {% include "components/badge.html" with label=feedback.label level=feedback.level %}
+  </td>
+</tr>
+{% endfor %}
+{% enddata_table %}
+{% else %}
+{% include "components/empty_state.html" with message="Você ainda não recebeu feedbacks." %}
+{% endif %}
+{% endblock %}

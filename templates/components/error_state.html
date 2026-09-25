@@ -1,0 +1,4 @@
+<div class="text-danger">
+    <p class="mb-1">{{ message|default:"Algo deu errado." }}</p>
+    {% if retry_url %}<a href="{{ retry_url }}" class="btn btn-sm btn-outline-danger">Tentar novamente</a>{% endif %}
+</div>

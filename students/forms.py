@@ -1,6 +1,8 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
+
 from core.models import CustomUser
+
 from .models import Student
 
 
@@ -9,7 +11,8 @@ class AlunoCreationForm(UserCreationForm):
         model = Student
         fields = (
             "email",
-            "nome_completo",
+            "first_name",
+            "last_name",
             "cpf",
             "telefone",
             "logradouro",

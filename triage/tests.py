@@ -1,16 +1,17 @@
 from django.core.exceptions import ValidationError
 from django.test import SimpleTestCase, TestCase
+
 from patient.models import Patient
 from students.models import Student
 
 from .forms import (
-    IarvAdultForm,
     IarvAdolescentForm,
+    IarvAdultForm,
     IarvChildForm,
 )
 from .models import (
-    IarvAdult,
     IarvAdolescent,
+    IarvAdult,
     IarvChild,
     TriageRecord,
 )
@@ -327,14 +328,16 @@ class TriageRecordSaveTests(TestCase):
     def setUp(self):
         self.patient = Patient.objects.create(
             email="patient.triage@test.com",
-            nome_completo="Paciente Teste",
+            first_name="Paciente",
+            last_name="Teste",
             cpf="12345678909",
             telefone="21999999999",
         )
 
         self.student = Student.objects.create(
             email="student.triage@test.com",
-            nome_completo="Aluno Teste",
+            first_name="Aluno",
+            last_name="Teste",
             cpf="52998224725",
             telefone="21888888888",
         )
@@ -342,7 +345,7 @@ class TriageRecordSaveTests(TestCase):
     def test_save_sets_patient_flow_status_to_in_triage_on_creation(self):
         self.assertEqual(
             self.patient.flow_status,
-            "",
+            Patient.FlowStatus.AWAITING_TRIAGE,
         )
 
         TriageRecord.objects.create(

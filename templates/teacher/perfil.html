@@ -1,18 +1,52 @@
 {% extends "base.html" %}
 
-{% block title %}Minha Área de Atuação | Sistema SEP{% endblock %}
+{% block title %}Área de Atuação | Sistema SEP{% endblock %}
+
+{% block breadcrumbs %}
+    <li class="breadcrumb-item"><a href="{% url 'home_redirect' %}">Página inicial</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Área de Atuação</li>
+{% endblock %}
+
+{% block page_title %}Área de Atuação{% endblock %}
 
 {% block content %}
-<h1 class="h3 mb-4">Minha Área de Atuação</h1>
-
-<div class="row">
+<div class="row g-3">
     <div class="col-12 col-lg-8">
-        <section class="card">
+        <section class="card h-100">
             <div class="card-body">
-                <form method="post">
+                
+                <!-- Injeção do componente de alerta para erros gerais do form -->
+                {% if form.non_field_errors %}
+                    {% include "components/alert.html" with level="danger" message=form.non_field_errors %}
+                {% endif %}
+
+                <form method="post" novalidate>
                     {% csrf_token %}
-                    {{ form.as_p }}
-                    <button type="submit" class="btn btn-primary">Salvar</button>
+
+                    <ul class="list-group list-group-flush mb-3">
+                        {% for checkbox in form.acting_areas %}
+                        <li class="list-group-item px-0">
+                            <div class="form-check">
+                                {{ checkbox.tag }}
+                                <label class="form-check-label" for="{{ checkbox.id_for_label }}">
+                                    {{ checkbox.choice_label }}
+                                </label>
+                            </div>
+                        </li>
+                        {% empty %}
+                        <li class="list-group-item px-0 border-0">
+                            <!-- Injeção do componente de estado vazio -->
+                            {% include "components/empty_state.html" with message="Nenhuma área de atuação cadastrada no sistema ainda." %}
+                        </li>
+                        {% endfor %}
+                    </ul>
+
+                    <!-- Injeção do componente de alerta para erros específicos das áreas -->
+                    {% if form.acting_areas.errors %}
+                        {% include "components/alert.html" with level="danger" message=form.acting_areas.errors %}
+                    {% endif %}
+
+                    <button type="submit" class="btn btn-primary">Salvar área de atuação</button>
                 </form>
             </div>
         </section>

@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block title %}Presença e Feedback | Sistema SEP{% endblock %}
+
+{% block breadcrumbs %}
+  <li class="breadcrumb-item"><a href="{% url 'home_redirect' %}">Página inicial</a></li>
+  <li class="breadcrumb-item active" aria-current="page">Presença e Feedback</li>
+{% endblock %}
+
+{% block page_title %}Presença e Feedback{% endblock %}
+
+{% block content %}
+<!-- Subtítulo / Informação da data -->
+<div class="mb-4">
+    <p class="text-body-secondary mb-0">
+        <i class="bi bi-calendar3"></i> Referente a hoje, {{ hoje|date:"d/m/Y" }}
+    </p>
+</div>
+
+<!-- Filtro por aluno (a pedido do front, validação de 12/09; busca por
+     nome adicionada em 19/09 pra ficar igual ao filtro de "Meus Alunos") -->
+<section class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-12 col-md-5">
+                <label for="busca-presenca" class="form-label">Buscar por nome</label>
+                <input
+                    type="text"
+                    id="busca-presenca"
+                    name="q"
+                    class="form-control"
+                    value="{{ termo_busca }}"
+                    placeholder="Nome do aluno..."
+                >
+            </div>
+            <div class="col-12 col-md-4">
+                <label for="filtro-aluno-presenca" class="form-label">Filtrar por aluno</label>
+                <select id="filtro-aluno-presenca" name="aluno" class="form-select">
+                    <option value="">Todos os alunos</option>
+                    {% for aluno in alunos_para_filtro %}
+                    <option value="{{ aluno.pk }}" {% if aluno_filtro_id == aluno.pk|stringformat:"s" %}selected{% endif %}>
+                        {{ aluno.nome_completo }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-6 col-md-3 d-grid">
+                <button type="submit" class="btn btn-outline-secondary">
+                    <i class="bi bi-search"></i> Filtrar
+                </button>
+            </div>
+            {% if aluno_filtro_id or termo_busca %}
+            <div class="col-6 col-md-3 d-grid">
+                <a href="{% url 'teacher:presenca' %}" class="btn btn-outline-danger">Limpar filtro</a>
+            </div>
+            {% endif %}
+        </form>
+    </div>
+</section>
+
+<section class="card mb-4">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col">Aluno</th>
+                        <th scope="col">Presença</th>
+                        <th scope="col" class="text-end">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for linha in linhas %}
+                    <tr>
+                        <td>{{ linha.aluno.nome_completo }}</td>
+                        <td>
+                            {% if linha.presenca %}
+                                <span class="badge text-bg-success">Presente</span>
+                            {% else %}
+                                <!-- Mantivemos o mini-form manual devido ao botão específico da tabela -->
+                                <form method="post" action="{% url 'teacher:marcar_presenca' linha.aluno.pk %}" class="d-flex align-items-center gap-2">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-dark btn-sm">Marcar presença</button>
+                                    <!-- MOCK (a pedido do front, 19/09): só a caixinha por enquanto,
+                                         sem campo no model/lógica de horas ainda. -->
+                                    <input
+                                        type="number"
+                                        name="horas"
+                                        step="0.5"
+                                        min="0"
+                                        class="form-control form-control-sm"
+                                        style="width: 90px;"
+                                        placeholder="Horas"
+                                        aria-label="Horas (ainda sem funcionalidade)"
+                                    >
+                                </form>
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            <a href="?aluno={{ linha.aluno.pk }}#feedback" class="btn btn-outline-secondary btn-sm">
+                                Feedback
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <!-- colspan="3" cobre toda a tabela -->
+                        <td colspan="3" class="text-center py-4 border-0">
+                            {% include "components/empty_state.html" with message="Nenhum aluno vinculado." %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+{% if aluno_selecionado %}
+<section class="card" id="feedback">
+    <div class="card-body">
+        <h2 class="h5 card-title mb-4">Avaliação de desempenho prático — {{ aluno_selecionado.nome_completo }}</h2>
+
+        <div class="mb-5">
+            <!-- Salvamos a URL e chamamos o componente genérico de formulário -->
+            {% url 'teacher:registrar_feedback' aluno_selecionado.pk as url_feedback %}
+            {% include "components/form.html" with form=form_feedback action_url=url_feedback submit_label="Enviar avaliação" %}
+        </div>
+
+        <h3 class="h6 mb-3">Feedbacks anteriores</h3>
+        {% if feedbacks_aluno %}
+        <ul class="list-group list-group-flush">
+            {% for feedback in feedbacks_aluno %}
+            <li class="list-group-item px-0 border-0">
+                <div class="d-flex justify-content-between">
+                    <strong>{{ feedback.teacher.nome_completo }}</strong>
+                    <span class="text-body-secondary">{{ feedback.updated_at|date:"d/m/Y H:i" }}</span>
+                </div>
+                <!-- Margin top para separar o nome do texto -->
+                <p class="mb-0 mt-2" style="white-space: pre-line;">{{ feedback.content }}</p>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+            <!-- Injeção do componente de estado vazio -->
+            {% include "components/empty_state.html" with message="Nenhum feedback registrado ainda para este aluno." %}
+        {% endif %}
+    </div>
+</section>
+{% endif %}
+{% endblock %}

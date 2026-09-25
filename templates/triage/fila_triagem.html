@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Fila de Triagem | Sistema SEP{% endblock %}
+
+{% block content %}
+<h1 class="h3 mb-4">Pacientes Aguardando Triagem</h1>
+
+<section class="card">
+    <div class="card-body">
+        <ul class="list-group list-group-flush">
+            {% for paciente in pacientes_aguardando %}
+            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                {{ paciente.nome_completo }}
+                <a href="{% url 'triage:create_triage' paciente.pk %}" class="btn btn-primary btn-sm">Iniciar Triagem</a>
+            </li>
+            {% empty %}
+            <li class="list-group-item px-0 text-body-secondary">Nenhum paciente aguardando triagem.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</section>
+{% endblock %}
