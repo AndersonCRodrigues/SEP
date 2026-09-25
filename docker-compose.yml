@@ -32,6 +32,12 @@ services:
       dockerfile: Dockerfile
       target: app
     container_name: django-docker
+    command: >
+      sh -c "python3 manage.py makemigrations core areas teacher students patient documents audit triage &&
+             python3 manage.py migrate &&
+             python3 manage.py populate_users &&
+             python3 manage.py setup_roles &&
+             python3 manage.py runserver 0.0.0.0:8000"
     ports:
       - "8000:8000"
     depends_on:
@@ -56,6 +62,20 @@ services:
       - ./templates:/app/templates      # hot-reload de templates sem rebuild
       - ./core/static:/app/core/static  # hot-reload de arquivos estáticos originais
       - staticfiles_data:/app/staticfiles # Persiste os arquivos estáticos processados
+      # hot-reload de código Python (sem rebuild a cada mudança)
+      - ./core:/app/core
+      - ./students:/app/students
+      - ./teacher:/app/teacher
+      - ./patient:/app/patient
+      - ./triage:/app/triage
+      - ./supervisor:/app/supervisor
+      - ./superadmin:/app/superadmin
+      - ./administration:/app/administration
+      - ./audit:/app/audit
+      - ./areas:/app/areas
+      - ./documents:/app/documents
+      - ./scheduling:/app/scheduling
+      - ./config:/app/config
 
 volumes:
   postgres_data:

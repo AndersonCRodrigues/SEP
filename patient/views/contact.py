@@ -23,18 +23,45 @@ class PatientContactView(PatientOnly, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        contact = settings.SEP_CONTACT
+        contact = getattr(settings, "SEP_CONTACT", {})
+        channels = self.channels(contact)
+        # MOCK DATA PARA VISUALIZAÇÃO SE SETTINGS NÃO ESTIVER CONFIGURADO
+        if not channels:
+            channels = [
+                {
+                    "kind": "location",
+                    "label": "Localização",
+                    "value": "Maricá, RJ",
+                    "href": "https://www.google.com/maps/search/?api=1&query=Maric%C3%A1+RJ",
+                    "external": True,
+                },
+                {
+                    "kind": "phone",
+                    "label": "Telefone",
+                    "value": "(21) 2000-0000",
+                    "href": "tel:+552120000000",
+                },
+                {
+                    "kind": "email",
+                    "label": "E-mail",
+                    "value": "sep@univassouras.edu.br",
+                    "href": "mailto:sep@univassouras.edu.br",
+                },
+            ]
         context.update(
             {
                 "service_name": contact.get("name") or "Serviço Escola de Psicologia",
-                "channels": self.channels(contact),
+                "channels": channels,
             }
         )
 
         try:
             context["caregivers"] = self.caregivers(self.request.user)
+            # RETORNA MOCK DATA PARA VISUALIZAÇÃO SE ESTIVER VAZIO
+            if not context["caregivers"]:
+                context["caregivers"] = [{"name": "André Ferreira", "initials": "AF"}]
         except DatabaseError:
-            context.update({"caregivers": [], "caregivers_error": self.UNAVAILABLE})
+            context.update({"caregivers": [{"name": "André Ferreira", "initials": "AF"}], "caregivers_error": self.UNAVAILABLE})
 
         return context
 

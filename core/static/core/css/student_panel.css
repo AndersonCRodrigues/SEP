@@ -1,12 +1,14 @@
-/* ═══════════════════════════════════════════
-   student_panel.css  —  Prontuários e evolução
-   ═══════════════════════════════════════════ */
+/**
+ *    student_panel.css  —  Prontuários e evolução
+ */
 
 :root {
   --sep-maroon: #6D1D20;
 }
 
-/* Título superior arredondado */
+/* ════════════════════════════════════════
+   DESKTOP
+   ════════════════════════════════════════ */
 .panel-title-pill {
   background-color: var(--sep-maroon);
   color: #FFFFFF;
@@ -21,13 +23,11 @@
   margin: 0 auto 40px auto;
 }
 
-/* Container de registros */
 .records-wrapper {
   max-width: 950px;
   margin: 0 auto;
 }
 
-/* Cabeçalhos (Pacientes, Última evolução) */
 .records-header {
   display: grid;
   grid-template-columns: 1fr 1fr 100px;
@@ -38,7 +38,6 @@
   color: #000000;
 }
 
-/* Caixa com borda */
 .records-container {
   background: #FFFFFF;
   border: 1px solid #A59C97;
@@ -49,7 +48,6 @@
   gap: 16px;
 }
 
-/* Linha de registro */
 .record-row {
   background-color: #E6E6E6;
   border-radius: 20px;
@@ -71,7 +69,6 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
-/* Badges */
 .badge-pill {
   font-size: 11px;
   font-weight: 600;
@@ -92,4 +89,105 @@
 .badge-red {
   background-color: #B43B3B;
   color: #FFFFFF;
+}
+
+/* ════════════════════════════════════════
+   MOBILE
+   ════════════════════════════════════════ */
+@media (max-width: 768px) {
+  /* Oculta navbar e footer do desktop no mobile */
+  .sep-navbar {
+    display: none !important;
+  }
+  body {
+    padding-bottom: 0 !important;
+    background-color: #F2F0EE;
+  }
+
+  .m-panel-title-pill {
+    background-color: var(--sep-maroon);
+    color: #FFFFFF;
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    text-align: center;
+    border-radius: 30px;
+    padding: 14px 0;
+    margin: 28px 40px 24px 40px;
+  }
+
+  /* Caixa grande branca com borda */
+  .m-panel-wrapper {
+    background: #FFFFFF;
+    border: 1px solid #A59C97;
+    border-radius: 20px;
+    padding: 12px 16px;
+    margin: 0 16px 40px 16px;
+  }
+
+  .m-panel-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* Card cinza interno */
+  .m-panel-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    background: #E5E5E5;
+    border-radius: 24px;
+    padding: 14px 16px;
+    gap: 8px;
+  }
+
+  .m-panel-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+  }
+
+  .m-panel-name {
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 800;
+    color: #000;
+    border-bottom: 1px solid #D1D1D1;
+    padding-bottom: 4px;
+  }
+
+  .m-panel-status {
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 11px;
+    color: #666;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .m-panel-status i {
+    font-size: 11px;
+    color: #666;
+  }
+
+  .m-panel-badge {
+    flex-shrink: 0;
+  }
+
+  .m-panel-badge .badge-green,
+  .m-panel-badge .badge-red {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 5px 0;
+    border-radius: 20px;
+    font-family: 'Museo Sans', sans-serif;
+    text-align: center;
+    display: inline-block;
+    white-space: nowrap;
+    min-width: 80px;
+  }
+
 }

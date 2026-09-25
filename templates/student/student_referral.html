@@ -3,65 +3,146 @@
 
 {% block extra_css %}
   {{ block.super }}
-  <link rel="stylesheet" href="{% static 'core/css/student_referral.css' %}">
+  <link rel="stylesheet" href="{% static 'core/css/teacher_home.css' %}">
+  <link rel="stylesheet" href="{% static 'core/css/student_referral.css' %}?v=6">
 {% endblock %}
 
 {% block home_title %}Encaminhamentos recebidos{% endblock %}
 
 {% block home_content %}
-<div class="col-12 mt-4 mb-5">
+<div class="col-12 px-0 mt-md-4 mb-5">
 
-  <div class="referral-title-pill">
-    Encaminhamentos recebidos
-  </div>
-
-  <div class="referral-wrapper">
-    <div class="referral-header">
-      <div>Pacientes:</div>
-      <div>Situação</div>
-      <div></div>
+  {# ── MOBILE ── #}
+  <div class="d-block d-md-none">
+    {# Header Mobile #}
+    <div class="mobile-header">
+      <a href="{% url 'students:home' %}" class="mobile-back"></a>
+      <span class="mobile-greeting">Olá, Aluno!</span>
+      <div class="mobile-icons d-flex align-items-center gap-3">
+        <i class="bi bi-bell"></i>
+        <form method="post" action="{% url 'logout' %}" class="m-0 p-0 d-inline-flex">
+          {% csrf_token %}
+          <button type="submit" class="p-0 border-0 bg-transparent text-white d-flex align-items-center" style="line-height: 1;">
+            <i class="bi bi-person-circle" style="font-size: 24px;"></i>
+          </button>
+        </form>
+      </div>
     </div>
 
-    <div class="referral-container">
+    {# Título pill #}
+    <div class="m-referral-title-pill">Encaminhamentos</div>
 
-      {% if encaminhamentos %}
-        {% for enc in encaminhamentos %}
-        <div class="referral-row">
-          <div>{{ enc.paciente_nome }} #{{ enc.paciente_id }}</div>
-          <div>{{ enc.situacao }}</div>
-          <div class="text-end">
-            {% if enc.status == 'ativo' %}
-              <span class="badge-ativo">Ativo</span>
-            {% else %}
-              <span class="badge-pendente">Pendente</span>
-            {% endif %}
+    {# Lista de cards #}
+    <div class="m-referral-wrapper">
+      <div class="m-referral-list">
+        {% if encaminhamentos %}
+          {% for enc in encaminhamentos %}
+          <div class="m-referral-row">
+            <div class="m-referral-info">
+              <span class="m-referral-name">{{ enc.paciente_nome }}</span>
+              <span class="m-referral-status">
+                <i class="bi bi-calendar3"></i> {{ enc.situacao }}
+              </span>
+            </div>
+            <div class="m-referral-badge text-end">
+              {% if enc.status == 'ativo' %}
+                <span class="badge-ativo">Ativo</span>
+              {% else %}
+                <span class="badge-pendente">Pendente</span>
+              {% endif %}
+            </div>
           </div>
-        </div>
-        {% endfor %}
-      {% else %}
-        {# Mock — será substituído pelo {% for %} quando o backend estiver pronto #}
-        <div class="referral-row">
-          <div>José Santos #9872736</div>
-          <div>Encaminhado por Supervisor geral</div>
-          <div class="text-end"><span class="badge-ativo">Ativo</span></div>
-        </div>
-        <div class="referral-row">
-          <div>Camila Duarte #4471736</div>
-          <div>Aguardando confirmação</div>
-          <div class="text-end"><span class="badge-pendente">Pendente</span></div>
-        </div>
-        <div class="referral-row">
-          <div>Rafael Nunes #3390214</div>
-          <div>Aguardando confirmação</div>
-          <div class="text-end"><span class="badge-pendente">Pendente</span></div>
-        </div>
-        <div class="referral-row">
-          <div>Ana Beatriz #5528871</div>
-          <div>Encaminhado por Supervisor geral</div>
-          <div class="text-end"><span class="badge-ativo">Ativo</span></div>
-        </div>
-      {% endif %}
+          {% endfor %}
+        {% else %}
+          {# Mocks #}
+          <div class="m-referral-row">
+            <div class="m-referral-info">
+              <span class="m-referral-name">Lucas Santos Melo</span>
+              <span class="m-referral-status"><i class="bi bi-calendar3"></i> Encaminhado por supervisão geral</span>
+            </div>
+            <div class="m-referral-badge"><span class="badge-ativo">Ativo</span></div>
+          </div>
+          <div class="m-referral-row">
+            <div class="m-referral-info">
+              <span class="m-referral-name">Lucas Santos Melo</span>
+              <span class="m-referral-status"><i class="bi bi-calendar3"></i> Aguardando confirmação</span>
+            </div>
+            <div class="m-referral-badge"><span class="badge-pendente" style="background:#BD5C5C;">Pendente</span></div>
+          </div>
+          <div class="m-referral-row">
+            <div class="m-referral-info">
+              <span class="m-referral-name">Lucas Santos Melo</span>
+              <span class="m-referral-status"><i class="bi bi-calendar3"></i> Encaminhado por supervisão geral</span>
+            </div>
+            <div class="m-referral-badge"><span class="badge-ativo" style="background:#3AA600;">Verificar</span></div>
+          </div>
+          <div class="m-referral-row">
+            <div class="m-referral-info">
+              <span class="m-referral-name">Lucas Santos Melo</span>
+              <span class="m-referral-status"><i class="bi bi-calendar3"></i> Aguardando confirmação</span>
+            </div>
+            <div class="m-referral-badge"><span class="badge-pendente" style="background:#BD5C5C;">Pendente</span></div>
+          </div>
+          <div class="m-referral-row">
+            <div class="m-referral-info">
+              <span class="m-referral-name">Lucas Santos Melo</span>
+              <span class="m-referral-status"><i class="bi bi-calendar3"></i> Encaminhado por supervisão geral</span>
+            </div>
+            <div class="m-referral-badge"><span class="badge-ativo" style="background:#3AA600;">Verificar</span></div>
+          </div>
+          <div class="m-referral-row">
+            <div class="m-referral-info">
+              <span class="m-referral-name">Lucas Santos Melo</span>
+              <span class="m-referral-status"><i class="bi bi-calendar3"></i> Aguardando confirmação</span>
+            </div>
+            <div class="m-referral-badge"><span class="badge-pendente" style="background:#BD5C5C;">Pendente</span></div>
+          </div>
+          <div class="m-referral-row">
+            <div class="m-referral-info">
+              <span class="m-referral-name">Lucas Santos Melo</span>
+              <span class="m-referral-status"><i class="bi bi-calendar3"></i> Encaminhado por supervisão geral</span>
+            </div>
+            <div class="m-referral-badge"><span class="badge-ativo" style="background:#3AA600;">Verificar</span></div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
 
+  </div>{# fim mobile #}
+
+  {# ── DESKTOP ── #}
+  <div class="d-none d-md-block px-3">
+    <div class="referral-title-pill">Encaminhamentos recebidos</div>
+    <div class="referral-wrapper">
+      <div class="referral-header">
+        <div>Pacientes:</div><div>Situação</div><div></div>
+      </div>
+      <div class="referral-container">
+        {% if encaminhamentos %}
+          {% for enc in encaminhamentos %}
+          <div class="referral-row">
+            <div>{{ enc.paciente_nome }} #{{ enc.paciente_id }}</div>
+            <div>{{ enc.situacao }}</div>
+            <div class="text-end">
+              {% if enc.status == 'ativo' %}
+                <span class="badge-ativo">Ativo</span>
+              {% else %}
+                <span class="badge-pendente">Pendente</span>
+              {% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="referral-row">
+            <div>José Santos #9872736</div><div>Encaminhado por Supervisor geral</div>
+            <div class="text-end"><span class="badge-ativo">Ativo</span></div>
+          </div>
+          <div class="referral-row">
+            <div>Camila Duarte #4471736</div><div>Aguardando confirmação</div>
+            <div class="text-end"><span class="badge-pendente">Pendente</span></div>
+          </div>
+        {% endif %}
+      </div>
     </div>
   </div>
 

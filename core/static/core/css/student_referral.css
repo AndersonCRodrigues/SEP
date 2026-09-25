@@ -1,12 +1,14 @@
-/* ═══════════════════════════════════════════════
-   student_referral.css  —  Encaminhamentos recebidos
-   ═══════════════════════════════════════════════ */
+/**
+ *    student_referral.css  —  Encaminhamentos recebidos
+ */
 
 :root {
   --sep-maroon: #6D1D20;
 }
 
-/* Título superior arredondado */
+/* ════════════════════════════════════════
+   DESKTOP
+   ════════════════════════════════════════ */
 .referral-title-pill {
   background-color: var(--sep-maroon);
   color: #FFFFFF;
@@ -21,13 +23,11 @@
   margin: 0 auto 36px auto;
 }
 
-/* Container de registros */
 .referral-wrapper {
   max-width: 900px;
   margin: 0 auto;
 }
 
-/* Cabeçalhos */
 .referral-header {
   display: grid;
   grid-template-columns: 1fr 1fr 90px;
@@ -38,7 +38,6 @@
   color: #000000;
 }
 
-/* Caixa com borda */
 .referral-container {
   background: #FFFFFF;
   border: 1px solid #A59C97;
@@ -49,7 +48,6 @@
   gap: 12px;
 }
 
-/* Linha de registro */
 .referral-row {
   background-color: #E6E6E6;
   border-radius: 20px;
@@ -71,7 +69,6 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
-/* Badge Ativo */
 .badge-ativo {
   background-color: #3AA600;
   color: #FFFFFF;
@@ -86,7 +83,6 @@
   min-width: 90px;
 }
 
-/* Badge Pendente */
 .badge-pendente {
   background-color: #B43B3B;
   color: #FFFFFF;
@@ -99,4 +95,93 @@
   display: inline-block;
   white-space: nowrap;
   min-width: 90px;
+}
+
+
+/* ════════════════════════════════════════
+   MOBILE
+   ════════════════════════════════════════ */
+@media (max-width: 768px) {
+  /* Oculta navbar e footer do desktop no mobile */
+  .sep-navbar {
+    display: none !important;
+  }
+  body {
+    padding-bottom: 0 !important;
+    background-color: #F2F0EE;
+  }
+
+  .m-referral-title-pill {
+    background-color: var(--sep-maroon);
+    color: #FFFFFF;
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    text-align: center;
+    border-radius: 30px;
+    padding: 14px 0;
+    margin: 28px 40px 24px 40px;
+  }
+
+  /* Caixa grande branca com borda */
+  .m-referral-wrapper {
+    background: #FFFFFF;
+    border: 1px solid #A59C97;
+    border-radius: 20px;
+    padding: 12px 16px;
+    margin: 0 16px 40px 16px;
+  }
+
+  .m-referral-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* Card cinza interno */
+  .m-referral-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    background: #E5E5E5;
+    border-radius: 24px;
+    padding: 14px 16px;
+    gap: 8px;
+  }
+
+  .m-referral-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+  }
+
+  .m-referral-name {
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 800;
+    color: #000;
+    border-bottom: 1px solid #D1D1D1;
+    padding-bottom: 4px;
+  }
+
+  .m-referral-status {
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 11px;
+    color: #666;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  
+  .m-referral-status i {
+    font-size: 11px;
+    color: #666;
+  }
+
+  .m-referral-badge {
+    flex-shrink: 0;
+  }
+
 }

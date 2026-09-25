@@ -1,55 +1,190 @@
 {% extends "patient/base_patient.html" %}
-{% load components %}
+{% load static %}
 
-{% block title %}Meus agendamentos{% endblock %}
+{% block title %}Meus Agendamentos{% endblock %}
+
+{% block extra_css %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'core/css/patient_home.css' %}?v=10"> <!-- para herdar header mobile -->
+  <link rel="stylesheet" href="{% static 'core/css/patient_agendamentos.css' %}">
+  <style>
+    @media (max-width: 767.98px) {
+      html, body { background-color: #F8F9FA !important; }
+      .sep-navbar  { display: none !important; }
+      main > .container-fluid { padding: 0 !important; }
+    }
+  </style>
+{% endblock %}
 
 {% block content %}
-<header class="page-heading">
-  <h1>Meus agendamentos</h1>
-  <a class="page-action" href="{% url 'patient:solicitar_horario' %}">Solicitar novo horário</a>
-</header>
 
-{% if appointments_error %}
-{% include "components/error_state.html" with message=appointments_error retry_url=request.path %}
-{% else %}
-{% data_table columns=column_labels label="Meus agendamentos" %}
-{% for row in appointments %}
-<tr>
-  <td>
-    <time datetime="{{ row.when|date:'c' }}">{{ row.when_label }}</time>
-  </td>
-  <td>{{ row.attendant|default:"A definir" }}</td>
-  <td>{% include "components/badge.html" with label=row.label level=row.level %}</td>
-</tr>
-{% empty %}
-<tr>
-  <td colspan="{{ column_labels|length }}">
-    {% include "components/empty_state.html" with message="Você não tem sessões agendadas." %}
-  </td>
-</tr>
-{% endfor %}
-{% enddata_table %}
+<!-- ══════════════════════════════════════
+     MOBILE AGENDAMENTOS
+     ══════════════════════════════════════ -->
+<div class="d-block d-md-none p-mobile-triage-bg" style="min-height: 100vh; display: flex; flex-direction: column; background-color: #F8F9FA;">
+  
+  <!-- Header Mobile -->
+  <div class="mobile-header" style="background-color: #6D1D20; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; padding-bottom: 20px;">
+    <a href="{% url 'patient:home' %}" class="mobile-back"></a>
+    <span class="mobile-greeting">Olá, {{ request.user.first_name|default:"Paciente" }}!</span>
+    <div class="mobile-icons d-flex align-items-center gap-3">
+      <i class="bi bi-bell"></i>
+      <form method="post" action="{% url 'logout' %}" class="m-0 p-0 d-inline-flex">
+        {% csrf_token %}
+        <button type="submit" class="p-0 border-0 bg-transparent text-white d-flex align-items-center" style="line-height: 1;">
+          <i class="bi bi-person-circle" style="font-size: 24px;"></i>
+        </button>
+      </form>
+    </div>
+  </div>
 
-{% section title="Minhas solicitações de horário" class="schedule-requests" id="requests-title" %}
-<ul class="request-list">
-  {% for item in schedule_requests %}
-  <li class="request">
-    <p class="request-preference">
-      <time datetime="{{ item.preferred_date|date:'Y-m-d' }}">{{ item.preferred_date|date:"d/m/Y" }}</time>
-      — {{ item.period }}
-    </p>
-    {% include "components/badge.html" with label=item.label level=item.level %}
-    <p class="request-date">Solicitada em {{ item.created_at|date:"d/m/Y" }}</p>
-    {% if item.response %}
-    <p class="request-response">Resposta: {{ item.response }}</p>
+  <div class="px-3 text-center mt-4 flex-grow-1">
+    
+    <div class="mb-4 text-center">
+      <span style="display: inline-block; background-color: #6D1D20; color: white; padding: 10px 40px; border-radius: 20px; font-weight: 700; font-family: 'Museo Sans', sans-serif; font-size: 16px;">
+        Agendamentos
+      </span>
+    </div>
+
+    <!-- Lista de agendamentos com mock falso (design) e variaveis reais (fallback) -->
+    <div style="border: 1px solid #C4C4C4; border-radius: 20px; padding: 12px; text-align: left; background: transparent;">
+      
+      {% if appointments %}
+        {% for ag in appointments %}
+        <div style="background-color: #DCDCDC; border-radius: 16px; padding: 14px 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-family: 'Museo Sans', sans-serif; font-size: 11px; font-weight: 500; color: #555; margin-bottom: 6px;">
+              <i class="bi bi-person" style="margin-right: 4px;"></i> {{ ag.attendant|default:"Aluna Marina Costa" }}
+            </div>
+            <div style="font-family: 'Museo Sans', sans-serif; font-size: 11px; font-weight: 500; color: #555;">
+              <i class="bi bi-calendar-event" style="margin-right: 4px;"></i> {{ ag.when_label }}
+            </div>
+          </div>
+          <div>
+            {% if ag.level == 'success' %}
+              <span style="background-color: #419F0D; color: white; padding: 6px 12px; border-radius: 12px; font-family: 'Museo Sans', sans-serif; font-size: 11px; font-weight: 600;">Confirmada</span>
+            {% elif ag.level == 'warning' %}
+              <span style="background-color: #D68B13; color: white; padding: 6px 12px; border-radius: 12px; font-family: 'Museo Sans', sans-serif; font-size: 11px; font-weight: 600;">A confirmar</span>
+            {% else %}
+              <span style="background-color: #797676; color: white; padding: 6px 12px; border-radius: 12px; font-family: 'Museo Sans', sans-serif; font-size: 11px; font-weight: 600;">Agendada</span>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <!-- Mocks fixos se banco estiver vazio -->
+        <div style="background-color: #DCDCDC; border-radius: 16px; padding: 14px 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-family: 'Museo Sans', sans-serif; font-size: 11px; font-weight: 500; color: #555; margin-bottom: 6px;"><i class="bi bi-person" style="margin-right: 4px;"></i> Aluna Marina Costa</div>
+            <div style="font-family: 'Museo Sans', sans-serif; font-size: 11px; font-weight: 500; color: #555;"><i class="bi bi-calendar3" style="margin-right: 4px;"></i> Hoje ás 14:20</div>
+          </div>
+          <div><span style="background-color: #419F0D; color: white; padding: 6px 12px; border-radius: 12px; font-family: 'Museo Sans', sans-serif; font-size: 11px; font-weight: 600;">Confirmada</span></div>
+        </div>
+
+        <div style="background-color: #DCDCDC; border-radius: 16px; padding: 14px 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-family: 'Museo Sans', sans-serif; font-size: 11px; font-weight: 500; color: #555; margin-bottom: 6px;"><i class="bi bi-person" style="margin-right: 4px;"></i> Aluna Marina Costa</div>
+            <div style="font-family: 'Museo Sans', sans-serif; font-size: 11px; font-weight: 500; color: #555;"><i class="bi bi-calendar3" style="margin-right: 4px;"></i> Hoje ás 14:20</div>
+          </div>
+          <div><span style="background-color: #D68B13; color: white; padding: 6px 12px; border-radius: 12px; font-family: 'Museo Sans', sans-serif; font-size: 11px; font-weight: 600;">A confirmar</span></div>
+        </div>
+
+        <div style="background-color: #DCDCDC; border-radius: 16px; padding: 14px 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-family: 'Museo Sans', sans-serif; font-size: 11px; font-weight: 500; color: #555; margin-bottom: 6px;"><i class="bi bi-person" style="margin-right: 4px;"></i> Aluna Marina Costa</div>
+            <div style="font-family: 'Museo Sans', sans-serif; font-size: 11px; font-weight: 500; color: #555;"><i class="bi bi-calendar3" style="margin-right: 4px;"></i> Hoje ás 14:20</div>
+          </div>
+          <div><span style="background-color: #797676; color: white; padding: 6px 12px; border-radius: 12px; font-family: 'Museo Sans', sans-serif; font-size: 11px; font-weight: 600;">Agendada</span></div>
+        </div>
+        
+        <div style="background-color: #DCDCDC; border-radius: 16px; padding: 14px 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-family: 'Museo Sans', sans-serif; font-size: 11px; font-weight: 500; color: #555; margin-bottom: 6px;"><i class="bi bi-person" style="margin-right: 4px;"></i> Aluna Marina Costa</div>
+            <div style="font-family: 'Museo Sans', sans-serif; font-size: 11px; font-weight: 500; color: #555;"><i class="bi bi-calendar3" style="margin-right: 4px;"></i> Hoje ás 14:20</div>
+          </div>
+          <div><span style="background-color: #797676; color: white; padding: 6px 12px; border-radius: 12px; font-family: 'Museo Sans', sans-serif; font-size: 11px; font-weight: 600;">Agendada</span></div>
+        </div>
+        
+        <div style="background-color: #DCDCDC; border-radius: 16px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-family: 'Museo Sans', sans-serif; font-size: 11px; font-weight: 500; color: #555; margin-bottom: 6px;"><i class="bi bi-person" style="margin-right: 4px;"></i> Aluna Marina Costa</div>
+            <div style="font-family: 'Museo Sans', sans-serif; font-size: 11px; font-weight: 500; color: #555;"><i class="bi bi-calendar3" style="margin-right: 4px;"></i> Hoje ás 14:20</div>
+          </div>
+          <div><span style="background-color: #797676; color: white; padding: 6px 12px; border-radius: 12px; font-family: 'Museo Sans', sans-serif; font-size: 11px; font-weight: 600;">Agendada</span></div>
+        </div>
+      {% endif %}
+
+    </div>
+
+    <div class="mt-4 mb-5 pb-5">
+      <a href="{% url 'patient:solicitar_horario' %}" style="background-color: #6D1D20; color: white; padding: 12px 30px; border-radius: 20px; text-decoration: none; font-weight: 700; font-family: 'Museo Sans', sans-serif; font-size: 14px; display: inline-block;">
+        Novo agendamento
+      </a>
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- ══════════════════════════════════════
+     DESKTOP AGENDAMENTOS
+     ══════════════════════════════════════ -->
+<div class="d-none d-md-block container mt-4 mb-5" style="max-width: 960px;">
+
+  {# ── Cabeçalho ── #}
+  <div class="agend-header">
+    <h1 class="agend-title">Meus agendamentos</h1>
+    <a href="{% url 'patient:solicitar_horario' %}" class="btn-solicitar">
+      Solicitar novo horário
+    </a>
+  </div>
+
+  {% if appointments_error %}
+    <div class="alert alert-danger">{{ appointments_error }}</div>
+  {% endif %}
+
+  {# ── Cabeçalho da tabela ── #}
+  <div class="agend-table-header">
+    <span>Data e hora:</span>
+    <span>Atendimento por:</span>
+  </div>
+
+  <div class="agend-list">
+
+    {% if appointments %}
+      {% for ag in appointments %}
+      <div class="agend-row">
+        <span class="agend-date">{{ ag.when_label }}</span>
+        <span class="agend-student">{{ ag.attendant }}</span>
+        <span class="agend-badge badge-{{ ag.level }}">{{ ag.label }}</span>
+      </div>
+      {% endfor %}
+    {% else %}
+      {# Dados falsos do Figma para demonstração #}
+      <div class="agend-row">
+        <span class="agend-date">Hoje - 14:00</span>
+        <span class="agend-student">Aluna Marina Costa</span>
+        <span class="agend-badge badge-confirmada">Confirmada</span>
+      </div>
+      <div class="agend-row">
+        <span class="agend-date">22/08/2026 - 14:00</span>
+        <span class="agend-student">Aluno Pedro Alves</span>
+        <span class="agend-badge badge-a-confirmar">A confirmar</span>
+      </div>
+      <div class="agend-row">
+        <span class="agend-date">29/08/2026 - 14:00</span>
+        <span class="agend-student">Aluno João Ribeiro</span>
+        <span class="agend-badge badge-agendada">Agendada</span>
+      </div>
+      <div class="agend-row">
+        <span class="agend-date">05/09/2026 - 14:00</span>
+        <span class="agend-student">Aluna Beatriz Lima</span>
+        <span class="agend-badge badge-agendada">Agendada</span>
+      </div>
     {% endif %}
-  </li>
-  {% empty %}
-  <li class="request-empty">
-    {% include "components/empty_state.html" with message="Nenhuma solicitação de horário enviada." %}
-  </li>
-  {% endfor %}
-</ul>
-{% endsection %}
-{% endif %}
+
+  </div>
+
+</div>
 {% endblock %}

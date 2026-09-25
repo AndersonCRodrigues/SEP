@@ -1,0 +1,191 @@
+/**
+ * patient_triagens.css — Lista de triagens do paciente
+ */
+
+:root {
+  --sep-maroon: #6D1D20;
+}
+
+/* ── Banner ── */
+.page-banner-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  margin-bottom: 40px;
+}
+
+.page-banner {
+  background-color: var(--sep-maroon);
+  color: #FFFFFF;
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  padding: 16px 60px;
+  border-radius: 40px;
+  margin: 0;
+  text-align: center;
+}
+
+/* ── Subtitle ── */
+.section-subtitle {
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--sep-maroon);
+  margin-bottom: 20px;
+}
+
+/* ── Progress banner ── */
+.triage-progress {
+  background-color: #FFF3CD;
+  color: #856404;
+  border: 1px solid #FFE69C;
+  border-radius: 10px;
+  padding: 12px 20px;
+  margin-bottom: 20px;
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 14px;
+}
+
+/* ── Lista de triagens ── */
+.triage-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ── Card de triagem ── */
+.triage-card {
+  background-color: #D3D3D3;
+  border-radius: 16px;
+  padding: 20px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  transition: box-shadow 0.2s;
+}
+
+.triage-card:hover {
+  box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+}
+
+/* ── Lado esquerdo (ícone + info) ── */
+.triage-card-left {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.triage-icon-wrap {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  flex-shrink: 0;
+}
+
+.icon-success {
+  background-color: #3AA600;
+  color: #FFFFFF;
+}
+
+.icon-secondary {
+  background-color: #8C8987;
+  color: #FFFFFF;
+}
+
+.icon-default {
+  background-color: var(--sep-maroon);
+  color: #FFFFFF;
+}
+
+.triage-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.triage-card-title {
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #000000;
+}
+
+.triage-card-date {
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 13px;
+  color: #555555;
+}
+
+/* ── Lado direito (badge + link) ── */
+.triage-card-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.triage-badge {
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 6px 18px;
+  border-radius: 20px;
+}
+
+.badge-success {
+  background-color: #3AA600;
+  color: #FFFFFF;
+}
+
+.badge-secondary {
+  background-color: #8C8987;
+  color: #FFFFFF;
+}
+
+.badge-default {
+  background-color: var(--sep-maroon);
+  color: #FFFFFF;
+}
+
+.triage-link {
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--sep-maroon);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.triage-link:hover {
+  text-decoration: underline;
+}
+
+/* ── Estado vazio ── */
+.triage-empty-state {
+  list-style: none;
+  padding: 40px 0;
+  text-align: center;
+}
+
+/* Responsivo */
+@media (max-width: 576px) {
+  .triage-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .page-banner {
+    font-size: 20px;
+    padding: 14px 30px;
+  }
+}

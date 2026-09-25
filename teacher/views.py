@@ -14,6 +14,10 @@ from core.models import CustomUser
 from .forms import VincularAlunoForm
 from students.models import StudentActivity
 from .forms import StudentActivityForm
+from students.models import CaseAssignment
+from patient.models import ProgressNote
+from django.utils import timezone
+from django.utils.timesince import timesince
 
 
 class HomeProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
@@ -24,6 +28,16 @@ class HomeProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
             CustomUser.Role.PROFESSOR,
             CustomUser.Role.SUPERVISOR,
         )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        try:
+            from teacher.models import Teacher
+            professor = Teacher.objects.get(pk=self.request.user.pk)
+            context["alunos_orientados"] = professor.current_advisees.count()
+        except Exception:
+            context["alunos_orientados"] = 0
+        return context
 
 
 @login_required
@@ -91,6 +105,69 @@ class PainelProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView)
         return context
 
 
+class ProntuariosProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    template_name = "teacher/teacher_records.html"
+
+    def test_func(self):
+        return self.request.user.role in (
+            CustomUser.Role.PROFESSOR,
+            CustomUser.Role.SUPERVISOR,
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        professor = get_object_or_404(Teacher, pk=self.request.user.pk)
+
+        # Busca todos os casos abertos sob orientação deste professor
+        casos_qs = (
+            CaseAssignment.objects.open()
+            .filter(student__current_advisor=professor)
+            .select_related("patient", "student")
+            .order_by("-start_date")
+        )
+
+        # Enriquece cada caso com a última evolução e se está pendente de revisão
+        casos_enriquecidos = []
+        for caso in casos_qs:
+            ultima_nota = (
+                ProgressNote.objects
+                .filter(patient=caso.patient, student=caso.student)
+                .order_by("-updated_at")
+                .first()
+            )
+            caso.ultima_evolucao = (
+                timesince(ultima_nota.updated_at) + " atrás"
+                if ultima_nota else None
+            )
+            caso.pendente_revisao = (
+                ultima_nota.pending_confirmation if ultima_nota else False
+            )
+            casos_enriquecidos.append(caso)
+
+        context["casos"] = casos_enriquecidos
+        return context
+
+
+class PresencaProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    template_name = "teacher/teacher_presence.html"
+
+    def test_func(self):
+        return self.request.user.role in (
+            CustomUser.Role.PROFESSOR,
+            CustomUser.Role.SUPERVISOR,
+        )
+
+
+class AreaAtuacaoProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    template_name = "teacher/teacher_area.html"
+
+    def test_func(self):
+        return self.request.user.role in (
+            CustomUser.Role.PROFESSOR,
+            CustomUser.Role.SUPERVISOR,
+        )
+
+
 @login_required
 def vincular_aluno(request):
     is_authorized = request.user.role in (
@@ -146,3 +223,12 @@ def lancar_horas(request):
             messages.error(request, "Corrija os erros do formulário de horas.")
 
     return redirect("teacher:painel")
+
+class TeacherAssignTriageView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    template_name = "teacher/teacher_assign_triage.html"
+
+    def test_func(self):
+        return self.request.user.role in (
+            CustomUser.Role.PROFESSOR,
+            CustomUser.Role.SUPERVISOR,
+        )

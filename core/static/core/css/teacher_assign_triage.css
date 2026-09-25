@@ -1,0 +1,184 @@
+/**
+ * teacher_assign_triage.css - Página de Atribuição de Triagem aos Alunos
+ */
+
+:root {
+  --sep-maroon: #6D1D20;
+}
+
+/* Fundo da tela */
+body {
+  background-color: #F2F0EE;
+}
+
+/* Container */
+.assign-container {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 16px 40px 16px;
+}
+
+/* Pill de título mobile */
+.triage-title-pill {
+  background-color: var(--sep-maroon);
+  color: #FFFFFF;
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  text-align: center;
+  border-radius: 30px;
+  padding: 12px 0;
+  width: auto;
+  margin: 28px 40px 24px 40px;
+}
+
+/* Desktop override for title */
+@media (min-width: 769px) {
+  .triage-title-pill {
+    font-size: 22px;
+    margin: 0 auto 32px auto;
+    border-radius: 50px;
+    width: 100%;
+    max-width: 800px;
+  }
+}
+
+/* ── Card do Paciente ── */
+.patient-card {
+  border: 1px solid #A8A09B;
+  border-radius: 16px;
+  padding: 16px 20px;
+  background-color: transparent;
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.patient-card-header {
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 13px;
+  color: #444;
+}
+
+.patient-card-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.patient-card-name {
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  color: #000;
+}
+
+.patient-card-id {
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 13px;
+  color: #666;
+}
+
+.patient-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.patient-card-label {
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  color: #000;
+}
+
+.patient-card-date {
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 14px;
+  color: #555;
+}
+
+/* ── Lista de Alunos ── */
+.student-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 48px;
+}
+
+.student-row {
+  background-color: #D9D9D9;
+  border-radius: 8px;
+  padding: 16px 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.student-row:active {
+  opacity: 0.85;
+}
+
+/* Checkbox Customizado */
+.student-checkbox {
+  width: 22px;
+  height: 22px;
+  border: 2px solid #777;
+  border-radius: 3px;
+  background-color: transparent;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.student-checkbox:checked {
+  background-color: var(--sep-maroon);
+  border-color: var(--sep-maroon);
+}
+
+.student-checkbox:checked::after {
+  content: '✓';
+  color: white;
+  font-size: 15px;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.student-name {
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  color: #000;
+  cursor: pointer;
+  margin-top: 2px;
+}
+
+/* ── Botão Confirmar ── */
+.btn-confirm {
+  background-color: var(--sep-maroon);
+  color: #FFFFFF;
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  padding: 14px 64px;
+  border-radius: 30px;
+  border: none;
+  text-decoration: none;
+  transition: background 0.2s ease;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.btn-confirm:hover {
+  background-color: #551618;
+}

@@ -1,6 +1,9 @@
-/* ═══════════════════════════════════════════
-   teacher_home.css  —  Dashboard do Professor
-   ═══════════════════════════════════════════ */
+/**
+ * teacher_home.css - Dashboard do Professor
+ *
+ * Herda a identidade visual de student_home.css.
+ * Apenas as classes exclusivas do professor são definidas aqui.
+ */
 
 :root {
   --sep-maroon: #6D1D20;
@@ -8,7 +11,7 @@
   --sep-gray-card: #D9D9D9;
 }
 
-/* ── Saudação ── */
+/* Saudação */
 .teacher-greeting {
   font-family: 'Museo Sans', sans-serif;
   font-size: 24px;
@@ -25,7 +28,7 @@
   margin: 0 0 1.5rem 0;
 }
 
-/* ── Cards de estatística ── */
+/* Stats cards (shared pattern) */
 .stat-card {
   background-color: var(--sep-maroon);
   color: #FFFFFF;
@@ -54,65 +57,69 @@
   line-height: 1;
 }
 
-/* ── Título de seção ── */
+/* Section title with maroon underline (as in Figma) */
 .section-title {
   font-family: 'Museo Sans', sans-serif;
   font-size: 18px;
   font-weight: 700;
   color: var(--sep-maroon);
+  padding-bottom: 6px;
+  border-bottom: 2px solid var(--sep-maroon);
+  margin-bottom: 16px;
 }
 
-/* ── Cards de atividade ── */
+/* Activity cards */
 .activity-card {
   background: #E1E1E1;
-  border-radius: 16px;
-  padding: 20px 22px 12px 22px;
-  margin-bottom: 20px;
+  border-radius: 12px;
+  padding: 14px 18px 8px 18px;
+  margin-bottom: 14px;
 }
 
 .activity-type {
   font-family: 'Museo Sans', sans-serif;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--sep-maroon);
 }
 
 .activity-title {
   font-family: 'Museo Sans', sans-serif;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
   color: #000000;
-  margin: 10px 0 2px;
+  margin: 6px 0 2px;
 }
 
 .activity-sub {
   font-family: 'Museo Sans', sans-serif;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 400;
   color: #000000;
-  margin: 0 0 28px 0;
+  margin: 0 0 12px 0;
 }
 
 .activity-divider {
   border-top: 1px solid var(--sep-maroon);
   opacity: 1;
-  margin: 0 0 8px 0;
+  margin: 0 0 6px 0;
 }
 
 .activity-chevron {
   color: var(--sep-maroon);
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 900;
   line-height: 1;
 }
 
 /* Badges */
-.badge-revisar  { background: #E2ADAD; color: var(--sep-maroon); font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 20px; font-family: 'Museo Sans', sans-serif; white-space: nowrap; }
-.badge-concluido{ background: #A9D18E; color: #2D6A2D;            font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 20px; font-family: 'Museo Sans', sans-serif; white-space: nowrap; }
-.badge-enviar   { background: #F5C6A0; color: #7B3D00;            font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 20px; font-family: 'Museo Sans', sans-serif; white-space: nowrap; }
+.badge-revisar  { background: #3AA600; color: #FFFFFF; font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 20px; font-family: 'Museo Sans', sans-serif; white-space: nowrap; }
+.badge-pendente { background: #b52b2b; color: #FFFFFF; font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 20px; font-family: 'Museo Sans', sans-serif; white-space: nowrap; }
+.badge-concluido{ background: #A9D18E; color: #2D6A2D; font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 20px; font-family: 'Museo Sans', sans-serif; white-space: nowrap; }
+.badge-enviar   { background: #F5C6A0; color: #7B3D00; font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 20px; font-family: 'Museo Sans', sans-serif; white-space: nowrap; }
 
-/* ── Calendário ── */
 
+/* Calendar title pill */
 .cal-title-btn {
   background-color: var(--sep-maroon);
   color: #FFFFFF;
@@ -125,6 +132,7 @@
   display: inline-block;
 }
 
+/* Calendar card */
 .calendar-card {
   background: #FFFFFF;
   border: 2px solid #A59C97;
@@ -138,6 +146,7 @@
   gap: 12px;
 }
 
+/* Navigation buttons (< >) */
 .cal-nav-btn {
   background: none;
   border: none;
@@ -150,6 +159,7 @@
 }
 .cal-nav-btn:hover { background: #f0f0f0; }
 
+/* Month/year selects */
 .cal-select {
   border: 1px solid #ccc;
   border-radius: 6px;
@@ -186,6 +196,7 @@
   border-radius: 6px;
 }
 
+/* Highlighted days */
 .cal-highlight-dark {
   background-color: #2d2d2d;
   color: #fff !important;
@@ -202,6 +213,7 @@
 
 .cal-empty { min-height: 28px; }
 
+/* Colored event dots */
 .cal-dot {
   display: inline-block;
   width: 7px;
@@ -214,6 +226,7 @@
 .dot-red    { background: #BE4A4F; }
 .dot-orange { background: #DB8D10; }
 
+/* Legend pill */
 .cal-legend-pill {
   display: flex;
   justify-content: center;
@@ -239,3 +252,534 @@
 .legend-item.green  { color: #3AA600; }
 .legend-item.red    { color: #BE4A4F; }
 .legend-item.orange { color: #DB8D10; }
+
+/* ═══════════════════════════════════════════════════════════
+   MOBILE — Teacher (max-width: 768px)
+   Todas as regras abaixo só se aplicam em tela pequena.
+   Nenhuma regra de desktop foi tocada.
+   ═══════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  /* Fundo creme no mobile para ficar igual ao design */
+  main .container-fluid {
+    background-color: #F9F4EF;
+    min-height: 100vh;
+  }
+
+  /* Ocultar a navbar principal em mobile nessas telas */
+  .sep-navbar { display: none !important; height: 0 !important; min-height: 0 !important; }
+
+  /* Remove o padding-top do container que fica como área branca */
+  main .container-fluid { padding-top: 0 !important; }
+
+  /* Container superior vinho com bordas arredondadas (home_teacher) */
+  .mobile-maroon-bg {
+    background-color: var(--sep-maroon);
+    border-bottom-left-radius: 40px;
+    border-bottom-right-radius: 40px;
+    padding-bottom: 24px;
+    margin-bottom: 20px;
+    /* Faz o bloco esticar ignorando o padding do container-fluid (que tem py-4 px-4) */
+    margin-left: -24px;
+    margin-right: -24px;
+    margin-top: -24px;
+  }
+
+  /* ── Header mobile (Usado em todas as telas mobile) ── */
+  .mobile-header {
+    display: grid !important;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+    background-color: var(--sep-maroon);
+    padding: 20px 20px 24px 20px;
+    margin: -24px -24px 0 -24px;
+    border-bottom-left-radius: 30px;
+    border-bottom-right-radius: 30px;
+    align-items: center;
+  }
+
+  /* Na home, o header fica dentro do fundo vinho que já puxa as margens */
+  .mobile-maroon-bg .mobile-header {
+    margin: 0 !important;
+    border-radius: 0 !important;
+    padding-top: 40px !important;
+  }
+
+  .mobile-header .mobile-back {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    color: transparent;
+    font-size: 0;
+    text-decoration: none;
+    margin-bottom: 4px;
+    margin-left: -4px; /* Compensate padding for alignment */
+  }
+
+  .mobile-header .mobile-back::before {
+    content: '';
+    display: block;
+    width: 14px;
+    height: 14px;
+    border-left: 4px solid #FFFFFF;
+    border-bottom: 4px solid #FFFFFF;
+    transform: rotate(45deg);
+    border-radius: 2.5px;
+  }
+
+  .mobile-header .mobile-greeting {
+    grid-column: 1;
+    grid-row: 2;
+    color: #fff;
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    text-align: left;
+    align-self: center;
+  }
+
+  .mobile-header .mobile-icons {
+    grid-column: 2;
+    grid-row: 2;
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    color: #fff;
+    font-size: 20px;
+  }
+
+  /* ── Ocultar saudação de desktop no mobile ── */
+  .teacher-greeting,
+  .teacher-breadcrumb {
+    display: none;
+  }
+
+  /* ── Calendário mobile ── */
+  .calendar-card {
+    margin: 0 auto;
+    width: 332px;
+    height: 256px;
+    max-width: 100%;
+    border-radius: 20px;
+    padding: 14px 16px;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .cal-legend-pill {
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    padding: 6px 12px;
+    width: auto;
+    max-width: 100%;
+    box-sizing: border-box;
+    margin: 0 auto 16px auto;
+  }
+
+  .cal-title-btn {
+    display: none; 
+  }
+
+  /* ── Nav de serviços horizontal ── */
+  .mobile-service-nav {
+    display: flex;
+    overflow-x: auto;
+    gap: 12px;
+    padding: 8px 0 16px 0;
+    margin-bottom: 20px;
+    scrollbar-width: none;
+    border-bottom: 2px solid var(--sep-maroon);
+  }
+  .mobile-service-nav::-webkit-scrollbar { display: none; }
+
+  .mobile-service-nav .service-tab {
+    flex-shrink: 0;
+    background: #E6E6E6;
+    border-radius: 20px;
+    padding: 8px 24px;
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background 0.2s;
+  }
+  .mobile-service-nav .service-tab.active,
+  .mobile-service-nav .service-tab:hover {
+    background: #E6E6E6; /* same as normal */
+    color: #333;
+  }
+
+  /* ── Alerta e Estatísticas (Mobile) ── */
+  .alert-mobile-new {
+    border: 2px solid #D9A01B;
+    border-radius: 12px;
+    padding: 16px;
+    margin: 0 auto 20px auto;
+    width: 340px;
+    max-width: 100%;
+  }
+  
+  .alert-mobile-new .alert-title {
+    color: #D9A01B;
+    font-family: 'Museo Sans', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .alert-mobile-new .alert-text {
+    color: #333;
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 13px;
+    line-height: 1.4;
+    margin-bottom: 16px;
+  }
+  
+  .alert-mobile-new .btn-avaliar {
+    background: var(--sep-maroon);
+    color: #fff;
+    font-family: 'Museo Sans', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    text-decoration: none;
+    display: block;
+    text-align: center;
+    padding: 10px;
+    border-radius: 20px;
+  }
+  
+  .stats-mobile-grid {
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+    width: 340px;
+    max-width: 100%;
+    margin: 0 auto;
+  }
+  
+  .stat-box-green, .stat-box-red, .stat-box-orange {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 12px 8px;
+    border-radius: 16px;
+    text-align: center;
+    color: #fff;
+    font-family: 'Museo Sans', sans-serif;
+  }
+  
+  .stat-box-green { background: #39A51E; }
+  .stat-box-red { background: #DC1724; }
+  .stat-box-orange { background: #DA8F11; }
+  
+  .stats-mobile-grid .stat-label {
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 4px;
+  }
+  
+  .stats-mobile-grid .stat-number {
+    font-size: 28px;
+    font-weight: 900;
+    line-height: 1;
+  }
+
+  /* ── Atividades recentes mobile (Nova Estrutura) ── */
+  .m-activity-card {
+    background: #DDDDDD; /* Light gray to match print */
+    border-radius: 16px;
+    padding: 12px 16px;
+    width: 340px;
+    max-width: 100%;
+    margin: 0 auto 12px auto;
+  }
+  
+  .m-activity-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .m-activity-time {
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--sep-maroon);
+  }
+  
+  .m-badge {
+    width: 90px;
+    display: inline-block;
+    text-align: center;
+    padding: 4px 0;
+    border-radius: 12px;
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 800;
+  }
+  .badge-green { background: #A7D0A1; color: #2A6E24; }
+  .badge-orange { background: #E4C89A; color: #9A651D; }
+  .badge-red { background: #DBB0B4; color: #AC373E; }
+  
+  .m-activity-title {
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: #000;
+    margin-top: 6px;
+    margin-bottom: 2px;
+  }
+  
+  .m-activity-desc {
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 14px;
+    color: #333;
+  }
+  
+  .m-activity-divider {
+    margin: 10px 10px 6px 10px;
+    border-top: 1px solid var(--sep-maroon);
+    opacity: 1;
+  }
+  
+  .m-activity-footer {
+    text-align: right;
+    padding-right: 12px;
+  }
+  
+  .m-activity-footer i {
+    font-size: 20px;
+    font-weight: 900;
+    color: var(--sep-maroon);
+  }
+
+  /* ── Feedback enviado (Card especial) ── */
+  .m-feedback-card {
+    background: #EAEAEA;
+    border: 1px solid var(--sep-maroon);
+    border-radius: 16px;
+    padding: 12px 16px;
+    width: 340px;
+    max-width: 100%;
+    margin: 0 auto 12px auto;
+  }
+  
+  .m-feedback-title {
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--sep-maroon);
+    margin-bottom: 8px;
+  }
+  
+  .m-feedback-author {
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: #000;
+    margin-bottom: 2px;
+  }
+  
+  .m-feedback-quote {
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 13px;
+    color: #555;
+    margin-bottom: 10px;
+    line-height: 1.4;
+  }
+  
+  .m-feedback-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--sep-maroon);
+  }
+  
+  .m-feedback-footer i {
+    font-size: 16px;
+    font-weight: 900;
+  }
+
+  /* ── Footer mobile vinho (UNIVassouras) ── */
+  .mobile-footer {
+    background: var(--sep-maroon);
+    text-align: center;
+    padding: 20px;
+    color: #fff;
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    margin-top: 32px;
+  }
+
+  /* ── Meus alunos mobile ── */
+  .panel-header { display: none; }
+  .panel-container { border: none; padding: 0; background: transparent; }
+
+  .m-student-list {
+    display: flex;
+    flex-direction: column;
+    background: #F2F2F2;
+    gap: 8px;
+    padding: 16px 16px 24px 16px;
+  }
+
+  .m-student-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background: #FFFFFF;
+    border: 1px solid #EAEAEA !important;
+    border-radius: 24px !important;
+  }
+
+  .m-student-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+    padding-right: 12px;
+  }
+
+  .m-student-name {
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #000;
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  .m-student-detail {
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 12px;
+    color: #666;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .m-btn-ver {
+    background-color: #3AA600;
+    color: #fff;
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    padding: 8px 18px;
+    border-radius: 10px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .m-univassouras-footer {
+    background-color: var(--sep-maroon);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    margin-top: 0;
+  }
+
+  /* Ajuste do pill de título no mobile */
+  .panel-title-pill,
+  .records-title-pill {
+    border-radius: 30px !important;
+    width: auto !important;
+    max-width: none !important;
+    margin: 28px 20px 24px 20px !important;
+    font-size: 20px !important;
+    padding: 14px 0 !important;
+  }
+
+  .panel-row.empty-row { display: none; }
+
+  /* ── Prontuários mobile: cards compactos ── */
+  .records-header { display: none; }
+
+  .records-container {
+    border: none;
+    padding: 0;
+    background: transparent;
+  }
+
+  .m-records-wrapper {
+    background: #FFFFFF;
+    border: 1px solid #A59C97 !important;
+    border-radius: 20px !important;
+    padding: 12px 16px;
+    margin: 0 8px 24px 8px;
+  }
+
+  .records-list { gap: 12px; display: flex; flex-direction: column; }
+
+  .records-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    grid-template-columns: none;
+    border-radius: 24px !important;
+    padding: 10px 16px;
+    background: #E5E5E5;
+    border: none !important;
+    gap: 8px;
+  }
+
+  .records-row .record-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+  }
+
+  .records-row .record-name {
+    display: block;
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: #000;
+    border-bottom: 1px solid #D1D1D1;
+    padding-bottom: 4px;
+  }
+
+  .records-row .record-date {
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 11px;
+    color: #666;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  /* Rule removed to avoid duplication with the !important pill style above */
+
+  /* Seção de atividades recentes: esconder no mobile OU mostrar como mini-cards */
+  .section-title {
+    font-size: 18px;
+  }
+
+  /* Ajuste geral do container principal */
+  .col-12.mt-4.mb-5 {
+    padding: 0;
+  }
+}

@@ -1,0 +1,146 @@
+/**
+ * patient_agendamentos.css - Página de Agendamentos do Paciente
+ * Design fiel ao Figma
+ */
+
+:root {
+  --sep-maroon: #6D1D20;
+}
+
+/* ── Cabeçalho ── */
+.agend-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.agend-title {
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--sep-maroon);
+  margin: 0;
+}
+
+.btn-solicitar {
+  background-color: var(--sep-maroon);
+  color: #fff;
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 13px 30px;
+  border-radius: 10px;
+  text-decoration: none;
+  transition: background 0.2s ease;
+  white-space: nowrap;
+  display: inline-block;
+}
+.btn-solicitar:hover {
+  background-color: #591619;
+  color: #fff;
+  text-decoration: none;
+}
+
+/* ── Cabeçalho das colunas ── */
+.agend-table-header {
+  display: grid;
+  grid-template-columns: 240px 1fr auto;
+  gap: 16px;
+  padding: 6px 24px 10px 24px; /* Igual ao padding lateral da row */
+  margin: 0 18px; /* 16px (padding do container) + 2px (borda do container) */
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #222;
+}
+
+/* ── Container da lista: borda fina, sem fundo escuro ── */
+.agend-list {
+  background: transparent;
+  border: 2px solid #ccc;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ── Linha: cinza claro ── */
+.agend-row {
+  background: #e6e6e6;
+  border-radius: 8px;
+  padding: 16px 24px;
+  display: grid;
+  grid-template-columns: 240px 1fr auto;
+  align-items: center;
+  gap: 16px;
+}
+
+.agend-date {
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #111;
+}
+
+.agend-student {
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #111;
+}
+
+/* ── Badges de status ── */
+.agend-badge {
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 16px;
+  border-radius: 30px;
+  white-space: nowrap;
+  text-align: center;
+  display: inline-block;
+}
+
+.badge-confirmada,
+.badge-success {
+  background-color: #4CAF50;
+  color: #fff;
+}
+
+.badge-a-confirmar,
+.badge-warning {
+  background-color: #FF9800;
+  color: #fff;
+}
+
+.badge-agendada,
+.badge-secondary {
+  background-color: #9E9E9E;
+  color: #fff;
+}
+
+.badge-danger {
+  background-color: #e53935;
+  color: #fff;
+}
+
+/* ── Responsivo ── */
+@media (max-width: 768px) {
+  .agend-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 14px 16px;
+  }
+  .agend-table-header {
+    display: none;
+  }
+  .agend-title {
+    font-size: 22px;
+  }
+  .btn-solicitar {
+    padding: 10px 18px;
+    font-size: 13px;
+  }
+}

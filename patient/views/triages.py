@@ -105,7 +105,17 @@ class PatientTriageDetailView(PatientOnly, TemplateView):
             return context | {"triage_error": self.UNAVAILABLE}
 
         if triage is None:
-            raise Http404("Triagem não encontrada.")
+            # RETORNA MOCK DATA PARA O USUÁRIO CONSEGUIR VISUALIZAR O CSS SEM DADOS NO BANCO
+            context["triage"] = {
+                "label": "Encaminhada",
+                "level": "success",
+                "summary": "e já encaminhada para acompanhamento.",
+                "created_at": timezone.now(),
+                "closed_at": timezone.now(),
+                "closed_by": "Supervisor Geral",
+                "teachers": ["Prof. Renata Alves"],
+            }
+            return context
 
         context["triage"] = self.as_detail(triage, teachers)
         return context
