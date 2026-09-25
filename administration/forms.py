@@ -244,6 +244,7 @@ class FullNameForm(RegistrationStepForm):
                 cleaned_data["last_name"] = parts[1]
             else:
                 self.add_error("name", "Por favor, informe também o sobrenome.")
+        cleaned_data.pop("name", None)
         return cleaned_data
 
 
