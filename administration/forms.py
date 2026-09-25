@@ -7,7 +7,6 @@ from django.utils import timezone
 from django.utils.html import format_html
 from localflavor.br.br_states import STATE_CHOICES
 from localflavor.br.forms import BRCPFField
-
 from core.fields import format_cep, only_digits
 from core.models import CustomUser
 from core.validators import NO_NUMBER, validate_letters, validate_phone
@@ -241,6 +240,7 @@ class FullNameForm(RegistrationStepForm):
                 cleaned_data["last_name"] = parts[1]
             else:
                 self.add_error("name", "Por favor, informe também o sobrenome.")
+        cleaned_data.pop("name", None)
         return cleaned_data
 
 

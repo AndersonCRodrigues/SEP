@@ -175,9 +175,6 @@
   .mobile-question #id_social_name::placeholder {
     color: transparent !important;
   }
-  .mobile-question .question-field:has(#id_gender_identity) {
-    display: none !important;
-  }
 
   /* ===== DRUM PICKER ===== */
   .drum-picker {
