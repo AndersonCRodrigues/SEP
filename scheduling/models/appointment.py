@@ -3,11 +3,13 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q
 from django.utils import timezone
+
 from core.models import CustomUser
 from core.permissions import ALL, BusinessRulesMixin, RoleScopedQuerySet
+from patient.models import Patient
 from students.models import Student
 from teacher.models import Teacher
-from patient.models import Patient
+
 from .room import Room, RoomBooking
 
 Role = CustomUser.Role

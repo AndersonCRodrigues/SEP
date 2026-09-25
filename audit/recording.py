@@ -1,4 +1,5 @@
 from utils.fields import EncryptedFieldMixin
+
 from .middleware import get_current_ip, get_current_user
 from .models import SecurityLog
 

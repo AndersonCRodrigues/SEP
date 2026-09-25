@@ -1,6 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import UniqueConstraint
+
 from areas.models import AreaActing
 from core.models import CustomUser
 from core.permissions import ALL, ANY, BusinessRulesMixin, RoleScopedQuerySet

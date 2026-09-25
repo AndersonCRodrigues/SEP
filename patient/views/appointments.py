@@ -4,7 +4,9 @@ from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views.generic import FormView, TemplateView
+
 from scheduling.models import AppointmentRequest
+
 from ..forms import AppointmentRequestForm
 from ..models import Patient
 from .access import PatientOnly

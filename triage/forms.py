@@ -6,8 +6,8 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 
 from .models import (
-    IarvAdult,
     IarvAdolescent,
+    IarvAdult,
     IarvChild,
     TriageRecord,
 )

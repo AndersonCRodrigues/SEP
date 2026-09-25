@@ -3,11 +3,12 @@ from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.db.models import Q
 from django.utils import timezone
+
+from core.constants import VISIBLE_TO_AUTHOR, VISIBLE_TO_PATIENT, TriageStatus
 from core.models import CustomUser
 from core.permissions import ALL, BusinessRulesMixin, RoleScopedQuerySet
 from patient.models import Patient
 from students.models import Student
-from core.constants import VISIBLE_TO_AUTHOR, VISIBLE_TO_PATIENT, TriageStatus
 from utils.fields import EncryptedTextField
 
 Role = CustomUser.Role

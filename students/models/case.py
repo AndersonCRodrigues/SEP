@@ -2,9 +2,11 @@ from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.db.models import Q, UniqueConstraint
 from django.utils import timezone
+
 from areas.models import AreaActing
 from core.models import CustomUser
 from core.permissions import BusinessRulesMixin
+
 from .scoping import AdviseeScopedQuerySet, can_reach_student
 from .student import Student
 

@@ -1,25 +1,23 @@
-from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.http import HttpResponseForbidden
+from django.shortcuts import get_object_or_404, redirect, render
 
+from areas.models import AreaActing
+from core.constants import TriageStatus
+from core.models import CustomUser
 from patient.models import Patient
 from students.models import Student
 from teacher.models import Teacher
-from areas.models import AreaActing
-from core.models import CustomUser
-from core.constants import TriageStatus
-from triage.models import TriageRecord, TriageFeedback, Referral
+from triage.models import Referral, TriageFeedback, TriageRecord
+
 from .forms import (
-    IarvAdultForm,
-    IarvAdolescentForm,
-    IarvChildForm,
     TriageRecordForm,
+    TriageRegistration,
     get_iarv_form_class,
     get_iarv_form_class_for_instance,
-    TriageRegistration,
 )
 
 Role = CustomUser.Role
@@ -315,9 +313,7 @@ def triage_detail_supervisor(request, pk):
     
     editada_pos_envio = False
     if pode_travar_edicao and triage.submitted_at:
-        if triage.updated_at > triage.submitted_at:
-            editada_pos_envio = True
-        elif iarv_updated and iarv_updated > triage.submitted_at:
+        if triage.updated_at > triage.submitted_at or iarv_updated and iarv_updated > triage.submitted_at:
             editada_pos_envio = True
 
     context = {

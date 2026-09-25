@@ -1,22 +1,26 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from students.models import Advising, advisees_visible_to
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.models import Q
-from django.utils import timezone
-from django.views.generic import ListView, DetailView, TemplateView, UpdateView
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
-from .forms import ProfessorCreationForm, PerfilProfessorForm
-from .models import Teacher
-from core.utils import sincronizar_grupo
-from django.core.exceptions import ValidationError
+from django.utils import timezone
+from django.views.generic import DetailView, ListView, TemplateView, UpdateView
+
 from core.models import CustomUser
-from .forms import VincularAlunoForm
-from students.models import StudentActivity
-from .forms import StudentActivityForm, PerformanceReviewForm
+from core.utils import sincronizar_grupo
 from patient.models import Patient
+from students.models import Advising, StudentActivity, advisees_visible_to
+
+from .forms import (
+    PerfilProfessorForm,
+    PerformanceReviewForm,
+    ProfessorCreationForm,
+    StudentActivityForm,
+    VincularAlunoForm,
+)
+from .models import Teacher
 
 
 class HomeProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):

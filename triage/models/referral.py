@@ -1,14 +1,15 @@
-from core.permissions import ALL, BusinessRulesMixin, RoleScopedQuerySet
-from django.db import models, transaction
-from areas.models import AreaActing
-from patient.models.patient import Patient
-from .triage_record import TriageRecord
-from teacher.models import Teacher
-from core.models import CustomUser
-from django.db.models import Q
-from core.constants import TriageStatus
 from django.core.exceptions import ValidationError
+from django.db import models, transaction
+from django.db.models import Q
 
+from areas.models import AreaActing
+from core.constants import TriageStatus
+from core.models import CustomUser
+from core.permissions import ALL, BusinessRulesMixin, RoleScopedQuerySet
+from patient.models.patient import Patient
+from teacher.models import Teacher
+
+from .triage_record import TriageRecord
 
 Role = CustomUser.Role
 

@@ -1,6 +1,8 @@
 from django.db import models
+
 from core.models import CustomUser
 from core.permissions import BusinessRulesMixin
+
 from .scoping import AdviseeScopedQuerySet, can_reach_student
 from .student import Student
 
