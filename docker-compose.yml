@@ -60,9 +60,10 @@ services:
       - .env
     volumes:
       - ./templates:/app/templates      # hot-reload de templates sem rebuild
-      - ./core/static:/app/core/static  # hot-reload de arquivos estáticos originais
-      - staticfiles_data:/app/staticfiles # Persiste os arquivos estáticos processados
-      # hot-reload de código Python (sem rebuild a cada mudança)
+      - staticfiles_data:/app/staticfiles # usado apenas se rodar collectstatic (produção)
+      # hot-reload de código Python e estáticos (sem rebuild a cada mudança)
+      # ./core já inclui core/static, então os .css/.js/imagens de lá também
+      # são atualizados ao vivo (ver WHITENOISE_USE_FINDERS/AUTOREFRESH em dev.py)
       - ./core:/app/core
       - ./students:/app/students
       - ./teacher:/app/teacher
