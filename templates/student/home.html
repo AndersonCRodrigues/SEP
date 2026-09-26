@@ -1,122 +1,130 @@
 {% extends "student/base_student.html" %}
-{% load components %}
 {% load static %}
-
-{% block extra_css %}
-  <link rel="stylesheet" href="{% static 'core/css/student_home.css' %}" />
-{% endblock %}
 
 {% block title %}Página inicial{% endblock %}
 
-{% block breadcrumbs %}
-<li class="breadcrumb-item active" aria-current="page">Página inicial - Aluno</li>
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/components/tokens.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/stat_card.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/activity_card.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/calendar.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/student_home.css' %}">
 {% endblock %}
 
-{% block page_title %}Olá, {{ request.user.first_name|default:"aluno" }}!{% endblock %}
-
-{% block page_actions %}
-<a class="new-triage" href="{% url 'triage:fila_triagem' %}">Fazer triagem</a>
-{% endblock %}
+{% block page_header %}{% endblock %}
 
 {% block content %}
 {% if home_error %}
 {% include "components/error_state.html" with message=home_error retry_url=request.path %}
 {% else %}
-{% include "components/summary_list.html" with indicators=indicators title="Resumo do estágio" id="summary-title" %}
+<h1 class="student-greeting">Olá, {{ request.user.first_name|default:"aluno" }}!</h1>
+<p class="student-breadcrumb">Página inicial - Aluno</p>
 
-<div class="panel">
-  {% section title="Atividades recentes" class="activities" id="activities-title" %}
-  <ul class="activity-list">
+<div class="row g-2 mb-4">
+  {% for indicator in indicators %}
+  <div class="col-6 col-md-3">
+    <div class="stat-card">
+      <p class="stat-label">{{ indicator.label }}</p>
+      <span class="stat-number">{{ indicator.value }}</span>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<hr class="section-divider">
+
+<div class="row g-4">
+  <div class="col-12 col-lg-7">
+    <h2 class="section-title mb-3">Atividades recentes</h2>
+
     {% for activity in activities %}
-    <li class="activity activity-{{ activity.kind }}">
-      <h3 class="activity-title">{{ activity.title }}</h3>
-      {% if activity.label %}
-      {% include "components/badge.html" with label=activity.label level=activity.level %}
-      {% endif %}
+    <div class="activity-card activity-{{ activity.kind }}">
+      <div class="d-flex justify-content-between align-items-center">
+        <span class="activity-type">{{ activity.link_label }}</span>
+        {% if activity.label %}
+        {% if activity.level == "success" %}
+        <span class="badge-concluido">{{ activity.label }}</span>
+        {% elif activity.level == "danger" %}
+        <span class="badge-enviar">{{ activity.label }}</span>
+        {% else %}
+        <span class="badge-revisar">{{ activity.label }}</span>
+        {% endif %}
+        {% endif %}
+      </div>
+      <p class="activity-title">{{ activity.title }}</p>
       {% if activity.detail %}
-      <p class="activity-detail">{{ activity.detail }}</p>
+      <p class="activity-sub">{{ activity.detail }}</p>
       {% endif %}
-      <a class="activity-link" href="{{ activity.url }}" aria-label="{{ activity.link_label }}">
-        <span aria-hidden="true">&rsaquo;</span>
-      </a>
-    </li>
+      <hr class="activity-divider">
+      <div class="text-end">
+        <a href="{{ activity.url }}" aria-label="{{ activity.link_label }}">
+          <i class="bi bi-chevron-right activity-chevron"></i>
+        </a>
+      </div>
+    </div>
     {% empty %}
-    <li class="activity-empty">
-      {% include "components/empty_state.html" with message="Nenhuma atividade recente." %}
-    </li>
+    {% include "components/empty_state.html" with message="Nenhuma atividade recente." %}
     {% endfor %}
-  </ul>
-  {% endsection %}
+  </div>
 
-  {% section title="Calendário" class="calendar" id="calendar-title" %}
-  <form class="calendar-nav" method="get" action="">
-    <a
-      class="calendar-previous"
-      href="?ano={{ previous_month|date:'Y' }}&amp;mes={{ previous_month|date:'n' }}"
-      aria-label="Mês anterior"
-    >&lsaquo;</a>
+  <div class="col-12 col-lg-5">
+    <h2 class="section-title mb-3">Calendário</h2>
 
-    <label class="visually-hidden" for="calendar-month">Mês</label>
-    <select id="calendar-month" name="mes">
-      {% for number, name in calendar_months %}
-      <option value="{{ number }}" {% if number == calendar_month %}selected{% endif %}>
-        {{ name }}
-      </option>
-      {% endfor %}
-    </select>
+    <div class="calendar-card mx-auto">
+      <form class="d-flex justify-content-between align-items-center px-2" method="get" action="">
+        <a class="cal-nav-btn"
+          href="?ano={{ previous_month|date:'Y' }}&amp;mes={{ previous_month|date:'n' }}"
+          aria-label="Mês anterior"><i class="bi bi-chevron-left"></i></a>
 
-    <label class="visually-hidden" for="calendar-year">Ano</label>
-    <select id="calendar-year" name="ano">
-      {% for year in calendar_years %}
-      <option value="{{ year }}" {% if year == calendar_year %}selected{% endif %}>
-        {{ year }}
-      </option>
-      {% endfor %}
-    </select>
+        <div class="d-flex gap-2 align-items-center">
+          <label class="visually-hidden" for="calendar-month">Mês</label>
+          <select class="cal-select" id="calendar-month" name="mes" onchange="this.form.submit()">
+            {% for number, name in calendar_months %}
+            <option value="{{ number }}" {% if number == calendar_month %}selected{% endif %}>{{ name }}</option>
+            {% endfor %}
+          </select>
 
-    <button type="submit">Ver</button>
+          <label class="visually-hidden" for="calendar-year">Ano</label>
+          <select class="cal-select" id="calendar-year" name="ano" onchange="this.form.submit()">
+            {% for year in calendar_years %}
+            <option value="{{ year }}" {% if year == calendar_year %}selected{% endif %}>{{ year }}</option>
+            {% endfor %}
+          </select>
+        </div>
 
-    <a
-      class="calendar-next"
-      href="?ano={{ next_month|date:'Y' }}&amp;mes={{ next_month|date:'n' }}"
-      aria-label="Próximo mês"
-    >&rsaquo;</a>
-  </form>
+        <a class="cal-nav-btn"
+          href="?ano={{ next_month|date:'Y' }}&amp;mes={{ next_month|date:'n' }}"
+          aria-label="Mês seguinte"><i class="bi bi-chevron-right"></i></a>
+      </form>
 
-  <table class="calendar-grid">
-    <caption class="visually-hidden">
-      Seus atendimentos no mês selecionado
-    </caption>
-    <thead>
-      <tr>
-        <th scope="col" abbr="Domingo">Dom</th>
-        <th scope="col" abbr="Segunda-feira">Seg</th>
-        <th scope="col" abbr="Terça-feira">Ter</th>
-        <th scope="col" abbr="Quarta-feira">Qua</th>
-        <th scope="col" abbr="Quinta-feira">Qui</th>
-        <th scope="col" abbr="Sexta-feira">Sex</th>
-        <th scope="col" abbr="Sábado">Sáb</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for week in calendar_weeks %}
-      <tr>
+      <div class="calendar-grid">
+        <div class="cal-header">Dom</div>
+        <div class="cal-header">Seg</div>
+        <div class="cal-header">Ter</div>
+        <div class="cal-header">Qua</div>
+        <div class="cal-header">Qui</div>
+        <div class="cal-header">Sex</div>
+        <div class="cal-header">Sáb</div>
+
+        {% for week in calendar_weeks %}
         {% for day in week %}
-        <td
-          class="day{% if not day.in_month %} day-outside-month{% endif %}{% if day.has_event %} day-with-event{% endif %}"
-          {% if day.today %}aria-current="date"{% endif %}
-        >
-          <time datetime="{{ day.date|date:'Y-m-d' }}">{{ day.date|date:"j" }}</time>
-          {% if day.has_event %}
-          <span class="visually-hidden">com atendimento</span>
-          {% endif %}
-        </td>
+        {% if day.in_month %}
+        <div class="cal-day{% if day.today %} cal-highlight-dark{% endif %}">
+          <span>{{ day.date|date:"j" }}</span>
+          {% if day.has_event %}<span class="cal-dot dot-green"></span>{% endif %}
+        </div>
+        {% else %}
+        <div class="cal-empty"></div>
+        {% endif %}
         {% endfor %}
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  {% endsection %}
+        {% endfor %}
+      </div>
+
+      <div class="d-flex justify-content-center gap-3 mt-2">
+        <span class="legend-item green">Com atendimento</span>
+      </div>
+    </div>
+  </div>
 </div>
 {% endif %}
 {% endblock %}
