@@ -1,86 +1,84 @@
-{% extends "base.html" %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
 
-{% block title_suffix %} | SEP Maricá{% endblock %}
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}{% endblock %}{% block title_suffix %} | SEP Maricá{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'core/css/base_area.css' %}">
+  {% block page_css %}{% endblock %}
+  {% block extra_css %}{% endblock %}
+</head>
 
-{% block brand %}
-<a class="navbar-brand brand" href="{% url 'supervisor:home' %}">
-  <span class="brand-name">SEP Maricá</span>
-  <span class="brand-institution">Universidade de Vassouras</span>
-</a>
-{% endblock %}
+<body>
+  <header class="admin-navbar">
+    {% block brand %}
+    <a class="admin-navbar__brand" href="{% url 'supervisor:home' %}">
+      <span class="brand-name">SEP Maricá</span>
+      <span class="brand-institution">Universidade de Vassouras</span>
+    </a>
+    {% endblock %}
 
-{% block main_nav %}
-{% with current=request.resolver_match.view_name %}
-<nav class="main-nav" aria-label="Navegação principal">
-  <ul class="navbar-nav">
-    <li class="nav-item">
-      <a
-        class="nav-link"
-        href="{% url 'supervisor:home' %}"
-        {% if current == 'supervisor:home' %}aria-current="page"{% endif %}
-      >Página inicial</a>
-    </li>
-    <li class="nav-item">
-      <a
-        class="nav-link"
-        href="{% url 'supervisor:alunos' %}"
-        {% if current == 'supervisor:alunos' or current == 'supervisor:aluno_detalhe' or current == 'students:cadastrar' %}aria-current="page"{% endif %}
-      >Alunos</a>
-    </li>
-    <li class="nav-item">
-      <a
-        class="nav-link"
-        href="{% url 'supervisor:professores' %}"
-        {% if current == 'supervisor:professores' or current == 'supervisor:professor_detalhe' or current == 'supervisor:listar_usuarios' or current == 'teacher:cadastrar' %}aria-current="page"{% endif %}
-      >Professores</a>
-    </li>
-    <li class="nav-item">
-      <a
-        class="nav-link"
-        href="{% url 'supervisor:triagens' %}"
-        {% if current == 'supervisor:triagens' or current == 'supervisor:triagem_detalhe' %}aria-current="page"{% endif %}
-      >Triagens</a>
-    </li>
-    <li class="nav-item">
-      <a
-        class="nav-link"
-        href="{% url 'supervisor:feedbacks' %}"
-        {% if current == 'supervisor:feedbacks' %}aria-current="page"{% endif %}
-      >Feedbacks</a>
-    </li>
-    <li class="nav-item">
-      <a
-        class="nav-link"
-        href="{% url 'supervisor:encaminhamentos' %}"
-        {% if current == 'supervisor:encaminhamentos' or current == 'supervisor:encaminhar' %}aria-current="page"{% endif %}
-      >Encaminhamentos</a>
-    </li>
-  </ul>
-</nav>
-{% endwith %}
-{% endblock %}
+    {% block main_nav %}
+    {% with current=request.resolver_match.view_name %}
+    <nav class="main-nav" aria-label="Navegação principal">
+      <ul class="admin-navbar__links">
+        <li><a href="{% url 'supervisor:home' %}"
+            class="{% if current == 'supervisor:home' %}active{% endif %}">Página inicial</a></li>
+        <li><a href="{% url 'supervisor:alunos' %}"
+            class="{% if current == 'supervisor:alunos' or current == 'supervisor:aluno_detalhe' or current == 'students:cadastrar' %}active{% endif %}">Alunos</a>
+        </li>
+        <li><a href="{% url 'supervisor:professores' %}"
+            class="{% if current == 'supervisor:professores' or current == 'supervisor:professor_detalhe' or current == 'supervisor:listar_usuarios' or current == 'teacher:cadastrar' %}active{% endif %}">Professores</a>
+        </li>
+        <li><a href="{% url 'supervisor:triagens' %}"
+            class="{% if current == 'supervisor:triagens' or current == 'supervisor:triagem_detalhe' %}active{% endif %}">Triagens</a>
+        </li>
+        <li><a href="{% url 'supervisor:feedbacks' %}"
+            class="{% if current == 'supervisor:feedbacks' %}active{% endif %}">Feedbacks</a></li>
+        <li><a href="{% url 'supervisor:encaminhamentos' %}"
+            class="{% if current == 'supervisor:encaminhamentos' or current == 'supervisor:encaminhar' %}active{% endif %}">Encaminhamentos</a>
+        </li>
+      </ul>
+    </nav>
+    {% endwith %}
+    {% endblock %}
 
-{% block user_links %}
-{# TODO: botões sem lógica; ficam para fazer #}
-<li class="nav-item">
-  <button type="button" class="header-action" aria-label="Mensagens">
-    <span aria-hidden="true">✉</span>
-  </button>
-</li>
-<li class="nav-item">
-  <button type="button" class="header-action" aria-label="Notificações">
-    <span aria-hidden="true">🔔</span>
-  </button>
-</li>
-<li class="nav-item">
-  <a class="header-action" href="{% url 'supervisor:perfil' %}" aria-label="Minha conta">
-    <span aria-hidden="true">👤</span>
-  </a>
-</li>
-{% endblock %}
+    <ul class="admin-navbar__actions">
+      {% block user_links %}
+      {# TODO: botões sem lógica; ficam para fazer #}
+      <li><button type="button" class="icon-btn" aria-label="Mensagens">✉</button></li>
+      <li><button type="button" class="icon-btn" aria-label="Notificações">🔔</button></li>
+      <li><a class="icon-btn" href="{% url 'supervisor:perfil' %}" aria-label="Minha conta">👤</a></li>
+      <li>
+        <form method="post" action="{% url 'logout' %}" class="d-inline">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-outline-light btn-sm">
+            <i class="bi bi-box-arrow-right"></i> Sair
+          </button>
+        </form>
+      </li>
+      {% endblock %}
+    </ul>
+  </header>
 
-{% block footer %}
-<footer class="site-footer">
-  <p>Univassouras</p>
-</footer>
-{% endblock %}
+  <main class="admin-content">
+    {% block page_header %}
+    <div class="page-header-row">
+      <h1 class="page-title">{% block page_title %}{% endblock %}</h1>
+      <div>{% block page_actions %}{% endblock %}</div>
+    </div>
+    {% endblock %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="admin-footer">
+    {% block footer %}<p>UNIVASSOURAS</p>{% endblock %}
+  </footer>
+
+  {% block extra_js %}{% endblock %}
+</body>
+
+</html>

@@ -1,16 +1,17 @@
 {% extends "supervisor/base_coordinator.html" %}
-{% load components %}
+{% load components static %}
 
 {% block title %}Página inicial{% endblock %}
 
-{% block breadcrumbs %}
-<li class="breadcrumb-item active" aria-current="page">Página inicial - Coordenação</li>
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'core/css/administrativo/administrativo_home.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/coordenacao/coordenacao.css' %}">
 {% endblock %}
 
 {% block page_title %}Olá, coordenação!{% endblock %}
 
 {% block page_actions %}
-<a class="advising-panel" href="{% url 'supervisor:orientacao' %}">Meus alunos orientandos</a>
+<a class="btn-wine" href="{% url 'supervisor:orientacao' %}">Meus alunos orientandos</a>
 {% endblock %}
 
 {% block content %}

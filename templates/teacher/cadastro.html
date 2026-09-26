@@ -1,13 +1,11 @@
 {% extends "supervisor/base_coordinator.html" %}
-{% load components %}
+{% load components static %}
+
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'core/css/form_cadastro.css' %}">
+{% endblock %}
 
 {% block title %}Adicionar professores{% endblock %}
-
-{% block breadcrumbs %}
-<li class="breadcrumb-item"><a href="{% url 'supervisor:home' %}">Página inicial</a></li>
-<li class="breadcrumb-item"><a href="{% url 'supervisor:professores' %}">Professores</a></li>
-<li class="breadcrumb-item active" aria-current="page">Adicionar</li>
-{% endblock %}
 
 {% block page_title %}Adicionar professores{% endblock %}
 
@@ -16,7 +14,7 @@
 {% include "components/alert.html" with message="Confira os campos destacados abaixo." level="danger" %}
 {% endif %}
 
-<form class="teacher-form" method="post" novalidate>
+<form class="figma-custom-form" method="post" novalidate>
   {% csrf_token %}
   {{ form.as_p }}
 
@@ -31,6 +29,6 @@
     {% endfor %}
   </fieldset>
 
-  <button type="submit" class="submit-teacher">Cadastrar professor</button>
+  <button type="submit" class="btn-submit-figma">Cadastrar professor</button>
 </form>
 {% endblock %}

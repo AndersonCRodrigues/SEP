@@ -1,103 +1,119 @@
 {% extends "supervisor/base_coordinator.html" %}
-{% load components %}
+{% load components static %}
 
 {% block title %}Novo encaminhamento{% endblock %}
 
-{% block breadcrumbs %}
-<li class="breadcrumb-item"><a href="{% url 'supervisor:home' %}">Página inicial</a></li>
-<li class="breadcrumb-item active" aria-current="page">Encaminhamentos</li>
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'core/css/superadmin/security_logs.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/teacher_area.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/administrativo/administrativo_atestados.css' %}">
 {% endblock %}
 
 {% block page_title %}Novo encaminhamento{% endblock %}
 
 {% block content %}
-<div class="panel">
-  {% section title="Triagens concluídas" class="concluded-triages" id="concluded-title" %}
-  <ul class="triage-choice-list">
-    {% for item in triagens %}
-    <li class="triage-choice{% if item.selected %} triage-choice-selected{% endif %}">
-      <a
-        href="{% url 'supervisor:encaminhar' item.triage.pk %}"
-        {% if item.selected %}aria-current="true"{% endif %}
-      >{{ item.patient }}</a>
-      <p class="triage-choice-student">Triagem por {{ item.student }}</p>
-      <p class="triage-choice-received">{{ item.received }}</p>
-    </li>
-    {% empty %}
-    <li class="triage-choice-empty">
-      {% include "components/empty_state.html" with message="Nenhuma triagem concluída esperando encaminhamento." %}
-    </li>
-    {% endfor %}
-  </ul>
-  {% endsection %}
+<div class="logs-container">
+  <h2 class="logs-title">Triagens concluídas</h2>
+  {% if triagens %}
+  <table class="table-logs">
+    <thead>
+      <tr>
+        <th style="width: 40%;">Paciente:</th>
+        <th style="width: 35%;">Triagem por:</th>
+        <th style="width: 25%;">Recebida:</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in triagens %}
+      <tr>
+        <td class="log-event">
+          <a href="{% url 'supervisor:encaminhar' item.triage.pk %}" {% if item.selected %}aria-current="true"{% endif %}>
+            {{ item.patient }}
+          </a>
+        </td>
+        <td class="log-details">{{ item.student }}</td>
+        <td class="log-time">{{ item.received }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  {% include "components/empty_state.html" with message="Nenhuma triagem concluída esperando encaminhamento." %}
+  {% endif %}
+</div>
 
-  {% if triagem %}
-  {% section title="Encaminhar paciente" class="referral-form" id="referral-title" %}
-  <div class="referral-patient">
-    <p class="referral-label">Paciente</p>
-    <p class="referral-name">{{ triagem.patient.get_full_name }}</p>
-    <p class="referral-date">Triagem realizada por {{ triagem.student_author.get_full_name }}</p>
-  </div>
+{% if triagem %}
+<div class="area-container">
+  <p class="area-title-pill">{{ triagem.patient.get_full_name }}</p>
+  <p class="area-label">Triagem realizada por {{ triagem.student_author.get_full_name }}</p>
 
-  <form class="referral-area" method="get" action="{% url 'supervisor:encaminhar' triagem.pk %}">
-    <p class="filter">
-      <label for="filter-area">Área de atuação do caso</label>
-      <select id="filter-area" name="area">
-        <option value="">Todas</option>
-        {% for area in areas %}
-        <option value="{{ area.pk }}" {% if area_filter == area.pk|stringformat:"s" %}selected{% endif %}>
-          {{ area.nome }}
-        </option>
-        {% endfor %}
-      </select>
-    </p>
-    <button type="submit">Filtrar professores</button>
+  <form class="logs-search-form" method="get" action="{% url 'supervisor:encaminhar' triagem.pk %}">
+    <label class="visually-hidden" for="filter-area">Área de atuação do caso</label>
+    <select class="form-control-search" id="filter-area" name="area">
+      <option value="">Todas as áreas</option>
+      {% for area in areas %}
+      <option value="{{ area.pk }}" {% if area_filter == area.pk|stringformat:"s" %}selected{% endif %}>
+        {{ area.nome }}
+      </option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn-wine">Filtrar professores</button>
   </form>
 
-  <form class="referral-choice" method="post" action="{% url 'supervisor:encaminhar' triagem.pk %}">
+  <form method="post" action="{% url 'supervisor:encaminhar' triagem.pk %}">
     {% csrf_token %}
     <fieldset>
-      <legend>Alocar para professor(es)</legend>
+      <legend class="area-label">Alocar para professor(es)</legend>
       {% for professor in teachers %}
-      <p class="teacher-option">
-        <input
-          type="checkbox"
-          id="professor-{{ professor.pk }}"
-          name="professores"
-          value="{{ professor.pk }}"
-          {% if professor.pk in chosen %}checked{% endif %}
-        />
-        <label for="professor-{{ professor.pk }}">
+      <div class="area-row">
+        <input class="area-checkbox" type="checkbox" id="professor-{{ professor.pk }}" name="professores"
+          value="{{ professor.pk }}" {% if professor.pk in chosen %}checked{% endif %} />
+        <label class="area-label" for="professor-{{ professor.pk }}">
           {{ professor.get_full_name }}
           {% for area in professor.acting_areas.all %} — {{ area.nome }}{% endfor %}
         </label>
-      </p>
+      </div>
       {% empty %}
-      <p class="teacher-empty">
-        {% include "components/empty_state.html" with message="Nenhum professor com essa área de atuação." %}
-      </p>
+      {% include "components/empty_state.html" with message="Nenhum professor com essa área de atuação." %}
       {% endfor %}
     </fieldset>
 
-    <button type="submit" class="confirm-referral">Confirmar encaminhamento</button>
+    <div class="area-actions">
+      <button type="submit" class="btn-salvar-area">Confirmar encaminhamento</button>
+    </div>
   </form>
-  {% endsection %}
-  {% endif %}
+</div>
+{% endif %}
 
-  {% section title="Encaminhamentos recentes" class="referral-recent" id="recent-title" %}
-  <ul class="referral-list">
-    {% for item in recent %}
-    <li class="referral">
-      <p class="referral-name">{{ item.patient }}</p>
-      <p class="referral-teachers">{{ item.teachers }}</p>
-      {% include "components/badge.html" with label=item.label level=item.level %}
-    </li>
-    {% empty %}
-    <li class="referral-empty">
-      {% include "components/empty_state.html" with message="Nenhum encaminhamento feito ainda." %}
-    </li>
-    {% endfor %}
-  </ul>
-  {% endsection %}
+<div class="logs-container">
+  <h2 class="logs-title">Encaminhamentos recentes</h2>
+  {% if recent %}
+  <table class="table-logs">
+    <thead>
+      <tr>
+        <th style="width: 40%;">Paciente:</th>
+        <th style="width: 40%;">Professor(es):</th>
+        <th style="width: 20%;"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in recent %}
+      <tr>
+        <td class="log-event">{{ item.patient }}</td>
+        <td class="log-details">{{ item.teachers }}</td>
+        <td class="text-end">
+          {% if item.level == "success" %}
+          <span class="badge-status badge-status-info">{{ item.label }}</span>
+          {% else %}
+          <span class="badge-status badge-status-atencao">{{ item.label }}</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  {% include "components/empty_state.html" with message="Nenhum encaminhamento feito ainda." %}
+  {% endif %}
 </div>
 {% endblock %}

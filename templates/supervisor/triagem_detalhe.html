@@ -3,12 +3,6 @@
 
 {% block title %}Triagem de {{ triagem.patient.get_full_name }}{% endblock %}
 
-{% block breadcrumbs %}
-<li class="breadcrumb-item"><a href="{% url 'supervisor:home' %}">Página inicial</a></li>
-<li class="breadcrumb-item"><a href="{% url 'supervisor:triagens' %}">Triagens</a></li>
-<li class="breadcrumb-item active" aria-current="page">{{ triagem.patient.get_full_name }}</li>
-{% endblock %}
-
 {% block page_title %}Triagem de {{ triagem.patient.get_full_name }}{% endblock %}
 
 {% block page_actions %}

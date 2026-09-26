@@ -3,12 +3,6 @@
 
 {% block title %}{{ aluno.get_full_name }}{% endblock %}
 
-{% block breadcrumbs %}
-<li class="breadcrumb-item"><a href="{% url 'supervisor:home' %}">Página inicial</a></li>
-<li class="breadcrumb-item"><a href="{% url 'supervisor:alunos' %}">Alunos</a></li>
-<li class="breadcrumb-item active" aria-current="page">{{ aluno.get_full_name }}</li>
-{% endblock %}
-
 {% block page_title %}{{ aluno.get_full_name }}{% endblock %}
 
 {% block content %}
