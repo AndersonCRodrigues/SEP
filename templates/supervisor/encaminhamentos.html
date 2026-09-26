@@ -1,0 +1,119 @@
+{% extends "supervisor/base_coordinator.html" %}
+{% load components static %}
+
+{% block title %}Novo encaminhamento{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'core/css/superadmin/security_logs.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/teacher_area.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/administrativo/administrativo_atestados.css' %}">
+{% endblock %}
+
+{% block page_title %}Novo encaminhamento{% endblock %}
+
+{% block content %}
+<div class="logs-container">
+  <h2 class="logs-title">Triagens concluídas</h2>
+  {% if triagens %}
+  <table class="table-logs">
+    <thead>
+      <tr>
+        <th style="width: 40%;">Paciente:</th>
+        <th style="width: 35%;">Triagem por:</th>
+        <th style="width: 25%;">Recebida:</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in triagens %}
+      <tr>
+        <td class="log-event">
+          <a href="{% url 'supervisor:encaminhar' item.triage.pk %}" {% if item.selected %}aria-current="true"{% endif %}>
+            {{ item.patient }}
+          </a>
+        </td>
+        <td class="log-details">{{ item.student }}</td>
+        <td class="log-time">{{ item.received }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  {% include "components/empty_state.html" with message="Nenhuma triagem concluída esperando encaminhamento." %}
+  {% endif %}
+</div>
+
+{% if triagem %}
+<div class="area-container">
+  <p class="area-title-pill">{{ triagem.patient.get_full_name }}</p>
+  <p class="area-label">Triagem realizada por {{ triagem.student_author.get_full_name }}</p>
+
+  <form class="logs-search-form" method="get" action="{% url 'supervisor:encaminhar' triagem.pk %}">
+    <label class="visually-hidden" for="filter-area">Área de atuação do caso</label>
+    <select class="form-control-search" id="filter-area" name="area">
+      <option value="">Todas as áreas</option>
+      {% for area in areas %}
+      <option value="{{ area.pk }}" {% if area_filter == area.pk|stringformat:"s" %}selected{% endif %}>
+        {{ area.nome }}
+      </option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn-wine">Filtrar professores</button>
+  </form>
+
+  <form method="post" action="{% url 'supervisor:encaminhar' triagem.pk %}">
+    {% csrf_token %}
+    <fieldset>
+      <legend class="area-label">Alocar para professor(es)</legend>
+      {% for professor in teachers %}
+      <div class="area-row">
+        <input class="area-checkbox" type="checkbox" id="professor-{{ professor.pk }}" name="professores"
+          value="{{ professor.pk }}" {% if professor.pk in chosen %}checked{% endif %} />
+        <label class="area-label" for="professor-{{ professor.pk }}">
+          {{ professor.get_full_name }}
+          {% for area in professor.acting_areas.all %} — {{ area.nome }}{% endfor %}
+        </label>
+      </div>
+      {% empty %}
+      {% include "components/empty_state.html" with message="Nenhum professor com essa área de atuação." %}
+      {% endfor %}
+    </fieldset>
+
+    <div class="area-actions">
+      <button type="submit" class="btn-salvar-area">Confirmar encaminhamento</button>
+    </div>
+  </form>
+</div>
+{% endif %}
+
+<div class="logs-container">
+  <h2 class="logs-title">Encaminhamentos recentes</h2>
+  {% if recent %}
+  <table class="table-logs">
+    <thead>
+      <tr>
+        <th style="width: 40%;">Paciente:</th>
+        <th style="width: 40%;">Professor(es):</th>
+        <th style="width: 20%;"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in recent %}
+      <tr>
+        <td class="log-event">{{ item.patient }}</td>
+        <td class="log-details">{{ item.teachers }}</td>
+        <td class="text-end">
+          {% if item.level == "success" %}
+          <span class="badge-status badge-status-info">{{ item.label }}</span>
+          {% else %}
+          <span class="badge-status badge-status-atencao">{{ item.label }}</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  {% include "components/empty_state.html" with message="Nenhum encaminhamento feito ainda." %}
+  {% endif %}
+</div>
+{% endblock %}

@@ -128,7 +128,7 @@ class CustomUser(AbstractUser):
             )
 
         if self.role in (self.Role.PROFESSOR, self.Role.SUPERVISOR) and not self.crp:
-            raise ValidationError({"crp": "Professor/Supervisor precisa ter o CRP."})
+            raise ValidationError({"crp": "Professor/Coordenador precisa ter o CRP."})
 
     def save(self, *args, **kwargs):
         self.normalize()

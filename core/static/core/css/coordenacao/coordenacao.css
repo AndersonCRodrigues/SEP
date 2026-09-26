@@ -1,0 +1,19 @@
+/* Área da Coordenação: só o que não tem equivalente em base_area.css,
+   administrativo_home.css e superadmin/security_logs.css, que são os
+   componentes reaproveitados aqui. */
+
+/* Seta de "abrir" em cada atividade da página inicial. A home do
+   Administrativo usa ícone no lugar, então não há regra a reutilizar. */
+.activity-link {
+  margin-left: auto;
+  align-self: center;
+  color: var(--sep-maroon);
+  font-size: 1.5rem;
+  line-height: 1;
+  text-decoration: none;
+  padding: 0 0.25rem;
+}
+
+.activity-link:hover {
+  color: var(--sep-maroon-dark);
+}

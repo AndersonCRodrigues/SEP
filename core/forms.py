@@ -55,7 +55,7 @@ class CustomUserCreationForm(UserCreationForm):
         queryset=AreaActing.objects.all(),
         required=False,
         label="Áreas de atuação",
-        help_text="Obrigatório para Professor e Supervisor.",
+        help_text="Obrigatório para Professor e Coordenador.",
         widget=forms.CheckboxSelectMultiple,
     )
 
@@ -77,7 +77,7 @@ class CustomUserCreationForm(UserCreationForm):
         if role in self.ROLES_REQUIRING_AREA and not cleaned_data.get("acting_areas"):
             self.add_error(
                 "acting_areas",
-                "Professor e Supervisor precisam de pelo menos uma área de atuação.",
+                "Professor e Coordenador precisam de pelo menos uma área de atuação.",
             )
 
         return cleaned_data
@@ -114,6 +114,6 @@ class SupervisorCreationForm(UserCreationForm):
         role = self.cleaned_data["role"]
         if role != CustomUser.Role.SUPERVISOR:
             raise forms.ValidationError(
-                "Pelo Superadmin, só é possível cadastrar Supervisor."
+                "Pelo Superadmin, só é possível cadastrar Coordenador."
             )
         return role

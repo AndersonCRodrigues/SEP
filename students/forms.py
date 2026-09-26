@@ -23,11 +23,14 @@ class AlunoCreationForm(UserCreationForm):
             "estado",
             "cep",
             "matricula",
+            "current_advisor",
         )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.instance.role = CustomUser.Role.ALUNO
+        self.fields["current_advisor"].label = "Professor responsável"
+        self.fields["current_advisor"].required = False
 
     def save(self, commit=True):
         aluno = super().save(commit=False)

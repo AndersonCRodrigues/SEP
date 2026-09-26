@@ -26,7 +26,7 @@ class TriageRecordQuerySet(RoleScopedQuerySet):
 FLOW_BY_TRIAGE_STATUS = {
     TriageStatus.OPEN: Patient.FlowStatus.IN_TRIAGE,
     TriageStatus.SUBMITTED: Patient.FlowStatus.AWAITING_REVIEW,
-    TriageStatus.CLOSED: Patient.FlowStatus.DISCHARGED,
+    TriageStatus.CLOSED: Patient.FlowStatus.AWAITING_REVIEW,
     TriageStatus.REFERRED: Patient.FlowStatus.REFERRED,
     TriageStatus.FINALIZED_EDITION: Patient.FlowStatus.AWAITING_REVIEW,
 }

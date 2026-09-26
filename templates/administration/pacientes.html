@@ -21,41 +21,49 @@
   <div class="patients-toolbar">
     <form method="get" class="search-form">
       <div class="search-input-wrapper">
-        <input 
-          type="text" 
-          name="q" 
-          placeholder="Buscar por nome, CPF ou código..." 
-          value="{{ request.GET.q|default:'' }}"
+        <input
+          type="text"
+          name="q"
+          placeholder="Buscar por nome ou CPF..."
+          value="{{ search }}"
         >
+      </div>
+      <div class="search-input-wrapper">
+        <select name="situacao" aria-label="Situação">
+          <option value="">Todas as situações</option>
+          {% for value, label in situations %}
+          <option value="{{ value }}" {% if situation_filter == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
       </div>
     </form>
   </div>
 
   <!-- ── Tabela de Pacientes ── -->
   <div class="patients-card">
-    {% if patients %}
+    {% if patients_error %}
+      {% include "components/error_state.html" with message=patients_error retry_url=request.path %}
+    {% elif patients %}
       <table class="patients-table">
         <thead>
           <tr>
             <th>Código</th>
             <th>Nome Completo</th>
             <th>CPF</th>
+            <th>Situação</th>
             <th>Data de Cadastro</th>
-            <th class="text-right">Ações</th>
           </tr>
         </thead>
         <tbody>
-          {% for patient in patients %}
+          {% for row in patients %}
           <tr>
-            <td class="patient-id">#{{ patient.pk }}</td>
+            <td class="patient-id">#{{ row.patient.pk }}</td>
             <td class="patient-name">
-              <strong>{{ patient.get_full_name }}</strong>
+              <strong>{{ row.name }}</strong>
             </td>
-            <td>{{ patient.cpf|default:"—" }}</td>
-            <td>{{ patient.created_at|date:"d/m/Y H:i" }}</td>
-            <td class="text-right">
-              <a href="#" class="btn-action">Ver ficha</a>
-            </td>
+            <td>{{ row.cpf }}</td>
+            <td>{% include "components/badge.html" with label=row.label level=row.level %}</td>
+            <td>{{ row.registered_at|date:"d/m/Y H:i" }}</td>
           </tr>
           {% endfor %}
         </tbody>

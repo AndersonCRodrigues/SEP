@@ -1,0 +1,38 @@
+{% extends "supervisor/base_coordinator.html" %}
+{% load components %}
+
+{% block title %}{{ professor.get_full_name }}{% endblock %}
+
+{% block page_title %}{{ professor.get_full_name }}{% endblock %}
+
+{% block content %}
+<dl class="teacher-detail">
+  <div class="teacher-field">
+    <dt>Áreas de atuação</dt>
+    <dd>{% for area in professor.acting_areas.all %}{{ area.nome }}{% if not forloop.last %}, {% endif %}{% empty %}Sem área{% endfor %}</dd>
+  </div>
+  <div class="teacher-field">
+    <dt>E-mail</dt>
+    <dd>{{ professor.email|default:"Não informado" }}</dd>
+  </div>
+  <div class="teacher-field">
+    <dt>CRP</dt>
+    <dd>{{ professor.crp|default:"Não informado" }}</dd>
+  </div>
+</dl>
+
+{% section title="Alunos orientados" class="advisees" id="advisees-title" %}
+<ul class="advisee-list">
+  {% for aluno in advisees %}
+  <li class="advisee">
+    <a href="{% url 'supervisor:aluno_detalhe' aluno.pk %}">{{ aluno.get_full_name }}</a>
+    <span class="advisee-stage">{{ aluno.get_stage_display }}</span>
+  </li>
+  {% empty %}
+  <li class="advisee-empty">
+    {% include "components/empty_state.html" with message="Este professor ainda não tem alunos vinculados." %}
+  </li>
+  {% endfor %}
+</ul>
+{% endsection %}
+{% endblock %}

@@ -17,7 +17,7 @@ from django.db import models
 
 class Role(models.TextChoices):
     SUPERADMIN = "SA"
-    SUPERVISOR = "SV"
+    SUPERVISOR = "SV", "Coordenador"
     PROFESSOR = "PR"
     ADMINISTRATIVO = "AD"
     ALUNO = "AL"

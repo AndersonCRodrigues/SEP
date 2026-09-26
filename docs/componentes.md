@@ -44,9 +44,13 @@ precisa de aspas.
 
 ## Notas
 
-Os componentes trazem classes do Bootstrap, mas `administration/base_admin.html`
-não carrega Bootstrap — só o `base.html` carrega. Nas telas do Administrativo as
-classes ficam inertes até o frontend estilizar.
+Os componentes trazem classes do Bootstrap, e todas as bases de área estendem o
+`base.html`, que é quem carrega o Bootstrap — inclusive
+`administration/base_admin.html`, que antes ficava de fora.
+
+`list.html`, `loading.html` e `table.html` existem e estão descritos acima, mas
+nenhuma tela os usa ainda: as listagens precisaram de selo ou link na célula e
+foram para o `{% data_table %}`, e o projeto não tem carregamento assíncrono.
 
 As homes do Administrativo e do Paciente escrevem os indicadores à mão, com a
 mesma marcação que o `summary_list.html` agora concentra. Elas migram quando

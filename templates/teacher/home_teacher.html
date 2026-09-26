@@ -15,12 +15,6 @@
 
 {% block page_actions %}
   <div class="d-flex gap-2">
-    {% comment %}
-    COMENTADO a pedido do front (validação de 12/09): rota teacher:painel comentada em urls.py
-    <a href="{% url 'teacher:painel' %}" class="btn btn-primary btn-sm">
-      <i class="bi bi-clipboard-data"></i> Painel do Professor
-    </a>
-    {% endcomment %}
     <a href="{% url 'teacher:alunos' %}" class="btn btn-outline-primary btn-sm">
       <i class="bi bi-people"></i> Meus Alunos
     </a>

@@ -586,7 +586,7 @@ def active_treatment(self):
 | `AWAITING_REVIEW` | Aluno **enviou** a ficha (`TriageStatus.SUBMITTED`) |
 | `REFERRED` | Supervisor encaminhou ao professor da área |
 | `IN_TREATMENT` | Professor designou o aluno que vai atender |
-| `DISCHARGED` | Alta, ou triagem fechada sem encaminhamento |
+| `DISCHARGED` | Alta, ao fim do atendimento |
 
 O estado vazio é deliberado: cadastrar não é entrar no fluxo. Quem tenta tratá-lo
 como um sexto estado acaba escrevendo `flow_status or IN_TRIAGE` espalhado.
@@ -598,14 +598,20 @@ se alguém o adicionar. Mover só acontece por `advance_to()`, que consulta o ma
 
 ```python
 ALLOWED_TRANSITIONS = {
-    "":               (IN_TRIAGE, IN_TREATMENT),
-    IN_TRIAGE:        (AWAITING_REVIEW, REFERRED, DISCHARGED),
-    AWAITING_REVIEW:  (IN_TRIAGE, REFERRED, DISCHARGED),
-    REFERRED:         (IN_TRIAGE, IN_TREATMENT, DISCHARGED),
-    IN_TREATMENT:     (DISCHARGED,),
-    DISCHARGED:       (IN_TRIAGE,),
+    "":                (AWAITING_TRIAGE, IN_TRIAGE, IN_TREATMENT),
+    AWAITING_TRIAGE:   (IN_TRIAGE, REFERRED),
+    IN_TRIAGE:         (AWAITING_REVIEW, REFERRED),
+    AWAITING_REVIEW:   (IN_TRIAGE, REFERRED),
+    REFERRED:          (IN_TRIAGE, IN_TREATMENT),
+    IN_TREATMENT:      (DISCHARGED,),
+    DISCHARGED:        (AWAITING_TRIAGE, IN_TRIAGE),
 }
 ```
+
+**A alta só existe no fim do atendimento.** A triagem é a etapa inicial: ela
+termina encaminhando o caso à coordenação, que analisa e envia ao professor da
+área. Por isso `DISCHARGED` saiu de todos os estados da triagem e só é alcançável
+a partir de `IN_TREATMENT` — fechar a ficha não dá alta a ninguém.
 
 Três escolhas que não são óbvias:
 

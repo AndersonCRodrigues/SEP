@@ -73,23 +73,56 @@ O `perfil/` continua no grupo do Django enquanto as outras rotas do Aluno confer
 | Rota | View | Mecanismo | Quem acessa |
 |---|---|---|---|
 | home | HomeProfessorView | LoginRequiredMixin + UserPassesTestMixin | PROFESSOR, SUPERVISOR, corrigido e testado nesta sessão |
-| painel/ | PainelProfessorView | UserPassesTestMixin | PROFESSOR, SUPERVISOR, testado |
 | cadastrar/ | cadastrar_professor | has_perm("teacher.add_teacher") | Supervisor |
 | perfil/ | PerfilProfessorView | LoginRequiredMixin + UserPassesTestMixin | PROFESSOR, SUPERVISOR, corrigido nesta sessão |
 | vincular-aluno/ | vincular_aluno | Role direto | PROFESSOR, SUPERVISOR, testado |
 | lancar-horas/ | lancar_horas | Role direto + can_be_created_by | PROFESSOR, SUPERVISOR, testado, 403 confirmado |
+| alunos/ | AlunosOrientacaoView | UserPassesTestMixin | PROFESSOR, SUPERVISOR |
+| alunos/\<pk\>/ | AlunoDetalheView | UserPassesTestMixin | PROFESSOR, SUPERVISOR |
+| prontuarios/ | ProntuariosView | UserPassesTestMixin | PROFESSOR, SUPERVISOR |
+| prontuarios/\<pk\>/ | ProntuarioDetalheView | UserPassesTestMixin | PROFESSOR, SUPERVISOR; sem link na interface, é MOCK |
+| presenca/ | PresencaFeedbackView | UserPassesTestMixin | PROFESSOR, SUPERVISOR |
+| presenca/marcar/\<aluno_id\>/ | marcar_presenca | login_required + Attendance.can_be_created_by | Orientador do aluno |
+| presenca/avaliar/\<aluno_id\>/ | registrar_feedback | login_required + checagem no model | Orientador do aluno |
+| triagens/ | TriagensPendentesView | UserPassesTestMixin | PROFESSOR, SUPERVISOR |
+| triagens/\<patient_id\>/ | DefinirTriagemView | UserPassesTestMixin | PROFESSOR, SUPERVISOR |
+
+A rota `painel/` e a `PainelProfessorView` foram removidas: a decisão do Card 1 é
+uma tela inicial por papel, e `teacher:home` já absorveu o conteúdo. Quem sai de
+`vincular-aluno/` ou `lancar-horas/` volta para `teacher:home`, ou para
+`supervisor:orientacao` quando é Coordenador.
  
 ## supervisor/ (prefixo /supervisor/)
  
 | Rota | View | Mecanismo | Quem acessa |
 |---|---|---|---|
-| home | HomeSupervisorView | GroupRequiredMixin("Supervisor") | Grupo Supervisor |
-| painel/ | PainelSupervisorView | GroupRequiredMixin("Supervisor") | Grupo Supervisor |
-| usuarios/ | ListarUsuariosView | GroupRequiredMixin("Supervisor") | Grupo Supervisor |
+| home | CoordinatorHomeView | CoordinatorOnly (LoginRequiredMixin + UserPassesTestMixin, role SV) | COORDENADOR |
+| professores/ | CoordinatorTeachersView | CoordinatorOnly | COORDENADOR |
+| professores/\<pk\>/ | CoordinatorTeacherDetailView | CoordinatorOnly | COORDENADOR |
+| alunos/ | CoordinatorStudentsView | CoordinatorOnly | COORDENADOR |
+| alunos/\<pk\>/ | CoordinatorStudentDetailView | CoordinatorOnly | COORDENADOR |
+| triagens/ | CoordinatorTriagesView | CoordinatorOnly | COORDENADOR |
+| triagens/\<pk\>/ | CoordinatorTriageDetailView | CoordinatorOnly + visible_to | COORDENADOR |
+| encaminhamentos/ | CoordinatorReferralsView | CoordinatorOnly | COORDENADOR |
+| encaminhamentos/\<pk\>/ | CoordinatorReferralsView | CoordinatorOnly + visible_to | COORDENADOR; mesma view, com a triagem fixada no pk |
+| feedbacks/ | CoordinatorFeedbacksView | CoordinatorOnly | COORDENADOR |
+| orientacao/ | PainelOrientacaoSupervisorView | GroupRequiredMixin("Supervisor") | Grupo Supervisor; painel dos orientandos, veio da dev |
+| usuarios/ | CoordinatorTeachersView | CoordinatorOnly | COORDENADOR; é a mesma listagem de professores, mantida pelo nome antigo |
+| painel/ | PainelSupervisorView | GroupRequiredMixin("Supervisor") | Grupo Supervisor, tela antiga |
+| perfil/ | PerfilSupervisorView | GroupRequiredMixin("Supervisor") | Grupo Supervisor, só o próprio |
 | register/ | cadastrar_supervisor | has_perm("core.add_customuser") | Superadmin |
 | areas/ | ListaAreasView | GroupRequiredMixin("Supervisor") | Grupo Supervisor |
-| areas/nova/ | CriarAreaView | has_perm("areas.add_areaacting") | Supervisor |
-| areas/<pk>/editar/ | EditarAreaView | has_perm("areas.change_areaacting") | Supervisor |
+| areas/nova/ | CriarAreaView | has_perm("areas.add_areaacting") | Coordenador |
+| areas/\<pk\>/editar/ | EditarAreaView | has_perm("areas.change_areaacting") | Coordenador |
+
+O papel `SV` se chama **Coordenador** na interface; a pasta `supervisor/`, a rota
+`/supervisor/`, o namespace `supervisor:` e o grupo do Django "Supervisor"
+continuam com o nome antigo. As telas novas conferem a role; as antigas seguem no
+grupo, a mesma mistura de mecanismos já registrada na legenda.
+
+O cadastro de professor e o de aluno continuam em `/teacher/cadastrar/` e
+`/students/cadastrar/`, por permissão do Django, e é para lá que os botões de
+cadastrar da área do Coordenador apontam.
  
 ## superadmin/ (prefixo /superadmin/)
  
@@ -103,7 +136,22 @@ O `perfil/` continua no grupo do Django enquanto as outras rotas do Aluno confer
  
 | Rota | View | Mecanismo | Quem acessa |
 |---|---|---|---|
-| create/<patient_id>/ | create_triage | login_required + checagem manual | Aluno, corrigido e testado nesta sessão |
+| fila/ | fila_triagem | login_required + role direto | ALUNO |
+| minhas-triagens/ | minhas_triagens | login_required + role direto | ALUNO; lista por autor, sem recorte de status |
+| create/\<patient_id\>/ | create_triage | login_required + checagem manual | Aluno, corrigido e testado nesta sessão |
+| student_detail/\<pk\>/ | triage_detail_student | login_required + role direto + autor | ALUNO, só a própria ficha |
+| supervisor_detail/\<pk\>/ | triage_detail_supervisor | login_required + role direto + visible_to | SUPERVISOR, PROFESSOR |
+| edit/\<pk\>/ | edit_triage | login_required + autor ou visible_to | Autor enquanto pode editar; SUPERVISOR e PROFESSOR |
+| submit/\<pk\>/ | submit_triage | login_required + role direto | ALUNO autor; é GET, mantido como veio da dev |
+| lock_triage_editing/\<pk\>/ | lock_triage_editing | login_required + role direto | SUPERVISOR |
+| feedback/\<pk\>/ | create_feedback | login_required + TriageFeedback.can_be_created_by | PROFESSOR e, por herança, SUPERVISOR |
+| create_referral/\<pk\>/ | create_referral | login_required + role direto + Referral.can_be_created_by | SUPERVISOR |
+
+A rota `concluida/<pk>/` saiu: a confirmação depois de criar a ficha é
+`students:triagem_concluida`, que mostrava a mesma coisa no shell do Aluno.
+
+Todas as recusas destas rotas usam `PermissionDenied`, para caírem no
+`handler403` em vez de virarem 500.
  
 ## Rotas mobile
  

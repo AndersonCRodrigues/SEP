@@ -140,22 +140,18 @@ class Patient(BusinessRulesMixin, CustomUser):
         FlowStatus.AWAITING_TRIAGE: (
             FlowStatus.IN_TRIAGE,
             FlowStatus.REFERRED,
-            FlowStatus.DISCHARGED,
         ),
         FlowStatus.IN_TRIAGE: (
             FlowStatus.AWAITING_REVIEW,
             FlowStatus.REFERRED,
-            FlowStatus.DISCHARGED,
         ),
         FlowStatus.AWAITING_REVIEW: (
             FlowStatus.IN_TRIAGE,
             FlowStatus.REFERRED,
-            FlowStatus.DISCHARGED,
         ),
         FlowStatus.REFERRED: (
             FlowStatus.IN_TRIAGE,
             FlowStatus.IN_TREATMENT,
-            FlowStatus.DISCHARGED,
         ),
         FlowStatus.IN_TREATMENT: (FlowStatus.DISCHARGED,),
         FlowStatus.DISCHARGED: (FlowStatus.AWAITING_TRIAGE, FlowStatus.IN_TRIAGE),

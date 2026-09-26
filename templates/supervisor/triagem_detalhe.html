@@ -1,0 +1,37 @@
+{% extends "supervisor/base_coordinator.html" %}
+{% load components %}
+
+{% block title %}Triagem de {{ triagem.patient.get_full_name }}{% endblock %}
+
+{% block page_title %}Triagem de {{ triagem.patient.get_full_name }}{% endblock %}
+
+{% block page_actions %}
+{% if can_refer %}
+<a class="refer-link" href="{% url 'supervisor:encaminhar' triagem.pk %}">Encaminhar</a>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<dl class="triage-detail">
+  <div class="triage-field">
+    <dt>Realizada por</dt>
+    <dd>{{ triagem.student_author.get_full_name }}</dd>
+  </div>
+  <div class="triage-field">
+    <dt>Recebida</dt>
+    <dd>{{ received }}</dd>
+  </div>
+  <div class="triage-field">
+    <dt>Situação</dt>
+    <dd>{% include "components/badge.html" with label=label level=level %}</dd>
+  </div>
+  <div class="triage-field">
+    <dt>Classificação de risco</dt>
+    <dd>{{ risk|default:"Sem instrumento preenchido" }}</dd>
+  </div>
+</dl>
+
+{% section title="Queixa principal" class="complaint" id="complaint-title" %}
+<p class="complaint-text">{{ triagem.chief_complaint }}</p>
+{% endsection %}
+{% endblock %}

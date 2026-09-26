@@ -3,7 +3,6 @@ import random
 
 from django.core.management.base import BaseCommand
 from django.db import transaction
-
 from areas.models import AreaActing
 from core.models import CustomUser
 from patient.models import Patient

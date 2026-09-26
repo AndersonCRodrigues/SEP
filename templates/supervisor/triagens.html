@@ -1,0 +1,61 @@
+{% extends "supervisor/base_coordinator.html" %}
+{% load static %}
+
+{% block title %}Triagens para analisar{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'core/css/superadmin/security_logs.css' %}">
+{% endblock %}
+
+{% block page_title %}Triagens para analisar{% endblock %}
+
+{% block content %}
+<div class="logs-header">
+  <form class="logs-search-form" method="get" action="">
+    <label class="visually-hidden" for="filter-situation">Situação</label>
+    <select class="form-control-search" id="filter-situation" name="situacao">
+      <option value="">Todas as situações</option>
+      {% for value, label in situations %}
+      <option value="{{ value }}" {% if situation_filter == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </form>
+</div>
+
+<div class="logs-container">
+  {% if rows %}
+  <table class="table-logs">
+    <thead>
+      <tr>
+        <th style="width: 28%;">Paciente:</th>
+        <th style="width: 27%;">Realizada por:</th>
+        <th style="width: 25%;">Recebida:</th>
+        <th style="width: 20%;"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>
+        <td class="log-event">
+          <a href="{% url 'supervisor:triagem_detalhe' row.triage.pk %}">{{ row.patient }}</a>
+        </td>
+        <td class="log-details">{{ row.student }}</td>
+        <td class="log-time">{{ row.received }}</td>
+        <td class="text-end">
+          {% if row.level == "danger" %}
+          <span class="badge-status badge-status-critico">{{ row.label }}</span>
+          {% elif row.level == "success" %}
+          <span class="badge-status badge-status-info">{{ row.label }}</span>
+          {% else %}
+          <span class="badge-status badge-status-atencao">{{ row.label }}</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  {% include "components/empty_state.html" with message="Nenhuma triagem aguardando análise." %}
+  {% endif %}
+</div>
+{% endblock %}

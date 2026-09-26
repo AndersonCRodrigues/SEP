@@ -6,6 +6,7 @@ from django.urls import reverse_lazy
 from django.views.generic import TemplateView, UpdateView
 
 from core.mixins import GroupRequiredMixin
+from supervisor.views.mocks import student_enrollment_fields
 from core.utils import sincronizar_grupo
 
 from ..forms import AlunoCreationForm
@@ -52,7 +53,7 @@ class MeuProfessorView(StudentOnly, TemplateView):
 @login_required
 def cadastrar_aluno(request):
     if not request.user.has_perm("students.add_student"):
-        raise PermissionDenied("Apenas Supervisores podem cadastrar Alunos.")
+        raise PermissionDenied("Apenas Coordenadores podem cadastrar Alunos.")
 
     if request.method == "POST":
         form = AlunoCreationForm(request.POST)
@@ -64,4 +65,8 @@ def cadastrar_aluno(request):
     else:
         form = AlunoCreationForm()
 
-    return render(request, "student/cadastro.html", {"form": form})
+    return render(
+        request,
+        "student/cadastro.html",
+        {"form": form, "matricula_academica": student_enrollment_fields()},
+    )

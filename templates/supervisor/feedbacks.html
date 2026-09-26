@@ -1,0 +1,81 @@
+{% extends "supervisor/base_coordinator.html" %}
+{% load components static %}
+
+{% block title %}Feedback sobre triagens{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'core/css/superadmin/security_logs.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/administrativo/administrativo_atestados.css' %}">
+{% endblock %}
+
+{% block page_title %}Feedback sobre triagens{% endblock %}
+
+{% block content %}
+<div class="logs-header">
+  <form class="logs-search-form" method="get" action="">
+    <label class="visually-hidden" for="filter-situation">Situação</label>
+    <select class="form-control-search" id="filter-situation" name="situacao">
+      <option value="">Todas as situações</option>
+      {% for value, label in situations %}
+      <option value="{{ value }}" {% if situation_filter == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </form>
+</div>
+
+<div class="logs-container">
+  {% if rows %}
+  <table class="table-logs">
+    <thead>
+      <tr>
+        <th style="width: 30%;">Aluno:</th>
+        <th style="width: 30%;">Paciente:</th>
+        <th style="width: 20%;">Situação:</th>
+        <th style="width: 20%;"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>
+        <td class="log-event">{{ row.student }}</td>
+        <td class="log-details">{{ row.patient }}</td>
+        <td>
+          {% if row.level == "danger" %}
+          <span class="badge-status badge-status-critico">{{ row.label }}</span>
+          {% elif row.level == "success" %}
+          <span class="badge-status badge-status-info">{{ row.label }}</span>
+          {% else %}
+          <span class="badge-status badge-status-atencao">{{ row.label }}</span>
+          {% endif %}
+        </td>
+        <td class="text-end">
+          {% if row.can_write %}
+          <a href="?triagem={{ row.triage.pk }}">
+            Escrever<span class="visually-hidden"> o feedback de {{ row.student }}</span>
+          </a>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  {% include "components/empty_state.html" with message="Nenhuma triagem para acompanhar." %}
+  {% endif %}
+</div>
+
+{% if chosen %}
+{% section title="Feedback para "|add:chosen.student_author.get_full_name class="certificate-form" id="feedback-form-title" %}
+<form method="post" action="{% url 'supervisor:feedbacks' %}">
+  {% csrf_token %}
+  <input type="hidden" name="triagem" value="{{ chosen.pk }}" />
+  <p>
+    <label for="parecer">Triagem de {{ chosen.patient.get_full_name }}</label>
+    <textarea id="parecer" name="parecer" rows="5"
+      placeholder="Escreva o feedback sobre a condução da triagem..."></textarea>
+  </p>
+  <button type="submit" class="btn-wine">Enviar avaliação</button>
+</form>
+{% endsection %}
+{% endif %}
+{% endblock %}

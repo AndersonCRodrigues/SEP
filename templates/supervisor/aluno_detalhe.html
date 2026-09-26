@@ -1,0 +1,35 @@
+{% extends "supervisor/base_coordinator.html" %}
+{% load components %}
+
+{% block title %}{{ aluno.get_full_name }}{% endblock %}
+
+{% block page_title %}{{ aluno.get_full_name }}{% endblock %}
+
+{% block content %}
+<dl class="student-detail">
+  <div class="student-field">
+    <dt>Orientador</dt>
+    <dd>{{ aluno.current_advisor.get_full_name|default:"Sem orientador" }}</dd>
+  </div>
+  <div class="student-field">
+    <dt>Fase do estágio</dt>
+    <dd>{{ aluno.get_stage_display }}</dd>
+  </div>
+  <div class="student-field">
+    <dt>Matrícula</dt>
+    <dd>{{ aluno.matricula|default:"Não informada" }}</dd>
+  </div>
+</dl>
+
+{% section title="Pacientes em atendimento" class="cases" id="cases-title" %}
+<ul class="case-list">
+  {% for caso in open_cases %}
+  <li class="case">{{ caso.patient.get_full_name }}</li>
+  {% empty %}
+  <li class="case-empty">
+    {% include "components/empty_state.html" with message="Este aluno ainda não atende nenhum paciente." %}
+  </li>
+  {% endfor %}
+</ul>
+{% endsection %}
+{% endblock %}
