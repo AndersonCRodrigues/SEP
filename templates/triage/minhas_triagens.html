@@ -1,42 +1,52 @@
-{% extends "base.html" %}
+{% extends "student/base_student.html" %}
+{% load static %}
 
-{% block title %}Minhas Triagens | Sistema SEP{% endblock %}
+{% block title %}Minhas triagens{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/components/tokens.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/list_panel.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/student_my_triages.css' %}">
+{% endblock %}
+
+{% block page_header %}{% endblock %}
 
 {% block content %}
-<h1 class="h3 mb-4">Minhas Triagens</h1>
+<div class="list-panel-title">Minhas triagens</div>
 
-<section class="card">
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table align-middle mb-0">
-                <thead>
-                    <tr>
-                        <th scope="col">Paciente</th>
-                        <th scope="col">Criada em</th>
-                        <th scope="col">Status</th>
-                        <th scope="col"></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for triagem in triagens %}
-                    <tr>
-                        <td>{{ triagem.patient.nome_completo }}</td>
-                        <td>{{ triagem.created_at }}</td>
-                        <td><span class="badge text-bg-secondary">{{ triagem.get_status_display }}</span></td>
-                        <td class="text-end">
-                            <a href="{% url 'triage:triage_detail_student' triagem.pk %}" class="btn btn-outline-primary btn-sm">Ver</a>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="4">
-                            {% include "components/empty_state.html" with message="Você ainda não fez nenhuma triagem." %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+{% if triagens %}
+<div class="list-panel">
+  <div class="list-panel-header my-triages-grid">
+    <div>Paciente:</div>
+    <div>Criada em:</div>
+    <div>Situação:</div>
+    <div></div>
+  </div>
+
+  <div class="list-panel-container">
+    {% for triagem in triagens %}
+    <div class="list-panel-row my-triages-grid">
+      <div>{{ triagem.patient.get_full_name }}</div>
+      <div>{{ triagem.created_at|date:"d/m/Y - H:i" }}h</div>
+      <div>
+        {% if triagem.status == "AB" %}
+        <span class="badge-situacao aberta">{{ triagem.get_status_display }}</span>
+        {% elif triagem.status == "FE" or triagem.status == "EN" %}
+        <span class="badge-situacao concluida">{{ triagem.get_status_display }}</span>
+        {% else %}
+        <span class="badge-situacao andamento">{{ triagem.get_status_display }}</span>
+        {% endif %}
+      </div>
+      <div class="text-end">
+        <a href="{% url 'triage:triage_detail_student' triagem.pk %}" class="btn-ver">
+          Ver<span class="visually-hidden"> a triagem de {{ triagem.patient.get_full_name }}</span>
+        </a>
+      </div>
     </div>
-</section>
+    {% endfor %}
+  </div>
+</div>
+{% else %}
+{% include "components/empty_state.html" with message="Você ainda não fez nenhuma triagem." %}
+{% endif %}
 {% endblock %}

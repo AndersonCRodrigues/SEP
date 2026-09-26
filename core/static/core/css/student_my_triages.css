@@ -1,0 +1,29 @@
+/* Minhas triagens: usa o painel de lista de components/list_panel.css.
+   Aqui fica so o que e proprio da tela: a grade de colunas e o botao
+   de abrir, com os mesmos valores do botao Iniciar das triagens. */
+
+.my-triages-grid {
+  grid-template-columns: 2fr 1.5fr 1.5fr 90px;
+}
+
+.btn-ver {
+  background-color: var(--sep-maroon);
+  color: #FFFFFF;
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 5px 16px;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+
+.btn-ver:hover {
+  background-color: #541618;
+  color: #FFFFFF;
+}
