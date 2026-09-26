@@ -1,0 +1,68 @@
+/* Cartao de atividade recente e selos de situacao.
+   Extraido do que era identico entre as telas das roles; o que varia por
+   role fica no CSS da propria role, carregado depois deste arquivo. */
+
+.activity-card {
+  background: #E1E1E1;
+}
+
+.activity-chevron {
+  color: var(--sep-maroon);
+  font-weight: 900;
+  line-height: 1;
+}
+
+.activity-divider {
+  border-top: 1px solid var(--sep-maroon);
+  opacity: 1;
+}
+
+.activity-sub {
+  font-family: 'Museo Sans', sans-serif;
+  font-weight: 400;
+  color: #000000;
+}
+
+.activity-title {
+  font-family: 'Museo Sans', sans-serif;
+  font-weight: 700;
+  color: #000000;
+}
+
+.activity-type {
+  font-family: 'Museo Sans', sans-serif;
+  font-weight: 700;
+  color: var(--sep-maroon);
+}
+
+.badge-concluido {
+  background: #A9D18E;
+  color: #2D6A2D;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 20px;
+  font-family: 'Museo Sans', sans-serif;
+  white-space: nowrap;
+}
+
+.badge-enviar {
+  background: #F5C6A0;
+  color: #7B3D00;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 20px;
+  font-family: 'Museo Sans', sans-serif;
+  white-space: nowrap;
+}
+
+.badge-revisar {
+  font-size: 12px;
+  border-radius: 20px;
+  font-family: 'Museo Sans', sans-serif;
+  white-space: nowrap;
+}
+
+.section-title {
+  font-size: 18px;
+}
+

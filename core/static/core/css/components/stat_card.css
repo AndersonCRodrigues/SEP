@@ -1,0 +1,32 @@
+/* Cartao de indicador numerico.
+   Extraido do que era identico entre as telas das roles; o que varia por
+   role fica no CSS da propria role, carregado depois deste arquivo. */
+
+.stat-card {
+  background-color: var(--sep-maroon);
+  color: #FFFFFF;
+  border-radius: 16px;
+  padding: 20px 16px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 130px;
+}
+
+.stat-label {
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  line-height: 1.2;
+}
+
+.stat-number {
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 42px;
+  font-weight: 700;
+  display: block;
+  line-height: 1;
+}
+

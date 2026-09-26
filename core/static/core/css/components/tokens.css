@@ -1,0 +1,10 @@
+/* Tokens de cor compartilhados pelas telas das roles.
+   Extraido do que era identico entre as telas das roles; o que varia por
+   role fica no CSS da propria role, carregado depois deste arquivo. */
+
+:root {
+  --sep-maroon: #6D1D20;
+  --sep-black: #000000;
+  --sep-gray-card: #D9D9D9;
+}
+

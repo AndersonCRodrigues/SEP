@@ -1,0 +1,18 @@
+/* No celular as telas desenham o proprio cabecalho dentro do conteudo, entao
+   a barra do desktop sai e o main perde o respiro lateral. Estava repetido
+   como <style> inline em cada tela da area do Paciente. */
+
+@media (max-width: 767.98px) {
+  html,
+  body {
+    background-color: #F8F9FA !important;
+  }
+
+  .sep-navbar {
+    display: none !important;
+  }
+
+  main > .container-fluid {
+    padding: 0 !important;
+  }
+}
