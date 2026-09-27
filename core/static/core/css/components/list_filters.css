@@ -29,6 +29,11 @@
   flex: 1 1 260px;
 }
 
+/* Busca de um lado, botao no extremo oposto — para a barra que tem so os dois. */
+.list-filters-spread {
+  justify-content: space-between;
+}
+
 .list-filters input:focus,
 .list-filters select:focus {
   border-color: var(--sep-maroon);

@@ -1,81 +1,89 @@
 {% extends "supervisor/base_coordinator.html" %}
-{% load components static %}
+{% load static %}
 
-{% block title %}Feedback sobre triagens{% endblock %}
+{% block title %}Feedbacks{% endblock %}
 
 {% block page_css %}
-<link rel="stylesheet" href="{% static 'core/css/superadmin/security_logs.css' %}">
-<link rel="stylesheet" href="{% static 'core/css/administrativo/administrativo_atestados.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/list_panel.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/hover_lift.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/list_filters.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/row_button.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/detail_panel.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/feedback_list.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/form_cadastro.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/coordenacao/coordenacao_lists.css' %}">
 {% endblock %}
 
-{% block page_title %}Feedback sobre triagens{% endblock %}
+{% block page_header %}{% endblock %}
 
 {% block content %}
-<div class="logs-header">
-  <form class="logs-search-form" method="get" action="">
-    <label class="visually-hidden" for="filter-situation">Situação</label>
-    <select class="form-control-search" id="filter-situation" name="situacao">
-      <option value="">Todas as situações</option>
-      {% for value, label in situations %}
-      <option value="{{ value }}" {% if situation_filter == value %}selected{% endif %}>{{ label }}</option>
-      {% endfor %}
-    </select>
-  </form>
-</div>
-
-<div class="logs-container">
-  {% if rows %}
-  <table class="table-logs">
-    <thead>
-      <tr>
-        <th style="width: 30%;">Aluno:</th>
-        <th style="width: 30%;">Paciente:</th>
-        <th style="width: 20%;">Situação:</th>
-        <th style="width: 20%;"></th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for row in rows %}
-      <tr>
-        <td class="log-event">{{ row.student }}</td>
-        <td class="log-details">{{ row.patient }}</td>
-        <td>
-          {% if row.level == "danger" %}
-          <span class="badge-status badge-status-critico">{{ row.label }}</span>
-          {% elif row.level == "success" %}
-          <span class="badge-status badge-status-info">{{ row.label }}</span>
-          {% else %}
-          <span class="badge-status badge-status-atencao">{{ row.label }}</span>
-          {% endif %}
-        </td>
-        <td class="text-end">
-          {% if row.can_write %}
-          <a href="?triagem={{ row.triage.pk }}">
-            Escrever<span class="visually-hidden"> o feedback de {{ row.student }}</span>
-          </a>
-          {% endif %}
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  {% else %}
-  {% include "components/empty_state.html" with message="Nenhuma triagem para acompanhar." %}
-  {% endif %}
-</div>
+<div class="list-panel-title">Feedbacks</div>
 
 {% if chosen %}
-{% section title="Feedback para "|add:chosen.student_author.get_full_name class="certificate-form" id="feedback-form-title" %}
-<form method="post" action="{% url 'supervisor:feedbacks' %}">
-  {% csrf_token %}
-  <input type="hidden" name="triagem" value="{{ chosen.pk }}" />
-  <p>
-    <label for="parecer">Triagem de {{ chosen.patient.get_full_name }}</label>
-    <textarea id="parecer" name="parecer" rows="5"
-      placeholder="Escreva o feedback sobre a condução da triagem..."></textarea>
-  </p>
-  <button type="submit" class="btn-wine">Enviar avaliação</button>
+<p class="list-panel-back">
+  <a class="btn-acao" href="{% url 'supervisor:feedbacks' %}">Voltar</a>
+</p>
+
+<section class="list-panel">
+  <h2 class="detail-title">Feedback para {{ chosen.student_author.get_full_name }}</h2>
+
+  <div class="figma-form-container">
+    <form class="figma-custom-form" method="post" action="{% url 'supervisor:feedbacks' %}">
+      {% csrf_token %}
+      <input type="hidden" name="triagem" value="{{ chosen.pk }}">
+      <p>
+        <label for="parecer">Triagem de {{ chosen.patient.get_full_name }}</label>
+        <textarea id="parecer" name="parecer" rows="5"
+          placeholder="Escreva o feedback sobre a condução da triagem..."></textarea>
+      </p>
+      <div class="figma-actions-center">
+        <button type="submit" class="btn-submit-figma">Enviar avaliação</button>
+      </div>
+    </form>
+  </div>
+
+  <h3 class="detail-title">Feedbacks anteriores</h3>
+  {% include "components/feedback_list.html" with feedbacks=feedbacks empty_message="Nenhum feedback enviado ainda para este aluno." %}
+</section>
+{% else %}
+<form class="list-filters list-filters-spread" method="get" action="">
+  <div class="list-search">
+    <i class="bi bi-search" aria-hidden="true"></i>
+    <label class="visually-hidden" for="filter-search">Buscar por aluno ou paciente</label>
+    <input type="search" id="filter-search" name="q" value="{{ search }}"
+      placeholder="Buscar por nome do aluno ou paciente...">
+  </div>
+  <button type="submit" class="btn-acao">Filtrar</button>
 </form>
-{% endsection %}
+
+{% if rows %}
+<div class="list-panel">
+  <div class="list-panel-header feedback-grid">
+    <div>Aluno:</div>
+    <div>Paciente:</div>
+    <div>Situação:</div>
+    <div></div>
+  </div>
+
+  <div class="list-panel-container">
+    {% for row in rows %}
+    <div class="list-panel-row feedback-grid hover-lift">
+      <div>{{ row.student }}</div>
+      <div>{{ row.patient }}</div>
+      <div>{% include "components/badge_situacao.html" with label=row.label level=row.level %}</div>
+      <div class="text-end">
+        {% if row.can_write %}
+        <a class="btn-ver" href="?triagem={{ row.triage.pk }}">
+          Escrever<span class="visually-hidden"> o feedback de {{ row.student }}</span>
+        </a>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% else %}
+{% include "components/empty_state.html" with message="Nenhuma triagem para acompanhar." %}
+{% endif %}
 {% endif %}
 {% endblock %}

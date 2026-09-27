@@ -469,12 +469,20 @@ def advisees_by_name(user, search):
 def student_feedbacks(user, student):
     from students.models import PerformanceReview
 
-    return (
+    avaliacoes = (
         PerformanceReview.objects.visible_to(user)
         .filter(student=student)
         .select_related("teacher")
         .order_by("-updated_at")
     )
+    return [
+        {
+            "author": avaliacao.teacher.get_full_name(),
+            "when": avaliacao.updated_at,
+            "content": avaliacao.content,
+        }
+        for avaliacao in avaliacoes
+    ]
 
 
 class PresencaView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
