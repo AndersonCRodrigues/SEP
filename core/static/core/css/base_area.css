@@ -44,7 +44,7 @@ main,
   width: 100%;
   max-width: none;
   margin: 0;
-  padding: 5rem 22px 4rem;
+  padding: 1.5rem 22px 4rem;
   box-sizing: border-box;
   flex: 1 0 auto;
 }
@@ -59,35 +59,6 @@ header nav.navbar.bg-dark,
   background-color: var(--sep-maroon) !important;
   color: #ffffff;
   padding: 0.85rem 2rem;
-}
-
-.main-nav .navbar-nav,
-.admin-navbar__links {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 28px;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.main-nav .nav-link,
-.admin-navbar__links a {
-  color: #ffffff;
-  font-family: var(--font-main);
-  font-size: 14px;
-  font-weight: 600;
-  text-decoration: none;
-  padding: 0;
-}
-
-.main-nav .nav-link:hover,
-.main-nav .nav-link[aria-current="page"],
-.admin-navbar__links a:hover,
-.admin-navbar__links a.active {
-  opacity: 0.85;
-  text-decoration: underline;
 }
 
 /* Utilitarios de alinhamento que os componentes compartilhados usam. Nas

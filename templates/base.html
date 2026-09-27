@@ -11,7 +11,6 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
     integrity="sha384-tViUnnbYAV00FLIhhi3v/dWt3Jxw4gZQcNoSCxCIFNJVCx7/D55/wXsrNIRANwdD" crossorigin="anonymous" />
   <link rel="stylesheet" href="{% static 'core/css/components/tokens.css' %}" />
-  <link rel="stylesheet" href="{% static 'core/css/base.css' %}" />
   <link rel="stylesheet" href="{% static 'core/css/components/site_header.css' %}" />
   <link rel="stylesheet" href="{% static 'core/css/components/site_footer.css' %}" />
   {% block extra_css %}{% endblock %}
@@ -42,7 +41,7 @@
                funcionando para toda tela ja existente. Quando uma tela for migrada
                pro novo layout horizontal, ela sobrescreve este bloco com seu proprio
                menu, sem precisar do _sidebar.html. -->
-          <div class="me-auto">
+          <div class="site-nav">
             {% block main_nav %}
             {% include "partials/_sidebar.html" %}
             {% endblock %}

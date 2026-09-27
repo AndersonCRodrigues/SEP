@@ -1,7 +1,67 @@
-/* Marca, icones e menu do usuario do cabecalho, usados por todas as areas.
+/* Cabecalho de todas as areas: marca a esquerda, navegacao centrada e icones
+   a direita. Os valores sao os da barra do Administrativo, que e o padrao.
    Acompanha os templates components/site_brand.html e
-   components/site_user_menu.html; a barra em si e o menu do meio continuam
-   em cada shell, porque os links mudam por role. */
+   components/site_user_menu.html; os links do meio ficam em cada shell,
+   porque mudam por role. */
+
+.sep-navbar,
+.admin-navbar {
+  background-color: var(--sep-maroon);
+  color: #FFFFFF;
+  min-height: 75px;
+}
+
+.sep-navbar > .container-fluid,
+.admin-navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 0.85rem 2rem;
+}
+
+/* A navegacao ocupa o espaco entre a marca e os icones, centrada nele. */
+.sep-navbar .navbar-collapse {
+  justify-content: space-between;
+}
+
+.site-nav,
+.admin-navbar > .main-nav {
+  flex: 1 1 auto;
+  display: flex;
+  justify-content: center;
+}
+
+.main-nav .navbar-nav,
+.admin-navbar__links {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.main-nav .nav-link,
+.admin-navbar__links a {
+  color: #FFFFFF;
+  font-family: var(--font-main);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  padding: 0;
+}
+
+.main-nav .nav-link:hover,
+.main-nav .nav-link[aria-current="page"],
+.admin-navbar__links a:hover,
+.admin-navbar__links a.active {
+  opacity: 0.85;
+  text-decoration: underline;
+}
 
 .site-brand {
   display: flex;
