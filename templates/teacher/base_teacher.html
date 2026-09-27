@@ -40,8 +40,14 @@
       </a>
     </li>
     <li class="nav-item">
-      <a class="nav-link" href="{% url 'teacher:triagens' %}"
-        {% if current == 'triagens' or current == 'triagem_definir' %}aria-current="page"{% endif %}>
+      <a class="nav-link" href="{% url 'teacher:encaminhamentos' %}"
+        {% if current == 'encaminhamentos' or current == 'encaminhar' %}aria-current="page"{% endif %}>
+        Encaminhar
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'teacher:avaliacoes' %}"
+        {% if current == 'avaliacoes' %}aria-current="page"{% endif %}>
         Avaliações
       </a>
     </li>

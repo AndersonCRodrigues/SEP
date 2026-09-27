@@ -91,11 +91,20 @@
   </li>
   <li class="nav-item">
     <a
-      class="nav-link {% if current_view == 'teacher:triagens' %}active{% endif %}"
-      href="{% url 'teacher:triagens' %}"
-      aria-current="{% if current_view == 'teacher:triagens' %}page{% else %}false{% endif %}"
+      class="nav-link {% if current_view == 'teacher:encaminhamentos' %}active{% endif %}"
+      href="{% url 'teacher:encaminhamentos' %}"
+      aria-current="{% if current_view == 'teacher:encaminhamentos' %}page{% else %}false{% endif %}"
     >
-      <i class="bi bi-clipboard2-pulse me-2"></i>Avaliações
+      <i class="bi bi-clipboard2-pulse me-2"></i>Encaminhar
+    </a>
+  </li>
+  <li class="nav-item">
+    <a
+      class="nav-link {% if current_view == 'teacher:avaliacoes' %}active{% endif %}"
+      href="{% url 'teacher:avaliacoes' %}"
+      aria-current="{% if current_view == 'teacher:avaliacoes' %}page{% else %}false{% endif %}"
+    >
+      <i class="bi bi-star me-2"></i>Avaliações
     </a>
   </li>
   <li class="nav-item">
