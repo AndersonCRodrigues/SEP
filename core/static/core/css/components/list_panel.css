@@ -66,6 +66,12 @@
   background-color: #D4D4D4;
 }
 
+/* Linha inteira clicavel: continua com a cara de linha, nao de link. */
+a.list-panel-row {
+  text-decoration: none;
+  color: var(--sep-black);
+}
+
 /* Selos de situacao, com os mesmos valores dos ja usados nas telas do Aluno. */
 .badge-situacao {
   color: #FFFFFF;

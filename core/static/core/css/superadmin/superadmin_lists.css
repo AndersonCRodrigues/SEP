@@ -39,11 +39,6 @@
   color: var(--sep-text-muted);
 }
 
-a.list-panel-row {
-  text-decoration: none;
-  color: var(--sep-black);
-}
-
 .list-pagination {
   display: flex;
   align-items: center;

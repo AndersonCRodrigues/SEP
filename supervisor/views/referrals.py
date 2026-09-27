@@ -17,7 +17,7 @@ from .triages import received_label
 
 CONCLUDED = (TriageStatus.SUBMITTED, TriageStatus.CLOSED)
 CONCLUDED_LIMIT = 10
-RECENT_LIMIT = 6
+RECENT_LIMIT = 5
 
 
 class CoordinatorReferralsView(CoordinatorOnly, TemplateView):
@@ -43,12 +43,8 @@ class CoordinatorReferralsView(CoordinatorOnly, TemplateView):
         context["triagem"] = triagem
         context["areas"] = AreaActing.objects.order_by("nome")
         context["area_filter"] = area
-        context["teachers"] = self.teachers(area)
-        context["chosen"] = (
-            set(triagem.patient.responsible_teachers.values_list("pk", flat=True))
-            if triagem
-            else set()
-        )
+        context["options"] = self.options(area, triagem)
+        context["concluida_em"] = self.concluded_at(triagem) if triagem else None
         context["recent"] = self.recent(user)
         return context
 
@@ -87,6 +83,11 @@ class CoordinatorReferralsView(CoordinatorOnly, TemplateView):
         )
 
     @staticmethod
+    def concluded_at(record):
+        """Quando o aluno fechou a triagem; o resto e para registro antigo."""
+        return record.submitted_at or record.closed_at or record.created_at
+
+    @staticmethod
     def teachers(area):
         professores = Teacher.objects.filter(
             role=CustomUser.Role.PROFESSOR
@@ -96,6 +97,28 @@ class CoordinatorReferralsView(CoordinatorOnly, TemplateView):
             professores = professores.filter(acting_areas__pk=area)
 
         return professores.distinct().order_by("first_name", "last_name")
+
+    @classmethod
+    def options(cls, area, triagem):
+        escolhidos = (
+            set(triagem.patient.responsible_teachers.values_list("pk", flat=True))
+            if triagem
+            else set()
+        )
+        linhas = []
+        for professor in cls.teachers(area):
+            areas = ", ".join(atuacao.nome for atuacao in professor.acting_areas.all())
+            rotulo = professor.get_full_name()
+            if areas:
+                rotulo = f"{rotulo} — {areas}"
+            linhas.append(
+                {
+                    "value": professor.pk,
+                    "label": rotulo,
+                    "checked": professor.pk in escolhidos,
+                }
+            )
+        return linhas
 
     def selected_triage(self, user):
         if self.kwargs.get("pk"):
@@ -134,8 +157,8 @@ class CoordinatorReferralsView(CoordinatorOnly, TemplateView):
             concluido = paciente.flow_status == Patient.FlowStatus.IN_TREATMENT
             linhas.append(
                 {
-                    "patient": paciente.get_full_name(),
-                    "teachers": professores or "Aguardando",
+                    "title": paciente.get_full_name(),
+                    "subtitle": professores or "Aguardando",
                     "label": "Concluído" if concluido else "Pendente",
                     "level": "success" if concluido else "warning",
                 }
