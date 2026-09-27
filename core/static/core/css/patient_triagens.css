@@ -59,7 +59,7 @@
 
 /* ── Card de triagem ── */
 .triage-card {
-  background-color: #D3D3D3;
+  background-color: #E6E6E6;
   border-radius: 16px;
   padding: 20px 28px;
   display: flex;
@@ -67,11 +67,10 @@
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 16px;
-  transition: box-shadow 0.2s;
 }
 
 .triage-card:hover {
-  box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+  background-color: #D4D4D4;
 }
 
 /* ── Lado esquerdo (ícone + info) ── */

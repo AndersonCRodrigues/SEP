@@ -3,18 +3,10 @@
 
 {% block title %}Histórico de sessões{% endblock %}
 
-{% block extra_css %}
-  {{ block.super }}
-  <link rel="stylesheet" href="{% static 'core/css/patient_home.css' %}?v=10"> <!-- para herdar header mobile -->
-  <link rel="stylesheet" href="{% static 'core/css/patient_historico.css' %}">
-  <style>
-    /* CSS apenas para esconder navbar e afins no mobile nesta página, igual agendamentos */
-    @media (max-width: 767.98px) {
-      html, body { background-color: #F8F9FA !important; }
-      .sep-navbar  { display: none !important; }
-      main > .container-fluid { padding: 0 !important; }
-    }
-  </style>
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'core/css/components/hover_lift.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/patient_home.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/patient_historico.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -167,7 +159,7 @@
 
         {% if sessions %}
           {% for row in sessions %}
-          <div class="hist-row">
+          <div class="hist-row hover-lift">
             <span class="hist-date">
               <a href="{% url 'patient:historico_detalhe' row.pk %}" style="color: inherit; text-decoration: none;">
                 {{ row.when|date:"d/m/Y - H:i" }}
@@ -179,22 +171,22 @@
           {% endfor %}
         {% else %}
           {# Dados falsos do Figma para demonstração #}
-          <div class="hist-row">
+          <div class="hist-row hover-lift">
             <span class="hist-date">12/08/2026 - 10:00</span>
             <span class="hist-student">Aluno André Ferreira</span>
             <span class="hist-badge badge-concluida">Concluída</span>
           </div>
-          <div class="hist-row">
+          <div class="hist-row hover-lift">
             <span class="hist-date">05/08/2026 - 10:00</span>
             <span class="hist-student">Aluno André Ferreira</span>
             <span class="hist-badge badge-concluida">Concluída</span>
           </div>
-          <div class="hist-row">
+          <div class="hist-row hover-lift">
             <span class="hist-date">29/07/2026 - 10:00</span>
             <span class="hist-student">Aluno André Ferreira</span>
             <span class="hist-badge badge-faltou">Faltou</span>
           </div>
-          <div class="hist-row">
+          <div class="hist-row hover-lift">
             <span class="hist-date">22/07/2026 - 10:00</span>
             <span class="hist-student">Aluno André Ferreira</span>
             <span class="hist-badge badge-concluida">Concluída</span>

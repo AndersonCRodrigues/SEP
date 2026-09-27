@@ -4,16 +4,10 @@
 
 {% block title %}Minhas triagens{% endblock %}
 
-{% block extra_css %}
-  {{ block.super }}
-  <link rel="stylesheet" href="{% static 'core/css/patient_home.css' %}?v=13"> <!-- herdar header mobile -->
-  <style>
-    @media (max-width: 767.98px) {
-      html, body { background-color: #F8F9FA !important; }
-      .sep-navbar  { display: none !important; }
-      main > .container-fluid { padding: 0 !important; }
-    }
-  </style>
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'core/css/components/hover_lift.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/patient_home.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/patient_triagens.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -91,34 +85,49 @@
      DESKTOP TRIAGENS (LISTA ORIGINAL)
      ══════════════════════════════════════ -->
 <div class="d-none d-md-block">
-  <h1 class="page-banner">Minhas triagens</h1>
+  <div class="page-banner-container">
+    <h1 class="page-banner">Minhas triagens</h1>
+  </div>
 
   {% if triages_error %}
   {% include "components/error_state.html" with message=triages_error retry_url=request.path %}
   {% else %}
+  <p class="section-subtitle">Triagens concluídas</p>
+
   {% if in_progress and triages %}
   <p class="triage-progress" role="status">{{ in_progress_message }}</p>
   {% endif %}
 
-  {% section title="Triagens concluídas" class="triages" id="triages-title" %}
   <ul class="triage-list">
     {% for item in triages %}
-    <li class="triage">
-      <h3 class="triage-title">
-        Triagem de <time datetime="{{ item.created_at|date:'Y-m-d' }}">{{ item.created_at|date:"d/m/Y" }}</time>
-      </h3>
-      {% include "components/badge.html" with label=item.label level=item.level %}
-      <a class="triage-link" href="{% url 'patient:triagem_detalhe' item.pk %}">
-        Ver detalhes<span class="visually-hidden"> da triagem de {{ item.created_at|date:"d/m/Y" }}</span>
-      </a>
+    <li class="triage-card hover-lift">
+      <div class="triage-card-left">
+        <span class="triage-icon-wrap {% if item.level == 'success' %}icon-success{% else %}icon-secondary{% endif %}">
+          <i class="bi bi-check-lg"></i>
+        </span>
+        <div class="triage-card-info">
+          <span class="triage-card-title">Triagem de {{ item.created_at|date:"d/m/Y" }}</span>
+          <span class="triage-card-date">
+            <time datetime="{{ item.created_at|date:'Y-m-d' }}">{{ item.created_at|date:"d/m/Y - H:i" }}h</time>
+          </span>
+        </div>
+      </div>
+
+      <div class="triage-card-right">
+        <span class="triage-badge {% if item.level == 'success' %}badge-success{% else %}badge-secondary{% endif %}">
+          {{ item.label }}
+        </span>
+        <a class="triage-link" href="{% url 'patient:triagem_detalhe' item.pk %}">
+          Ver detalhes<span class="visually-hidden"> da triagem de {{ item.created_at|date:"d/m/Y" }}</span>
+        </a>
+      </div>
     </li>
     {% empty %}
-    <li class="triage-empty">
+    <li class="triage-empty-state">
       {% include "components/empty_state.html" with message=empty_message %}
     </li>
     {% endfor %}
   </ul>
-  {% endsection %}
   {% endif %}
 </div>
 {% endblock %}

@@ -28,5 +28,6 @@
   font-weight: 700;
   display: block;
   line-height: 1;
+  overflow-wrap: break-word;
 }
 

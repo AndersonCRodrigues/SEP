@@ -1,6 +1,13 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title_suffix %} | SEP Maricá{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/components/tokens.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/mobile_shell.css' %}">
+{% block page_css %}{% endblock %}
+{% endblock %}
 
 {% block brand %}
 <a class="navbar-brand brand" href="{% url 'patient:home' %}">

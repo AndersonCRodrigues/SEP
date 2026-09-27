@@ -57,6 +57,7 @@
   .figma-custom-form p input[type="email"],
   .figma-custom-form p input[type="tel"],
   .figma-custom-form p input[type="number"],
+  .figma-custom-form p input[type="date"],
   .figma-custom-form p input[type="password"],
   .figma-custom-form p select,
   .figma-custom-form p textarea {

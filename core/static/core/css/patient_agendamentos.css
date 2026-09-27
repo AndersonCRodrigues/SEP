@@ -77,6 +77,10 @@
   gap: 16px;
 }
 
+.agend-row:hover {
+  background-color: #D4D4D4;
+}
+
 .agend-date {
   font-family: 'Museo Sans', sans-serif;
   font-size: 15px;
