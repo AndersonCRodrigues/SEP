@@ -93,7 +93,10 @@ Fora de `components/`, o `form_cadastro.css` é o desenho de todo formulário co
 a classe `figma-custom-form`: bloco cinza por campo e caixa de digitação branca
 com borda própria, em `box-sizing: border-box` para não passar do bloco. O
 `help_text` do Django — as regras de senha, que vêm como `<ul>` — fica apagado e
-em itálico, para ler como sugestão e não como mais um campo.
+em itálico, para ler como sugestão e não como mais um campo. Essa regra é escrita
+pelo conteúdo da lista (`ul:not(.errorlist):not(:has(input))`), e não pela posição
+dela: o navegador tira o `<ul>` de dentro do `<p>` ao interpretar a página, então
+a dica deixa de estar dentro do bloco do campo.
 
 ## O desenho da página inicial
 
