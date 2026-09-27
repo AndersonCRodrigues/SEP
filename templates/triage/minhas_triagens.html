@@ -22,7 +22,6 @@
     <div>Paciente:</div>
     <div>Criada em:</div>
     <div>Situação:</div>
-    <div></div>
   </div>
 
   <div class="list-panel-container">
@@ -38,11 +37,6 @@
         {% else %}
         <span class="badge-situacao andamento">{{ triagem.get_status_display }}</span>
         {% endif %}
-      </div>
-      <div class="text-end">
-        <a href="{% url 'triage:triage_detail_student' triagem.pk %}" class="btn-ver">
-          Ver<span class="visually-hidden"> a triagem de {{ triagem.patient.get_full_name }}</span>
-        </a>
       </div>
     </div>
     {% endfor %}

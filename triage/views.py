@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 
 from areas.models import AreaActing
 from core.constants import TriageStatus
@@ -204,16 +205,22 @@ def edit_triage(request, pk):
             messages.success(request, "Triagem atualizada com sucesso.")
             
             if user.role == Role.ALUNO:
-                return redirect("triage:triage_detail_student", pk=pk)
+                return redirect("triage:minhas_triagens")
             return redirect("triage:triage_detail_supervisor", pk=pk)
     else:
         triage_form = TriageRecordForm(instance=triage)
         iarv_form = iarv_form_class(instance=iarv)
 
+    if user.role == Role.ALUNO:
+        cancel_url = reverse("triage:minhas_triagens")
+    else:
+        cancel_url = reverse("triage:triage_detail_supervisor", args=[pk])
+
     context = {
         "triage": triage,
         "triage_form": triage_form,
         "iarv_form": iarv_form,
+        "cancel_url": cancel_url,
     }
 
     return render(request, "triage/edit_triage.html", context)
@@ -231,7 +238,7 @@ def submit_triage(request, pk):
     except ValidationError as e:
         messages.error(request, str(e))
 
-    return redirect("triage:triage_detail_student", pk=pk)
+    return redirect("triage:minhas_triagens")
 
 
 @login_required

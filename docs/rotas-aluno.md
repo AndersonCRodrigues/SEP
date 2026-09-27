@@ -185,9 +185,10 @@ consulta. `PerfilAlunoView` é um `UpdateView` que só edita os campos de contat
 endereço do próprio usuário (`get_object` devolve `Student` com o `pk` da
 sessão), com sucesso em `students:home`. `cadastrar_aluno` recusa com
 `PermissionDenied` quem não tem `students.add_student`, salva pelo
-`AlunoCreationForm`, sincroniza o grupo e volta para `supervisor:painel`; os
-campos de curso e período no formulário vêm de
-`supervisor.views.mocks.student_enrollment_fields` e não persistem.
+`AlunoCreationForm`, sincroniza o grupo e volta para `supervisor:painel`. O
+campo "Período" do formulário é o `term` da orientação: viaja por
+`_advising_term` até o signal que abre o `Advising`, então só é aceito junto com
+o professor responsável.
 
 ## 4. Rotas de triagem que o Aluno usa
 
@@ -216,11 +217,15 @@ Detalhes que valem registro:
   removida junto com a view e o template.
 - `submit_triage` é **GET**: o link envia a ficha. Veio assim da `dev` e foi
   mantido de propósito; trocar para POST muda o template e a confirmação.
-- `edit_triage` monta `cancel_url` na view, apontando para
-  `triage_detail_student` quando a role é `ALUNO` e para
-  `triage_detail_supervisor` nos demais casos. O template não pode decidir isso
-  sozinho porque `user.role` guarda `"AL"`, não `"ALUNO"` — comparar com o nome
-  por extenso no template foi exatamente o bug do botão "Cancelar".
+- `edit_triage` monta `cancel_url` na view, apontando para `minhas_triagens`
+  quando a role é `ALUNO` e para `triage_detail_supervisor` nos demais casos. O
+  template não pode decidir isso sozinho porque `user.role` guarda `"AL"`, não
+  `"ALUNO"` — comparar com o nome por extenso no template foi exatamente o bug
+  do botão "Cancelar".
+- **O Aluno não abre mais o detalhe da própria ficha.** A lista "Minhas
+  triagens" perdeu o botão "Ver" e, junto com ele, `edit_triage` e
+  `submit_triage` passaram a devolver o Aluno para a lista. A rota
+  `triage_detail_student` continua de pé, sem nenhum link para ela.
 - Todas as recusas usam `PermissionDenied`, que o `handler403` transforma em
   redirecionamento com aviso. Recusa com `ValidationError` virava 500.
 
