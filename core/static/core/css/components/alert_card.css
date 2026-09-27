@@ -28,6 +28,8 @@
 
 .alert-card-action {
   display: block;
+  /* O respiro interno entra na largura: sem isso o botao passa da caixa. */
+  box-sizing: border-box;
   background-color: var(--sep-maroon);
   color: #FFFFFF;
   font-family: var(--font-main);
