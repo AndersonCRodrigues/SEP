@@ -85,8 +85,11 @@
   }
 
   /* Regras de senha e demais ajudas: texto apagado, para ler como sugestao e
-     nunca como campo (o help_text do Django vem como <ul>). */
-  .figma-custom-form .helptext {
+     nunca como campo. O help_text do Django vem como <ul>, e o navegador tira
+     essa lista de dentro do <p> ao interpretar a pagina -- por isso a regra e
+     pelo conteudo da lista (sem campo dentro), nao pela posicao dela. */
+  .figma-custom-form .helptext,
+  .figma-custom-form ul:not(.errorlist):not(:has(input)) {
     display: block;
     margin-top: 0.45rem;
     font-size: 0.75rem;
@@ -97,17 +100,28 @@
     opacity: 0.85;
   }
 
-  .figma-custom-form .helptext ul {
-    padding-left: 1.1rem;
-    list-style: disc;
+  .figma-custom-form .helptext:empty {
+    display: none;
   }
 
-  .figma-custom-form .helptext ul li {
+  .figma-custom-form ul:not(.errorlist):not(:has(input)) {
+    list-style: disc;
+    padding-left: 1.2rem;
+  }
+
+  .figma-custom-form ul:not(.errorlist):not(:has(input)) li {
     display: list-item;
     background-color: transparent;
     border-radius: 0;
     padding: 0;
-    margin-bottom: 0.15rem;
+    margin: 0 0 0.15rem 0;
+  }
+
+  /* Quando a lista sai do bloco do campo, ela vira filha do formulario: aqui
+     ela volta a andar junto do campo que descreve. */
+  .figma-custom-form > ul:not(.errorlist):not(:has(input)) {
+    margin: -0.95rem 0 1.25rem 0;
+    padding-left: 2.4rem;
   }
 
   .figma-custom-form ul.errorlist {
