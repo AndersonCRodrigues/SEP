@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="{% static 'core/css/components/hover_lift.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/components/list_filters.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/components/row_button.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/detail_panel.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/teacher_lists.css' %}">
 {% endblock %}
 
@@ -82,14 +83,14 @@
 
 {% if aluno_selecionado %}
 <section class="list-panel mt-5" id="feedback">
-  <h2 class="section-subtitle">Avaliação de desempenho prático - {{ aluno_selecionado.nome_completo }}</h2>
+  <h2 class="detail-title">Avaliação de desempenho prático - {{ aluno_selecionado.nome_completo }}</h2>
 
   <div class="list-panel-container">
     {% url 'teacher:registrar_feedback' aluno_selecionado.pk as url_feedback %}
     {% include "components/form.html" with form=form_feedback action_url=url_feedback submit_label="Enviar avaliação" %}
   </div>
 
-  <h3 class="section-subtitle mt-4">Feedbacks anteriores</h3>
+  <h3 class="detail-title mt-4">Feedbacks anteriores</h3>
   {% if feedbacks_aluno %}
   <div class="list-panel-container">
     {% for feedback in feedbacks_aluno %}

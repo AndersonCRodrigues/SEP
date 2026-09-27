@@ -6,6 +6,7 @@
 {% block page_css %}
 <link rel="stylesheet" href="{% static 'core/css/components/list_panel.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/components/list_filters.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/detail_panel.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/teacher_lists.css' %}">
 {% endblock %}
 
@@ -16,7 +17,7 @@
 
 <div class="list-panel">
   <section class="detail-card">
-    <h2 class="section-subtitle">Dados do aluno</h2>
+    <h2 class="detail-title">Dados do aluno</h2>
     <div class="list-panel-container">
       <div class="list-panel-row detail-grid">
         <div>Matrícula</div>
@@ -38,7 +39,7 @@
   </section>
 
   <section class="detail-card">
-    <h2 class="section-subtitle">Pacientes sob orientação (casos abertos)</h2>
+    <h2 class="detail-title">Pacientes sob orientação (casos abertos)</h2>
     {% if casos_abertos %}
     <div class="list-panel-container">
       {% for caso in casos_abertos %}
@@ -54,7 +55,7 @@
   </section>
 
   <section class="detail-card">
-    <h2 class="section-subtitle">Histórico de casos encerrados</h2>
+    <h2 class="detail-title">Histórico de casos encerrados</h2>
     {% if casos_encerrados %}
     <div class="list-panel-container">
       {% for caso in casos_encerrados %}
