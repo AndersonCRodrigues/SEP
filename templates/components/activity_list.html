@@ -11,6 +11,8 @@
         {% elif activity.kind == 'appointment' %}bi-calendar-check
         {% elif activity.kind == 'backup' %}bi-hdd
         {% elif activity.kind == 'security' %}bi-shield-lock
+        {% elif activity.kind == 'document' %}bi-file-earmark-text
+        {% elif activity.kind == 'room' %}bi-door-open
         {% else %}bi-circle{% endif %} activity-icon" aria-hidden="true"></i>
       <span class="activity-content">
         <span class="activity-title">{{ activity.title }}</span>

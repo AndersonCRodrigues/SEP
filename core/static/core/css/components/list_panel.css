@@ -18,6 +18,14 @@
   margin: 0 auto 36px auto;
 }
 
+.list-panel-subtitle {
+  max-width: 900px;
+  margin: -20px auto 20px auto;
+  font-family: var(--font-main);
+  font-size: 14px;
+  color: var(--sep-maroon);
+}
+
 .list-panel {
   max-width: 900px;
   margin: 0 auto;

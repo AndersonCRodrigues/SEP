@@ -17,12 +17,6 @@
 </p>
 
 <div class="figma-form-container">
-  <form class="figma-custom-form" method="post" novalidate>
-    {% csrf_token %}
-    {{ form.as_p }}
-    <div class="figma-actions-center">
-      <button type="submit" class="btn-submit-figma">Salvar</button>
-    </div>
-  </form>
+  {% include "components/form.html" with submit_label="Salvar" %}
 </div>
 {% endblock %}

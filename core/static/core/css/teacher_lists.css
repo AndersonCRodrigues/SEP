@@ -2,14 +2,6 @@
    Aqui fica so o que e proprio de cada tela — a grade de colunas, o selo por
    situacao do prontuario e o formulario de presenca dentro da linha. */
 
-.list-panel-subtitle {
-  max-width: 900px;
-  margin: -20px auto 20px auto;
-  font-family: 'Museo Sans', sans-serif;
-  font-size: 14px;
-  color: var(--sep-maroon);
-}
-
 .list-panel-back {
   max-width: 900px;
   margin: 0 auto 20px auto;
