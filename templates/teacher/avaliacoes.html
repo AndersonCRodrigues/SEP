@@ -1,0 +1,73 @@
+{% extends "teacher/base_teacher.html" %}
+{% load static %}
+
+{% block title %}Avaliações{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'core/css/components/list_panel.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/hover_lift.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/list_filters.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/row_button.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/detail_panel.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/feedback_list.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/form_cadastro.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/teacher_lists.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="list-panel-title">Avaliações</div>
+
+{% if chosen %}
+<p class="list-panel-back">
+  <a class="btn-acao" href="{% url 'teacher:avaliacoes' %}">Voltar</a>
+</p>
+
+<section class="list-panel">
+  <h2 class="detail-title">Avaliação de desempenho prático - {{ chosen.get_full_name }}</h2>
+
+  <div class="list-panel-container">
+    {% url 'teacher:registrar_feedback' chosen.pk as url_feedback %}
+    {% include "components/form.html" with form=form_feedback action_url=url_feedback submit_label="Enviar avaliação" %}
+  </div>
+
+  <h3 class="detail-title">Feedbacks anteriores</h3>
+  {% include "components/feedback_list.html" with feedbacks=feedbacks %}
+</section>
+{% else %}
+<p class="list-panel-subtitle">Escolha o aluno para escrever a avaliação de desempenho prático.</p>
+
+<form class="list-filters" method="get">
+  <label class="visually-hidden" for="busca-avaliacao">Buscar por nome</label>
+  <input type="text" id="busca-avaliacao" name="q" value="{{ search }}" placeholder="Buscar por nome do aluno...">
+
+  <button type="submit" class="btn-acao">Filtrar</button>
+  {% if search %}
+  <a class="btn-limpar" href="{% url 'teacher:avaliacoes' %}">Limpar filtros</a>
+  {% endif %}
+</form>
+
+{% if students %}
+<div class="list-panel">
+  <div class="list-panel-header evaluation-grid">
+    <div>Aluno:</div>
+    <div></div>
+  </div>
+
+  <div class="list-panel-container">
+    {% for student in students %}
+    <div class="list-panel-row evaluation-grid hover-lift">
+      <div>{{ student.get_full_name }}</div>
+      <div class="text-end">
+        <a class="btn-ver" href="?aluno={{ student.pk }}">
+          Feedback<span class="visually-hidden"> de {{ student.get_full_name }}</span>
+        </a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% else %}
+{% include "components/empty_state.html" with message="Nenhum aluno vinculado." %}
+{% endif %}
+{% endif %}
+{% endblock %}

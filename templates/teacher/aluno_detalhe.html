@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="{% static 'core/css/components/list_panel.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/components/list_filters.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/components/detail_panel.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/feedback_list.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/teacher_lists.css' %}">
 {% endblock %}
 
@@ -68,6 +69,11 @@
     {% else %}
     {% include "components/empty_state.html" with message="Nenhum caso encerrado ainda." %}
     {% endif %}
+  </section>
+
+  <section class="detail-card">
+    <h2 class="detail-title">Feedbacks recebidos</h2>
+    {% include "components/feedback_list.html" with feedbacks=feedbacks empty_message="Nenhum feedback registrado ainda para este aluno." %}
   </section>
 </div>
 {% endblock %}
