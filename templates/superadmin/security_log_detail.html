@@ -1,98 +1,75 @@
-{% extends "base.html" %}
+{% extends "superadmin/base_superadmin.html" %}
+{% load static %}
 
-{% block title %}Detalhe do Log | Sistema SEP{% endblock %}
+{% block title %}Detalhe do log{% endblock %}
 
-{% block breadcrumbs %}
-{{ block.super }}
-<li class="breadcrumb-item">
-    <a href="{% url 'superadmin:home' %}">Superadmin</a>
-</li>
-<li class="breadcrumb-item">
-    <a href="{% url 'superadmin:logs' %}">Logs de Segurança</a>
-</li>
-<li class="breadcrumb-item active" aria-current="page">
-    Detalhe
-</li>
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'core/css/components/list_panel.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/list_filters.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/detail_panel.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/superadmin/superadmin_lists.css' %}">
 {% endblock %}
 
-{% block page_title %}Detalhe do log{% endblock %}
-
 {% block content %}
+<div class="list-panel-title">Detalhe do log</div>
 
-<section class="card">
-    <div class="card-body">
+<p class="list-toolbar">
+  <a class="btn-limpar" href="{% url 'superadmin:logs' %}">← Voltar para Logs de segurança</a>
+</p>
 
-        <dl class="row mb-0">
-
-            <dt class="col-sm-3">Data e hora</dt>
-            <dd class="col-sm-9">
-                {{ log.created_at|date:"d/m/Y H:i:s" }}
-            </dd>
-
-            <dt class="col-sm-3">Evento</dt>
-            <dd class="col-sm-9">
-                {{ log.get_action_display }}
-            </dd>
-
-            <dt class="col-sm-3">Usuário</dt>
-            <dd class="col-sm-9">
-                {{ log.user_identifier|default:"-" }}
-            </dd>
-
-            <dt class="col-sm-3">IP</dt>
-            <dd class="col-sm-9">
-                {{ log.ip_address|default:"-" }}
-            </dd>
-
-            <dt class="col-sm-3">Modelo afetado</dt>
-            <dd class="col-sm-9">
-                {{ log.target_model|default:"-" }}
-                {% if log.target_id %}
-                #{{ log.target_id }}
-                {% endif %}
-            </dd>
-
-            <dt class="col-sm-3">Detalhe</dt>
-            <dd class="col-sm-9">
-                {{ log.detail|default:"-" }}
-            </dd>
-
-            <dt class="col-sm-3">Alterações</dt>
-            <dd class="col-sm-9">
-
-                {% if log.changes %}
-
-                <table class="table table-sm">
-                    <thead>
-                        <tr>
-                            <th>Campo</th>
-                            <th>Antes</th>
-                            <th>Depois</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        {% for field, change in log.changes.items %}
-                        <tr>
-                            <td>{{ field }}</td>
-                            <td>{{ change.old|default:"-" }}</td>
-                            <td>{{ change.new|default:"-" }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-
-                {% else %}
-
-                {% include "components/empty_state.html" with message="Nenhuma alteração registrada." %}
-
-                {% endif %}
-
-            </dd>
-
-        </dl>
-
+<div class="list-panel">
+  <section class="detail-card">
+    <h2 class="detail-title">Registro</h2>
+    <div class="list-panel-container">
+      <div class="list-panel-row detail-grid">
+        <div>Data e hora</div>
+        <div class="text-end">{{ log.created_at|date:"d/m/Y H:i:s" }}</div>
+      </div>
+      <div class="list-panel-row detail-grid">
+        <div>Evento</div>
+        <div class="text-end">{{ log.get_action_display }}</div>
+      </div>
+      <div class="list-panel-row detail-grid">
+        <div>Usuário</div>
+        <div class="text-end">{{ log.user_identifier|default:"—" }}</div>
+      </div>
+      <div class="list-panel-row detail-grid">
+        <div>IP</div>
+        <div class="text-end">{{ log.ip_address|default:"—" }}</div>
+      </div>
+      <div class="list-panel-row detail-grid">
+        <div>Modelo afetado</div>
+        <div class="text-end">
+          {{ log.target_model|default:"—" }}{% if log.target_id %} #{{ log.target_id }}{% endif %}
+        </div>
+      </div>
+      <div class="list-panel-row detail-grid">
+        <div>Detalhe</div>
+        <div class="text-end">{{ log.detail|default:"—" }}</div>
+      </div>
     </div>
-</section>
+  </section>
 
+  <section class="detail-card">
+    <h2 class="detail-title">Alterações</h2>
+    {% if log.changes %}
+    <div class="list-panel-header change-grid">
+      <div>Campo:</div>
+      <div>Antes:</div>
+      <div>Depois:</div>
+    </div>
+    <div class="list-panel-container">
+      {% for field, change in log.changes.items %}
+      <div class="list-panel-row change-grid">
+        <div>{{ field }}</div>
+        <div>{{ change.old|default:"—" }}</div>
+        <div>{{ change.new|default:"—" }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    {% include "components/empty_state.html" with message="Nenhuma alteração registrada." %}
+    {% endif %}
+  </section>
+</div>
 {% endblock %}
