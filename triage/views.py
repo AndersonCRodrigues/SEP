@@ -41,17 +41,6 @@ def minhas_triagens(request):
 
 
 @login_required
-def triagem_concluida(request, pk):
-    """Tela de confirmação exibida logo após o Aluno criar a ficha."""
-    triage = get_object_or_404(TriageRecord, pk=pk)
-
-    if triage.student_author_id != request.user.pk:
-        return HttpResponseForbidden("Você não tem acesso a essa triagem.")
-
-    return render(request, "triage/triagem_concluida.html", {"triage": triage})
-
-
-@login_required
 def fila_triagem(request):
     if request.user.role != Role.ALUNO:
         return HttpResponseForbidden("Apenas Alunos podem acessar a fila de triagem.")
@@ -170,7 +159,7 @@ def create_triage_step(request, patient_id, step):
             messages.error(request, "Revise os dados e tente novamente.")
             return to_triage_step(patient_id, steps[0])
 
-        return redirect("triage:triagem_concluida", pk=triage_record.pk)
+        return redirect("students:triagem_concluida", pk=triage_record.pk)
 
     if wizard.is_ahead(current):
         return to_triage_step(patient_id, wizard.first_unanswered())

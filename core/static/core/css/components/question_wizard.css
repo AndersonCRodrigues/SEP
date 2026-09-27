@@ -224,3 +224,98 @@
     font-size: 24px;
   }
 }
+
+/* -- Fim do fluxo: cartao de conclusao -- */
+
+.registration-completed {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  max-width: 500px;
+  margin: 60px auto;
+  padding: 20px;
+  text-align: center;
+}
+
+/* Ícone de Visto (Check) Verde em Círculo */
+.completed-icon {
+  width: 64px;
+  height: 64px;
+  background-color: #28A745;
+  border-radius: 50%;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='20 6 9 17 4 12'></polyline></svg>");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 32px;
+}
+
+.completed-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #1E293B;
+  margin-bottom: 28px;
+}
+
+/* Card do Resumo (Cinza Escuro / Taupe) */
+.completed-summary {
+  width: 100%;
+  max-width: 380px;
+  background-color: #8C8581;
+  color: #FFFFFF;
+  border-radius: 12px;
+  padding: 12px 20px;
+  margin: 0 0 32px 0;
+  box-sizing: border-box;
+}
+
+.completed-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+  font-size: 13px;
+}
+
+.completed-row:last-child {
+  border-bottom: none;
+}
+
+.completed-row dt {
+  font-weight: 600;
+  opacity: 0.9;
+  text-align: left;
+}
+
+.completed-row dd {
+  font-weight: 700;
+  margin: 0;
+  text-align: right;
+}
+
+/* Botão Continuar */
+.completed-continue {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 220px;
+  height: 44px;
+  background-color: #6D1D20;
+  color: #FFFFFF !important;
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none !important;
+  border-radius: 999px;
+  transition: background-color 0.2s ease;
+  box-shadow: 0 4px 10px rgba(109, 29, 32, 0.2);
+}
+
+.completed-continue:hover {
+  background-color: #541618;
+}

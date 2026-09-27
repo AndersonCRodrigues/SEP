@@ -147,6 +147,12 @@ segurança: triagem de outro aluno responde 404, sem checagem extra na view.
 `completed_at` cai em cascata: `submitted_at`, senão `closed_at`, senão
 `created_at` — a ficha nem sempre tem data de envio.
 
+A tela é o cartão de conclusão do wizard (`components/question_wizard.css`), o
+mesmo do pré-cadastro de paciente: selo verde, o resumo em caixa e o botão
+Continuar, dentro do shell do Aluno. A confirmação que vivia em
+`/triage/concluida/<pk>/`, no menu antigo, foi removida — era a mesma coisa em
+outro layout, e agora o fim do wizard cai aqui.
+
 Efeito do `VISIBLE_TO_AUTHOR`: depois que a Coordenação fecha ou encaminha a
 triagem, esta tela passa a responder 404 para o próprio autor.
 
@@ -181,7 +187,9 @@ e a idade do registro. `dates.received_label` monta "Recebida às 14:20",
 
 `MeuProfessorView` mostra `aluno.current_advisor`, ou o vazio quando não há
 orientador. `PainelEstudanteView` é a tela antiga, um `TemplateView` sem
-consulta. `PerfilAlunoView` é um `UpdateView` que só edita os campos de contato e
+consulta — **sem link para ela em lugar nenhum**: o menu antigo
+(`partials/_sidebar.html`) e o botão "Voltar" de Meu Professor deixaram de
+apontar para lá, como já tinha acontecido com o detalhe da triagem. `PerfilAlunoView` é um `UpdateView` que só edita os campos de contato e
 endereço do próprio usuário (`get_object` devolve `Student` com o `pk` da
 sessão), com sucesso em `students:home`. `cadastrar_aluno` recusa com
 `PermissionDenied` quem não tem `students.add_student`, salva pelo
@@ -211,6 +219,18 @@ Detalhes que valem registro:
   Paciente sem data de nascimento levanta `ValidationError`, e `create_triage` e
   `edit_triage` tratam: avisam pela mensagem e devolvem para a fila ou para o
   detalhe da triagem, em vez de deixar subir como 500.
+- A ficha é uma pergunta por vez, no mesmo desenho do pré-cadastro de paciente
+  do Administrativo (`components/question_wizard.css` + `student_triage_wizard.css`),
+  dentro do shell do Aluno. A barra lateral mostra o paciente e as cinco seções
+  da referência — Identificação, Vínculo institucional, Contexto clínico, Rede
+  de apoio e Encerramento —, definidas em `SECTION_STARTS` pelo primeiro campo
+  de cada uma, mais "Instrumento de risco" para os campos do IARV, que a
+  referência não cobre mas o fluxo exige. Cada seção tem três barras, e
+  `section_bars()` preenche conforme a pergunta avança dentro dela.
+- `_as_question` troca o widget só na tela: campo de texto vira caixa com
+  "Resposta...", booleano vira Sim/Não e escolha vira lista de botões sem a
+  opção vazia. O valor gravado continua o mesmo — o booleano viaja como
+  `"true"`/`"false"`, que é o que o `BooleanField` do formulário real entende.
 - `create_triage` grava ficha e IARV dentro de `transaction.atomic()` e
   redireciona para `students:triagem_concluida`. A rota antiga
   `/triage/concluida/<pk>/` mostrava a mesma confirmação em outro layout e foi

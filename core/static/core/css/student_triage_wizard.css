@@ -47,6 +47,13 @@ body {
   background-color: #E63946;
 }
 
+.completed-text {
+  font-family: var(--font-main);
+  font-size: 15px;
+  color: #333333;
+  margin: -16px 0 28px 0;
+}
+
 /* ── Pergunta ── */
 .question-title {
   line-height: 1.15;

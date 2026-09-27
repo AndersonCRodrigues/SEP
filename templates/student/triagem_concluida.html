@@ -1,36 +1,41 @@
 {% extends "student/base_student.html" %}
+{% load static %}
 
 {% block title %}Triagem concluída{% endblock %}
 
-{% block breadcrumbs %}
-<li class="breadcrumb-item"><a href="{% url 'students:home' %}">Página inicial</a></li>
-<li class="breadcrumb-item"><a href="{% url 'students:triagens' %}">Triagens</a></li>
-<li class="breadcrumb-item active" aria-current="page">Conclusão</li>
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/components/tokens.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/question_wizard.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/student_triage_wizard.css' %}">
 {% endblock %}
 
-{% block page_title %}Triagem concluída com sucesso!{% endblock %}
+{% block page_header %}{% endblock %}
 
 {% block content %}
-{% include "components/alert.html" with message="A ficha foi enviada para a coordenação." level="success" %}
+<section class="registration-completed" aria-labelledby="completed-title">
+  <div class="completed-icon" aria-hidden="true"></div>
 
-<dl class="triage-summary">
-  <div class="triage-field">
-    <dt>Paciente</dt>
-    <dd>{{ triage.patient.get_full_name }}</dd>
-  </div>
-  <div class="triage-field">
-    <dt>Entrevistado por</dt>
-    <dd>{{ triage.student_author.get_full_name }}</dd>
-  </div>
-  <div class="triage-field">
-    <dt>Concluído em</dt>
-    <dd>
-      <time datetime="{{ completed_at|date:'Y-m-d\TH:i' }}">
-        {{ completed_at|date:"d/m/Y" }} às {{ completed_at|date:"H:i" }}
-      </time>
-    </dd>
-  </div>
-</dl>
+  <h1 id="completed-title" class="completed-title">Triagem concluída com sucesso!</h1>
 
-<a class="back-link" href="{% url 'students:triagens' %}">Voltar para Triagens a realizar</a>
+  <p class="completed-text">A ficha foi enviada para a coordenação.</p>
+
+  <dl class="completed-summary">
+    <div class="completed-row">
+      <dt>Paciente</dt>
+      <dd>{{ triage.patient.get_full_name }} #{{ triage.patient.pk }}</dd>
+    </div>
+    <div class="completed-row">
+      <dt>Entrevistado por</dt>
+      <dd>{{ triage.student_author.get_full_name }}</dd>
+    </div>
+    <div class="completed-row">
+      <dt>Concluído em</dt>
+      <dd>
+        <time datetime="{{ completed_at|date:'c' }}">{{ completed_at|date:"d/m/Y à\s H:i" }}</time>
+      </dd>
+    </div>
+  </dl>
+
+  <a class="completed-continue" href="{% url 'students:triagens' %}">Continuar</a>
+</section>
 {% endblock %}
