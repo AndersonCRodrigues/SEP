@@ -61,28 +61,6 @@ header nav.navbar.bg-dark,
   padding: 0.85rem 2rem;
 }
 
-.navbar-brand.brand,
-.admin-navbar__brand {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.2;
-  text-decoration: none;
-  color: #ffffff;
-}
-
-.brand-name {
-  font-family: var(--font-main);
-  font-size: 15px;
-  font-weight: 700;
-}
-
-.brand-institution {
-  font-family: var(--font-main);
-  font-size: 10px;
-  font-weight: 400;
-  opacity: 0.85;
-}
-
 .main-nav .navbar-nav,
 .admin-navbar__links {
   display: flex;
@@ -110,55 +88,6 @@ header nav.navbar.bg-dark,
 .admin-navbar__links a.active {
   opacity: 0.85;
   text-decoration: underline;
-}
-
-.header-action,
-.admin-navbar__actions .icon-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: #ffffff;
-  color: var(--sep-maroon);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  cursor: pointer;
-  font-size: 16px;
-}
-
-.header-action:hover,
-.admin-navbar__actions .icon-btn:hover {
-  opacity: 0.9;
-}
-
-.admin-navbar__actions {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-/* ── Site Footer ── */
-.site-footer,
-.admin-footer {
-  background-color: var(--sep-maroon);
-  padding: 20px 0;
-  text-align: center;
-  color: #ffffff;
-  font-family: var(--font-main);
-  font-weight: 700;
-  
-  margin-top: auto;
-  width: 100%;
-  flex-shrink: 0;
-}
-
-.site-footer p,
-.admin-footer p {
-  margin: 0;
 }
 
 /* ── Cabeçalhos e Banners de Páginas ── */

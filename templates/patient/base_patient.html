@@ -10,10 +10,8 @@
 {% endblock %}
 
 {% block brand %}
-<a class="navbar-brand brand" href="{% url 'patient:home' %}">
-  <span class="brand-name">SEP Maricá</span>
-  <span class="brand-institution">Universidade de Vassouras</span>
-</a>
+{% url 'patient:home' as home_url %}
+{% include "components/site_brand.html" %}
 {% endblock %}
 
 {% block main_nav %}
@@ -40,28 +38,4 @@
 {% endwith %}
 {% endblock %}
 
-{% block user_links %}
-<li class="nav-item">
-  <button type="button" class="nav-icon-btn" aria-label="Mensagens">
-    <i class="bi bi-envelope"></i>
-  </button>
-</li>
-<li class="nav-item ms-2">
-  <button type="button" class="nav-icon-btn" aria-label="Notificações">
-    <i class="bi bi-bell"></i>
-  </button>
-</li>
-<li class="nav-item ms-2">
-  <button type="button" class="nav-icon-btn" aria-label="Minha conta">
-    <i class="bi bi-person-circle"></i>
-  </button>
-</li>
-{% endblock %}
-
 {% block page_header %}{% endblock %}
-
-{% block footer %}
-<footer class="sep-footer text-center">
-  <img src="/static/core/images/logo-home-aluno-vassouras-rodape.png" alt="Univassouras" style="height: 30px;">
-</footer>
-{% endblock %}
