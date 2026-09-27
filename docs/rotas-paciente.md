@@ -248,6 +248,13 @@ erro, `empty_state.html` e `error_state.html`; a solicitação de horário usa
 escreve os indicadores à mão, em vez de usar `summary_list.html`; a migração está
 registrada em `componentes.md`.
 
+**Minhas triagens** é a primeira tela da área no padrão de lista das outras
+roles: pílula de título, `list-panel` com cabeçalho de colunas, `badge_situacao`
+e `btn-ver`, numa marcação só para celular e desktop — o `patient_triagens.css`
+guarda apenas a grade de colunas e o empilhamento da linha abaixo de 768px. As
+demais telas ainda têm o par de blocos `d-block d-md-none` / `d-none d-md-block`
+com estilo inline.
+
 ## 7. Pendências técnicas
 
 1. **Indicadores da home.** São os únicos que não passam por

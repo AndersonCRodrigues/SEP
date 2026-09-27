@@ -35,6 +35,10 @@ precisa de aspas.
 | Tabela com células próprias | `_data_table.html` | `{% data_table %}` | As linhas são escritas na tela; o componente entrega cabeçalho e corpo |
 | Formulário | `form.html` | include | É `method="post"` com `form.as_p` e as classes `figma-*`; a tela precisa carregar `form_cadastro.css`. Não serve para filtro em GET |
 | Modal | `_modal.html` | `{% modal %}` | Depende do JavaScript do Bootstrap para abrir |
+| Feedbacks do aluno | `feedback_list.html` | include | `feedbacks` com `author`/`when`/`content` — a view normaliza, porque o Professor lê `PerformanceReview` e o Coordenador, `TriageFeedback`; `empty_message` opcional e `components/feedback_list.css` na tela |
+| Paciente em foco | `patient_card.html` | include | Caixa do encaminhamento: `name`, `code` (o `#id`), `detail` e `detail_date` opcionais |
+| Lista de opções | `option_list.html` | include | Caixas de marcar do encaminhamento: `options` com `value`/`label`/`checked`, mais `field_name` e `empty_message` |
+| Encaminhamentos recentes | `referral_recent.html` | include | `items` com `title`/`subtitle`/`label`/`level`; o selo sai do `badge_situacao.html` |
 | Alerta | `alert.html` | include | Mensagem única; para aviso de sistema use as mensagens do Django, que o `base.html` já exibe |
 | Loading | `loading.html` | include | Estado estático; não há carregamento assíncrono no projeto |
 | Estado vazio | `empty_state.html` | include | — |
@@ -69,12 +73,15 @@ regra própria para o que aquela tela realmente tem de diferente.
 | `activity_list.css` | Lista de atividades recentes: ícone, título e detalhe | Homes de todas as áreas |
 | `calendar.css` | Calendário do mês: caixa, grade, dias, navegação, legenda | Homes de Aluno, Paciente e Professor |
 | `list_panel.css` | Painel de lista: pílula de título, subtítulo, cabeçalho, linhas e os selos `badge-situacao` (`ok`, `atencao`, `critica`, `neutra`) | Telas de lista de todas as áreas |
-| `list_filters.css` | Barra de busca/filtro acima da lista, a barra de título com busca ou ação (`list-toolbar`) e o botão `btn-acao` | Telas de lista de todas as áreas |
+| `list_filters.css` | Barra de busca/filtro acima da lista, a barra de título com busca ou ação (`list-toolbar`) e o botão `btn-acao`; `list-filters-spread` joga o botão para o extremo oposto da busca | Telas de lista de todas as áreas |
 | `row_button.css` | Botão no fim da linha: `btn-iniciar` (verde), `btn-ver` (vinho) e `btn-editar` (cinza) | Listas de todas as áreas |
 | `hover_lift.css` | Elevação no hover de linha ou cartão clicável (`hover-lift`) | Listas de todas as áreas |
 | `detail_panel.css` | Tela de detalhe: caixas empilhadas com título, linhas de rótulo e valor e texto corrido | Telas de detalhe de Professor, Superadmin e Coordenador |
 | `option_list.css` | Lista de opções com caixa de marcar, uma por linha do painel | Área de atuação (Professor) e encaminhamento (Coordenador) |
 | `alert_card.css` | Cartão de alerta cinza com título laranja e botão de ação | Home do Superadmin |
+| `feedback_list.css` | Entradas de feedback: autor e data na mesma linha, texto com as quebras preservadas | Avaliações e perfil do aluno (Professor) |
+| `referral_panel.css` | Tela de encaminhamento: duas colunas, caixa do paciente, filtro, rolagem da lista de opções, recentes e fila | Encaminhamentos do Coordenador e do Professor |
+| `question_wizard.css` | Uma pergunta por vez: cartão branco, barra vinho de progresso à esquerda, contador, título, campos e os botões Voltar/Avançar | Pré-cadastro de paciente (Administrativo) e ficha de triagem (Aluno) |
 | `<área>/<área>_lists.css` | Só a grade de colunas de cada tela de lista e o que é exclusivo dela | Uma por área: `administrativo`, `superadmin`, `coordenacao`, `teacher_lists.css` |
 | `mobile_shell.css` | Reset do mobile das telas do Paciente | `patient/base_patient.html` |
 
