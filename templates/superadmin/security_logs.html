@@ -13,14 +13,17 @@
 {% block content %}
 <div class="list-toolbar">
   <h1 class="list-toolbar-title">Logs de segurança</h1>
+</div>
 
-  <form class="list-search" method="get">
+<form class="list-filters list-filters-spread" method="get">
+  <div class="list-search">
     <i class="bi bi-search" aria-hidden="true"></i>
     <label class="visually-hidden" for="busca-log">Buscar por evento ou usuário</label>
-    <input type="search" id="busca-log" name="q" value="{{ request.GET.q|default:'' }}"
+    <input type="search" id="busca-log" name="q" value="{{ search }}"
       placeholder="Buscar por evento ou usuário">
-  </form>
-</div>
+  </div>
+  <button type="submit" class="btn-acao">Filtrar</button>
+</form>
 
 {% if logs %}
 <div class="list-panel">
@@ -59,11 +62,11 @@
 {% if page_obj.paginator.num_pages > 1 %}
 <nav class="list-pagination" aria-label="Paginação de logs">
   {% if page_obj.has_previous %}
-  <a class="btn-limpar" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&amp;q={{ request.GET.q }}{% endif %}">&lt; Anterior</a>
+  <a class="btn-limpar" href="?page={{ page_obj.previous_page_number }}{% if search %}&amp;q={{ search }}{% endif %}">&lt; Anterior</a>
   {% endif %}
   <span class="list-pagination-info">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
   {% if page_obj.has_next %}
-  <a class="btn-limpar" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&amp;q={{ request.GET.q }}{% endif %}">Próxima &gt;</a>
+  <a class="btn-limpar" href="?page={{ page_obj.next_page_number }}{% if search %}&amp;q={{ search }}{% endif %}">Próxima &gt;</a>
   {% endif %}
 </nav>
 {% endif %}

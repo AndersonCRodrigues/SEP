@@ -149,6 +149,7 @@ class SecurityLogView(GroupRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         for log in context["logs"]:
             log.severidade = self.SEVERIDADE_POR_ACTION.get(log.action, "info")
+        context["search"] = self.request.GET.get("q", "").strip()
         return context
 
 class SecurityLogDetailView(GroupRequiredMixin, DetailView):
