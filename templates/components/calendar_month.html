@@ -1,10 +1,10 @@
-<div class="calendar-card mx-auto">
-  <form class="d-flex justify-content-between align-items-center px-2" method="get" action="">
+<div class="calendar-card">
+  <form class="cal-nav" method="get" action="">
     <a class="cal-nav-btn"
       href="?ano={{ previous_month|date:'Y' }}&amp;mes={{ previous_month|date:'n' }}"
       aria-label="Mês anterior"><i class="bi bi-chevron-left"></i></a>
 
-    <div class="d-flex gap-2 align-items-center">
+    <div class="cal-selects">
       <label class="visually-hidden" for="calendar-month">Mês</label>
       <select class="cal-select" id="calendar-month" name="mes" onchange="this.form.submit()">
         {% for number, name in calendar_months %}
@@ -48,7 +48,7 @@
     {% endfor %}
   </div>
 
-  <div class="d-flex justify-content-center gap-3 mt-2">
+  <div class="cal-legend">
     <span class="legend-item green">{{ legend_label|default:"Com atendimento" }}</span>
   </div>
 </div>
