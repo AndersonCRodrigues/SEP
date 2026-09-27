@@ -16,6 +16,11 @@
 
 <p class="list-panel-subtitle">Referente a hoje, {{ hoje|date:"d/m/Y" }}</p>
 
+{% if aluno_selecionado %}
+<p class="list-panel-back">
+  <a class="btn-acao" href="{% url 'teacher:presenca' %}">Voltar</a>
+</p>
+{% else %}
 <form class="list-filters" method="get">
   <label class="visually-hidden" for="busca-presenca">Buscar por nome</label>
   <input type="text" id="busca-presenca" name="q" value="{{ termo_busca }}" placeholder="Buscar por nome do aluno...">
@@ -35,6 +40,7 @@
   <a class="btn-limpar" href="{% url 'teacher:presenca' %}">Limpar filtros</a>
   {% endif %}
 </form>
+{% endif %}
 
 {% if linhas %}
 <div class="list-panel">

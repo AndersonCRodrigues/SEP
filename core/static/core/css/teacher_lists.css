@@ -10,12 +10,32 @@
   color: var(--sep-maroon);
 }
 
+.list-panel-back {
+  max-width: 900px;
+  margin: 0 auto 20px auto;
+}
+
 .section-subtitle {
   font-family: 'Museo Sans', sans-serif;
   font-size: 18px;
   font-weight: 700;
   color: var(--sep-maroon);
   margin-bottom: 16px;
+}
+
+/* Tela de perfil do aluno: caixas empilhadas, uma embaixo da outra, dentro
+   da mesma largura do painel de lista. */
+.detail-card {
+  margin-bottom: 36px;
+}
+
+.detail-card:last-child {
+  margin-bottom: 0;
+}
+
+.detail-grid {
+  grid-template-columns: 1fr auto;
+  gap: 16px;
 }
 
 .student-grid {
