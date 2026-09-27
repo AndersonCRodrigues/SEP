@@ -1,35 +1,55 @@
 {% extends "supervisor/base_coordinator.html" %}
-{% load components %}
+{% load static %}
 
 {% block title %}{{ aluno.get_full_name }}{% endblock %}
 
-{% block page_title %}{{ aluno.get_full_name }}{% endblock %}
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'core/css/components/list_panel.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/list_filters.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/detail_panel.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/coordenacao/coordenacao_lists.css' %}">
+{% endblock %}
+
+{% block page_header %}{% endblock %}
 
 {% block content %}
-<dl class="student-detail">
-  <div class="student-field">
-    <dt>Orientador</dt>
-    <dd>{{ aluno.current_advisor.get_full_name|default:"Sem orientador" }}</dd>
-  </div>
-  <div class="student-field">
-    <dt>Fase do estágio</dt>
-    <dd>{{ aluno.get_stage_display }}</dd>
-  </div>
-  <div class="student-field">
-    <dt>Matrícula</dt>
-    <dd>{{ aluno.matricula|default:"Não informada" }}</dd>
-  </div>
-</dl>
+<div class="list-panel-title">{{ aluno.get_full_name }}</div>
 
-{% section title="Pacientes em atendimento" class="cases" id="cases-title" %}
-<ul class="case-list">
-  {% for caso in open_cases %}
-  <li class="case">{{ caso.patient.get_full_name }}</li>
-  {% empty %}
-  <li class="case-empty">
+<p class="list-panel-subtitle"><a class="btn-limpar" href="{% url 'supervisor:alunos' %}">← Voltar para Alunos</a></p>
+
+<div class="list-panel">
+  <section class="detail-card">
+    <h2 class="detail-title">Dados do aluno</h2>
+    <div class="list-panel-container">
+      <div class="list-panel-row detail-grid">
+        <div>Orientador</div>
+        <div class="text-end">{{ aluno.current_advisor.get_full_name|default:"Sem orientador" }}</div>
+      </div>
+      <div class="list-panel-row detail-grid">
+        <div>Fase do estágio</div>
+        <div class="text-end">{{ aluno.get_stage_display }}</div>
+      </div>
+      <div class="list-panel-row detail-grid">
+        <div>Matrícula</div>
+        <div class="text-end">{{ aluno.matricula|default:"Não informada" }}</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="detail-card">
+    <h2 class="detail-title">Pacientes em atendimento</h2>
+    {% if open_cases %}
+    <div class="list-panel-container">
+      {% for caso in open_cases %}
+      <div class="list-panel-row detail-grid">
+        <div>{{ caso.patient.get_full_name }}</div>
+        <div class="text-end">{{ caso.acting_area.nome|default:"—" }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
     {% include "components/empty_state.html" with message="Este aluno ainda não atende nenhum paciente." %}
-  </li>
-  {% endfor %}
-</ul>
-{% endsection %}
+    {% endif %}
+  </section>
+</div>
 {% endblock %}

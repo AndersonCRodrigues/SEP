@@ -21,3 +21,12 @@
   color: var(--sep-maroon);
   margin-bottom: 16px;
 }
+
+/* Texto corrido dentro de uma caixa de detalhe, como uma queixa ou um parecer. */
+.detail-text {
+  font-family: var(--font-main);
+  font-size: 14px;
+  color: #333333;
+  white-space: pre-line;
+  margin: 0;
+}

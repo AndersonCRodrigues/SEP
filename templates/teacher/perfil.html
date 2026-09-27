@@ -6,6 +6,7 @@
 {% block page_css %}
 <link rel="stylesheet" href="{% static 'core/css/components/list_panel.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/components/list_filters.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/option_list.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/teacher_lists.css' %}">
 {% endblock %}
 
@@ -23,9 +24,9 @@
 <form class="list-panel" method="post" novalidate>
   {% csrf_token %}
 
-  <div class="area-list">
+  <div class="option-list">
     {% for checkbox in form.acting_areas %}
-    <label class="list-panel-row area-row" for="{{ checkbox.id_for_label }}">
+    <label class="list-panel-row option-row" for="{{ checkbox.id_for_label }}">
       {{ checkbox.tag }}
       <span>{{ checkbox.choice_label }}</span>
     </label>
@@ -34,7 +35,7 @@
     {% endfor %}
   </div>
 
-  <div class="area-actions">
+  <div class="option-actions">
     <button type="submit" class="btn-acao">Salvar área de atuação</button>
   </div>
 </form>

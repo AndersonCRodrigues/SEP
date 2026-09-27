@@ -1,37 +1,57 @@
 {% extends "supervisor/base_coordinator.html" %}
-{% load components %}
+{% load static %}
 
 {% block title %}Triagem de {{ triagem.patient.get_full_name }}{% endblock %}
 
-{% block page_title %}Triagem de {{ triagem.patient.get_full_name }}{% endblock %}
-
-{% block page_actions %}
-{% if can_refer %}
-<a class="refer-link" href="{% url 'supervisor:encaminhar' triagem.pk %}">Encaminhar</a>
-{% endif %}
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'core/css/components/list_panel.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/list_filters.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/detail_panel.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/coordenacao/coordenacao_lists.css' %}">
 {% endblock %}
 
-{% block content %}
-<dl class="triage-detail">
-  <div class="triage-field">
-    <dt>Realizada por</dt>
-    <dd>{{ triagem.student_author.get_full_name }}</dd>
-  </div>
-  <div class="triage-field">
-    <dt>Recebida</dt>
-    <dd>{{ received }}</dd>
-  </div>
-  <div class="triage-field">
-    <dt>Situação</dt>
-    <dd>{% include "components/badge.html" with label=label level=level %}</dd>
-  </div>
-  <div class="triage-field">
-    <dt>Classificação de risco</dt>
-    <dd>{{ risk|default:"Sem instrumento preenchido" }}</dd>
-  </div>
-</dl>
+{% block page_header %}{% endblock %}
 
-{% section title="Queixa principal" class="complaint" id="complaint-title" %}
-<p class="complaint-text">{{ triagem.chief_complaint }}</p>
-{% endsection %}
+{% block content %}
+<div class="list-panel-title">Triagem de {{ triagem.patient.get_full_name }}</div>
+
+<div class="list-toolbar">
+  <a class="btn-limpar" href="{% url 'supervisor:triagens' %}">← Voltar para Triagens</a>
+  {% if can_refer %}
+  <a class="btn-acao" href="{% url 'supervisor:encaminhar' triagem.pk %}">Encaminhar</a>
+  {% endif %}
+</div>
+
+<div class="list-panel">
+  <section class="detail-card">
+    <h2 class="detail-title">Dados da triagem</h2>
+    <div class="list-panel-container">
+      <div class="list-panel-row detail-grid">
+        <div>Realizada por</div>
+        <div class="text-end">{{ triagem.student_author.get_full_name }}</div>
+      </div>
+      <div class="list-panel-row detail-grid">
+        <div>Recebida</div>
+        <div class="text-end">{{ received }}</div>
+      </div>
+      <div class="list-panel-row detail-grid">
+        <div>Situação</div>
+        <div class="text-end">
+          {% include "components/badge_situacao.html" with label=label level=level %}
+        </div>
+      </div>
+      <div class="list-panel-row detail-grid">
+        <div>Classificação de risco</div>
+        <div class="text-end">{{ risk|default:"Sem instrumento preenchido" }}</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="detail-card">
+    <h2 class="detail-title">Queixa principal</h2>
+    <div class="list-panel-container">
+      <p class="detail-text">{{ triagem.chief_complaint }}</p>
+    </div>
+  </section>
+</div>
 {% endblock %}
