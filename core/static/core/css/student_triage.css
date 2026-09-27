@@ -23,28 +23,6 @@
   margin: 0 auto 36px auto;
 }
 
-.btn-iniciar {
-  background-color: #3AA600;
-  color: #FFFFFF;
-  font-family: 'Museo Sans', sans-serif;
-  font-size: 11px;
-  font-weight: 600;
-  padding: 5px 16px;
-  border-radius: 20px;
-  border: none;
-  cursor: pointer;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  transition: background 0.15s;
-  white-space: nowrap;
-}
-
-.btn-iniciar:hover {
-  background-color: #2d8200;
-  color: #FFFFFF;
-}
-
 /* ════════════════════════════════════════
    MOBILE
    ════════════════════════════════════════ */

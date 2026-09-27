@@ -1,0 +1,70 @@
+/* Barra de busca e filtros acima de um painel de lista, com o botao de acao
+   principal das telas de lista. Acompanha components/list_panel.css: mesma
+   largura maxima, para a barra ficar alinhada com o painel. */
+
+.list-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  max-width: 900px;
+  margin: 0 auto 20px auto;
+}
+
+.list-filters input,
+.list-filters select {
+  height: 44px;
+  padding: 0 16px;
+  background-color: #FFFFFF;
+  border: 1px solid #A59C97;
+  border-radius: 12px;
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 14px;
+  color: #333333;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.list-filters input {
+  flex: 1 1 260px;
+}
+
+.list-filters input:focus,
+.list-filters select:focus {
+  border-color: var(--sep-maroon);
+}
+
+.btn-acao {
+  background-color: var(--sep-maroon);
+  color: #FFFFFF;
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  height: 44px;
+  padding: 0 28px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+
+.btn-acao:hover {
+  background-color: #541618;
+  color: #FFFFFF;
+}
+
+.btn-limpar {
+  background: none;
+  color: var(--sep-maroon);
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: underline;
+  border: none;
+  cursor: pointer;
+  padding: 0 4px;
+}

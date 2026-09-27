@@ -9,21 +9,6 @@
 }
 
 /* ════════════════════════════════════════
-   DESKTOP
-   ════════════════════════════════════════ */
-.cal-title-btn {
-  background-color: var(--sep-maroon);
-  color: #FFFFFF;
-  font-family: 'Museo Sans', sans-serif;
-  font-size: 16px;
-  font-weight: 600;
-  text-align: center;
-  border-radius: 20px;
-  padding: 8px 48px;
-  display: inline-block;
-}
-
-/* ════════════════════════════════════════
    MOBILE (Aluno Home)
    ════════════════════════════════════════ */
 @media (max-width: 768px) {
