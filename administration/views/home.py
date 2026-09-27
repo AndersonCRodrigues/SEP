@@ -1,5 +1,6 @@
 from datetime import datetime, time
 
+from django.urls import reverse
 from django.utils import timezone
 from django.views.generic import TemplateView
 
@@ -21,37 +22,44 @@ class AdministrativeHomeView(AdministrativeOnly, TemplateView):
         user = self.request.user
         today = timezone.localdate()
 
-        context.update(self.operational_summary(user, today))
-        context["recent_activities"] = self.recent_activities(user)
+        context["indicators"] = self.operational_summary(user, today)
+        context["activities"] = self.recent_activities(user)
         context.update(self.calendar_context(user, today))
         return context
 
     def operational_summary(self, user, today):
-        return {
-            "occupied_rooms": len(busy_until(user)),
-            "total_rooms": Room.objects.visible_to(user).usable().count(),
-            "appointments_today": (
-                Appointment.objects.visible_to(user)
+        pending_declarations = (
+            AttendanceCertificate.objects.visible_to(user)
+            .filter(
+                kind=AttendanceCertificate.Kind.DECLARATION,
+                status=AttendanceCertificate.Status.PENDING,
+            )
+            .count()
+            + InternshipDeclaration.objects.visible_to(user)
+            .filter(status=InternshipDeclaration.Status.PENDING)
+            .count()
+        )
+
+        return [
+            {
+                "label": "Salas ocupadas",
+                "value": f"{len(busy_until(user))}/"
+                f"{Room.objects.visible_to(user).usable().count()}",
+            },
+            {
+                "label": "Atendimentos hoje",
+                "value": Appointment.objects.visible_to(user)
                 .filter(scheduled_at__date=today)
-                .count()
-            ),
-            "pending_declarations": (
-                AttendanceCertificate.objects.visible_to(user)
-                .filter(
-                    kind=AttendanceCertificate.Kind.DECLARATION,
-                    status=AttendanceCertificate.Status.PENDING,
-                )
-                .count()
-                + InternshipDeclaration.objects.visible_to(user)
-                .filter(status=InternshipDeclaration.Status.PENDING)
-                .count()
-            ),
-            "certificates_issued": (
-                AttendanceCertificate.objects.visible_to(user)
+                .count(),
+            },
+            {"label": "Declarações pendentes", "value": pending_declarations},
+            {
+                "label": "Atestados emitidos",
+                "value": AttendanceCertificate.objects.visible_to(user)
                 .filter(issued_at=today)
-                .count()
-            ),
-        }
+                .count(),
+            },
+        ]
 
     def recent_activities(self, user):
         items = []
@@ -69,6 +77,8 @@ class AdministrativeHomeView(AdministrativeOnly, TemplateView):
                     "detail": (
                         f"{appointment.room or 'Sem sala'} — {when:%d/%m às %H:%M}"
                     ),
+                    "url": reverse("administration:agenda"),
+                    "link_label": "Ver a agenda",
                     "when": appointment.created_at,
                 }
             )
@@ -83,6 +93,8 @@ class AdministrativeHomeView(AdministrativeOnly, TemplateView):
                     "kind": "document",
                     "title": f"{document.get_kind_display()} emitido",
                     "detail": str(document.person),
+                    "url": reverse("administration:declaracoes"),
+                    "link_label": "Ver as declarações",
                     "when": document.created_at,
                 }
             )
@@ -99,6 +111,8 @@ class AdministrativeHomeView(AdministrativeOnly, TemplateView):
                     "title": "Sala liberada",
                     "detail": f"{booking.room or 'Sala removida'} — "
                     f"{booking.get_weekday_display()} {booking.start_time:%H:%M}",
+                    "url": reverse("administration:salas"),
+                    "link_label": "Ver as salas",
                     "when": self.as_instant(booking.end_date),
                 }
             )

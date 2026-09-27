@@ -1,21 +1,17 @@
-{% extends "base.html" %}
+{% extends "administration/base_admin.html" %}
+{% load static %}
 
-{% block title %}Meu Perfil | Sistema SEP{% endblock %}
+{% block title %}Meu perfil{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'core/css/components/list_panel.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/form_cadastro.css' %}">
+{% endblock %}
 
 {% block content %}
-<h1 class="h3 mb-4">Meu Perfil</h1>
+<div class="list-panel-title">Meu perfil</div>
 
-<div class="row">
-    <div class="col-12 col-lg-8">
-        <section class="card">
-            <div class="card-body">
-                <form method="post">
-                    {% csrf_token %}
-                    {{ form.as_p }}
-                    <button type="submit" class="btn btn-primary">Salvar</button>
-                </form>
-            </div>
-        </section>
-    </div>
+<div class="figma-form-container">
+  {% include "components/form.html" with submit_label="Salvar" %}
 </div>
 {% endblock %}

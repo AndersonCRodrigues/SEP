@@ -1,47 +1,44 @@
-{% extends "base.html" %}
+{% extends "administration/base_admin.html" %}
+{% load static %}
 
-{% block title %}Painel Administrativo | Sistema SEP{% endblock %}
+{% block title %}Painel administrativo{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'core/css/components/list_panel.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/hover_lift.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/list_filters.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/administrativo/administrativo_lists.css' %}">
+{% endblock %}
 
 {% block content %}
-<header class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="h3 mb-0">Painel de Gestão Administrativa</h1>
-    <div class="d-flex flex-wrap gap-2">
-        <a href="{% url 'administration:cadastrar_paciente' %}" class="btn btn-primary btn-sm">
-            <i class="bi bi-person-plus"></i> Cadastrar Paciente
-        </a>
-        <a href="{% url 'administration:home' %}" class="btn btn-outline-secondary btn-sm">
-            <i class="bi bi-arrow-left"></i> Voltar para a Home
-        </a>
-    </div>
-</header>
+<div class="list-toolbar">
+  <h1 class="list-toolbar-title">Painel de gestão administrativa</h1>
+  <a class="btn-acao" href="{% url 'administration:cadastrar_paciente' %}">+ Cadastrar paciente</a>
+</div>
 
-<section class="card">
-    <div class="card-body">
-        <h2 class="h5 card-title">Registros e Triagens (Alunos e Professores)</h2>
-        <div class="table-responsive">
-            <table class="table table-striped align-middle mb-0">
-                <thead>
-                    <tr>
-                        <th scope="col">Nome</th>
-                        <th scope="col">Email</th>
-                        <th scope="col">Tipo</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for usuario in atendimentos_ou_usuarios %}
-                    <tr>
-                        <td>{{ usuario.get_full_name }}</td>
-                        <td>{{ usuario.email }}</td>
-                        <td><span class="badge text-bg-primary">{{ usuario.get_role_display }}</span></td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="3" class="text-body-secondary">Nenhum registro encontrado.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+<p class="list-panel-subtitle">Registros e triagens de alunos e professores.</p>
+
+{% if atendimentos_ou_usuarios %}
+<div class="list-panel">
+  <div class="list-panel-header user-grid">
+    <div>Nome:</div>
+    <div>E-mail:</div>
+    <div></div>
+  </div>
+
+  <div class="list-panel-container">
+    {% for usuario in atendimentos_ou_usuarios %}
+    <div class="list-panel-row user-grid hover-lift">
+      <div>{{ usuario.get_full_name }}</div>
+      <div>{{ usuario.email }}</div>
+      <div class="text-end">
+        <span class="badge-situacao neutra">{{ usuario.get_role_display }}</span>
+      </div>
     </div>
-</section>
+    {% endfor %}
+  </div>
+</div>
+{% else %}
+{% include "components/empty_state.html" with message="Nenhum registro encontrado." %}
+{% endif %}
 {% endblock %}
