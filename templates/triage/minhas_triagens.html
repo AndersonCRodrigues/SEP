@@ -6,6 +6,7 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'core/css/components/tokens.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/components/list_panel.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/hover_lift.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/student_my_triages.css' %}">
 {% endblock %}
 
@@ -25,7 +26,7 @@
 
   <div class="list-panel-container">
     {% for triagem in triagens %}
-    <div class="list-panel-row my-triages-grid">
+    <div class="list-panel-row my-triages-grid hover-lift">
       <div>{{ triagem.patient.get_full_name }}</div>
       <div>{{ triagem.created_at|date:"d/m/Y - H:i" }}h</div>
       <div>

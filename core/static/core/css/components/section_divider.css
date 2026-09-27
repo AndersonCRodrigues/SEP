@@ -1,0 +1,11 @@
+/* Divisor vinho que fecha a faixa de indicadores da pagina inicial.
+   Extraido do que era identico entre as telas das roles; o que varia por
+   role fica no CSS da propria role, carregado depois deste arquivo. */
+
+.section-divider {
+  border: 3px solid var(--sep-maroon);
+  background-color: var(--sep-maroon);
+  opacity: 1;
+  border-radius: 4px;
+  margin: 1.5rem 0 1.8rem 0;
+}

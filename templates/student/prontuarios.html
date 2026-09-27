@@ -5,6 +5,7 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'core/css/components/tokens.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/hover_lift.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/student_panel.css' %}">
 {% endblock %}
 
@@ -25,7 +26,7 @@
 
   <div class="records-container">
     {% for record in records %}
-    <div class="record-row">
+    <div class="record-row hover-lift">
       <div class="record-patient">{{ record.patient }}</div>
       <div class="record-status">{{ record.updated }}</div>
       <div class="text-end">

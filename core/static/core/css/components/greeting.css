@@ -1,0 +1,19 @@
+/* Saudacao e trilha no topo da pagina inicial das roles.
+   Extraido do que era identico entre as telas das roles; o que varia por
+   role fica no CSS da propria role, carregado depois deste arquivo. */
+
+.greeting-title {
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--sep-maroon);
+  margin-bottom: 2px;
+}
+
+.greeting-subtitle {
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--sep-maroon);
+  margin: 0 0 1.5rem 0;
+}

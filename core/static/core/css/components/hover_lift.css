@@ -1,0 +1,13 @@
+/* Elevacao no hover das linhas e cartoes clicaveis das listas.
+   Extraido do que era identico entre as telas das roles; a cor de fundo do
+   hover fica no CSS da propria role, junto da cor de fundo da linha. */
+
+.hover-lift {
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}

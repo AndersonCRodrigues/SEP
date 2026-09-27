@@ -6,6 +6,7 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'core/css/components/tokens.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/components/list_panel.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/hover_lift.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/student_referral.css' %}">
 {% endblock %}
 
@@ -26,7 +27,7 @@
 
   <div class="list-panel-container">
     {% for referral in referrals %}
-    <div class="list-panel-row referral-grid">
+    <div class="list-panel-row referral-grid hover-lift">
       <div>{{ referral.patient }}</div>
       <div>{{ referral.situation }}</div>
       <div class="text-end">

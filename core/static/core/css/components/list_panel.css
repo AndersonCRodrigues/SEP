@@ -1,7 +1,8 @@
 /* Painel de lista: pilula de titulo, cabecalho de colunas e linhas.
    E o padrao que Feedbacks, Encaminhamentos e Triagens ja repetiam; as regras
    sao as mesmas daquelas telas, sem alteracao de valor. A grade de colunas
-   fica por tela, porque cada uma tem um numero de colunas. */
+   fica por tela, porque cada uma tem um numero de colunas. A elevacao no hover
+   vem de components/hover_lift.css, carregado junto deste arquivo. */
 
 .list-panel-title {
   background-color: var(--sep-maroon);
@@ -51,14 +52,10 @@
   font-size: 14px;
   font-weight: 700;
   color: #000000;
-  cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .list-panel-row:hover {
   background-color: #D4D4D4;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
 /* Selos de situacao, com os mesmos valores dos ja usados nas telas do Aluno. */
