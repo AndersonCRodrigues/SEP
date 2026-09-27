@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.utils import timezone
 from django.urls import reverse_lazy
 from django.views.generic import ListView, TemplateView, UpdateView, DetailView
@@ -58,9 +59,19 @@ class PerfilSuperadminView(GroupRequiredMixin, UpdateView):
     model = CustomUser
     template_name = "superadmin/perfil.html"
     success_url = reverse_lazy("superadmin:perfil")
+    fields = (
+        "first_name",
+        "last_name",
+        "email",
+        "data_nascimento",
+    ) + CustomUser.ADDRESS_FIELDS
 
     def get_object(self, queryset=None):
         return self.request.user
+
+    def form_valid(self, form):
+        messages.success(self.request, "Perfil atualizado com sucesso!")
+        return super().form_valid(form)
 
 
 class ServerStatusView(GroupRequiredMixin, ListView):
