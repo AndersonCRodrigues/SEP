@@ -5,7 +5,9 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'core/css/components/tokens.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/greeting.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/components/stat_card.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/section_divider.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/components/activity_card.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/components/calendar.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/student_home.css' %}">
@@ -17,8 +19,8 @@
 {% if home_error %}
 {% include "components/error_state.html" with message=home_error retry_url=request.path %}
 {% else %}
-<h1 class="student-greeting">Olá, {{ request.user.first_name|default:"aluno" }}!</h1>
-<p class="student-breadcrumb">Página inicial - Aluno</p>
+<h1 class="greeting-title">Olá, {{ request.user.first_name|default:"aluno" }}!</h1>
+<p class="greeting-subtitle">Página inicial - Aluno</p>
 
 <div class="row g-2 mb-4">
   {% for indicator in indicators %}

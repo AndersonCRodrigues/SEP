@@ -4,10 +4,14 @@
 
 .activity-card {
   background: #E1E1E1;
+  border-radius: 16px;
+  padding: 20px 22px 12px 22px;
+  margin-bottom: 20px;
 }
 
 .activity-chevron {
   color: var(--sep-maroon);
+  font-size: 18px;
   font-weight: 900;
   line-height: 1;
 }
@@ -15,22 +19,28 @@
 .activity-divider {
   border-top: 1px solid var(--sep-maroon);
   opacity: 1;
+  margin: 0 0 8px 0;
 }
 
 .activity-sub {
   font-family: 'Museo Sans', sans-serif;
+  font-size: 13px;
   font-weight: 400;
   color: #000000;
+  margin: 0 0 28px 0;
 }
 
 .activity-title {
   font-family: 'Museo Sans', sans-serif;
+  font-size: 15px;
   font-weight: 700;
   color: #000000;
+  margin: 10px 0 2px;
 }
 
 .activity-type {
   font-family: 'Museo Sans', sans-serif;
+  font-size: 18px;
   font-weight: 700;
   color: var(--sep-maroon);
 }
@@ -38,31 +48,48 @@
 .badge-concluido {
   background: #A9D18E;
   color: #2D6A2D;
+  font-family: 'Museo Sans', sans-serif;
   font-size: 12px;
   font-weight: 600;
   border-radius: 20px;
-  font-family: 'Museo Sans', sans-serif;
+  padding: 4px 0;
+  min-width: 90px;
+  text-align: center;
+  display: inline-block;
   white-space: nowrap;
 }
 
 .badge-enviar {
   background: #F5C6A0;
   color: #7B3D00;
+  font-family: 'Museo Sans', sans-serif;
   font-size: 12px;
   font-weight: 600;
   border-radius: 20px;
-  font-family: 'Museo Sans', sans-serif;
+  padding: 4px 0;
+  min-width: 90px;
+  text-align: center;
+  display: inline-block;
   white-space: nowrap;
 }
 
 .badge-revisar {
-  font-size: 12px;
-  border-radius: 20px;
+  background: #E2ADAD;
+  color: var(--sep-maroon);
   font-family: 'Museo Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 20px;
+  padding: 4px 0;
+  min-width: 90px;
+  text-align: center;
+  display: inline-block;
   white-space: nowrap;
 }
 
 .section-title {
+  font-family: 'Museo Sans', sans-serif;
   font-size: 18px;
+  font-weight: 700;
+  color: var(--sep-maroon);
 }
-

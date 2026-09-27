@@ -47,10 +47,6 @@
   font-weight: 700;
 }
 
-.cal-legend-pill {
-  justify-content: center;
-}
-
 .cal-nav-btn {
   background: none;
   border: none;
@@ -59,6 +55,9 @@
   padding: 4px 8px;
   cursor: pointer;
   border-radius: 50%;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
   transition: background 0.15s;
 }
 
@@ -74,6 +73,19 @@
   color: #333;
   background: #fff;
   cursor: pointer;
+}
+
+.calendar-card {
+  background: #FFFFFF;
+  border: 1px solid #CCC;
+  border-radius: 28px;
+  padding: 20px 24px;
+  width: 100%;
+  max-width: 340px;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .calendar-grid {

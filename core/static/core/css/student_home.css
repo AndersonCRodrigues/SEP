@@ -11,60 +11,6 @@
 /* ════════════════════════════════════════
    DESKTOP
    ════════════════════════════════════════ */
-.student-greeting {
-  font-family: 'Museo Sans', sans-serif;
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--sep-maroon);
-  margin-bottom: 2px;
-}
-
-.student-breadcrumb {
-  font-family: 'Museo Sans', sans-serif;
-  font-size: 13px;
-  font-weight: 400;
-  color: var(--sep-maroon);
-  margin: 0 0 1.5rem 0;
-}.section-title {
-  font-family: 'Museo Sans', sans-serif;
-  font-weight: 700;
-  color: var(--sep-maroon);
-}.activity-card {
-  border-radius: 16px;
-  padding: 20px 22px 12px 22px;
-  margin-bottom: 20px;
-}.activity-type {
-  font-size: 18px;
-}.activity-title {
-  font-size: 15px;
-  margin: 10px 0 2px;
-}.activity-sub {
-  font-size: 13px;
-  margin: 0 0 28px 0;
-}.activity-divider {
-  margin: 0 0 8px 0;
-}.activity-chevron {
-  font-size: 18px;
-}.badge-revisar {
-  background: #E2ADAD;
-  color: var(--sep-maroon);
-  font-weight: 600;
-  padding: 4px 0;
-  text-align: center;
-  display: inline-block;
-  min-width: 90px;
-}.badge-concluido {
-  padding: 4px 0;
-  text-align: center;
-  display: inline-block;
-  min-width: 90px;
-}.badge-enviar {
-  padding: 4px 0;
-  text-align: center;
-  display: inline-block;
-  min-width: 90px;
-}
-
 .cal-title-btn {
   background-color: var(--sep-maroon);
   color: #FFFFFF;
@@ -75,29 +21,6 @@
   border-radius: 20px;
   padding: 8px 48px;
   display: inline-block;
-}
-
-.calendar-card {
-  background: #FFFFFF;
-  border: 1px solid #CCC;
-  border-radius: 28px;
-  padding: 20px 24px;
-  width: 100%;
-  max-width: 340px;
-  height: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}.cal-legend-pill {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  background: #FFFFFF;
-  border: 1px solid #CCC;
-  border-radius: 20px;
-  padding: 5px 16px;
-  width: max-content;
-  margin: 0 auto;
 }
 
 /* ════════════════════════════════════════
@@ -246,14 +169,4 @@
     font-size: 18px;
     font-weight: 900;
   }
-}
-
-/* Divisor vinho entre os indicadores e as atividades. Era style= inline no
-   <hr> da tela; virou regra para sair do template. */
-.section-divider {
-  border: 3px solid var(--sep-maroon);
-  background-color: var(--sep-maroon);
-  opacity: 1;
-  border-radius: 4px;
-  margin: 1.5rem 0 1.8rem 0;
 }
