@@ -68,3 +68,56 @@
   cursor: pointer;
   padding: 0 4px;
 }
+
+/* Barra de titulo com busca ou acao a direita, alinhada com o painel. */
+.list-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  max-width: 900px;
+  margin: 0 auto 20px auto;
+}
+
+.list-toolbar-title {
+  font-family: var(--font-main);
+  font-size: 30px;
+  font-weight: 800;
+  color: var(--sep-maroon);
+  margin: 0;
+}
+
+.list-search {
+  position: relative;
+  flex: 1 1 300px;
+  max-width: 420px;
+}
+
+.list-search input {
+  width: 100%;
+  height: 46px;
+  padding: 0 16px 0 44px;
+  background-color: #FFFFFF;
+  border: 1px solid var(--sep-gray-border);
+  border-radius: 30px;
+  font-family: var(--font-main);
+  font-size: 14px;
+  color: #333333;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+}
+
+.list-search input:focus {
+  border-color: var(--sep-maroon);
+}
+
+.list-search .bi {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 15px;
+  color: var(--sep-text-muted);
+}

@@ -9,6 +9,8 @@
         {% elif activity.kind == 'record' %}bi-file-earmark-medical
         {% elif activity.kind == 'history' %}bi-clock-history
         {% elif activity.kind == 'appointment' %}bi-calendar-check
+        {% elif activity.kind == 'backup' %}bi-hdd
+        {% elif activity.kind == 'security' %}bi-shield-lock
         {% else %}bi-circle{% endif %} activity-icon" aria-hidden="true"></i>
       <span class="activity-content">
         <span class="activity-title">{{ activity.title }}</span>

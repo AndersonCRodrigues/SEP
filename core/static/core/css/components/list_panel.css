@@ -72,14 +72,21 @@
   min-width: 90px;
 }
 
-.badge-situacao.aberta {
+.badge-situacao.aberta,
+.badge-situacao.critica {
   background-color: #B43B3B;
 }
 
-.badge-situacao.andamento {
+.badge-situacao.andamento,
+.badge-situacao.atencao {
   background-color: #D98C20;
 }
 
-.badge-situacao.concluida {
+.badge-situacao.concluida,
+.badge-situacao.ok {
   background-color: #3AA600;
+}
+
+.badge-situacao.neutra {
+  background-color: #9E9E9E;
 }

@@ -90,6 +90,17 @@ header nav.navbar.bg-dark,
   text-decoration: underline;
 }
 
+/* Utilitarios de alinhamento que os componentes compartilhados usam. Nas
+   areas com Bootstrap eles vem do framework; aqui precisam existir, senao a
+   ultima coluna das linhas de lista fica desalinhada. */
+.text-end {
+  text-align: right;
+}
+
+.text-center {
+  text-align: center;
+}
+
 /* ── Cabeçalhos e Banners de Páginas ── */
 .page-header-row {
   display: flex;

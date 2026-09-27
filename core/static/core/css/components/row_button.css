@@ -3,7 +3,8 @@
    mesmos valores; o que muda entre os dois e so a cor. */
 
 .btn-iniciar,
-.btn-ver {
+.btn-ver,
+.btn-editar {
   color: #FFFFFF;
   font-family: var(--font-main);
   font-size: 11px;
@@ -34,5 +35,14 @@
 
 .btn-ver:hover {
   background-color: #541618;
+  color: #FFFFFF;
+}
+
+.btn-editar {
+  background-color: #8A8A8A;
+}
+
+.btn-editar:hover {
+  background-color: #6F6F6F;
   color: #FFFFFF;
 }

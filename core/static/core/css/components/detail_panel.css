@@ -1,0 +1,23 @@
+/* Tela de detalhe montada com o painel de lista: caixas empilhadas, cada uma
+   com um titulo e linhas de rotulo e valor. Acompanha components/list_panel.css. */
+
+.detail-card {
+  margin-bottom: 36px;
+}
+
+.detail-card:last-child {
+  margin-bottom: 0;
+}
+
+.detail-grid {
+  grid-template-columns: 1fr auto;
+  gap: 16px;
+}
+
+.detail-title {
+  font-family: var(--font-main);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--sep-maroon);
+  margin-bottom: 16px;
+}

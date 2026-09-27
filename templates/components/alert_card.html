@@ -1,0 +1,11 @@
+<div class="alert-card{% if alert_level == 'ok' %} alert-card-ok{% endif %}">
+  <p class="alert-card-title">
+    <i class="bi {% if alert_level == 'ok' %}bi-check-circle-fill{% else %}bi-exclamation-triangle-fill{% endif %}"
+      aria-hidden="true"></i>
+    {{ alert_title }}
+  </p>
+  <p class="alert-card-text">{{ alert_message }}</p>
+  {% if alert_url %}
+  <a class="alert-card-action" href="{{ alert_url }}">{{ alert_action }}</a>
+  {% endif %}
+</div>

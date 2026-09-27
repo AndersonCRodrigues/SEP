@@ -21,6 +21,10 @@
   transform: translateX(-50%);
 }
 
+.panel-plain::before {
+  display: none;
+}
+
 .panel h2 {
   font-family: var(--font-main);
   font-size: 22px;
