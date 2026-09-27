@@ -9,14 +9,13 @@ from django.utils import timezone
 from django.views.generic import DetailView, ListView, TemplateView, UpdateView
 
 from core.models import CustomUser
+from core.month_calendar import displayed_month, month_calendar, month_range
 from core.utils import sincronizar_grupo
 from patient.models import Patient
-from django.utils.timesince import timesince
 
 from patient.models import ProgressNote
 from students.models import (
     Advising,
-    CaseAssignment,
     StudentActivity,
     advisees_visible_to,
 )
@@ -45,87 +44,57 @@ class HomeProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         Appointment real (status Agendado) -- "Disponível"/"Pendente" do
         Figma não têm equivalente no backend ainda, então ficam de fora até
         virarem task."""
-        import calendar
-        from datetime import date, datetime
+        from datetime import datetime, time
 
         from scheduling.models import Appointment
 
-        try:
-            mes = int(self.request.GET.get("mes", hoje.month))
-            ano = int(self.request.GET.get("ano", hoje.year))
-        except ValueError:
-            mes, ano = hoje.month, hoje.year
+        ano, mes = displayed_month(self.request.GET, hoje)
+        primeiro, ultimo = month_range(ano, mes)
 
-        if not 1 <= mes <= 12 or not 1 <= ano <= 9999:
-            mes, ano = hoje.month, hoje.year
-
-        data_referencia = date(ano, mes, 1)
-        mes_anterior, ano_anterior = (12, ano - 1) if mes == 1 else (mes - 1, ano)
-        mes_seguinte, ano_seguinte = (1, ano + 1) if mes == 12 else (mes + 1, ano)
-
-        # `scheduled_at` é guardado em UTC (USE_TZ=True), mas o "mês" que o
-        # calendário mostra é o mês local (o mesmo usado por
-        # timezone.localdate()/timezone.localtime()). Filtrar diretamente
-        # por scheduled_at__year/__month compara o componente em UTC do
-        # campo, não o local: um agendamento perto da virada do mês (ex.:
-        # 31/01 22h no fuso local, já 01/02 de madrugada em UTC, ou o
-        # inverso) pode aparecer no mês errado ou sumir do mês certo.
-        # Por isso convertemos o mês local pedido num intervalo
-        # timezone-aware [início, fim) e filtramos scheduled_at por esse
-        # intervalo, em vez de pelos componentes de data/mês do campo.
-        inicio_mes = timezone.make_aware(datetime(ano, mes, 1))
-        inicio_mes_seguinte = timezone.make_aware(
-            datetime(ano_seguinte, mes_seguinte, 1)
-        )
+        # `scheduled_at` é guardado em UTC e o mês exibido é o local: filtrar
+        # pelos componentes de data do campo joga agendamento da virada do mês
+        # para o mês errado. Por isso o recorte é um intervalo timezone-aware.
+        inicio = timezone.make_aware(datetime.combine(primeiro, time.min))
+        fim = timezone.make_aware(datetime.combine(ultimo, time.max))
 
         agendamentos_mes = Appointment.objects.visible_to(self.request.user).filter(
-            scheduled_at__gte=inicio_mes,
-            scheduled_at__lt=inicio_mes_seguinte,
+            scheduled_at__gte=inicio,
+            scheduled_at__lte=fim,
             status=Appointment.Status.SCHEDULED,
         )
         dias_com_agendamento = {
-            timezone.localtime(dt).day
-            for dt in agendamentos_mes.values_list("scheduled_at", flat=True)
+            timezone.localtime(momento).date()
+            for momento in agendamentos_mes.values_list("scheduled_at", flat=True)
         }
 
-        cal = calendar.Calendar(firstweekday=6)  # semana começa no domingo
-
-        return {
-            "data_referencia": data_referencia,
-            "semanas": cal.monthdayscalendar(ano, mes),
-            "dias_com_agendamento": dias_com_agendamento,
-            "dia_hoje": hoje.day if (hoje.year == ano and hoje.month == mes) else None,
-            "mes_anterior": mes_anterior,
-            "ano_anterior": ano_anterior,
-            "mes_seguinte": mes_seguinte,
-            "ano_seguinte": ano_seguinte,
-        }
+        return month_calendar(ano, mes, hoje, dias_com_agendamento)
 
     def get_context_data(self, **kwargs):
-        from patient.models import Patient, ProgressNote
         from students.models import Attendance
 
         context = super().get_context_data(**kwargs)
         alunos = advisees_visible_to(self.request.user)
 
         hoje = timezone.localdate()
-        context["calendario"] = self._montar_calendario(hoje)
+        context.update(self._montar_calendario(hoje))
 
-        context["alunos_orientados_total"] = alunos.count()
-        context["pacientes_ativos_total"] = (
-            Patient.objects.visible_to(self.request.user)
-            .filter(flow_status=Patient.FlowStatus.IN_TREATMENT)
-            .count()
-        )
-        context["presentes_hoje"] = Attendance.objects.filter(
-            student__in=alunos, date=hoje
-        ).count()
-        context["total_para_presenca"] = alunos.count()
-
+        orientados = alunos.count()
+        presentes = Attendance.objects.filter(student__in=alunos, date=hoje).count()
         evolucoes_pendentes = ProgressNote.objects.visible_to(self.request.user).filter(
             confirmed_at__isnull=True
         )
-        context["avaliacoes_pendentes_total"] = evolucoes_pendentes.count()
+
+        context["indicators"] = [
+            {"label": "Alunos orientados", "value": orientados},
+            {
+                "label": "Pacientes ativos",
+                "value": Patient.objects.visible_to(self.request.user)
+                .filter(flow_status=Patient.FlowStatus.IN_TREATMENT)
+                .count(),
+            },
+            {"label": "Presença hoje", "value": f"{presentes}/{orientados}"},
+            {"label": "Avaliações pendentes", "value": evolucoes_pendentes.count()},
+        ]
 
         atividades = []
         for nota in evolucoes_pendentes.select_related("patient", "student").order_by(
@@ -133,12 +102,15 @@ class HomeProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         )[:5]:
             atividades.append(
                 {
-                    "tipo": "Prontuário",
-                    "titulo": f"Evolução de {nota.patient.nome_completo}",
-                    "detalhe": f"Aluno responsável: {nota.student.nome_completo}",
-                    "quando": nota.created_at,
-                    "url_name": "teacher:prontuario_detalhe",
-                    "url_pk": nota.pk,
+                    "kind": "record",
+                    "section": "Prontuário",
+                    "title": f"Evolução de {nota.patient.nome_completo}",
+                    "detail": f"Aluno responsável: {nota.student.nome_completo}",
+                    "label": "Revisar",
+                    "level": "warning",
+                    "url": reverse("teacher:prontuario_detalhe", args=[nota.pk]),
+                    "link_label": "Ver prontuário",
+                    "when": nota.created_at,
                 }
             )
 
@@ -149,17 +121,20 @@ class HomeProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         ):
             atividades.append(
                 {
-                    "tipo": "Triagem",
-                    "titulo": f"Encaminhamento — {paciente.nome_completo}",
-                    "detalhe": "Aguardando definição de aluno responsável",
-                    "quando": paciente.created_at,
-                    "url_name": "teacher:triagem_definir",
-                    "url_pk": paciente.pk,
+                    "kind": "triage",
+                    "section": "Triagem",
+                    "title": f"Encaminhamento — {paciente.nome_completo}",
+                    "detail": "Aguardando definição de aluno responsável",
+                    "label": "Definir",
+                    "level": "danger",
+                    "url": reverse("teacher:triagem_definir", args=[paciente.pk]),
+                    "link_label": "Definir aluno responsável",
+                    "when": paciente.created_at,
                 }
             )
 
-        atividades.sort(key=lambda item: item["quando"], reverse=True)
-        context["atividades_recentes"] = atividades[:5]
+        atividades.sort(key=lambda item: item["when"], reverse=True)
+        context["activities"] = atividades[:5]
         return context
 
 
@@ -198,80 +173,11 @@ class PerfilProfessorView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         return get_object_or_404(Teacher, pk=self.request.user.pk)
 
 
-class PainelProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
-    """Painel do Professor. Supervisor tem o painel próprio em
-    supervisor:orientacao — não reaproveita mais essa view/template."""
-
-    template_name = "teacher/teacher_panel.html"
-
-    def test_func(self):
-        return self.request.user.role in (
-            CustomUser.Role.PROFESSOR,
-            CustomUser.Role.SUPERVISOR,
-        )
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        from students.models import Student
-
-        professor = get_object_or_404(Teacher, pk=self.request.user.pk)
-
-        if professor.role == CustomUser.Role.SUPERVISOR:
-            context["alunos_vinculados"] = Student.objects.filter(
-                current_advisor__isnull=False
-            )
-        else:
-            context["alunos_vinculados"] = professor.current_advisees.all()
-        # Professor só recebe o que o Supervisor escolheu especificamente
-        # pra ele — isso é responsible_teachers no Patient, não o Referral
-        # em si (que é área-based e é coisa de Supervisor).
-        context["pacientes_encaminhados"] = Patient.objects.filter(
-            responsible_teachers=professor
-        )
-        context["alunos_disponiveis"] = Student.objects.filter(
-            current_advisor__isnull=True
-        )
-        context["form_vincular"] = VincularAlunoForm()
-        context["form_horas"] = StudentActivityForm(user=professor)
-        return context
-
-
-# COMENTADO a pedido do front (validação de 12/09): a decisão do Card 1 é
-# que cada papel tenha uma única tela inicial (ver "Mapa de Rotas e
-# Permissões", seção Card 1). teacher:home já absorveu resumo/atividades/
-# calendário; falta só decidir onde os dois formulários abaixo (Vincular
-# Aluno, Lançar Horas) vão morar antes de remover isto de vez. Comentado, não
-# apagado, pra não perder a implementação. A rota em urls.py e o link na
-# sidebar também estão comentados -- ver esses dois arquivos.
-#
-# class PainelProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
-#     template_name = "teacher/teacher_panel.html"
-#
-#     def test_func(self):
-#         return self.request.user.role in (
-#             CustomUser.Role.PROFESSOR,
-#             CustomUser.Role.SUPERVISOR,
-#         )
-#
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         from students.models import Student
-#
-#         professor = get_object_or_404(Teacher, pk=self.request.user.pk)
-#         context["alunos_vinculados"] = professor.current_advisees.all()
-#
-#         context["alunos_disponiveis"] = Student.objects.filter(
-#             current_advisor__isnull=True
-#         )
-#         context["form_vincular"] = VincularAlunoForm()
-#         context["form_horas"] = StudentActivityForm(user=professor)
-#         return context
-
 
 def _painel_redirect_for(user):
     if user.role == CustomUser.Role.SUPERVISOR:
         return "supervisor:orientacao"
-    return "teacher:painel"
+    return "teacher:home"
 
 
 @login_required
@@ -428,7 +334,6 @@ class ProntuariosView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         )
 
     def get_context_data(self, **kwargs):
-        from patient.models import ProgressNote
 
         context = super().get_context_data(**kwargs)
         notas = (
@@ -500,7 +405,6 @@ class ProntuarioDetalheView(LoginRequiredMixin, UserPassesTestMixin, DetailView)
         return redirect("teacher:prontuarios")
 
     def get_queryset(self):
-        from patient.models import ProgressNote
 
         return ProgressNote.objects.visible_to(self.request.user).select_related(
             "patient", "student"
@@ -678,7 +582,6 @@ class TriagensPendentesView(LoginRequiredMixin, UserPassesTestMixin, ListView):
         )
 
     def get_queryset(self):
-        from patient.models import Patient
 
         return (
             Patient.objects.visible_to(self.request.user)
@@ -699,7 +602,6 @@ class DefinirTriagemView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
         )
 
     def get_queryset(self):
-        from patient.models import Patient
 
         return Patient.objects.visible_to(self.request.user)
 
@@ -738,78 +640,3 @@ class DefinirTriagemView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
             messages.warning(request, "Nenhum aluno foi selecionado.")
 
         return redirect("teacher:triagens")
-
-
-# ---------------------------------------------------------------------------
-# Telas do front: mesma área, desenho novo. Ficam em rota própria para não
-# competirem com as telas que já têm consulta e recorte por visibilidade.
-# ---------------------------------------------------------------------------
-
-
-class ProntuariosProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
-    template_name = "teacher/teacher_records.html"
-
-    def test_func(self):
-        return self.request.user.role in (
-            CustomUser.Role.PROFESSOR,
-            CustomUser.Role.SUPERVISOR,
-        )
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        professor = get_object_or_404(Teacher, pk=self.request.user.pk)
-
-        casos = (
-            CaseAssignment.objects.open()
-            .filter(student__current_advisor=professor)
-            .select_related("patient", "student")
-            .order_by("-start_date")
-        )
-
-        enriquecidos = []
-        for caso in casos:
-            ultima_nota = (
-                ProgressNote.objects.filter(patient=caso.patient, student=caso.student)
-                .order_by("-updated_at")
-                .first()
-            )
-            caso.ultima_evolucao = (
-                timesince(ultima_nota.updated_at) + " atrás" if ultima_nota else None
-            )
-            caso.pendente_revisao = (
-                ultima_nota.pending_confirmation if ultima_nota else False
-            )
-            enriquecidos.append(caso)
-
-        context["casos"] = enriquecidos
-        return context
-
-
-class PresencaProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
-    template_name = "teacher/teacher_presence.html"
-
-    def test_func(self):
-        return self.request.user.role in (
-            CustomUser.Role.PROFESSOR,
-            CustomUser.Role.SUPERVISOR,
-        )
-
-
-class AreaAtuacaoProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
-    template_name = "teacher/teacher_area.html"
-
-    def test_func(self):
-        return self.request.user.role in (
-            CustomUser.Role.PROFESSOR,
-            CustomUser.Role.SUPERVISOR,
-        )
-
-
-class TeacherAssignTriageView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
-    template_name = "teacher/teacher_assign_triage.html"
-
-    def test_func(self):
-        return self.request.user.role in (
-            CustomUser.Role.PROFESSOR,
-            CustomUser.Role.SUPERVISOR,
-        )

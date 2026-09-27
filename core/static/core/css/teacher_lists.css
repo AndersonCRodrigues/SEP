@@ -1,0 +1,124 @@
+/* Telas de lista do Professor: usam o painel de components/list_panel.css.
+   Aqui fica so o que e proprio de cada tela — a grade de colunas, o selo por
+   situacao do prontuario e o formulario de presenca dentro da linha. */
+
+.list-panel-subtitle {
+  max-width: 900px;
+  margin: -20px auto 20px auto;
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 14px;
+  color: var(--sep-maroon);
+}
+
+.section-subtitle {
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--sep-maroon);
+  margin-bottom: 16px;
+}
+
+.student-grid {
+  grid-template-columns: 2fr 1.5fr 1.5fr 110px;
+}
+
+.record-grid {
+  grid-template-columns: 2fr 1.5fr 1.5fr 100px;
+}
+
+.triage-grid {
+  grid-template-columns: 2fr 1.5fr 110px;
+}
+
+.presence-grid {
+  grid-template-columns: 2fr 1.5fr 110px;
+}
+
+/* Area de atuacao: a linha do painel vira uma opcao com caixa de marcar. */
+.area-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.area-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+}
+
+.area-row input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--sep-maroon);
+}
+
+.area-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 32px;
+}
+
+.badge-situacao.pendente {
+  background-color: #B43B3B;
+}
+
+.badge-situacao.revisar {
+  background-color: #3AA600;
+}
+
+/* Marcar presenca fica dentro da linha, entao o botao e o campo acompanham a
+   altura da linha em vez do tamanho padrao de formulario. */
+.presence-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-marcar {
+  background-color: #1C1C1E;
+  color: #FFFFFF;
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 5px 16px;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+
+.btn-marcar:hover {
+  background-color: #000000;
+}
+
+.presence-form input {
+  width: 80px;
+  height: 30px;
+  padding: 0 8px;
+  border: 1px solid #A59C97;
+  border-radius: 8px;
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 12px;
+  outline: none;
+}
+
+.feedback-item {
+  border-bottom: 1px solid #E0E0E0;
+  padding-bottom: 12px;
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 14px;
+}
+
+.feedback-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.feedback-content {
+  white-space: pre-line;
+  margin: 8px 0 0 0;
+  color: #333333;
+}
