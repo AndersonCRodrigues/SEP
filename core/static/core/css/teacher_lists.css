@@ -15,38 +15,18 @@
   grid-template-columns: 2fr 1.5fr 1.5fr 100px;
 }
 
-.triage-grid {
-  grid-template-columns: 2fr 1.5fr 110px;
+.referral-grid {
+  grid-template-columns: 2fr 1.5fr 1.2fr;
 }
 
+/* Presenca e Avaliacoes listam o mesmo aluno, mas a primeira tem a marcacao
+   dentro da linha e a segunda so o botao de feedback no fim. */
 .presence-grid {
-  grid-template-columns: 2fr 1.5fr 110px;
+  grid-template-columns: 2fr 200px;
 }
 
-/* Area de atuacao: a linha do painel vira uma opcao com caixa de marcar. */
-.area-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.area-row {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  cursor: pointer;
-}
-
-.area-row input {
-  width: 18px;
-  height: 18px;
-  accent-color: var(--sep-maroon);
-}
-
-.area-actions {
-  display: flex;
-  justify-content: center;
-  margin-top: 32px;
+.evaluation-grid {
+  grid-template-columns: 2fr 110px;
 }
 
 .badge-situacao.pendente {
@@ -57,8 +37,8 @@
   background-color: #3AA600;
 }
 
-/* Marcar presenca fica dentro da linha, entao o botao e o campo acompanham a
-   altura da linha em vez do tamanho padrao de formulario. */
+/* Marcar presenca fica dentro da linha, entao o botao acompanha a altura da
+   linha em vez do tamanho padrao de formulario. */
 .presence-form {
   display: flex;
   align-items: center;
@@ -83,31 +63,3 @@
   background-color: #000000;
 }
 
-.presence-form input {
-  width: 80px;
-  height: 30px;
-  padding: 0 8px;
-  border: 1px solid #A59C97;
-  border-radius: 8px;
-  font-family: 'Museo Sans', sans-serif;
-  font-size: 12px;
-  outline: none;
-}
-
-.feedback-item {
-  border-bottom: 1px solid #E0E0E0;
-  padding-bottom: 12px;
-  font-family: 'Museo Sans', sans-serif;
-  font-size: 14px;
-}
-
-.feedback-item:last-child {
-  border-bottom: none;
-  padding-bottom: 0;
-}
-
-.feedback-content {
-  white-space: pre-line;
-  margin: 8px 0 0 0;
-  color: #333333;
-}

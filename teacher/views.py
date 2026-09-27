@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.exceptions import PermissionDenied, ValidationError
+from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
@@ -16,6 +17,8 @@ from patient.models import Patient
 from patient.models import ProgressNote
 from students.models import (
     Advising,
+    CaseAssignment,
+    Student,
     StudentActivity,
     advisees_visible_to,
 )
@@ -122,13 +125,13 @@ class HomeProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
             atividades.append(
                 {
                     "kind": "triage",
-                    "section": "Triagem",
-                    "title": f"Encaminhamento — {paciente.nome_completo}",
+                    "section": "Encaminhamento",
+                    "title": f"Encaminhamento — {paciente.get_full_name()}",
                     "detail": "Aguardando definição de aluno responsável",
-                    "label": "Definir",
+                    "label": "Encaminhar",
                     "level": "danger",
-                    "url": reverse("teacher:triagem_definir", args=[paciente.pk]),
-                    "link_label": "Definir aluno responsável",
+                    "url": reverse("teacher:encaminhar", args=[paciente.pk]),
+                    "link_label": "Encaminhar para aluno",
                     "when": paciente.created_at,
                 }
             )
@@ -316,6 +319,7 @@ class AlunoDetalheView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
         context["casos_encerrados"] = aluno.case_history.filter(
             end_date__isnull=False
         ).select_related("patient")
+        context["feedbacks"] = student_feedbacks(self.request.user, aluno)
         return context
 
 
@@ -449,12 +453,32 @@ class ProntuarioDetalheView(LoginRequiredMixin, UserPassesTestMixin, DetailView)
 
 
 # ---------------------------------------------------------------------------
-# Card: Presença e feedback
+# Card: Presença
 # ---------------------------------------------------------------------------
 
 
-class PresencaFeedbackView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
-    template_name = "teacher/presenca_feedback.html"
+def advisees_by_name(user, search):
+    students = advisees_visible_to(user).order_by("first_name", "last_name")
+    if search:
+        students = students.filter(
+            Q(first_name__icontains=search) | Q(last_name__icontains=search)
+        )
+    return students
+
+
+def student_feedbacks(user, student):
+    from students.models import PerformanceReview
+
+    return (
+        PerformanceReview.objects.visible_to(user)
+        .filter(student=student)
+        .select_related("teacher")
+        .order_by("-updated_at")
+    )
+
+
+class PresencaView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    template_name = "teacher/presenca.html"
 
     def test_func(self):
         return self.request.user.role in (
@@ -463,57 +487,58 @@ class PresencaFeedbackView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
         )
 
     def get_context_data(self, **kwargs):
-        from students.models import Attendance, PerformanceReview
+        from students.models import Attendance
 
         context = super().get_context_data(**kwargs)
-        alunos = advisees_visible_to(self.request.user).order_by(
-            "first_name", "last_name"
-        )
+        search = self.request.GET.get("q", "").strip()
+        students = advisees_by_name(self.request.user, search)
 
-        # Busca por nome (a pedido do front, 19/09): igual à de "Meus
-        # Alunos" -- filtra a lista antes de montar tabela/<select>, além
-        # do filtro por aluno específico já existente logo abaixo.
-        termo_busca = self.request.GET.get("q", "").strip()
-        if termo_busca:
-            alunos = alunos.filter(
-                Q(first_name__icontains=termo_busca)
-                | Q(last_name__icontains=termo_busca)
-            )
-
-        hoje = timezone.localdate()
-        presencas_hoje = {
-            registro.student_id: registro
-            for registro in Attendance.objects.filter(student__in=alunos, date=hoje)
+        today = timezone.localdate()
+        attendance_today = {
+            record.student_id: record
+            for record in Attendance.objects.filter(student__in=students, date=today)
         }
 
-        # Filtro por aluno (a pedido do front, validação de 12/09): quando
-        # um aluno é escolhido no <select>, a tabela passa a mostrar só a
-        # linha dele, em vez de todos os orientandos.
-        aluno_id = self.request.GET.get("aluno", "").strip()
-        # isdigit() evita ValueError do Django ao comparar string nao
-        # numerica com pk inteiro (ex.: ?aluno=abc manipulado na URL).
-        aluno_selecionado = (
-            alunos.filter(pk=aluno_id).first() if aluno_id.isdigit() else None
-        )
-        alunos_para_tabela = [aluno_selecionado] if aluno_selecionado else alunos
-
-        context["linhas"] = [
-            {"aluno": aluno, "presenca": presencas_hoje.get(aluno.pk)}
-            for aluno in alunos_para_tabela
+        context["rows"] = [
+            {"student": student, "attendance": attendance_today.get(student.pk)}
+            for student in students
         ]
-        context["hoje"] = hoje
-        context["alunos_para_filtro"] = alunos
-        context["aluno_filtro_id"] = aluno_id
-        context["termo_busca"] = termo_busca
+        context["today"] = today
+        context["search"] = search
+        return context
 
-        if aluno_selecionado:
-            context["aluno_selecionado"] = aluno_selecionado
+
+# ---------------------------------------------------------------------------
+# Card: Avaliações
+# ---------------------------------------------------------------------------
+
+
+class AvaliacoesView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    template_name = "teacher/avaliacoes.html"
+
+    def test_func(self):
+        return self.request.user.role in (
+            CustomUser.Role.PROFESSOR,
+            CustomUser.Role.SUPERVISOR,
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        search = self.request.GET.get("q", "").strip()
+        students = advisees_by_name(self.request.user, search)
+
+        student_id = self.request.GET.get("aluno", "").strip()
+        chosen = (
+            students.filter(pk=student_id).first() if student_id.isdigit() else None
+        )
+
+        context["students"] = students
+        context["search"] = search
+
+        if chosen:
+            context["chosen"] = chosen
             context["form_feedback"] = PerformanceReviewForm()
-            context["feedbacks_aluno"] = (
-                PerformanceReview.objects.filter(student=aluno_selecionado)
-                .select_related("teacher")
-                .order_by("-updated_at")
-            )
+            context["feedbacks"] = student_feedbacks(self.request.user, chosen)
 
         return context
 
@@ -563,80 +588,144 @@ def registrar_feedback(request, aluno_id):
         else:
             messages.error(request, "Corrija os erros do formulário de feedback.")
 
-    return redirect(f"{reverse('teacher:presenca')}?aluno={aluno_id}")
+    return redirect(f"{reverse('teacher:avaliacoes')}?aluno={aluno_id}")
 
 
 # ---------------------------------------------------------------------------
-# Card: Definição de realização de triagem
+# Card: Encaminhar
 # ---------------------------------------------------------------------------
 
 
-class TriagensPendentesView(LoginRequiredMixin, UserPassesTestMixin, ListView):
-    template_name = "teacher/triagens_lista.html"
-    context_object_name = "pacientes"
+RECENT_LIMIT = 5
+
+
+class EncaminharView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    template_name = "teacher/encaminhamentos.html"
 
     def test_func(self):
         return self.request.user.role in (
             CustomUser.Role.PROFESSOR,
             CustomUser.Role.SUPERVISOR,
         )
-
-    def get_queryset(self):
-
-        return (
-            Patient.objects.visible_to(self.request.user)
-            .filter(flow_status=Patient.FlowStatus.REFERRED)
-            .order_by("first_name", "last_name")
-        )
-
-
-class DefinirTriagemView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
-    template_name = "teacher/triagem_definir.html"
-    context_object_name = "paciente"
-    pk_url_kwarg = "patient_id"
-
-    def test_func(self):
-        return self.request.user.role in (
-            CustomUser.Role.PROFESSOR,
-            CustomUser.Role.SUPERVISOR,
-        )
-
-    def get_queryset(self):
-
-        return Patient.objects.visible_to(self.request.user)
 
     def get_context_data(self, **kwargs):
-
         context = super().get_context_data(**kwargs)
-        alunos = advisees_visible_to(self.request.user).order_by(
-            "first_name", "last_name"
-        )
+        user = self.request.user
+        patient = self.selected_patient(user)
 
-        # MOCK: ainda não foi definido como produto/backend que essa tela do
-        # Figma mapeia para CaseAssignment (limite de alunos por paciente).
-        # Por ora, todo aluno vem habilitado e nenhum pré-marcado. Quando essa
-        # integração virar task, trocar por CaseAssignment.objects.open() +
-        # CaseAssignment.MAX_STUDENTS_PER_PATIENT.
-        context["linhas"] = [
-            {"aluno": aluno, "ja_designado": False, "habilitado": True}
-            for aluno in alunos
+        context["queue"] = [
+            {"patient": referido, "selected": patient == referido}
+            for referido in self.queue(user)
         ]
-        context["vagas_disponiveis"] = 2  # mock
+        context["patient"] = patient
+        context["areas"] = self.teacher().acting_areas.order_by("nome")
+        context["options"] = self.options(user, patient)
+        context["recent"] = self.recent(user)
         return context
 
     def post(self, request, *args, **kwargs):
-        # MOCK: não persiste nada ainda — a integração real (CaseAssignment)
-        # entra quando a task de "definição de triagem" for confirmada.
-        paciente = self.get_object()
-        alunos_selecionados = request.POST.getlist("alunos")
+        user = request.user
+        patient = self.selected_patient(user)
+        if patient is None:
+            messages.error(request, "Escolha o paciente a encaminhar.")
+            return redirect("teacher:encaminhamentos")
 
-        if alunos_selecionados:
-            messages.success(
-                request,
-                f"{len(alunos_selecionados)} aluno(s) selecionado(s) para "
-                f"{paciente.nome_completo} (simulado).",
+        students = Student.objects.filter(
+            current_advisor_id=user.pk, pk__in=request.POST.getlist("alunos")
+        )
+        if not students:
+            messages.error(request, "Escolha ao menos um aluno para encaminhar.")
+            return redirect("teacher:encaminhar", pk=patient.pk)
+
+        area_id = request.POST.get("area", "").strip()
+        area = (
+            self.teacher().acting_areas.filter(pk=area_id).first()
+            if area_id.isdigit()
+            else None
+        )
+        if area is None:
+            messages.error(request, "Escolha a área de atuação do caso.")
+            return redirect("teacher:encaminhar", pk=patient.pk)
+
+        for student in students:
+            if not CaseAssignment.can_be_created_by(user, student=student):
+                raise PermissionDenied("Este aluno não está sob sua orientação.")
+
+        try:
+            self.refer(patient, students, area)
+        except ValidationError as erro:
+            messages.error(request, erro.messages[0])
+            return redirect("teacher:encaminhar", pk=patient.pk)
+
+        messages.success(
+            request,
+            f"{patient.get_full_name()} encaminhado para {students.count()} aluno(s).",
+        )
+        return redirect("teacher:encaminhamentos")
+
+    def teacher(self):
+        return get_object_or_404(Teacher, pk=self.request.user.pk)
+
+    @staticmethod
+    def queue(user):
+        return (
+            Patient.objects.visible_to(user)
+            .filter(
+                flow_status=Patient.FlowStatus.REFERRED,
+                responsible_teachers=user.pk,
             )
-        else:
-            messages.warning(request, "Nenhum aluno foi selecionado.")
+            .distinct()
+            .order_by("-created_at")
+        )
 
-        return redirect("teacher:triagens")
+    def selected_patient(self, user):
+        if self.kwargs.get("pk"):
+            return get_object_or_404(self.queue(user), pk=self.kwargs["pk"])
+
+        return self.queue(user).first()
+
+    @staticmethod
+    def options(user, patient):
+        atendendo = (
+            set(
+                patient.assignment_history.filter(end_date__isnull=True).values_list(
+                    "student_id", flat=True
+                )
+            )
+            if patient
+            else set()
+        )
+        alunos = Student.objects.filter(current_advisor_id=user.pk).order_by(
+            "first_name", "last_name"
+        )
+        return [
+            {
+                "value": aluno.pk,
+                "label": aluno.get_full_name(),
+                "checked": aluno.pk in atendendo,
+            }
+            for aluno in alunos
+        ]
+
+    @staticmethod
+    @transaction.atomic
+    def refer(patient, students, area):
+        for student in students:
+            CaseAssignment.objects.assign(student, patient, acting_area=area)
+
+    @staticmethod
+    def recent(user):
+        casos = (
+            CaseAssignment.objects.visible_to(user)
+            .select_related("patient", "student")
+            .order_by("-start_date")[:RECENT_LIMIT]
+        )
+        return [
+            {
+                "title": caso.patient.get_full_name(),
+                "subtitle": caso.student.get_full_name(),
+                "label": "Em atendimento" if caso.end_date is None else "Encerrado",
+                "level": "success" if caso.end_date is None else "neutral",
+            }
+            for caso in casos
+        ]

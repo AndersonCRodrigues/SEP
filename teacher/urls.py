@@ -20,23 +20,25 @@ urlpatterns = [
         views.ProntuarioDetalheView.as_view(),
         name="prontuario_detalhe",
     ),
-    # Card: Presença e feedback
-    path("presenca/", views.PresencaFeedbackView.as_view(), name="presenca"),
+    # Card: Presença
+    path("presenca/", views.PresencaView.as_view(), name="presenca"),
     path(
         "presenca/marcar/<int:aluno_id>/",
         views.marcar_presenca,
         name="marcar_presenca",
     ),
+    # Card: Avaliações
+    path("avaliacoes/", views.AvaliacoesView.as_view(), name="avaliacoes"),
     path(
-        "presenca/avaliar/<int:aluno_id>/",
+        "avaliacoes/<int:aluno_id>/",
         views.registrar_feedback,
         name="registrar_feedback",
     ),
-    # Card: Definição de realização de triagem
-    path("triagens/", views.TriagensPendentesView.as_view(), name="triagens"),
+    # Card: Encaminhar
+    path("encaminhamentos/", views.EncaminharView.as_view(), name="encaminhamentos"),
     path(
-        "triagens/<int:patient_id>/",
-        views.DefinirTriagemView.as_view(),
-        name="triagem_definir",
+        "encaminhamentos/<int:pk>/",
+        views.EncaminharView.as_view(),
+        name="encaminhar",
     ),
 ]
