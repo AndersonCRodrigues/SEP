@@ -63,6 +63,9 @@
   .figma-custom-form p select,
   .figma-custom-form p textarea {
     width: 100%;
+    /* A borda e o respiro interno entram na largura: sem isso o campo passa da
+       caixa cinza. */
+    box-sizing: border-box;
     border: 1px solid #b6aca7 !important;
     border-radius: 10px;
     background: #ffffff !important;
@@ -81,28 +84,17 @@
     box-shadow: 0 0 0 3px rgba(97, 30, 37, 0.15) !important;
   }
 
-  /* Senha: bloco mais opaco que os campos de cadastro, para separar o dado de
-     acesso do resto da ficha. */
-  .figma-custom-form p:has(input[type="password"]) {
-    background-color: #d7d1ce;
-  }
-
-  .figma-custom-form p:has(input[type="password"]) label {
-    color: #5f5753;
-  }
-
-  .figma-custom-form p:has(input[type="password"]) input {
-    background: #f4f2f1 !important;
-    border-color: #bdb3ae !important;
-  }
-
-  /* Regras de senha e demais ajudas: texto de apoio, nunca caixa igual a de
-     campo (o help_text do Django vem como <ul>). */
+  /* Regras de senha e demais ajudas: texto apagado, para ler como sugestao e
+     nunca como campo (o help_text do Django vem como <ul>). */
   .figma-custom-form .helptext {
     display: block;
     margin-top: 0.45rem;
-    font-size: 0.78rem;
-    color: #6f6764;
+    font-size: 0.75rem;
+    font-weight: 400;
+    font-style: italic;
+    line-height: 1.35;
+    color: #9a938f;
+    opacity: 0.85;
   }
 
   .figma-custom-form .helptext ul {
