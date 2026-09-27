@@ -69,6 +69,11 @@ def to_triage_step(patient_id, step):
     return redirect("triage:create_triage_step", patient_id=patient_id, step=step.slug)
 
 
+def patient_initials(patient):
+    nomes = patient.get_full_name().split()
+    return "".join(nome[0] for nome in nomes[:2]).upper()
+
+
 def render_triage_step(request, wizard, step, form):
     return render(
         request,
@@ -76,6 +81,7 @@ def render_triage_step(request, wizard, step, form):
         {
             "patient": wizard.patient,
             "patient_age": wizard.patient.current_age,
+            "patient_initials": patient_initials(wizard.patient),
             "form": form,
             "step": step,
             "number": wizard.number(step),
