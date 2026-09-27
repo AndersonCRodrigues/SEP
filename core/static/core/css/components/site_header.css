@@ -15,7 +15,7 @@
 }
 
 .site-brand-name {
-  font-family: 'Museo Sans', sans-serif;
+  font-family: var(--font-main);
   font-size: 20px;
   font-weight: 700;
   line-height: 1;
@@ -89,7 +89,7 @@
 }
 
 .user-menu-name {
-  font-family: 'Museo Sans', sans-serif;
+  font-family: var(--font-main);
   font-size: 13px;
   font-weight: 700;
   color: #333333;
@@ -99,7 +99,7 @@
 
 .user-menu-link {
   display: block;
-  font-family: 'Museo Sans', sans-serif;
+  font-family: var(--font-main);
   font-size: 14px;
   color: #333333;
   text-decoration: none;
@@ -122,7 +122,7 @@
   border-top: 1px solid #E6E6E6;
   margin-top: 8px;
   padding: 10px 8px 2px;
-  font-family: 'Museo Sans', sans-serif;
+  font-family: var(--font-main);
   font-size: 14px;
   font-weight: 700;
   color: var(--sep-maroon);

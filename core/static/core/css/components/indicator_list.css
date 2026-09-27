@@ -1,0 +1,69 @@
+/* Faixa de indicadores da pagina inicial: cartoes vinho com rotulo e numero.
+   Os valores sao os da home do Administrativo; acompanha o template
+   components/summary_list.html. */
+
+.summary-list {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 28px;
+  list-style: none;
+  margin: 0 0 50px 0;
+  padding: 0;
+}
+
+.indicator {
+  background-color: var(--sep-maroon);
+  color: #FFFFFF;
+  border-radius: 20px;
+  padding: 32px 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 160px;
+  box-sizing: border-box;
+}
+
+.indicator-label {
+  font-family: var(--font-main);
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  line-height: 1.2;
+  display: block;
+}
+
+.indicator-value {
+  font-family: var(--font-main);
+  font-size: 64px;
+  font-weight: 800;
+  line-height: 1;
+  overflow-wrap: break-word;
+}
+
+/* Indicador cujo valor e palavra, e nao numero: cabe na largura do cartao. */
+.indicator-value.indicator-text {
+  font-size: 30px;
+}
+
+@media (max-width: 768px) {
+  .summary-list {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .indicator {
+    padding: 20px 12px;
+    min-height: 120px;
+  }
+
+  .indicator-value {
+    font-size: 40px;
+  }
+
+  .indicator-value.indicator-text {
+    font-size: 22px;
+  }
+}

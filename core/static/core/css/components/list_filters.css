@@ -18,7 +18,7 @@
   background-color: #FFFFFF;
   border: 1px solid #A59C97;
   border-radius: 12px;
-  font-family: 'Museo Sans', sans-serif;
+  font-family: var(--font-main);
   font-size: 14px;
   color: #333333;
   outline: none;
@@ -37,7 +37,7 @@
 .btn-acao {
   background-color: var(--sep-maroon);
   color: #FFFFFF;
-  font-family: 'Museo Sans', sans-serif;
+  font-family: var(--font-main);
   font-size: 14px;
   font-weight: 700;
   height: 44px;
@@ -60,7 +60,7 @@
 .btn-limpar {
   background: none;
   color: var(--sep-maroon);
-  font-family: 'Museo Sans', sans-serif;
+  font-family: var(--font-main);
   font-size: 13px;
   font-weight: 700;
   text-decoration: underline;

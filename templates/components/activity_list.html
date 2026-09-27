@@ -1,0 +1,24 @@
+<ul class="activity-list">
+  {% for activity in activities %}
+  <li class="activity">
+    <a class="activity-link" href="{{ activity.url }}" aria-label="{{ activity.link_label|default:activity.title }}">
+      <i class="bi
+        {% if activity.kind == 'triage' %}bi-clipboard2-pulse
+        {% elif activity.kind == 'referral' %}bi-send
+        {% elif activity.kind == 'feedback' %}bi-chat-square-text
+        {% elif activity.kind == 'record' %}bi-file-earmark-medical
+        {% elif activity.kind == 'history' %}bi-clock-history
+        {% elif activity.kind == 'appointment' %}bi-calendar-check
+        {% else %}bi-circle{% endif %} activity-icon" aria-hidden="true"></i>
+      <span class="activity-content">
+        <span class="activity-title">{{ activity.title }}</span>
+        {% if activity.detail %}
+        <span class="activity-detail">{{ activity.detail }}</span>
+        {% endif %}
+      </span>
+    </a>
+  </li>
+  {% empty %}
+  <li class="activity-empty">{{ empty_message|default:"Nenhuma atividade recente." }}</li>
+  {% endfor %}
+</ul>

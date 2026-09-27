@@ -1,0 +1,54 @@
+<div class="calendar-card mx-auto">
+  <form class="d-flex justify-content-between align-items-center px-2" method="get" action="">
+    <a class="cal-nav-btn"
+      href="?ano={{ previous_month|date:'Y' }}&amp;mes={{ previous_month|date:'n' }}"
+      aria-label="Mês anterior"><i class="bi bi-chevron-left"></i></a>
+
+    <div class="d-flex gap-2 align-items-center">
+      <label class="visually-hidden" for="calendar-month">Mês</label>
+      <select class="cal-select" id="calendar-month" name="mes" onchange="this.form.submit()">
+        {% for number, name in calendar_months %}
+        <option value="{{ number }}" {% if number == calendar_month %}selected{% endif %}>{{ name }}</option>
+        {% endfor %}
+      </select>
+
+      <label class="visually-hidden" for="calendar-year">Ano</label>
+      <select class="cal-select" id="calendar-year" name="ano" onchange="this.form.submit()">
+        {% for year in calendar_years %}
+        <option value="{{ year }}" {% if year == calendar_year %}selected{% endif %}>{{ year }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <a class="cal-nav-btn"
+      href="?ano={{ next_month|date:'Y' }}&amp;mes={{ next_month|date:'n' }}"
+      aria-label="Mês seguinte"><i class="bi bi-chevron-right"></i></a>
+  </form>
+
+  <div class="calendar-grid">
+    <div class="cal-header">Dom</div>
+    <div class="cal-header">Seg</div>
+    <div class="cal-header">Ter</div>
+    <div class="cal-header">Qua</div>
+    <div class="cal-header">Qui</div>
+    <div class="cal-header">Sex</div>
+    <div class="cal-header">Sáb</div>
+
+    {% for week in calendar_weeks %}
+    {% for day in week %}
+    {% if day.in_month %}
+    <div class="cal-day{% if day.today %} cal-highlight-dark{% endif %}">
+      <span>{{ day.date|date:"j" }}</span>
+      {% if day.has_event %}<span class="cal-dot dot-green"></span>{% endif %}
+    </div>
+    {% else %}
+    <div class="cal-empty"></div>
+    {% endif %}
+    {% endfor %}
+    {% endfor %}
+  </div>
+
+  <div class="d-flex justify-content-center gap-3 mt-2">
+    <span class="legend-item green">{{ legend_label|default:"Com atendimento" }}</span>
+  </div>
+</div>

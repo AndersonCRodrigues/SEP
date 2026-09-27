@@ -7,7 +7,7 @@
 .list-panel-title {
   background-color: var(--sep-maroon);
   color: #FFFFFF;
-  font-family: 'Museo Sans', sans-serif;
+  font-family: var(--font-main);
   font-size: 24px;
   font-weight: 700;
   text-align: center;
@@ -36,7 +36,7 @@
 .list-panel-header {
   display: grid;
   padding: 0 28px 10px 28px;
-  font-family: 'Museo Sans', sans-serif;
+  font-family: var(--font-main);
   font-size: 14px;
   font-weight: 700;
   color: #000000;
@@ -48,7 +48,7 @@
   padding: 14px 20px;
   display: grid;
   align-items: center;
-  font-family: 'Museo Sans', sans-serif;
+  font-family: var(--font-main);
   font-size: 14px;
   font-weight: 700;
   color: #000000;
@@ -61,7 +61,7 @@
 /* Selos de situacao, com os mesmos valores dos ja usados nas telas do Aluno. */
 .badge-situacao {
   color: #FFFFFF;
-  font-family: 'Museo Sans', sans-serif;
+  font-family: var(--font-main);
   font-size: 11px;
   font-weight: 600;
   padding: 5px 0;

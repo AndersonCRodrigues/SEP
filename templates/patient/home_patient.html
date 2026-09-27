@@ -5,9 +5,9 @@
 
 {% block page_css %}
 <link rel="stylesheet" href="{% static 'core/css/components/greeting.css' %}">
-<link rel="stylesheet" href="{% static 'core/css/components/stat_card.css' %}">
-<link rel="stylesheet" href="{% static 'core/css/components/section_divider.css' %}">
-<link rel="stylesheet" href="{% static 'core/css/components/activity_card.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/indicator_list.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/home_panel.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/activity_list.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/components/calendar.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/patient_home.css' %}">
 {% endblock %}
@@ -133,134 +133,27 @@
        ══════════════════════════════════════ -->
   <div class="d-none d-md-block container-fluid px-lg-4 mt-4 mb-5">
 
-    <h1 class="greeting-title">Olá, {{ request.user.first_name|default:"paciente" }}!</h1>
-    <p class="greeting-subtitle">Página inicial - Paciente</p>
+    <section class="greeting">
+      <h1 class="greeting-title">Olá, {{ request.user.first_name|default:"paciente" }}!</h1>
+      <p class="greeting-subtitle">Página inicial - Paciente</p>
+    </section>
 
     {% if home_error %}
     {% include "components/error_state.html" with message=home_error retry_url=request.path %}
     {% else %}
 
-    <div class="row g-2 mb-4">
-      <div class="col-6 col-md-3">
-        <div class="stat-card">
-          <p class="stat-label">Sessões realizadas</p>
-          <span class="stat-number">{{ sessions_done }}</span>
-        </div>
-      </div>
-      <div class="col-6 col-md-3">
-        <div class="stat-card">
-          <p class="stat-label">Status da triagem</p>
-          <span class="stat-number">{{ triage_status }}</span>
-        </div>
-      </div>
-      <div class="col-6 col-md-3">
-        <div class="stat-card">
-          <p class="stat-label">Próxima sessão</p>
-          <span class="stat-number">{{ next_session }}</span>
-        </div>
-      </div>
-      <div class="col-6 col-md-3">
-        <div class="stat-card">
-          <p class="stat-label">Faltas</p>
-          <span class="stat-number">{{ absences }}</span>
-        </div>
-      </div>
-    </div>
+    {% include "components/summary_list.html" with title="Resumo" id="summary-title" %}
 
-    <hr class="section-divider">
+    <div class="panel">
+      <section class="activities">
+        <h2>Atividades recentes</h2>
+        {% include "components/activity_list.html" %}
+      </section>
 
-    <div class="row g-4">
-      <div class="col-12 col-lg-7">
-        <h2 class="section-title mb-3">Atividades recentes</h2>
-
-        {% for activity in activities %}
-        <div class="activity-card activity-{{ activity.kind }}">
-          <div class="d-flex justify-content-between align-items-center">
-            <span class="activity-type">{{ activity.section|default:activity.link_label }}</span>
-            {% if activity.label %}
-            {% if activity.level == "success" %}
-            <span class="badge-concluido">{{ activity.label }}</span>
-            {% elif activity.level == "danger" %}
-            <span class="badge-enviar">{{ activity.label }}</span>
-            {% else %}
-            <span class="badge-revisar">{{ activity.label }}</span>
-            {% endif %}
-            {% endif %}
-          </div>
-          <p class="activity-title">{{ activity.title }}</p>
-          {% if activity.detail %}
-          <p class="activity-sub">{{ activity.detail }}</p>
-          {% endif %}
-          <hr class="activity-divider">
-          <div class="text-end">
-            <a href="{{ activity.url }}" aria-label="{{ activity.link_label }}">
-              <i class="bi bi-chevron-right activity-chevron"></i>
-            </a>
-          </div>
-        </div>
-        {% empty %}
-        {% include "components/empty_state.html" with message="Nenhuma atividade recente." %}
-        {% endfor %}
-      </div>
-
-      <div class="col-12 col-lg-5">
-        <h2 class="section-title mb-3">Calendário</h2>
-
-        <div class="calendar-card mx-auto">
-          <form class="d-flex justify-content-between align-items-center px-2" method="get" action="">
-            <a class="cal-nav-btn"
-              href="?ano={{ previous_month|date:'Y' }}&amp;mes={{ previous_month|date:'n' }}"
-              aria-label="Mês anterior"><i class="bi bi-chevron-left"></i></a>
-
-            <div class="d-flex gap-2 align-items-center">
-              <label class="visually-hidden" for="calendar-month">Mês</label>
-              <select class="cal-select" id="calendar-month" name="mes" onchange="this.form.submit()">
-                {% for number, name in calendar_months %}
-                <option value="{{ number }}" {% if number == calendar_month %}selected{% endif %}>{{ name }}</option>
-                {% endfor %}
-              </select>
-
-              <label class="visually-hidden" for="calendar-year">Ano</label>
-              <select class="cal-select" id="calendar-year" name="ano" onchange="this.form.submit()">
-                {% for year in calendar_years %}
-                <option value="{{ year }}" {% if year == calendar_year %}selected{% endif %}>{{ year }}</option>
-                {% endfor %}
-              </select>
-            </div>
-
-            <a class="cal-nav-btn"
-              href="?ano={{ next_month|date:'Y' }}&amp;mes={{ next_month|date:'n' }}"
-              aria-label="Mês seguinte"><i class="bi bi-chevron-right"></i></a>
-          </form>
-
-          <div class="calendar-grid">
-            <div class="cal-header">Dom</div>
-            <div class="cal-header">Seg</div>
-            <div class="cal-header">Ter</div>
-            <div class="cal-header">Qua</div>
-            <div class="cal-header">Qui</div>
-            <div class="cal-header">Sex</div>
-            <div class="cal-header">Sáb</div>
-
-            {% for week in calendar_weeks %}
-            {% for day in week %}
-            {% if day.in_month %}
-            <div class="cal-day{% if day.today %} cal-highlight-dark{% endif %}">
-              <span>{{ day.date|date:"j" }}</span>
-              {% if day.has_event %}<span class="cal-dot dot-green"></span>{% endif %}
-            </div>
-            {% else %}
-            <div class="cal-empty"></div>
-            {% endif %}
-            {% endfor %}
-            {% endfor %}
-          </div>
-
-          <div class="d-flex justify-content-center gap-3 mt-2">
-            <span class="legend-item green">Com atendimento</span>
-          </div>
-        </div>
-      </div>
+      <section class="calendar">
+        <h2>Calendário</h2>
+        {% include "components/calendar_month.html" %}
+      </section>
     </div>
 
     {% endif %}

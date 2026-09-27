@@ -6,5 +6,8 @@
   --sep-maroon: #6D1D20;
   --sep-black: #000000;
   --sep-gray-card: #D9D9D9;
+  --sep-gray-border: #E0DEDC;
+  --sep-text-muted: #777777;
+  --font-main: 'Museo Sans', "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
 }
 

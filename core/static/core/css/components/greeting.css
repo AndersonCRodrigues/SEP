@@ -1,19 +1,24 @@
 /* Saudacao e trilha no topo da pagina inicial das roles.
-   Extraido do que era identico entre as telas das roles; o que varia por
-   role fica no CSS da propria role, carregado depois deste arquivo. */
+   Os valores sao os da home do Administrativo, que e o padrao de desenho
+   das paginas iniciais; o que varia por role fica no CSS da propria role,
+   carregado depois deste arquivo. */
+
+.greeting {
+  margin-bottom: 2.2rem;
+}
 
 .greeting-title {
-  font-family: 'Museo Sans', sans-serif;
-  font-size: 24px;
-  font-weight: 700;
+  font-family: var(--font-main);
+  font-size: 32px;
+  font-weight: 800;
   color: var(--sep-maroon);
-  margin-bottom: 2px;
+  margin: 0 0 4px 0;
 }
 
 .greeting-subtitle {
-  font-family: 'Museo Sans', sans-serif;
-  font-size: 13px;
-  font-weight: 400;
-  color: var(--sep-maroon);
-  margin: 0 0 1.5rem 0;
+  font-family: var(--font-main);
+  font-size: 15px;
+  font-weight: 500;
+  color: #8A6466;
+  margin: 0;
 }
