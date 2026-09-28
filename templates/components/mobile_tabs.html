@@ -1,0 +1,10 @@
+<div class="mobile-section-head">
+  <h2 class="mobile-section-title">{{ tabs_title|default:"Opções de Serviço" }}</h2>
+  {% if tabs_all_url %}
+  <a class="mobile-section-link" href="{{ tabs_all_url }}">Ver todos<i class="bi bi-chevron-right"></i></a>
+  {% endif %}
+</div>
+
+<nav class="mobile-tabs" aria-label="{{ tabs_title|default:"Opções de Serviço" }}">
+  {% include tabs_items %}
+</nav>

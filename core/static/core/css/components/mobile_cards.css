@@ -1,0 +1,379 @@
+/* As caixas das telas de celular: indicadores, alerta, cartao de atividade,
+   linha de lista, caixa de informacao, pilula de titulo e botao pilula. Sao os
+   mesmos desenhos nas seis roles — o que muda e o texto.
+
+   Os valores vem das pastas de referencia em docs e do que ja existia em
+   html-css-juliana (patient_home.css e teacher_home.css, que escreviam as
+   mesmas caixas com dois nomes diferentes). A coluna de 340px centralizada e
+   de la: e ela que da o respiro lateral no celular.
+   Acompanha os componentes de mobile em templates/components. */
+
+@media (max-width: 767.98px) {
+
+  .mobile-column {
+    width: 340px;
+    max-width: 100%;
+    margin: 0 auto;
+  }
+
+  /* ── Indicadores: tres pilulas ── */
+  .mobile-stats {
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+  }
+
+  .mobile-stat {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 12px 8px;
+    border-radius: 16px;
+    text-align: center;
+    font-family: var(--font-main);
+    color: #FFFFFF;
+  }
+
+  .mobile-stat-1 { background: #556B2F; }
+  .mobile-stat-2 { background: #A92024; }
+  .mobile-stat-3 { background: #BA681F; }
+
+  .mobile-stat-label {
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 4px;
+  }
+
+  .mobile-stat-value {
+    font-size: 22px;
+    font-weight: 900;
+    line-height: 1;
+  }
+
+  /* ── Cartao de alerta ── */
+  .mobile-alert {
+    padding: 16px;
+    background: #FFFFFF;
+    border: 2px solid #D9A01B;
+    border-radius: 12px;
+  }
+
+  .mobile-alert-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 8px 0;
+    font-family: var(--font-main);
+    font-size: 16px;
+    font-weight: 700;
+    color: #D9A01B;
+  }
+
+  .mobile-alert-text {
+    margin: 0 0 16px 0;
+    font-family: var(--font-main);
+    font-size: 13px;
+    line-height: 1.4;
+    color: #333333;
+  }
+
+  /* ── Botao pilula ── */
+  .mobile-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 32px;
+    border: none;
+    border-radius: 20px;
+    background: var(--sep-maroon);
+    font-family: var(--font-main);
+    font-size: 14px;
+    font-weight: 700;
+    color: #FFFFFF;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .mobile-button:hover {
+    background: var(--sep-maroon-dark);
+    color: #FFFFFF;
+  }
+
+  .mobile-button-block {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    text-align: center;
+  }
+
+  .mobile-actions {
+    display: flex;
+    justify-content: center;
+    margin: 24px 0;
+  }
+
+  /* ── Pilula de titulo das telas internas ── */
+  .mobile-title {
+    display: block;
+    margin: 24px auto;
+    padding: 12px 24px;
+    border-radius: 30px;
+    background: var(--sep-maroon);
+    font-family: var(--font-main);
+    font-size: 20px;
+    font-weight: 800;
+    color: #FFFFFF;
+    text-align: center;
+  }
+
+  /* ── Cartao de atividade ── */
+  .mobile-card {
+    display: block;
+    margin-bottom: 12px;
+    padding: 12px 16px;
+    background: #DDDDDD;
+    border-radius: 16px;
+    text-decoration: none;
+  }
+
+  .mobile-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .mobile-card-section {
+    font-family: var(--font-main);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--sep-maroon);
+  }
+
+  .mobile-card-title {
+    margin: 6px 0 2px 0;
+    font-family: var(--font-main);
+    font-size: 15px;
+    font-weight: 700;
+    color: #000000;
+  }
+
+  .mobile-card-detail {
+    font-family: var(--font-main);
+    font-size: 14px;
+    color: #333333;
+  }
+
+  .mobile-card-detail i {
+    margin-right: 6px;
+    color: #777777;
+  }
+
+  .mobile-card-rule {
+    margin: 10px 10px 6px 10px;
+    border-top: 1px solid var(--sep-maroon);
+  }
+
+  .mobile-card-go {
+    display: block;
+    padding-right: 12px;
+    text-align: right;
+    text-decoration: none;
+  }
+
+  .mobile-card-go i {
+    font-size: 20px;
+    font-weight: 900;
+    color: var(--sep-maroon);
+  }
+
+  /* ── Linha de lista das telas internas ── */
+  .mobile-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+    padding: 14px 16px;
+    background: #DCDCDC;
+    border-radius: 16px;
+    text-decoration: none;
+  }
+
+  .mobile-row-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+  }
+
+  .mobile-row-name {
+    font-family: var(--font-main);
+    font-size: 14px;
+    font-weight: 800;
+    color: #333333;
+  }
+
+  .mobile-row-detail {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-main);
+    font-size: 12px;
+    font-weight: 500;
+    color: #777777;
+  }
+
+  /* ── Selos ── */
+  .mobile-badge {
+    display: inline-block;
+    width: 90px;
+    padding: 4px 0;
+    border-radius: 12px;
+    font-family: var(--font-main);
+    font-size: 11px;
+    font-weight: 800;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .mobile-badge-ok { background: #A7D0A1; color: #2A6E24; }
+  .mobile-badge-warning { background: #E4C89A; color: #9A651D; }
+  .mobile-badge-danger { background: #DBB0B4; color: #AC373E; }
+  .mobile-badge-neutral { background: #D5D5D5; color: #555555; }
+
+  /* Na linha de lista o selo e cheio, nao pastel. */
+  .mobile-row .mobile-badge {
+    width: auto;
+    padding: 8px 16px;
+    font-size: 12px;
+    color: #FFFFFF;
+  }
+
+  .mobile-row .mobile-badge-ok { background: #419F0D; }
+  .mobile-row .mobile-badge-warning { background: #D68B13; }
+  .mobile-row .mobile-badge-danger { background: #D93B3B; }
+  .mobile-row .mobile-badge-neutral { background: #8C8581; }
+
+  /* ── Cartao de pessoa: avatar, nome e papel ── */
+  .mobile-person {
+    margin-bottom: 20px;
+    padding: 24px 16px;
+    background: #DCDCDC;
+    border-radius: 16px;
+    text-align: center;
+  }
+
+  .mobile-avatar {
+    width: 50px;
+    height: 50px;
+    margin: 0 auto 12px auto;
+    border-radius: 50%;
+    background: #E25C5C;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-main);
+    font-size: 18px;
+    font-weight: 700;
+    color: #FFFFFF;
+  }
+
+  .mobile-person-name {
+    margin-bottom: 4px;
+    font-family: var(--font-main);
+    font-size: 16px;
+    font-weight: 800;
+    color: #000000;
+  }
+
+  .mobile-person-role {
+    font-family: var(--font-main);
+    font-size: 12px;
+    font-weight: 500;
+    color: #555555;
+  }
+
+  /* ── Cartao de canais: titulo vinho e linhas com icone ── */
+  .mobile-panel {
+    margin-bottom: 20px;
+    padding: 20px 16px;
+    background: #DCDCDC;
+    border-radius: 16px;
+  }
+
+  .mobile-panel-title {
+    margin: 0 0 16px 0;
+    font-family: var(--font-main);
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--sep-maroon);
+  }
+
+  .mobile-panel-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+    font-family: var(--font-main);
+    font-size: 14px;
+    color: #333333;
+    text-decoration: none;
+  }
+
+  .mobile-panel-row:last-child {
+    margin-bottom: 0;
+  }
+
+  .mobile-panel-row i {
+    font-size: 18px;
+    color: #000000;
+  }
+
+  /* ── Caixa de informacao ── */
+  .mobile-info {
+    margin-bottom: 32px;
+    padding: 20px 16px;
+    background: #8E8989;
+    border-radius: 16px;
+  }
+
+  .mobile-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #FFFFFF;
+    font-family: var(--font-main);
+    font-size: 13px;
+  }
+
+  .mobile-info-row:last-child {
+    margin-bottom: 0;
+  }
+
+  .mobile-info-label {
+    font-weight: 800;
+    color: #FFFFFF;
+  }
+
+  .mobile-info-value {
+    color: #EEEEEE;
+    text-align: right;
+  }
+
+  /* ── Estado vazio ── */
+  .mobile-empty {
+    padding: 32px 16px;
+    text-align: center;
+    font-family: var(--font-main);
+    font-size: 14px;
+    color: #666666;
+  }
+}

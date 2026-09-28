@@ -1,0 +1,14 @@
+<div class="mobile-row mobile-column">
+  <div class="mobile-row-info">
+    {% if name %}<span class="mobile-row-name">{{ name }}</span>{% endif %}
+    {% if person %}
+    <span class="mobile-row-detail"><i class="bi bi-person"></i>{{ person }}</span>
+    {% endif %}
+    {% if when %}
+    <span class="mobile-row-detail"><i class="bi bi-calendar3"></i>{{ when }}</span>
+    {% endif %}
+  </div>
+  {% if label %}
+  {% include "components/mobile_badge.html" with label=label level=level %}
+  {% endif %}
+</div>

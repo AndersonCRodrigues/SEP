@@ -1,6 +1,7 @@
-/* No celular as telas desenham o proprio cabecalho dentro do conteudo, entao
-   a barra do desktop sai e o main perde o respiro lateral. Estava repetido
-   como <style> inline em cada tela da area do Paciente. */
+/* Moldura das telas no celular: a barra do desktop sai, a faixa vinho entra no
+   topo com o cabecalho dentro dela, e o rodape fecha a pagina. Vale para as
+   seis roles — o que muda por tela e o conteudo, nao a moldura.
+   Acompanha components/mobile_header.html e components/mobile_footer.html. */
 
 @media (max-width: 767.98px) {
   html,
@@ -8,11 +9,98 @@
     background-color: #F8F9FA !important;
   }
 
-  .sep-navbar {
+  .sep-navbar,
+  .admin-navbar {
     display: none !important;
   }
 
+  main.container-fluid,
   main > .container-fluid {
     padding: 0 !important;
+  }
+
+  .site-footer {
+    display: none;
+  }
+
+  /* ── Faixa vinho do topo ── */
+  .mobile-maroon-bg {
+    background-color: var(--sep-maroon);
+    border-bottom-left-radius: 30px;
+    border-bottom-right-radius: 30px;
+    padding-bottom: 20px;
+  }
+
+  /* ── Cabecalho ── */
+  .mobile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 20px 10px 20px;
+  }
+
+  .mobile-back {
+    text-decoration: none;
+    line-height: 1;
+  }
+
+  .mobile-back::before {
+    content: "\F284";
+    font-family: "bootstrap-icons";
+    font-size: 28px;
+    font-weight: 700;
+    color: #FFFFFF;
+  }
+
+  .mobile-greeting {
+    flex-grow: 1;
+    margin-left: 10px;
+    font-family: var(--font-main);
+    font-size: 22px;
+    font-weight: 700;
+    color: #FFFFFF;
+  }
+
+  .mobile-icons {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .mobile-icons i {
+    font-size: 22px;
+    color: #FFFFFF;
+  }
+
+  .mobile-icon-button {
+    display: flex;
+    align-items: center;
+    padding: 0;
+    border: none;
+    background: transparent;
+    line-height: 1;
+  }
+
+  /* ── Conteudo abaixo da faixa ── */
+  .mobile-content {
+    padding: 0 16px;
+    margin-top: 24px;
+  }
+
+  .mobile-content-tight {
+    padding: 0 12px;
+  }
+
+  /* ── Rodape ── */
+  .mobile-footer {
+    margin-top: 40px;
+    padding: 18px 0;
+    background-color: var(--sep-maroon);
+    text-align: center;
+  }
+
+  .mobile-footer img {
+    height: 30px;
+    width: auto;
   }
 }

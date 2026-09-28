@@ -1,0 +1,16 @@
+<div class="mobile-header">
+  <a href="{{ back_url|default:"/" }}" class="mobile-back" aria-label="Voltar"></a>
+  <span class="mobile-greeting">Olá, {{ request.user.first_name|default:"Usuário" }}!</span>
+  <div class="mobile-icons">
+    {# TODO: botão sem lógica; fica para fazer #}
+    <button type="button" class="mobile-icon-button" aria-label="Notificações">
+      <i class="bi bi-bell"></i>
+    </button>
+    <form method="post" action="{% url 'logout' %}">
+      {% csrf_token %}
+      <button type="submit" class="mobile-icon-button" aria-label="Sair">
+        <i class="bi bi-person-circle"></i>
+      </button>
+    </form>
+  </div>
+</div>

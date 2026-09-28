@@ -1,0 +1,24 @@
+<h3 class="mobile-block-title">{{ activities_title|default:"Atividade Recente" }}</h3>
+
+{% for activity in activities %}
+<div class="mobile-card mobile-column">
+  <div class="mobile-card-head">
+    <span class="mobile-card-section">{{ activity.section }}</span>
+    {% if activity.label %}
+    {% include "components/mobile_badge.html" with label=activity.label level=activity.level %}
+    {% endif %}
+  </div>
+
+  <p class="mobile-card-title">{{ activity.title }}</p>
+  <p class="mobile-card-detail">{{ activity.detail }}</p>
+
+  {% if activity.url %}
+  <div class="mobile-card-rule"></div>
+  <a class="mobile-card-go" href="{{ activity.url }}" aria-label="{{ activity.link_label|default:"Abrir" }}">
+    <i class="bi bi-chevron-right"></i>
+  </a>
+  {% endif %}
+</div>
+{% empty %}
+<p class="mobile-empty">{{ empty_message|default:"Nada recente por aqui." }}</p>
+{% endfor %}
