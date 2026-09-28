@@ -10,6 +10,7 @@ from scheduling.models import Appointment, Room, RoomBooking
 from scheduling.occupancy import busy_until
 
 from .access import AdministrativeOnly
+from .schedule import STATUS_LEVELS
 
 
 class AdministrativeHomeView(AdministrativeOnly, TemplateView):
@@ -22,13 +23,19 @@ class AdministrativeHomeView(AdministrativeOnly, TemplateView):
         user = self.request.user
         today = timezone.localdate()
 
-        context["indicators"] = self.operational_summary(user, today)
+        pending_declarations = self.pending_declarations(user)
+
+        context["indicators"] = self.operational_summary(
+            user, today, pending_declarations
+        )
+        context["pending_alert"] = self.pending_alert(pending_declarations)
         context["activities"] = self.recent_activities(user)
         context.update(self.calendar_context(user, today))
         return context
 
-    def operational_summary(self, user, today):
-        pending_declarations = (
+    @staticmethod
+    def pending_declarations(user):
+        return (
             AttendanceCertificate.objects.visible_to(user)
             .filter(
                 kind=AttendanceCertificate.Kind.DECLARATION,
@@ -40,6 +47,19 @@ class AdministrativeHomeView(AdministrativeOnly, TemplateView):
             .count()
         )
 
+    @staticmethod
+    def pending_alert(pending_declarations):
+        if not pending_declarations:
+            return None
+        noun = "declaração" if pending_declarations == 1 else "declarações"
+        return {
+            "title": "Alerta pendente",
+            "message": f"{pending_declarations} {noun} aguardando emissão",
+            "url": reverse("administration:declaracoes"),
+            "action": "Ver declarações",
+        }
+
+    def operational_summary(self, user, today, pending_declarations):
         return [
             {
                 "label": "Salas ocupadas",
@@ -79,6 +99,8 @@ class AdministrativeHomeView(AdministrativeOnly, TemplateView):
                     ),
                     "url": reverse("administration:agenda"),
                     "link_label": "Ver a agenda",
+                    "label": appointment.get_status_display(),
+                    "level": STATUS_LEVELS.get(appointment.status, "secondary"),
                     "when": appointment.created_at,
                 }
             )
@@ -95,6 +117,12 @@ class AdministrativeHomeView(AdministrativeOnly, TemplateView):
                     "detail": str(document.person),
                     "url": reverse("administration:declaracoes"),
                     "link_label": "Ver as declarações",
+                    "label": document.get_status_display(),
+                    "level": (
+                        "success"
+                        if document.status == document.Status.ISSUED
+                        else "warning"
+                    ),
                     "when": document.created_at,
                 }
             )
@@ -113,6 +141,8 @@ class AdministrativeHomeView(AdministrativeOnly, TemplateView):
                     f"{booking.get_weekday_display()} {booking.start_time:%H:%M}",
                     "url": reverse("administration:salas"),
                     "link_label": "Ver as salas",
+                    "label": "Disponível",
+                    "level": "success",
                     "when": self.as_instant(booking.end_date),
                 }
             )
