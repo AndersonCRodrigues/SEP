@@ -1,0 +1,15 @@
+{% if feedbacks %}
+<div class="list-panel-container">
+  {% for feedback in feedbacks %}
+  <div class="feedback-item">
+    <div class="feedback-head">
+      <strong>{{ feedback.author }}</strong>
+      <span>{{ feedback.when|date:"d/m/Y H:i" }}</span>
+    </div>
+    <p class="feedback-content">{{ feedback.content }}</p>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+{% include "components/empty_state.html" with message=empty_message|default:"Nenhum feedback registrado ainda para este aluno." %}
+{% endif %}

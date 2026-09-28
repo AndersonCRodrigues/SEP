@@ -1,32 +1,45 @@
 {% extends "student/base_student.html" %}
-{% load components %}
+{% load static %}
 
 {% block title %}Triagens a realizar{% endblock %}
 
-{% block breadcrumbs %}
-<li class="breadcrumb-item"><a href="{% url 'students:home' %}">Página inicial</a></li>
-<li class="breadcrumb-item active" aria-current="page">Triagens</li>
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/components/tokens.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/list_panel.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/hover_lift.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/row_button.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/student_triage.css' %}">
 {% endblock %}
 
-{% block page_title %}Triagens a realizar{% endblock %}
+{% block page_header %}{% endblock %}
 
 {% block content %}
+<div class="list-panel-title">Triagens a realizar</div>
+
 {% if triages %}
-{% data_table columns=columns label="Pacientes aguardando triagem" %}
-{% for triage in triages %}
-<tr class="triage">
-  <td class="triage-patient">{{ triage.name }}</td>
-  <td class="triage-waiting">
-    <time datetime="{{ triage.waiting_since|date:'Y-m-d' }}">{{ triage.waiting_label }}</time>
-  </td>
-  <td class="triage-action">
-    <a class="triage-start" href="{{ triage.start_url }}">
-      Iniciar<span class="visually-hidden"> a triagem de {{ triage.name }}</span>
-    </a>
-  </td>
-</tr>
-{% endfor %}
-{% enddata_table %}
+<div class="list-panel">
+  <div class="list-panel-header triage-grid">
+    <div>Nome do paciente:</div>
+    <div>Aguardando desde:</div>
+    <div>Tempo de espera:</div>
+    <div></div>
+  </div>
+
+  <div class="list-panel-container">
+    {% for triage in triages %}
+    <div class="list-panel-row triage-grid hover-lift">
+      <div>{{ triage.name }}</div>
+      <div>{{ triage.waiting_since|date:"d/m/Y - H:i" }}h</div>
+      <div>{{ triage.waiting_label }}</div>
+      <div class="text-end">
+        <a href="{{ triage.start_url }}" class="btn-iniciar">
+          Iniciar<span class="visually-hidden"> a triagem de {{ triage.name }}</span>
+        </a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
 {% else %}
 {% include "components/empty_state.html" with message="Nenhum paciente aguardando triagem." %}
 {% endif %}

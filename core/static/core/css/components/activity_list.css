@@ -1,0 +1,70 @@
+/* Lista de atividades recentes da pagina inicial: icone, titulo e detalhe,
+   uma linha por atividade. Os valores sao os da home do Administrativo;
+   acompanha o template components/activity_list.html. */
+
+.activity-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.activity {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--sep-gray-border);
+}
+
+.activity:last-child {
+  border-bottom: none;
+}
+
+.activity-link {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  text-decoration: none;
+}
+
+.activity-link:hover .activity-title {
+  text-decoration: underline;
+}
+
+.activity-icon {
+  width: 26px;
+  height: 26px;
+  font-size: 22px;
+  line-height: 1;
+  color: var(--sep-maroon);
+  flex-shrink: 0;
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.activity-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.activity-title {
+  font-family: var(--font-main);
+  font-size: 17px;
+  font-weight: 800;
+  color: #000000;
+  margin: 0 0 4px 0;
+}
+
+.activity-detail {
+  font-family: var(--font-main);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--sep-maroon);
+  margin: 0;
+}
+
+.activity-empty {
+  font-family: var(--font-main);
+  font-size: 15px;
+  color: var(--sep-text-muted);
+  padding: 10px 0;
+}

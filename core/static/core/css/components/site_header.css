@@ -1,0 +1,194 @@
+/* Cabecalho de todas as areas: marca a esquerda, navegacao centrada e icones
+   a direita. Os valores sao os da barra do Administrativo, que e o padrao.
+   Acompanha os templates components/site_brand.html e
+   components/site_user_menu.html; os links do meio ficam em cada shell,
+   porque mudam por role. */
+
+.sep-navbar,
+.admin-navbar {
+  background-color: var(--sep-maroon);
+  color: #FFFFFF;
+  min-height: 75px;
+}
+
+.sep-navbar > .container-fluid,
+.admin-navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 0.85rem 2rem;
+}
+
+/* A navegacao ocupa o espaco entre a marca e os icones, centrada nele. */
+.sep-navbar .navbar-collapse {
+  justify-content: space-between;
+}
+
+.site-nav,
+.admin-navbar > .main-nav {
+  flex: 1 1 auto;
+  display: flex;
+  justify-content: center;
+}
+
+.main-nav .navbar-nav,
+.admin-navbar__links {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.main-nav .nav-link,
+.admin-navbar__links a {
+  color: #FFFFFF;
+  font-family: var(--font-main);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  padding: 0;
+}
+
+.main-nav .nav-link:hover,
+.main-nav .nav-link[aria-current="page"],
+.admin-navbar__links a:hover,
+.admin-navbar__links a.active {
+  opacity: 0.85;
+  text-decoration: underline;
+}
+
+.site-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  margin-right: 2rem;
+  padding: 0;
+  text-decoration: none;
+  color: #FFFFFF;
+}
+
+.site-brand-name {
+  font-family: var(--font-main);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1;
+  color: #FFFFFF;
+}
+
+.site-brand-logo {
+  height: 24px;
+  width: auto;
+  object-fit: contain;
+}
+
+.header-actions {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.6rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.header-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.header-icon:hover {
+  background: rgba(255, 255, 255, 0.22);
+  color: #FFFFFF;
+}
+
+.user-menu {
+  position: relative;
+}
+
+.user-menu-toggle {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  font-size: 24px;
+  list-style: none;
+}
+
+.user-menu-toggle::marker,
+.user-menu-toggle::-webkit-details-marker {
+  display: none;
+  content: "";
+}
+
+.user-menu-panel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  min-width: 230px;
+  background: #FFFFFF;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+  padding: 12px;
+  z-index: 1040;
+}
+
+.user-menu-name {
+  font-family: var(--font-main);
+  font-size: 13px;
+  font-weight: 700;
+  color: #333333;
+  margin: 0 0 4px;
+  padding: 0 8px;
+}
+
+.user-menu-link {
+  display: block;
+  font-family: var(--font-main);
+  font-size: 14px;
+  color: #333333;
+  text-decoration: none;
+  padding: 8px;
+  border-radius: 8px;
+}
+
+.user-menu-link:hover {
+  background: #F0F0F0;
+  color: #333333;
+}
+
+.user-menu-logout {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  border-top: 1px solid #E6E6E6;
+  margin-top: 8px;
+  padding: 10px 8px 2px;
+  font-family: var(--font-main);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--sep-maroon);
+  cursor: pointer;
+}
+
+.user-menu-logout:hover {
+  color: var(--sep-maroon-dark);
+}

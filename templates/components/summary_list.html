@@ -4,7 +4,7 @@
         {% for indicator in indicators %}
         <li class="indicator">
             <span class="indicator-label">{{ indicator.label }}</span>
-            <strong class="indicator-value">{{ indicator.value }}</strong>
+            <strong class="indicator-value{% if indicator.text %} indicator-text{% endif %}">{{ indicator.value }}</strong>
         </li>
         {% empty %}
         <li class="indicator-empty">

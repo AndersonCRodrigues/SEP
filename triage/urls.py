@@ -16,7 +16,6 @@ urlpatterns = [
         views.create_triage_step,
         name="create_triage_step",
     ),
-    path("concluida/<int:pk>/", views.triagem_concluida, name="triagem_concluida"),
     path("edit/<int:pk>/", views.edit_triage, name="edit_triage"),
     path("submit/<int:pk>/", views.submit_triage, name="submit_triage"),
     path("feedback/<int:pk>/", views.create_feedback, name="create_feedback"),

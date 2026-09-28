@@ -2,23 +2,6 @@
    duplicado em supervisor/cadastro_supervisor.html e administration/cadastro.html.
    Mesmas classes figma-* definidas lá, sem alteração. */
 
-  /* Banner Oval Vinho */
-  .figma-header-banner {
-    background-color: #611e25;
-    color: #ffffff;
-    text-align: center;
-    border-radius: 50px;
-    padding: 1rem 2rem;
-    margin-bottom: 2.5rem;
-  }
-
-  .figma-header-banner h1 {
-    color: #ffffff !important;
-    font-size: 1.75rem;
-    font-weight: 700;
-    margin: 0;
-  }
-
   /* Centralização e largura do formulário */
   .figma-form-container {
     max-width: 780px;
@@ -52,23 +35,91 @@
     margin-bottom: 0.35rem;
   }
 
-  /* Inputs de texto, email, selects, etc. */
+  /* Inputs de texto, email, selects, etc. A area de digitacao tem fundo e
+     borda proprios para se distinguir do bloco cinza em volta. */
   .figma-custom-form p input[type="text"],
   .figma-custom-form p input[type="email"],
   .figma-custom-form p input[type="tel"],
   .figma-custom-form p input[type="number"],
+  .figma-custom-form p input[type="date"],
   .figma-custom-form p input[type="password"],
   .figma-custom-form p select,
   .figma-custom-form p textarea {
     width: 100%;
-    border: none !important;
-    background: transparent !important;
+    /* A borda e o respiro interno entram na largura: sem isso o campo passa da
+       caixa cinza. */
+    box-sizing: border-box;
+    border: 1px solid #b6aca7 !important;
+    border-radius: 10px;
+    background: #ffffff !important;
     font-size: 1rem;
     font-weight: 600;
     color: #1a1a1a;
     outline: none !important;
-    padding: 0.2rem 0;
+    padding: 0.55rem 0.8rem;
     box-shadow: none !important;
+  }
+
+  .figma-custom-form p input:focus,
+  .figma-custom-form p select:focus,
+  .figma-custom-form p textarea:focus {
+    border-color: #611e25 !important;
+    box-shadow: 0 0 0 3px rgba(97, 30, 37, 0.15) !important;
+  }
+
+  /* Regras de senha e demais ajudas: texto apagado, para ler como sugestao e
+     nunca como campo. O help_text do Django vem como <ul>, e o navegador tira
+     essa lista de dentro do <p> ao interpretar a pagina -- por isso a regra e
+     pelo conteudo da lista (sem campo dentro), nao pela posicao dela. */
+  .figma-custom-form .helptext,
+  .figma-custom-form ul:not(.errorlist):not(:has(input)) {
+    display: block;
+    margin-top: 0.45rem;
+    font-size: 0.75rem;
+    font-weight: 400;
+    font-style: italic;
+    line-height: 1.35;
+    color: #9a938f;
+    opacity: 0.85;
+  }
+
+  .figma-custom-form .helptext:empty {
+    display: none;
+  }
+
+  .figma-custom-form ul:not(.errorlist):not(:has(input)) {
+    list-style: disc;
+    padding-left: 1.2rem;
+  }
+
+  .figma-custom-form ul:not(.errorlist):not(:has(input)) li {
+    display: list-item;
+    background-color: transparent;
+    border-radius: 0;
+    padding: 0;
+    margin: 0 0 0.15rem 0;
+  }
+
+  /* Quando a lista sai do bloco do campo, ela vira filha do formulario: aqui
+     ela volta a andar junto do campo que descreve. */
+  .figma-custom-form > ul:not(.errorlist):not(:has(input)) {
+    margin: -0.95rem 0 1.25rem 0;
+    padding-left: 2.4rem;
+  }
+
+  .figma-custom-form ul.errorlist {
+    margin-bottom: 0.4rem;
+  }
+
+  .figma-custom-form ul.errorlist li {
+    display: block;
+    background-color: transparent;
+    border-radius: 0;
+    padding: 0;
+    margin: 0;
+    color: #cc2a2a;
+    font-size: 0.82rem;
+    font-weight: 600;
   }
 
   /* Trata o campo de Áreas de Atuação (Checkboxes) */

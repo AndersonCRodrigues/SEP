@@ -1,34 +1,35 @@
 {% extends "supervisor/base_coordinator.html" %}
-{% load components static %}
-
-{% block page_css %}
-<link rel="stylesheet" href="{% static 'core/css/form_cadastro.css' %}">
-{% endblock %}
+{% load static %}
 
 {% block title %}Adicionar alunos{% endblock %}
 
-{% block page_title %}Adicionar alunos{% endblock %}
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'core/css/components/list_panel.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/list_filters.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/form_cadastro.css' %}">
+{% endblock %}
+
+{% block page_header %}{% endblock %}
 
 {% block content %}
-{% if form.errors %}
-{% include "components/alert.html" with message="Confira os campos destacados abaixo." level="danger" %}
-{% endif %}
+<div class="list-panel-title">Adicionar alunos</div>
 
-<form class="figma-custom-form" method="post" novalidate>
-  {% csrf_token %}
-  {{ form.as_p }}
+<p class="list-panel-subtitle">
+  <a class="btn-limpar" href="{% url 'supervisor:alunos' %}">← Voltar para Alunos</a>
+</p>
 
-  {# TODO: campos sem persistência; curso e período ainda não existem no cadastro #}
-  <fieldset class="student-enrollment">
-    <legend>Dados acadêmicos</legend>
-    {% for campo in matricula_academica %}
-    <p class="field">
-      <label for="campo-{{ campo.value }}">{{ campo.label }}</label>
-      <input type="text" id="campo-{{ campo.value }}" name="{{ campo.value }}" />
-    </p>
-    {% endfor %}
-  </fieldset>
+<div class="figma-form-container">
+  {% if form.errors %}
+  <div class="figma-error-alert">Confira os campos destacados abaixo.</div>
+  {% endif %}
 
-  <button type="submit" class="btn-submit-figma">Cadastrar aluno</button>
-</form>
+  <form class="figma-custom-form" method="post" novalidate>
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <div class="figma-actions-center">
+      <button type="submit" class="btn-submit-figma">Cadastrar aluno</button>
+    </div>
+  </form>
+</div>
 {% endblock %}

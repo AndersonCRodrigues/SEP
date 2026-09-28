@@ -3,17 +3,10 @@
 
 {% block title %}Meus Agendamentos{% endblock %}
 
-{% block extra_css %}
-  {{ block.super }}
-  <link rel="stylesheet" href="{% static 'core/css/patient_home.css' %}?v=10"> <!-- para herdar header mobile -->
-  <link rel="stylesheet" href="{% static 'core/css/patient_agendamentos.css' %}">
-  <style>
-    @media (max-width: 767.98px) {
-      html, body { background-color: #F8F9FA !important; }
-      .sep-navbar  { display: none !important; }
-      main > .container-fluid { padding: 0 !important; }
-    }
-  </style>
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'core/css/components/hover_lift.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/patient_home.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/patient_agendamentos.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -154,7 +147,7 @@
 
     {% if appointments %}
       {% for ag in appointments %}
-      <div class="agend-row">
+      <div class="agend-row hover-lift">
         <span class="agend-date">{{ ag.when_label }}</span>
         <span class="agend-student">{{ ag.attendant }}</span>
         <span class="agend-badge badge-{{ ag.level }}">{{ ag.label }}</span>
@@ -162,22 +155,22 @@
       {% endfor %}
     {% else %}
       {# Dados falsos do Figma para demonstração #}
-      <div class="agend-row">
+      <div class="agend-row hover-lift">
         <span class="agend-date">Hoje - 14:00</span>
         <span class="agend-student">Aluna Marina Costa</span>
         <span class="agend-badge badge-confirmada">Confirmada</span>
       </div>
-      <div class="agend-row">
+      <div class="agend-row hover-lift">
         <span class="agend-date">22/08/2026 - 14:00</span>
         <span class="agend-student">Aluno Pedro Alves</span>
         <span class="agend-badge badge-a-confirmar">A confirmar</span>
       </div>
-      <div class="agend-row">
+      <div class="agend-row hover-lift">
         <span class="agend-date">29/08/2026 - 14:00</span>
         <span class="agend-student">Aluno João Ribeiro</span>
         <span class="agend-badge badge-agendada">Agendada</span>
       </div>
-      <div class="agend-row">
+      <div class="agend-row hover-lift">
         <span class="agend-date">05/09/2026 - 14:00</span>
         <span class="agend-student">Aluna Beatriz Lima</span>
         <span class="agend-badge badge-agendada">Agendada</span>

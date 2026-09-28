@@ -1,0 +1,11 @@
+<div class="option-list">
+  {% for option in options %}
+  <label class="list-panel-row option-row" for="{{ field_name }}-{{ option.value }}">
+    <input type="checkbox" id="{{ field_name }}-{{ option.value }}" name="{{ field_name }}"
+      value="{{ option.value }}" {% if option.checked %}checked{% endif %}>
+    <span>{{ option.label }}</span>
+  </label>
+  {% empty %}
+  {% include "components/empty_state.html" with message=empty_message %}
+  {% endfor %}
+</div>

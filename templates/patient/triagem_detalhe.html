@@ -3,17 +3,9 @@
 
 {% block title %}Triagem concluída{% endblock %}
 
-{% block extra_css %}
-  {{ block.super }}
-  <link rel="stylesheet" href="{% static 'core/css/patient_home.css' %}?v=12"> <!-- herdar header mobile -->
-  <link rel="stylesheet" href="{% static 'core/css/patient_triage_detail.css' %}">
-  <style>
-    @media (max-width: 767.98px) {
-      html, body { background-color: #F8F9FA !important; }
-      .sep-navbar  { display: none !important; }
-      main > .container-fluid { padding: 0 !important; }
-    }
-  </style>
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'core/css/patient_home.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/patient_triage_detail.css' %}">
 {% endblock %}
 
 {% block content %}

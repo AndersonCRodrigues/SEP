@@ -1,36 +1,33 @@
 {% extends "superadmin/base_superadmin.html" %}
-
 {% load static %}
 
+{% block title %}Adicionar supervisor{% endblock %}
+
 {% block page_css %}
+<link rel="stylesheet" href="{% static 'core/css/components/list_panel.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/list_filters.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/form_cadastro.css' %}">
 {% endblock %}
-{% block title %}Cadastrar Supervisor | Sistema SEP{% endblock %}
 
 {% block content %}
+<div class="list-panel-title">Adicionar supervisor</div>
 
-<!-- Banner Oval do Figma -->
-<div class="figma-header-banner">
-    <h1>Adicionar supervisor</h1>
-</div>
+<p class="list-panel-subtitle">
+  <a class="btn-limpar" href="{% url 'superadmin:home' %}">← Voltar para a página inicial</a>
+</p>
 
 <div class="figma-form-container">
-    {% if form.errors %}
-        <div class="figma-error-alert">
-            <strong>Erros encontrados:</strong>
-            {{ form.errors }}
-        </div>
-    {% endif %}
+  {% if form.errors %}
+  <div class="figma-error-alert">Confira os campos destacados abaixo.</div>
+  {% endif %}
 
-    <form method="post" class="figma-custom-form">
-        {% csrf_token %}
-        
-        <!-- Renderiza todos os campos (Email, Nome, CPF, Telefone, CRP, Matrícula, Áreas de Atuação) -->
-        {{ form.as_p }}
+  <form class="figma-custom-form" method="post" novalidate>
+    {% csrf_token %}
+    {{ form.as_p }}
 
-        <div class="figma-actions-center">
-            <button type="submit" class="btn-submit-figma">Cadastrar supervisor</button>
-        </div>
-    </form>
+    <div class="figma-actions-center">
+      <button type="submit" class="btn-submit-figma">Cadastrar supervisor</button>
+    </div>
+  </form>
 </div>
 {% endblock %}

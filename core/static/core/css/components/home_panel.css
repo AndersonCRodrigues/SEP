@@ -1,0 +1,45 @@
+/* Painel duplo da pagina inicial: atividades a esquerda, calendario a
+   direita, separados pela regua vinho. Os valores sao os da home do
+   Administrativo. */
+
+.panel {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  position: relative;
+  align-items: start;
+}
+
+.panel::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--sep-maroon);
+  transform: translateX(-50%);
+}
+
+.panel-plain::before {
+  display: none;
+}
+
+.panel h2 {
+  font-family: var(--font-main);
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--sep-maroon);
+  margin: 0 0 24px 0;
+}
+
+@media (max-width: 991.98px) {
+  .panel {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  .panel::before {
+    display: none;
+  }
+}

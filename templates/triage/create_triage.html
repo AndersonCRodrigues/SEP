@@ -1,50 +1,77 @@
-{% extends "base.html" %}
+{% extends "student/base_student.html" %}
+{% load static %}
 
-{% block title %}Nova Triagem | Sistema SEP{% endblock %}
+{% block title %}Ficha de triagem{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/components/tokens.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/question_wizard.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/student_triage_wizard.css' %}">
+{% endblock %}
+
+{% block page_header %}{% endblock %}
 
 {% block content %}
-<h1 class="h3 mb-1">Nova Triagem</h1>
-<p class="text-body-secondary mb-4">Paciente: {{ patient.nome_completo }} ({{ patient_age }} anos)</p>
+<div class="registration">
+  <aside class="registration-progress" aria-label="Progresso da triagem">
+    <p class="registration-brand">
+      <span class="registration-avatar" aria-hidden="true">{{ patient_initials }}</span>
+      <span class="registration-brand-text">
+        <strong class="registration-name">{{ patient.get_full_name }}</strong>
+        <span class="registration-subtitle">#{{ patient.pk }}</span>
+      </span>
+    </p>
 
-<div class="row">
-  <div class="col-12 col-lg-3">
-    <ol class="list-group mb-4">
+    <ol class="progress-sections">
       {% for section in sections %}
-      <li
-        class="list-group-item d-flex justify-content-between align-items-center
-               {% if section.state == 'current' %}active{% elif section.state == 'done' %}text-success{% endif %}"
-        {% if section.state == "current" %}aria-current="step"{% endif %}
-      >
-        {{ section.name }}
+      <li class="progress-section progress-{{ section.state }}"
+        {% if section.state == "current" %}aria-current="step"{% endif %}>
+        <span class="progress-name">{{ section.name }}</span>
+        <span class="progress-bars">
+          {% for filled in section.bars %}
+          <span class="progress-bar{% if filled %} progress-bar-filled{% endif %}"></span>
+          {% endfor %}
+        </span>
+        <span class="visually-hidden">
+          {% if section.state == "done" %}concluída{% elif section.state == "current" %}em andamento{% else %}pendente{% endif %}
+        </span>
       </li>
       {% endfor %}
     </ol>
-  </div>
+  </aside>
 
-  <div class="col-12 col-lg-8">
-    <section class="card">
-      <div class="card-body">
-        <p class="text-body-secondary mb-1">Passo {{ number }} de {{ total }}</p>
-        <h2 class="h5 card-title mb-4">{{ step.title }}</h2>
+  <section class="question" aria-labelledby="question-title">
+    <div class="question-body">
+      <p class="question-counter">{{ step.section }} · pergunta {{ number }} de {{ total }}</p>
 
-        <form method="post" novalidate>
-          {% csrf_token %}
-          {{ form.as_p }}
+      <h1 id="question-title" class="question-title">{{ step.title }}</h1>
 
-          <div class="d-flex justify-content-between mt-4">
-            <button
-              type="submit"
-              name="action"
-              value="back"
-              class="btn btn-outline-secondary"
-              formnovalidate
-              {% if is_first %}disabled{% endif %}
-            >Voltar</button>
-            <button type="submit" name="action" value="next" class="btn btn-primary">Avançar</button>
+      <form class="question-form" method="post" novalidate>
+        {% csrf_token %}
+
+        <div class="question-fields">
+          {% for field in form %}
+          <div class="question-field question-field-{{ field.name }}">
+            <label for="{{ field.id_for_label }}" class="visually-hidden">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}
+            <p class="question-help">{{ field.help_text }}</p>
+            {% endif %}
+            {% if field.errors %}
+            <div class="field-errors">{{ field.errors }}</div>
+            {% endif %}
           </div>
-        </form>
-      </div>
-    </section>
-  </div>
+          {% endfor %}
+        </div>
+
+        <div class="question-actions">
+          <button type="submit" name="action" value="back" class="question-back" formnovalidate
+            {% if is_first %}disabled{% endif %}>Voltar</button>
+
+          <button type="submit" name="action" value="next" class="question-next">Avançar</button>
+        </div>
+      </form>
+    </div>
+  </section>
 </div>
 {% endblock %}

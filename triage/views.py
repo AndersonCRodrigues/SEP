@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 
 from areas.models import AreaActing
 from core.constants import TriageStatus
@@ -40,17 +41,6 @@ def minhas_triagens(request):
 
 
 @login_required
-def triagem_concluida(request, pk):
-    """Tela de confirmação exibida logo após o Aluno criar a ficha."""
-    triage = get_object_or_404(TriageRecord, pk=pk)
-
-    if triage.student_author_id != request.user.pk:
-        return HttpResponseForbidden("Você não tem acesso a essa triagem.")
-
-    return render(request, "triage/triagem_concluida.html", {"triage": triage})
-
-
-@login_required
 def fila_triagem(request):
     if request.user.role != Role.ALUNO:
         return HttpResponseForbidden("Apenas Alunos podem acessar a fila de triagem.")
@@ -68,6 +58,11 @@ def to_triage_step(patient_id, step):
     return redirect("triage:create_triage_step", patient_id=patient_id, step=step.slug)
 
 
+def patient_initials(patient):
+    nomes = patient.get_full_name().split()
+    return "".join(nome[0] for nome in nomes[:2]).upper()
+
+
 def render_triage_step(request, wizard, step, form):
     return render(
         request,
@@ -75,6 +70,7 @@ def render_triage_step(request, wizard, step, form):
         {
             "patient": wizard.patient,
             "patient_age": wizard.patient.current_age,
+            "patient_initials": patient_initials(wizard.patient),
             "form": form,
             "step": step,
             "number": wizard.number(step),
@@ -163,7 +159,7 @@ def create_triage_step(request, patient_id, step):
             messages.error(request, "Revise os dados e tente novamente.")
             return to_triage_step(patient_id, steps[0])
 
-        return redirect("triage:triagem_concluida", pk=triage_record.pk)
+        return redirect("students:triagem_concluida", pk=triage_record.pk)
 
     if wizard.is_ahead(current):
         return to_triage_step(patient_id, wizard.first_unanswered())
@@ -204,16 +200,22 @@ def edit_triage(request, pk):
             messages.success(request, "Triagem atualizada com sucesso.")
             
             if user.role == Role.ALUNO:
-                return redirect("triage:triage_detail_student", pk=pk)
+                return redirect("triage:minhas_triagens")
             return redirect("triage:triage_detail_supervisor", pk=pk)
     else:
         triage_form = TriageRecordForm(instance=triage)
         iarv_form = iarv_form_class(instance=iarv)
 
+    if user.role == Role.ALUNO:
+        cancel_url = reverse("triage:minhas_triagens")
+    else:
+        cancel_url = reverse("triage:triage_detail_supervisor", args=[pk])
+
     context = {
         "triage": triage,
         "triage_form": triage_form,
         "iarv_form": iarv_form,
+        "cancel_url": cancel_url,
     }
 
     return render(request, "triage/edit_triage.html", context)
@@ -231,7 +233,7 @@ def submit_triage(request, pk):
     except ValidationError as e:
         messages.error(request, str(e))
 
-    return redirect("triage:triage_detail_student", pk=pk)
+    return redirect("triage:minhas_triagens")
 
 
 @login_required

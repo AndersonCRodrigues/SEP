@@ -4,18 +4,9 @@
 
 {% block title %}Métodos de contato{% endblock %}
 
-{% block extra_css %}
-  {{ block.super }}
-  <link rel="stylesheet" href="{% static 'core/css/patient_home.css' %}?v=11"> <!-- para herdar header mobile -->
-  <link rel="stylesheet" href="{% static 'core/css/patient_contato.css' %}">
-  <style>
-    /* CSS para o mobile */
-    @media (max-width: 767.98px) {
-      html, body { background-color: #F8F9FA !important; }
-      .sep-navbar  { display: none !important; }
-      main > .container-fluid { padding: 0 !important; }
-    }
-  </style>
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'core/css/patient_home.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/patient_contato.css' %}">
 {% endblock %}
 
 {% block content %}

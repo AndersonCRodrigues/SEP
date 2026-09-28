@@ -1,0 +1,56 @@
+/* Telas de lista do Superadmin: usam o painel de components/list_panel.css.
+   Aqui fica so o que e proprio de cada tela — a grade de colunas, a linha de
+   servidor fora do ar e a paginacao dos logs. */
+
+.server-grid {
+  grid-template-columns: 2fr 1fr 1fr 1fr 110px;
+}
+
+.permission-grid {
+  grid-template-columns: 1.5fr 2.5fr 100px;
+}
+
+.log-grid {
+  grid-template-columns: 1fr 2fr 2fr 110px;
+}
+
+.change-grid {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.backup-grid {
+  grid-template-columns: 1.5fr 2fr 1fr 110px;
+}
+
+/* Servidor sem resposta ocupa as colunas de uptime, CPU e memoria. */
+.server-offline {
+  grid-column: span 3;
+  font-weight: 500;
+  color: var(--sep-text-muted);
+}
+
+.role-scope,
+.log-details {
+  font-weight: 500;
+}
+
+.log-time {
+  font-weight: 500;
+  color: var(--sep-text-muted);
+}
+
+.list-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  max-width: 900px;
+  margin: 24px auto 0 auto;
+}
+
+.list-pagination-info {
+  font-family: var(--font-main);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--sep-text-muted);
+}

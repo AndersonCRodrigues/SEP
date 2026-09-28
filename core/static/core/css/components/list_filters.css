@@ -1,0 +1,128 @@
+/* Barra de busca e filtros acima de um painel de lista, com o botao de acao
+   principal das telas de lista. Acompanha components/list_panel.css: mesma
+   largura maxima, para a barra ficar alinhada com o painel. */
+
+.list-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  max-width: 900px;
+  margin: 0 auto 20px auto;
+}
+
+.list-filters input,
+.list-filters select {
+  height: 44px;
+  padding: 0 16px;
+  background-color: #FFFFFF;
+  border: 1px solid #A59C97;
+  border-radius: 12px;
+  font-family: var(--font-main);
+  font-size: 14px;
+  color: #333333;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.list-filters input {
+  flex: 1 1 260px;
+}
+
+/* Busca de um lado, botao no extremo oposto — para a barra que tem so os dois. */
+.list-filters-spread {
+  justify-content: space-between;
+}
+
+.list-filters input:focus,
+.list-filters select:focus {
+  border-color: var(--sep-maroon);
+}
+
+.btn-acao {
+  background-color: var(--sep-maroon);
+  color: #FFFFFF;
+  font-family: var(--font-main);
+  font-size: 14px;
+  font-weight: 700;
+  height: 44px;
+  padding: 0 28px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+
+.btn-acao:hover {
+  background-color: #541618;
+  color: #FFFFFF;
+}
+
+.btn-limpar {
+  background: none;
+  color: var(--sep-maroon);
+  font-family: var(--font-main);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: underline;
+  border: none;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+/* Barra de titulo com busca ou acao a direita, alinhada com o painel. */
+.list-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  max-width: 900px;
+  margin: 0 auto 20px auto;
+}
+
+.list-toolbar-title {
+  font-family: var(--font-main);
+  font-size: 30px;
+  font-weight: 800;
+  color: var(--sep-maroon);
+  margin: 0;
+}
+
+.list-search {
+  position: relative;
+  flex: 1 1 300px;
+  max-width: 420px;
+}
+
+.list-search input {
+  width: 100%;
+  height: 46px;
+  padding: 0 16px 0 44px;
+  background-color: #FFFFFF;
+  border: 1px solid var(--sep-gray-border);
+  border-radius: 30px;
+  font-family: var(--font-main);
+  font-size: 14px;
+  color: #333333;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+}
+
+.list-search input:focus {
+  border-color: var(--sep-maroon);
+}
+
+.list-search .bi {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 15px;
+  color: var(--sep-text-muted);
+}

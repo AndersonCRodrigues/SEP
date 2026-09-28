@@ -1,0 +1,5 @@
+<div class="patient-card">
+  <p class="patient-card-label">{{ label|default:"Paciente" }}</p>
+  <p class="patient-card-name">{{ name }}{% if code %} #{{ code }}{% endif %}</p>
+  <p class="patient-card-detail">{{ detail }}{% if detail_date %} {{ detail_date|date:"d/m/Y" }}{% endif %}</p>
+</div>

@@ -1,0 +1,59 @@
+/* Telas de lista do Administrativo: usam o painel de components/list_panel.css.
+   Aqui fica so o que e proprio de cada tela — a grade de colunas e a linha da
+   agenda, que abre os detalhes do atendimento. */
+
+.agenda-grid {
+  grid-template-columns: 1.5fr 1fr 1.5fr 130px;
+}
+
+.patient-grid {
+  grid-template-columns: 2fr 1.2fr 1.2fr 130px;
+}
+
+.user-grid {
+  grid-template-columns: 1.5fr 2fr 140px;
+}
+
+.document-grid {
+  grid-template-columns: 2fr 1.5fr 1.2fr 130px;
+}
+
+/* A linha da agenda e um <details>: o resumo e a grade, e o corpo aparece
+   embaixo quando a linha e aberta. */
+.agenda-row {
+  display: block;
+  cursor: pointer;
+}
+
+.agenda-row > summary {
+  display: grid;
+  align-items: center;
+  gap: 16px;
+  list-style: none;
+}
+
+.agenda-row > summary::marker,
+.agenda-row > summary::-webkit-details-marker {
+  display: none;
+  content: "";
+}
+
+.agenda-detail {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 20px;
+  margin: 16px 0 0 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--sep-gray-border);
+  font-size: 13px;
+}
+
+.agenda-detail dt {
+  font-weight: 700;
+  color: var(--sep-maroon);
+}
+
+.agenda-detail dd {
+  margin: 0;
+  font-weight: 500;
+}

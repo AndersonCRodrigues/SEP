@@ -1,28 +1,50 @@
 {% extends "patient/base_patient.html" %}
+{% load static %}
 
 {% block title %}Solicitar novo horário{% endblock %}
 
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'core/css/patient_home.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/patient_triagens.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/patient_triage_detail.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/form_cadastro.css' %}">
+{% endblock %}
+
 {% block content %}
-<h1>Solicitar novo horário</h1>
+<div class="page-banner-container">
+  <h1 class="page-banner">Solicitar novo horário</h1>
+</div>
 
 {% if request_error %}
 {% include "components/error_state.html" with message=request_error retry_url=request.path %}
+
 {% elif pending_request %}
-<section class="notice" role="status" aria-labelledby="pending-title">
-  <h2 id="pending-title" class="notice-title">Solicitação pendente</h2>
-  <p class="notice-message">
+<div class="figma-form-container">
+  <div class="figma-error-alert" role="status">
     Você já pediu um horário para {{ pending_request.preferred_date|date:"d/m/Y" }}
     ({{ pending_request.get_preferred_period_display }}). Aguarde a resposta do
     Administrativo para pedir outro.
-  </p>
-</section>
+  </div>
+</div>
+
 {% else %}
-<p class="page-intro">
+<p class="section-subtitle text-center">
   Escolha a data e o período de sua preferência. O Administrativo vai responder
   sua solicitação.
 </p>
-{% include "components/form.html" with form=form submit_label="Enviar solicitação" %}
+
+<div class="figma-form-container">
+  <form class="figma-custom-form" method="post" novalidate>
+    {% csrf_token %}
+    {{ form.as_p }}
+    <div class="figma-actions-center">
+      <button type="submit" class="btn-submit-figma">Enviar solicitação</button>
+    </div>
+  </form>
+</div>
 {% endif %}
 
-<a class="back-link" href="{% url 'patient:agendamentos' %}">Voltar para meus agendamentos</a>
+<div class="back-link-container">
+  <a class="back-link" href="{% url 'patient:agendamentos' %}">Voltar para meus agendamentos</a>
+</div>
 {% endblock %}

@@ -1,5 +1,7 @@
-<form method="post" action="{{ action_url|default:"" }}" novalidate>
+<form class="figma-custom-form" method="post" action="{{ action_url|default:"" }}" novalidate>
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit" class="btn btn-primary">{{ submit_label|default:"Salvar" }}</button>
+    <div class="figma-actions-center">
+        <button type="submit" class="btn-submit-figma">{{ submit_label|default:"Salvar" }}</button>
+    </div>
 </form>

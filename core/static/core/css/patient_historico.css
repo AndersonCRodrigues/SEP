@@ -57,13 +57,17 @@
 }
 
 .hist-row {
-  background-color: #dcdcdc;
+  background-color: #E6E6E6;
   border-radius: 14px;
   padding: 18px 24px;
   display: grid;
   grid-template-columns: 240px 1fr 120px;
   gap: 16px;
   align-items: center;
+}
+
+.hist-row:hover {
+  background-color: #D4D4D4;
 }
 
 .hist-date {

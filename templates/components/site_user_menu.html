@@ -1,0 +1,32 @@
+<ul class="header-actions">
+  {# TODO: botões sem lógica; ficam para fazer #}
+  <li>
+    <button type="button" class="header-icon" aria-label="Mensagens">
+      <i class="bi bi-envelope"></i>
+    </button>
+  </li>
+  <li>
+    <button type="button" class="header-icon" aria-label="Notificações">
+      <i class="bi bi-bell"></i>
+    </button>
+  </li>
+  <li>
+    <details class="user-menu">
+      <summary class="header-icon user-menu-toggle" aria-label="Minha conta">
+        <i class="bi bi-person"></i>
+      </summary>
+      <div class="user-menu-panel">
+        <p class="user-menu-name">{{ request.user.nome_completo|default:request.user.email }}</p>
+        {% if profile_url %}
+        <a class="user-menu-link" href="{{ profile_url }}">Meu perfil</a>
+        {% endif %}
+        <form method="post" action="{% url 'logout' %}">
+          {% csrf_token %}
+          <button type="submit" class="user-menu-logout">
+            <i class="bi bi-box-arrow-right"></i> Sair
+          </button>
+        </form>
+      </div>
+    </details>
+  </li>
+</ul>

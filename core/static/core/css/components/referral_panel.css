@@ -1,0 +1,137 @@
+/* Tela de encaminhamento: duas colunas, com o paciente em foco a esquerda e os
+   encaminhamentos recentes a direita; a fila aguardando encaminhamento fica
+   embaixo. Mesmo desenho no Coordenador (aloca professores) e no Professor
+   (aloca alunos orientados) — o que muda e so a lista de opcoes.
+   A caixa de opcoes mostra quatro linhas e rola o resto, para as duas colunas
+   terminarem na mesma altura. */
+
+.referral-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: stretch;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.referral-new .list-toolbar-title {
+  margin-bottom: 20px;
+}
+
+.patient-card {
+  background: #FCFAF9;
+  border: 1px solid var(--sep-gray-border);
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 28px;
+}
+
+.patient-card-label {
+  font-family: var(--font-main);
+  font-size: 13px;
+  color: var(--sep-text-muted);
+  margin: 0 0 4px 0;
+}
+
+.patient-card-name {
+  font-family: var(--font-main);
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--sep-black);
+  margin: 0 0 6px 0;
+}
+
+.patient-card-detail {
+  font-family: var(--font-main);
+  font-size: 13px;
+  color: #333333;
+  margin: 0;
+}
+
+.referral-filter {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.referral-filter select {
+  flex: 1 1 auto;
+  height: 44px;
+  padding: 0 16px;
+  background-color: #FFFFFF;
+  border: 1px solid #A59C97;
+  border-radius: 12px;
+  font-family: var(--font-main);
+  font-size: 14px;
+  color: #333333;
+  outline: none;
+}
+
+.referral-actions {
+  display: flex;
+  margin-top: 28px;
+}
+
+.recent-grid {
+  grid-template-columns: 1fr 130px;
+}
+
+.recent-name {
+  display: block;
+  font-family: var(--font-main);
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--sep-black);
+}
+
+.recent-sub {
+  display: block;
+  font-family: var(--font-main);
+  font-size: 13px;
+  font-weight: 500;
+  color: #444444;
+  margin-top: 2px;
+}
+
+.referral-queue {
+  max-width: 900px;
+  margin: 48px auto 0 auto;
+}
+
+.referral-new .option-fieldset .option-list {
+  max-height: 248px;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.referral-new .option-fieldset .option-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.referral-new .option-fieldset .option-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.referral-new .option-fieldset .option-list::-webkit-scrollbar-thumb {
+  background-color: #A59C97;
+  border-radius: 10px;
+}
+
+/* A caixa dos recentes acompanha a altura da coluna da esquerda. */
+.referral-recent {
+  display: flex;
+  flex-direction: column;
+}
+
+.referral-recent .list-panel-container {
+  flex: 1 1 auto;
+  max-width: none;
+}
+
+@media (max-width: 991.98px) {
+  .referral-layout {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+}

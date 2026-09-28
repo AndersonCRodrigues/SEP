@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/components/row_button.css' %}">
   {{ block.super }}
   <link rel="stylesheet" href="{% static 'core/css/teacher_home.css' %}">
   <link rel="stylesheet" href="{% static 'core/css/student_triage.css' %}?v=6">
@@ -48,7 +49,7 @@
             </div>
             <div class="m-triage-info">
               <i class="bi bi-calendar3"></i>
-              {{ caso.start_date|date:"d/m/Y" }} - {{ caso.start_date|date:"H:i" }}h
+              {{ caso.start_date|date:"d/m/Y" }}
             </div>
           </div>
           <div class="m-triage-card-right">
