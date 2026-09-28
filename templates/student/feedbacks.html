@@ -3,8 +3,7 @@
 
 {% block title %}Feedbacks recebidos{% endblock %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'core/css/components/tokens.css' %}">
+{% block page_css %}
 <link rel="stylesheet" href="{% static 'core/css/components/list_panel.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/components/hover_lift.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/student_feedback.css' %}">
@@ -13,6 +12,36 @@
 {% block page_header %}{% endblock %}
 
 {% block content %}
+<!-- ══════════════════════════════════════
+     MOBILE
+     ══════════════════════════════════════ -->
+<div class="mobile-page">
+  <div class="mobile-maroon-bg">
+    {% url 'students:home' as back_url %}
+    {% include "components/mobile_header.html" %}
+  </div>
+
+  {% include "components/mobile_title.html" with title="Feedbacks" %}
+
+  <div class="mobile-content">
+    {% if feedbacks_error %}
+    <p class="mobile-empty">{{ feedbacks_error }}</p>
+    {% else %}
+    {% for feedback in feedbacks %}
+    {% include "components/mobile_row.html" with name=feedback.subject person=feedback.author when=feedback.received label=feedback.label level=feedback.level %}
+    {% empty %}
+    <p class="mobile-empty">Nenhum feedback recebido.</p>
+    {% endfor %}
+    {% endif %}
+  </div>
+
+  {% include "components/mobile_footer.html" %}
+</div>
+
+<!-- ══════════════════════════════════════
+     DESKTOP
+     ══════════════════════════════════════ -->
+<div class="desktop-page">
 <div class="list-panel-title">Feedbacks recebidos</div>
 
 {% if feedbacks_error %}
@@ -48,4 +77,5 @@
 {% else %}
 {% include "components/empty_state.html" with message="Você ainda não recebeu feedbacks." %}
 {% endif %}
+</div>
 {% endblock %}

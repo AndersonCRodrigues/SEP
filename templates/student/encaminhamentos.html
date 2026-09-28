@@ -3,8 +3,7 @@
 
 {% block title %}Encaminhamentos recebidos{% endblock %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'core/css/components/tokens.css' %}">
+{% block page_css %}
 <link rel="stylesheet" href="{% static 'core/css/components/list_panel.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/components/hover_lift.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/student_referral.css' %}">
@@ -13,6 +12,38 @@
 {% block page_header %}{% endblock %}
 
 {% block content %}
+<!-- ══════════════════════════════════════
+     MOBILE
+     ══════════════════════════════════════ -->
+<div class="mobile-page">
+  <div class="mobile-maroon-bg">
+    {% url 'students:home' as back_url %}
+    {% include "components/mobile_header.html" %}
+  </div>
+
+  {% include "components/mobile_title.html" with title="Encaminhamentos" %}
+
+  <div class="mobile-content">
+    {% if referrals_error %}
+    <p class="mobile-empty">{{ referrals_error }}</p>
+    {% else %}
+    <div class="mobile-list mobile-column">
+      {% for referral in referrals %}
+      {% include "components/mobile_row.html" with name=referral.patient when=referral.situation label=referral.label level=referral.level %}
+      {% empty %}
+      <p class="mobile-empty">Nenhum encaminhamento recebido.</p>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  {% include "components/mobile_footer.html" %}
+</div>
+
+<!-- ══════════════════════════════════════
+     DESKTOP
+     ══════════════════════════════════════ -->
+<div class="desktop-page">
 <div class="list-panel-title">Encaminhamentos recebidos</div>
 
 {% if referrals_error %}
@@ -44,4 +75,5 @@
 {% else %}
 {% include "components/empty_state.html" with message="Nenhum encaminhamento recebido." %}
 {% endif %}
+</div>
 {% endblock %}

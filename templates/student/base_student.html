@@ -1,6 +1,15 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title_suffix %} | SEP Maricá{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/components/tokens.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/mobile_shell.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/mobile_nav.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/mobile_cards.css' %}">
+{% block page_css %}{% endblock %}
+{% endblock %}
 
 {% block brand %}
 {% url 'students:home' as home_url %}

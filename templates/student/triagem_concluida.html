@@ -3,8 +3,7 @@
 
 {% block title %}Triagem concluída{% endblock %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'core/css/components/tokens.css' %}">
+{% block page_css %}
 <link rel="stylesheet" href="{% static 'core/css/components/question_wizard.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/student_triage_wizard.css' %}">
 {% endblock %}
@@ -12,30 +11,74 @@
 {% block page_header %}{% endblock %}
 
 {% block content %}
-<section class="registration-completed" aria-labelledby="completed-title">
-  <div class="completed-icon" aria-hidden="true"></div>
 
-  <h1 id="completed-title" class="completed-title">Triagem concluída com sucesso!</h1>
+<!-- ══════════════════════════════════════
+     MOBILE
+     ══════════════════════════════════════ -->
+<div class="mobile-page">
+  <div class="mobile-maroon-bg">
+    {% url 'students:home' as back_url %}
+    {% include "components/mobile_header.html" %}
+  </div>
 
-  <p class="completed-text">A ficha foi enviada para a coordenação.</p>
+  <div class="mobile-content">
+    <div class="mobile-success" aria-hidden="true"><i class="bi bi-check-lg"></i></div>
 
-  <dl class="completed-summary">
-    <div class="completed-row">
-      <dt>Paciente</dt>
-      <dd>{{ triage.patient.get_full_name }} #{{ triage.patient.pk }}</dd>
+    <h1 class="mobile-success-title">Triagem concluída com sucesso</h1>
+    <p class="mobile-success-text">A ficha foi enviada para a coordenação.</p>
+
+    <dl class="mobile-info mobile-info-light mobile-column">
+      <div class="mobile-info-row">
+        <dt class="mobile-info-label">Paciente</dt>
+        <dd class="mobile-info-value">{{ triage.patient.get_full_name }}</dd>
+      </div>
+      <div class="mobile-info-row">
+        <dt class="mobile-info-label">Entrevistado por</dt>
+        <dd class="mobile-info-value">{{ triage.student_author.get_full_name }}</dd>
+      </div>
+      <div class="mobile-info-row">
+        <dt class="mobile-info-label">Concluído em</dt>
+        <dd class="mobile-info-value">{{ completed_at|date:"d/m/Y à\s H:i" }}</dd>
+      </div>
+    </dl>
+
+    <div class="mobile-actions">
+      <a class="mobile-button" href="{% url 'students:triagens' %}">Continuar</a>
     </div>
-    <div class="completed-row">
-      <dt>Entrevistado por</dt>
-      <dd>{{ triage.student_author.get_full_name }}</dd>
-    </div>
-    <div class="completed-row">
-      <dt>Concluído em</dt>
-      <dd>
-        <time datetime="{{ completed_at|date:'c' }}">{{ completed_at|date:"d/m/Y à\s H:i" }}</time>
-      </dd>
-    </div>
-  </dl>
+  </div>
 
-  <a class="completed-continue" href="{% url 'students:triagens' %}">Continuar</a>
-</section>
+  {% include "components/mobile_footer.html" %}
+</div>
+
+<!-- ══════════════════════════════════════
+     DESKTOP
+     ══════════════════════════════════════ -->
+<div class="desktop-page">
+  <section class="registration-completed" aria-labelledby="completed-title">
+    <div class="completed-icon" aria-hidden="true"></div>
+
+    <h1 id="completed-title" class="completed-title">Triagem concluída com sucesso!</h1>
+
+    <p class="completed-text">A ficha foi enviada para a coordenação.</p>
+
+    <dl class="completed-summary">
+      <div class="completed-row">
+        <dt>Paciente</dt>
+        <dd>{{ triage.patient.get_full_name }} #{{ triage.patient.pk }}</dd>
+      </div>
+      <div class="completed-row">
+        <dt>Entrevistado por</dt>
+        <dd>{{ triage.student_author.get_full_name }}</dd>
+      </div>
+      <div class="completed-row">
+        <dt>Concluído em</dt>
+        <dd>
+          <time datetime="{{ completed_at|date:'c' }}">{{ completed_at|date:"d/m/Y à\s H:i" }}</time>
+        </dd>
+      </div>
+    </dl>
+
+    <a class="completed-continue" href="{% url 'students:triagens' %}">Continuar</a>
+  </section>
+</div>
 {% endblock %}

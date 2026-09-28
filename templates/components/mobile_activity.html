@@ -3,7 +3,19 @@
 {% for activity in activities %}
 <div class="mobile-card mobile-column">
   <div class="mobile-card-head">
-    <span class="mobile-card-section">{{ activity.section }}</span>
+    <span class="mobile-card-section">
+      {% if activity.section %}{{ activity.section }}
+      {% elif activity.kind == 'triage' %}Triagem
+      {% elif activity.kind == 'referral' %}Encaminhamento
+      {% elif activity.kind == 'feedback' %}Feedback
+      {% elif activity.kind == 'record' %}Prontuário
+      {% elif activity.kind == 'history' %}Histórico
+      {% elif activity.kind == 'appointment' %}Agendamento
+      {% elif activity.kind == 'backup' %}Backups
+      {% elif activity.kind == 'security' %}Segurança
+      {% elif activity.kind == 'document' %}Declarações
+      {% elif activity.kind == 'room' %}Salas{% endif %}
+    </span>
     {% if activity.label %}
     {% include "components/mobile_badge.html" with label=activity.label level=activity.level %}
     {% endif %}

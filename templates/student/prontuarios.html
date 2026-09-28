@@ -3,8 +3,7 @@
 
 {% block title %}Prontuários e evolução{% endblock %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'core/css/components/tokens.css' %}">
+{% block page_css %}
 <link rel="stylesheet" href="{% static 'core/css/components/hover_lift.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/student_panel.css' %}">
 {% endblock %}
@@ -12,6 +11,38 @@
 {% block page_header %}{% endblock %}
 
 {% block content %}
+<!-- ══════════════════════════════════════
+     MOBILE
+     ══════════════════════════════════════ -->
+<div class="mobile-page">
+  <div class="mobile-maroon-bg">
+    {% url 'students:home' as back_url %}
+    {% include "components/mobile_header.html" %}
+  </div>
+
+  {% include "components/mobile_title.html" with title="Prontuários" %}
+
+  <div class="mobile-content">
+    {% if records_error %}
+    <p class="mobile-empty">{{ records_error }}</p>
+    {% else %}
+    <div class="mobile-list mobile-column">
+      {% for record in records %}
+      {% include "components/mobile_row.html" with name=record.patient when=record.updated label=record.label level=record.level %}
+      {% empty %}
+      <p class="mobile-empty">Nenhum paciente em atendimento.</p>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  {% include "components/mobile_footer.html" %}
+</div>
+
+<!-- ══════════════════════════════════════
+     DESKTOP
+     ══════════════════════════════════════ -->
+<div class="desktop-page">
 <div class="panel-title-pill">Prontuários e evolução</div>
 
 {% if records_error %}
@@ -43,4 +74,5 @@
 {% else %}
 {% include "components/empty_state.html" with message="Você ainda não tem paciente em atendimento." %}
 {% endif %}
+</div>
 {% endblock %}

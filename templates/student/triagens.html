@@ -3,8 +3,7 @@
 
 {% block title %}Triagens a realizar{% endblock %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'core/css/components/tokens.css' %}">
+{% block page_css %}
 <link rel="stylesheet" href="{% static 'core/css/components/list_panel.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/components/hover_lift.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/components/row_button.css' %}">
@@ -14,6 +13,32 @@
 {% block page_header %}{% endblock %}
 
 {% block content %}
+<!-- ══════════════════════════════════════
+     MOBILE
+     ══════════════════════════════════════ -->
+<div class="mobile-page">
+  <div class="mobile-maroon-bg">
+    {% url 'students:home' as back_url %}
+    {% include "components/mobile_header.html" %}
+  </div>
+
+  {% include "components/mobile_title.html" with title="Triagens a realizar" %}
+
+  <div class="mobile-content">
+    {% for triage in triages %}
+    {% include "components/mobile_row.html" with variant="white" name=triage.name code=triage.patient.pk when=triage.waiting_since|date:"d/m/Y - H:i" action_url=triage.start_url action_label="Iniciar" %}
+    {% empty %}
+    <p class="mobile-empty">Nenhum paciente aguardando triagem.</p>
+    {% endfor %}
+  </div>
+
+  {% include "components/mobile_footer.html" %}
+</div>
+
+<!-- ══════════════════════════════════════
+     DESKTOP
+     ══════════════════════════════════════ -->
+<div class="desktop-page">
 <div class="list-panel-title">Triagens a realizar</div>
 
 {% if triages %}
@@ -43,4 +68,5 @@
 {% else %}
 {% include "components/empty_state.html" with message="Nenhum paciente aguardando triagem." %}
 {% endif %}
+</div>
 {% endblock %}
