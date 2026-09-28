@@ -9,9 +9,115 @@
 <link rel="stylesheet" href="{% static 'core/css/components/detail_panel.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/components/feedback_list.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/teacher_lists.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/patient_home.css' %}">
 {% endblock %}
 
 {% block content %}
+
+<!-- ══════════════════════════════════════
+     MOBILE — Detalhe do aluno
+     ══════════════════════════════════════ -->
+<div class="d-block d-md-none" style="min-height: 100vh; background-color: #F8F9FA;">
+
+  <!-- Header Mobile -->
+  <div class="mobile-header" style="background-color: #6D1D20; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; padding-bottom: 20px;">
+    <a href="{% url 'teacher:alunos' %}" class="mobile-back"></a>
+    <span class="mobile-greeting">Olá, {{ request.user.first_name|default:"Professor" }}!</span>
+    <div class="mobile-icons d-flex align-items-center gap-3">
+      <i class="bi bi-bell"></i>
+      <form method="post" action="{% url 'logout' %}" class="m-0 p-0 d-inline-flex">
+        {% csrf_token %}
+        <button type="submit" class="p-0 border-0 bg-transparent text-white d-flex align-items-center" style="line-height: 1;">
+          <i class="bi bi-person-circle" style="font-size: 24px;"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div class="px-3 text-center mt-4">
+
+    <!-- Pílula de título -->
+    <div class="mb-4 text-center">
+      <span style="display: inline-block; background-color: #6D1D20; color: white; padding: 10px 40px; border-radius: 20px; font-weight: 700; font-family: 'Museo Sans', sans-serif; font-size: 16px;">
+        {{ aluno.nome_completo }}
+      </span>
+    </div>
+
+    <!-- ── Dados do aluno ── -->
+    <div style="text-align: left; margin-bottom: 24px;">
+      <p style="font-family: 'Museo Sans', sans-serif; font-size: 13px; font-weight: 700; color: #6D1D20; margin-bottom: 8px;">Dados do aluno</p>
+      <div style="border: 1px solid #C4C4C4; border-radius: 20px; padding: 12px; background: transparent;">
+        
+        <div style="background-color: #DCDCDC; border-radius: 16px; padding: 12px 14px; margin-bottom: 10px;">
+          <div style="font-family: 'Museo Sans', sans-serif; font-size: 13px; font-weight: 700; color: #111;">Matrícula</div>
+          <div style="font-family: 'Museo Sans', sans-serif; font-size: 12px; color: #6D1D20;">{{ aluno.matricula|default:"—" }}</div>
+        </div>
+        
+        <div style="background-color: #DCDCDC; border-radius: 16px; padding: 12px 14px; margin-bottom: 10px;">
+          <div style="font-family: 'Museo Sans', sans-serif; font-size: 13px; font-weight: 700; color: #111;">Curso e período</div>
+          <div style="font-family: 'Museo Sans', sans-serif; font-size: 12px; color: #6D1D20;">{{ aluno.curso_periodo|default:"—" }}</div>
+        </div>
+        
+        <div style="background-color: #DCDCDC; border-radius: 16px; padding: 12px 14px; margin-bottom: 10px;">
+          <div style="font-family: 'Museo Sans', sans-serif; font-size: 13px; font-weight: 700; color: #111;">Fase do estágio</div>
+          <div style="font-family: 'Museo Sans', sans-serif; font-size: 12px; color: #6D1D20;">{{ aluno.get_stage_display }}</div>
+        </div>
+        
+        <div style="background-color: #DCDCDC; border-radius: 16px; padding: 12px 14px;">
+          <div style="font-family: 'Museo Sans', sans-serif; font-size: 13px; font-weight: 700; color: #111;">E-mail</div>
+          <div style="font-family: 'Museo Sans', sans-serif; font-size: 12px; color: #6D1D20;">{{ aluno.email|default:"—" }}</div>
+        </div>
+        
+      </div>
+    </div>
+
+    <!-- ── Pacientes em atendimento ── -->
+    <div style="text-align: left; margin-bottom: 24px;">
+      <p style="font-family: 'Museo Sans', sans-serif; font-size: 13px; font-weight: 700; color: #6D1D20; margin-bottom: 8px;">Pacientes em atendimento</p>
+      {% if casos_abertos %}
+      <select style="width: 100%; border: 1px solid #C4C4C4; border-radius: 12px; padding: 12px 16px; font-family: 'Museo Sans', sans-serif; font-size: 13px; color: #888; background: #fff; appearance: none; background-image: url('data:image/svg+xml;utf8,<svg fill=\'%23888\' height=\'24\' viewBox=\'0 0 24 24\' width=\'24\' xmlns=\'http://www.w3.org/2000/svg\'><path d=\'M7 10l5 5 5-5z\'/><path d=\'M0 0h24v24H0z\' fill=\'none\'/></svg>'); background-repeat: no-repeat; background-position-x: 96%; background-position-y: 50%;">
+        {% for caso in casos_abertos %}
+        <option>{{ caso.patient.nome_completo }}</option>
+        {% endfor %}
+      </select>
+      {% else %}
+      <p style="color:#888; font-family:'Museo Sans',sans-serif; font-size:12px;">Nenhum caso aberto no momento.</p>
+      {% endif %}
+    </div>
+
+    <!-- ── Histórico de casos encerrados ── -->
+    <div style="text-align: left; margin-bottom: 24px;">
+      <p style="font-family: 'Museo Sans', sans-serif; font-size: 13px; font-weight: 700; color: #6D1D20; margin-bottom: 4px;">Histórico de casos encerrados</p>
+      {% if casos_encerrados %}
+      <select style="width: 100%; border: 1px solid #C4C4C4; border-radius: 12px; padding: 12px 16px; font-family: 'Museo Sans', sans-serif; font-size: 13px; color: #888; background: #fff; appearance: none; background-image: url('data:image/svg+xml;utf8,<svg fill=\'%23888\' height=\'24\' viewBox=\'0 0 24 24\' width=\'24\' xmlns=\'http://www.w3.org/2000/svg\'><path d=\'M7 10l5 5 5-5z\'/><path d=\'M0 0h24v24H0z\' fill=\'none\'/></svg>'); background-repeat: no-repeat; background-position-x: 96%; background-position-y: 50%;">
+        {% for caso in casos_encerrados %}
+        <option>{{ caso.patient.nome_completo }}</option>
+        {% endfor %}
+      </select>
+      {% else %}
+      <p style="color:#888; font-family:'Museo Sans',sans-serif; font-size:12px;">Nenhum caso encerrado ainda</p>
+      {% endif %}
+    </div>
+
+    <!-- ── Feedbacks recebidos ── -->
+    <div style="text-align: left; margin-bottom: 40px;">
+      <p style="font-family: 'Museo Sans', sans-serif; font-size: 13px; font-weight: 700; color: #6D1D20; margin-bottom: 8px;">Feedbacks recebidos</p>
+      <div style="border: 1px solid #C4C4C4; border-radius: 16px; padding: 12px; background: transparent;">
+        {# Mock temporario ja que nao temos feedbacks na variavel de contexto do aluno_detalhe #}
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #E0E0E0;">
+          <span style="font-family: 'Museo Sans', sans-serif; font-size: 13px; font-weight: 700; color: #111;">Professor</span>
+          <span style="font-family: 'Museo Sans', sans-serif; font-size: 12px; font-weight: 700; color: #111;">{{ request.user.date_joined|date:"d/m/Y" }}</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     DESKTOP — Detalhe do aluno
+     ══════════════════════════════════════ -->
+<div class="d-none d-md-block">
 <div class="list-panel-title">{{ aluno.nome_completo }}</div>
 
 <p class="list-panel-subtitle"><a class="btn-limpar" href="{% url 'teacher:alunos' %}">← Voltar para Meus alunos</a></p>
@@ -75,5 +181,6 @@
     <h2 class="detail-title">Feedbacks recebidos</h2>
     {% include "components/feedback_list.html" with feedbacks=feedbacks empty_message="Nenhum feedback registrado ainda para este aluno." %}
   </section>
+</div>
 </div>
 {% endblock %}

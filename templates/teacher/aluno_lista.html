@@ -9,9 +9,101 @@
 <link rel="stylesheet" href="{% static 'core/css/components/list_filters.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/components/row_button.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/teacher_lists.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/patient_home.css' %}">
 {% endblock %}
 
 {% block content %}
+
+<!-- ══════════════════════════════════════
+     MOBILE — Meus alunos
+     ══════════════════════════════════════ -->
+<div class="d-block d-md-none" style="min-height: 100vh; background-color: #F8F9FA;">
+
+  <!-- Header Mobile -->
+  <div class="mobile-header" style="background-color: #6D1D20; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; padding-bottom: 20px;">
+    <a href="{% url 'teacher:home' %}" class="mobile-back"></a>
+    <span class="mobile-greeting">Olá, {{ request.user.first_name|default:"Professor" }}!</span>
+    <div class="mobile-icons d-flex align-items-center gap-3">
+      <i class="bi bi-bell"></i>
+      <form method="post" action="{% url 'logout' %}" class="m-0 p-0 d-inline-flex">
+        {% csrf_token %}
+        <button type="submit" class="p-0 border-0 bg-transparent text-white d-flex align-items-center" style="line-height: 1;">
+          <i class="bi bi-person-circle" style="font-size: 24px;"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div class="px-3 text-center mt-4" style="flex-grow: 1;">
+
+    <!-- Pílula de título -->
+    <div class="mb-4 text-center">
+      <span style="display: inline-block; background-color: #6D1D20; color: white; padding: 10px 40px; border-radius: 20px; font-weight: 700; font-family: 'Museo Sans', sans-serif; font-size: 16px;">
+        Meus alunos
+      </span>
+    </div>
+
+    <!-- Barra de busca + filtrar -->
+    <form method="get" class="d-flex gap-2 mb-4">
+      <input type="text" name="q" value="{{ termo_busca }}" placeholder="Buscar por nome..."
+        style="flex: 1; border: 1px solid #C4C4C4; border-radius: 20px; padding: 8px 16px; font-family: 'Museo Sans', sans-serif; font-size: 13px; background: #fff;">
+      <button type="submit"
+        style="background-color: #6D1D20; color: white; border: none; border-radius: 20px; padding: 8px 18px; font-family: 'Museo Sans', sans-serif; font-size: 13px; font-weight: 700;">
+        Filtrar
+      </button>
+    </form>
+
+    <!-- Lista de alunos -->
+    <div style="border: 1px solid #C4C4C4; border-radius: 20px; padding: 12px; text-align: left; background: transparent;">
+
+      {% if alunos %}
+        {% for aluno in alunos %}
+        <div style="background-color: #DCDCDC; border-radius: 16px; padding: 14px 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-family: 'Museo Sans', sans-serif; font-size: 13px; font-weight: 700; color: #111; margin-bottom: 4px;">
+              {{ aluno.nome_completo }}
+            </div>
+            <div style="font-family: 'Museo Sans', sans-serif; font-size: 11px; font-weight: 500; color: #555; margin-bottom: 4px;">
+              <i class="bi bi-person" style="margin-right: 4px;"></i> {{ aluno.curso_periodo|default:"—" }}
+            </div>
+            <div style="font-family: 'Museo Sans', sans-serif; font-size: 11px; font-weight: 500; color: #555;">
+              <i class="bi bi-calendar-event" style="margin-right: 4px;"></i> {{ aluno.open_cases.count }} pacientes ativos
+            </div>
+          </div>
+          <div>
+            <a href="{% url 'teacher:aluno_detalhe' aluno.pk %}"
+              style="background-color: #419F0D; color: white; padding: 8px 16px; border-radius: 12px; font-family: 'Museo Sans', sans-serif; font-size: 12px; font-weight: 700; text-decoration: none; white-space: nowrap;">
+              Ver
+            </a>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <!-- Mocks fixos se banco vazio -->
+        {% for nome, periodo, pacientes in placeholder_alunos|default:"" %}
+        <div style="background-color: #DCDCDC; border-radius: 16px; padding: 14px 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-family: 'Museo Sans', sans-serif; font-size: 13px; font-weight: 700; color: #111; margin-bottom: 4px;">{{ nome }}</div>
+            <div style="font-family: 'Museo Sans', sans-serif; font-size: 11px; color: #555; margin-bottom: 4px;"><i class="bi bi-person" style="margin-right:4px;"></i> {{ periodo }}</div>
+            <div style="font-family: 'Museo Sans', sans-serif; font-size: 11px; color: #555;"><i class="bi bi-calendar-event" style="margin-right:4px;"></i> {{ pacientes }} pacientes ativos</div>
+          </div>
+          <div><span style="background-color: #419F0D; color: white; padding: 8px 16px; border-radius: 12px; font-size: 12px; font-weight: 700;">Ver</span></div>
+        </div>
+        {% empty %}
+        <p style="text-align:center; color:#888; font-family:'Museo Sans',sans-serif;">Nenhum aluno encontrado.</p>
+        {% endfor %}
+      {% endif %}
+
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     DESKTOP — Meus alunos
+     ══════════════════════════════════════ -->
+<div class="d-none d-md-block">
 <div class="list-panel-title">Meus alunos</div>
 
 <form class="list-filters" method="get">
@@ -59,4 +151,7 @@
 {% else %}
 {% include "components/empty_state.html" with message="Nenhum aluno encontrado para os filtros aplicados." %}
 {% endif %}
+</div>
+
 {% endblock %}
+

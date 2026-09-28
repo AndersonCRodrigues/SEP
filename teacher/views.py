@@ -486,7 +486,7 @@ def student_feedbacks(user, student):
 
 
 class PresencaView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
-    template_name = "teacher/presenca.html"
+    template_name = "teacher/presenca_feedback.html"
 
     def test_func(self):
         return self.request.user.role in (

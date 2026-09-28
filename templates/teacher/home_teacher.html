@@ -10,27 +10,135 @@
 <link rel="stylesheet" href="{% static 'core/css/components/home_panel.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/components/activity_list.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/components/calendar.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/teacher_home.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/patient_home.css' %}">
 {% endblock %}
 
 {% block page_header %}{% endblock %}
-
 {% block content %}
-<section class="greeting">
-  <h1 class="greeting-title">Olá, {{ request.user.first_name|default:"professor" }}!</h1>
-  <p class="greeting-subtitle">Página inicial - Professor</p>
-</section>
-
-{% include "components/summary_list.html" with title="Resumo" id="summary-title" %}
-
-<div class="panel">
-  <section class="activities">
-    <h2>Atividades recentes</h2>
-    {% include "components/activity_list.html" %}
+<div class="d-none d-md-block">
+  <section class="greeting">
+    <h1 class="greeting-title">Olá, {{ request.user.first_name|default:"professor" }}!</h1>
+    <p class="greeting-subtitle">Página inicial - Professor</p>
   </section>
 
-  <section class="calendar">
-    <h2>Calendário</h2>
-    {% include "components/calendar_month.html" %}
-  </section>
+  {% include "components/summary_list.html" with title="Resumo" id="summary-title" %}
+
+  <div class="panel">
+    <section class="activities">
+      <h2>Atividades recentes</h2>
+      {% include "components/activity_list.html" %}
+    </section>
+
+    <section class="calendar">
+      <h2>Calendário</h2>
+      {% include "components/calendar_month.html" %}
+    </section>
+  </div>
+</div>
+
+<div class="d-block d-md-none">
+  <!-- Fundo Vinho -->
+  <div class="mobile-maroon-bg">
+    
+    <!-- Header Mobile -->
+    <div class="mobile-header">
+      <a href="{% url 'teacher:home' %}" class="mobile-back">Voltar</a>
+      <span class="mobile-greeting">Olá, {{ request.user.first_name|default:"Professor" }}!</span>
+      <div class="mobile-icons d-flex align-items-center gap-3">
+        <i class="bi bi-bell"></i>
+        <form method="post" action="{% url 'logout' %}" class="m-0 p-0 d-inline-flex">
+          {% csrf_token %}
+          <button type="submit" class="p-0 border-0 bg-transparent text-white d-flex align-items-center" style="line-height: 1;">
+            <i class="bi bi-person-circle" style="font-size: 24px;"></i>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Estatísticas (Padrão Paciente) -->
+    <div class="px-3 pt-3 pb-1">
+      <div class="patient-stats-grid">
+        {% for indicator in indicators|slice:":3" %}
+        <div class="p-stat-box {% cycle 'p-stat-green' 'p-stat-red' 'p-stat-orange' %}">
+          <div class="p-stat-label">{{ indicator.label|linebreaksbr }}</div>
+          <div class="p-stat-value">{{ indicator.value }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Alerta Pendente (Padrão Paciente) -->
+    <div class="px-3 mt-4 pb-4">
+      <div class="p-alert-box">
+        <div class="p-alert-header">
+          <i class="bi bi-exclamation-triangle-fill"></i> Atenção pendente
+        </div>
+        <p class="p-alert-text">Avaliação de desempenho de <strong>2 alunos</strong> em aberto</p>
+        <button class="p-alert-btn" onclick="window.location.href='{% url 'teacher:avaliacoes' %}'">Avaliar orientados</button>
+      </div>
+    </div>
+  </div> <!-- fim fundo vinho -->
+
+  <!-- Conteúdo abaixo do fundo vinho -->
+  <div class="px-3 mt-4">
+    <!-- Opções de Serviço -->
+    <div class="d-flex justify-content-between align-items-baseline mb-2">
+      <h2 class="p-section-title">Opções de Serviço</h2>
+      <a href="#" class="p-see-all">Ver todos<i class="bi bi-chevron-right ms-1" style="font-size:10px;"></i></a>
+    </div>
+
+    <div class="patient-mobile-nav">
+      <a href="{% url 'teacher:home' %}" class="p-nav-tab active">Página inicial</a>
+      <a href="{% url 'teacher:alunos' %}" class="p-nav-tab">Meus alunos</a>
+      <a href="{% url 'teacher:prontuarios' %}" class="p-nav-tab">Prontuários</a>
+      <a href="{% url 'teacher:presenca' %}" class="p-nav-tab">Presença</a>
+      <a href="{% url 'teacher:encaminhamentos' %}" class="p-nav-tab">Encaminhar</a>
+      <a href="{% url 'teacher:avaliacoes' %}" class="p-nav-tab">Avaliações</a>
+    </div>
+
+    <div class="p-nav-divider"></div>
+
+    <!-- Calendário -->
+    <h3 class="p-activity-section-title">Calendário</h3>
+    <div class="mb-2">
+      <style>
+        .d-md-none .cal-legend { display: none !important; }
+      </style>
+      {% include "components/calendar_month.html" %}
+    </div>
+    
+    <div class="cal-legend-pill mt-2 mb-4" style="background:#f2f2f2;">
+      <span class="legend-item green"><span class="cal-dot dot-green"></span> Disponível</span>
+      <span class="legend-item red"><span class="cal-dot dot-red"></span> Agendado</span>
+      <span class="legend-item orange"><span class="cal-dot dot-orange"></span> Pendente</span>
+    </div>
+
+    <!-- Atividades Recentes -->
+    <h3 class="p-activity-section-title mt-4">Atividades recentes</h3>
+    {% for activity in activities %}
+    <div class="p-activity-card">
+      <div class="p-activity-header">
+        <span class="p-activity-category">{{ activity.kind|capfirst|default:"Geral" }}</span>
+        {% if activity.label %}
+        <span class="p-badge {% if activity.level == 'success' %}p-badge-success{% elif activity.level == 'warning' %}p-badge-warning{% else %}p-badge-secondary{% endif %}">{{ activity.label }}</span>
+        {% endif %}
+      </div>
+      <div class="p-activity-title">{{ activity.title }}</div>
+      {% if activity.detail %}
+      <div class="p-activity-desc">{{ activity.detail }}</div>
+      {% endif %}
+      <div class="p-activity-divider"></div>
+      <a href="{{ activity.url }}" class="p-activity-footer">
+        <i class="bi bi-chevron-right"></i>
+      </a>
+    </div>
+    {% empty %}
+    <div class="p-activity-card text-center text-muted">
+      Nenhuma atividade recente.
+    </div>
+    {% endfor %}
+
+  </div>
 </div>
 {% endblock %}
