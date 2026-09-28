@@ -9,9 +9,25 @@
 {% endblock %}
 
 {% block content %}
-<div class="list-panel-title">Meu perfil</div>
+<div class="mobile-only">
+  <div class="mobile-maroon-bg">
+    {% url 'administration:home' as back_url %}
+    {% include "components/mobile_header.html" %}
+  </div>
 
-<div class="figma-form-container">
+  {% include "components/mobile_title.html" with title="Meu perfil" %}
+</div>
+
+<div class="list-panel-title desktop-page">Meu perfil</div>
+
+<div class="figma-form-container mobile-column">
   {% include "components/form.html" with submit_label="Salvar" %}
+</div>
+{% endblock %}
+
+{% block footer %}
+{{ block.super }}
+<div class="mobile-only">
+  {% include "components/mobile_footer.html" %}
 </div>
 {% endblock %}

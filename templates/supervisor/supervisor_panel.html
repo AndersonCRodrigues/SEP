@@ -1,40 +1,45 @@
-{% extends "base.html" %}
+{% extends "supervisor/base_coordinator.html" %}
+{% load static %}
 
-{% block title %}Painel do Coordenador | Sistema SEP{% endblock %}
+{% block title %}Usuários cadastrados{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'core/css/components/list_panel.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/hover_lift.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/list_filters.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/coordenacao/coordenacao_lists.css' %}">
+{% endblock %}
+
+{% block page_header %}{% endblock %}
 
 {% block content %}
-<header class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="h3 mb-0">Usuários Cadastrados</h1>
-        <a href="{% url 'students:cadastrar' %}" class="btn btn-primary btn-sm">
-        <i class="bi bi-person-plus"></i> Cadastrar Aluno</a>
-    <a href="{% url 'teacher:cadastrar' %}">Cadastrar Professor
-    </a>
-</header>
+<div class="list-toolbar">
+  <h1 class="list-toolbar-title">Usuários cadastrados</h1>
+  <span class="list-toolbar-actions">
+    <a class="btn-acao" href="{% url 'students:cadastrar' %}">+ Cadastrar aluno</a>
+    <a class="btn-acao" href="{% url 'teacher:cadastrar' %}">+ Cadastrar professor</a>
+  </span>
+</div>
 
-<section class="card">
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-striped align-middle mb-0">
-                <thead>
-                    <tr>
-                        <th scope="col">Nome</th>
-                        <th scope="col">Papel</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for usuario in usuarios_listados %}
-                    <tr>
-                        <td>{{ usuario.get_full_name }}</td>
-                        <td><span class="badge text-bg-primary">{{ usuario.get_role_display }}</span></td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="2" class="text-body-secondary">Nenhum usuário cadastrado.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+{% if usuarios_listados %}
+<div class="list-panel">
+  <div class="list-panel-header user-grid">
+    <div>Nome:</div>
+    <div></div>
+  </div>
+
+  <div class="list-panel-container">
+    {% for usuario in usuarios_listados %}
+    <div class="list-panel-row user-grid hover-lift">
+      <div>{{ usuario.get_full_name }}</div>
+      <div class="text-end">
+        <span class="badge-situacao neutra">{{ usuario.get_role_display }}</span>
+      </div>
     </div>
-</section>
+    {% endfor %}
+  </div>
+</div>
+{% else %}
+{% include "components/empty_state.html" with message="Nenhum usuário cadastrado." %}
+{% endif %}
 {% endblock %}

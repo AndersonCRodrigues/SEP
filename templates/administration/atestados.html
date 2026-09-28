@@ -9,9 +9,18 @@
 {% endblock %}
 
 {% block content %}
-<h1 class="page-banner">Emitir atestados</h1>
+<div class="mobile-only">
+  <div class="mobile-maroon-bg">
+    {% url 'administration:home' as back_url %}
+    {% include "components/mobile_header.html" %}
+  </div>
 
-<div class="certificates">
+  {% include "components/mobile_title.html" with title="Emitir atestados" %}
+</div>
+
+<h1 class="page-banner desktop-page">Emitir atestados</h1>
+
+<div class="certificates mobile-column">
   <div class="certificate-form">
     {% include "components/form.html" with form=form submit_label="Gerar atestado em PDF" %}
   </div>
@@ -33,6 +42,13 @@
       {% endfor %}
     </ul>
   </div>
+</div>
+{% endblock %}
+
+{% block footer %}
+{{ block.super }}
+<div class="mobile-only">
+  {% include "components/mobile_footer.html" %}
 </div>
 {% endblock %}
 

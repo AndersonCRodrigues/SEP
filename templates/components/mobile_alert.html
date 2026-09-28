@@ -1,0 +1,10 @@
+<div class="mobile-alert mobile-column">
+  <p class="mobile-alert-title">
+    <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
+    {{ alert_title }}
+  </p>
+  <p class="mobile-alert-text">{{ alert_message }}</p>
+  {% if alert_url %}
+  <a class="mobile-button mobile-button-block" href="{{ alert_url }}">{{ alert_action }}</a>
+  {% endif %}
+</div>

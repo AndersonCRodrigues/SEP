@@ -47,7 +47,7 @@ recebidos. A referência não traz tela de detalhe.
 | Role | O que acontece |
 |---|---|
 | Aluno | Única role com acesso às seis telas |
-| Professor e Supervisor | Têm as telas equivalentes na própria área (`teacher:triagens`, `teacher:prontuarios`, `teacher:presenca`) |
+| Professor e Supervisor | Têm as telas equivalentes na própria área (`teacher:encaminhamentos`, `teacher:prontuarios`, `teacher:presenca`) |
 | Administrativo e Paciente | Sem acesso; o `handler403` redireciona para a home da própria role |
 | Anônimo | Redirecionado para `/login/` com retorno para a página pedida |
 
@@ -90,9 +90,9 @@ redirecionamento do `handler403`; sessão expirada cai no login com `next`.
 
 1. **Designação da triagem ao aluno.** A tela de "Triagens a realizar" mostra
    quem encaminhou e quando, mas não existe vínculo entre paciente e aluno antes
-   da ficha nascer. A tela do Professor que faria essa designação
-   (`teacher:triagem_definir`) também é mock e não grava nada. Falta definir
-   quem designa, o que fica registrado e se há prazo.
+   da ficha nascer. O Professor já designa o aluno responsável pelo atendimento
+   em `teacher:encaminhamentos`, que grava o `CaseAssignment` — o que falta é a
+   designação de quem **realiza a triagem**, antes da ficha existir.
 2. **Confirmação do encaminhamento.** A referência mostra "Ativo" e "Aguardando
    confirmação", mas o `CaseAssignment` nasce ativo e não guarda quem
    encaminhou. Falta definir quem confirma, em quanto tempo e o que acontece se

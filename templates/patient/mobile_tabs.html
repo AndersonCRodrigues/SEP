@@ -1,0 +1,7 @@
+{% with current=request.resolver_match.url_name %}
+<a class="mobile-tab {% if current == 'home' %}active{% endif %}" href="{% url 'patient:home' %}">Página inicial</a>
+<a class="mobile-tab {% if current == 'triagens' or current == 'triagem_detalhe' %}active{% endif %}" href="{% url 'patient:triagens' %}">Triagens</a>
+<a class="mobile-tab {% if current == 'agendamentos' or current == 'solicitar_horario' %}active{% endif %}" href="{% url 'patient:agendamentos' %}">Agendamentos</a>
+<a class="mobile-tab {% if current == 'historico' or current == 'historico_detalhe' %}active{% endif %}" href="{% url 'patient:historico' %}">Histórico</a>
+<a class="mobile-tab {% if current == 'contato' %}active{% endif %}" href="{% url 'patient:contato' %}">Contato</a>
+{% endwith %}

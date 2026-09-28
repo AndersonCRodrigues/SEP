@@ -11,6 +11,36 @@
 {% endblock %}
 
 {% block content %}
+<!-- ══════════════════════════════════════
+     MOBILE
+     ══════════════════════════════════════ -->
+<div class="mobile-page">
+  <div class="mobile-maroon-bg">
+    {% url 'administration:home' as back_url %}
+    {% include "components/mobile_header.html" %}
+  </div>
+
+  {% include "components/mobile_title.html" with title="Painel de gestão" %}
+
+  <div class="mobile-content">
+    {% for usuario in atendimentos_ou_usuarios %}
+    {% include "components/mobile_row.html" with variant="white" name=usuario.get_full_name person=usuario.email label=usuario.get_role_display %}
+    {% empty %}
+    <p class="mobile-empty">Nenhum registro encontrado.</p>
+    {% endfor %}
+
+    <div class="mobile-actions">
+      <a class="mobile-button" href="{% url 'administration:cadastrar_paciente' %}">Cadastrar paciente</a>
+    </div>
+  </div>
+
+  {% include "components/mobile_footer.html" %}
+</div>
+
+<!-- ══════════════════════════════════════
+     DESKTOP
+     ══════════════════════════════════════ -->
+<div class="desktop-page">
 <div class="list-toolbar">
   <h1 class="list-toolbar-title">Painel de gestão administrativa</h1>
   <a class="btn-acao" href="{% url 'administration:cadastrar_paciente' %}">+ Cadastrar paciente</a>
@@ -41,4 +71,5 @@
 {% else %}
 {% include "components/empty_state.html" with message="Nenhum registro encontrado." %}
 {% endif %}
+</div>
 {% endblock %}

@@ -1,0 +1,729 @@
+/* As caixas das telas de celular: indicadores, alerta, cartao de atividade,
+   linha de lista, caixa de informacao, pilula de titulo e botao pilula. Sao os
+   mesmos desenhos nas seis roles — o que muda e o texto.
+
+   Os valores vem das pastas de referencia em docs e do que ja existia em
+   html-css-juliana (patient_home.css e teacher_home.css, que escreviam as
+   mesmas caixas com dois nomes diferentes). A coluna de 340px centralizada e
+   de la: e ela que da o respiro lateral no celular.
+   Acompanha os componentes de mobile em templates/components. */
+
+@media (max-width: 767.98px) {
+
+  .mobile-column {
+    width: 340px;
+    max-width: 100%;
+    margin: 0 auto;
+  }
+
+  /* ── Indicadores: tres pilulas ── */
+  .mobile-stats {
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+  }
+
+  .mobile-stat {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 12px 8px;
+    border-radius: 16px;
+    text-align: center;
+    font-family: var(--font-main);
+    color: #FFFFFF;
+  }
+
+  .mobile-stat-1 { background: #556B2F; }
+  .mobile-stat-2 { background: #A92024; }
+  .mobile-stat-3 { background: #BA681F; }
+
+  .mobile-stat-label {
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 4px;
+  }
+
+  .mobile-stat-value {
+    font-size: 22px;
+    font-weight: 900;
+    line-height: 1;
+  }
+
+  /* ── Cartao de alerta ── */
+  .mobile-stats + .mobile-alert {
+    margin-top: 16px;
+  }
+
+  .mobile-alert {
+    padding: 16px;
+    background: #FFFFFF;
+    border: 2px solid #D9A01B;
+    border-radius: 12px;
+  }
+
+  .mobile-alert-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 8px 0;
+    font-family: var(--font-main);
+    font-size: 16px;
+    font-weight: 700;
+    color: #D9A01B;
+  }
+
+  .mobile-alert-text {
+    margin: 0 0 16px 0;
+    font-family: var(--font-main);
+    font-size: 13px;
+    line-height: 1.4;
+    color: #333333;
+  }
+
+  /* ── Botao pilula ── */
+  .mobile-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 32px;
+    border: none;
+    border-radius: 20px;
+    background: var(--sep-maroon);
+    font-family: var(--font-main);
+    font-size: 14px;
+    font-weight: 700;
+    color: #FFFFFF;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .mobile-button:hover {
+    background: var(--sep-maroon-dark);
+    color: #FFFFFF;
+  }
+
+  .mobile-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .mobile-button-block {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    text-align: center;
+  }
+
+  .mobile-actions {
+    display: flex;
+    justify-content: center;
+    margin: 24px 0;
+  }
+
+  /* ── Pilula de titulo das telas internas ── */
+  .mobile-title {
+    display: block;
+    margin: 24px auto;
+    padding: 12px 24px;
+    border-radius: 30px;
+    background: var(--sep-maroon);
+    font-family: var(--font-main);
+    font-size: 20px;
+    font-weight: 800;
+    color: #FFFFFF;
+    text-align: center;
+  }
+
+  /* ── Cartao de atividade ── */
+  .mobile-card {
+    display: block;
+    margin-bottom: 12px;
+    padding: 12px 16px;
+    background: #DDDDDD;
+    border-radius: 16px;
+    text-decoration: none;
+  }
+
+  .mobile-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .mobile-card-section {
+    font-family: var(--font-main);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--sep-maroon);
+  }
+
+  .mobile-card-title {
+    margin: 6px 0 2px 0;
+    font-family: var(--font-main);
+    font-size: 15px;
+    font-weight: 700;
+    color: #000000;
+  }
+
+  .mobile-card-detail {
+    font-family: var(--font-main);
+    font-size: 14px;
+    color: #333333;
+  }
+
+  .mobile-card-detail i {
+    margin-right: 6px;
+    color: #777777;
+  }
+
+  .mobile-card-rule {
+    margin: 10px 10px 6px 10px;
+    border-top: 1px solid var(--sep-maroon);
+  }
+
+  .mobile-card-go {
+    display: block;
+    padding-right: 12px;
+    text-align: right;
+    text-decoration: none;
+  }
+
+  .mobile-card-go i {
+    font-size: 20px;
+    font-weight: 900;
+    color: var(--sep-maroon);
+  }
+
+  /* ── Linha de lista das telas internas ── */
+  .mobile-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+    padding: 14px 16px;
+    background: #DCDCDC;
+    border-radius: 16px;
+    text-decoration: none;
+  }
+
+  .mobile-row-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+  }
+
+  .mobile-row-name {
+    padding-bottom: 6px;
+    border-bottom: 1px solid #C8C8C8;
+    font-family: var(--font-main);
+    font-size: 14px;
+    font-weight: 800;
+    color: #333333;
+  }
+
+  .mobile-row-code {
+    margin-top: -4px;
+    font-family: var(--font-main);
+    font-size: 11px;
+    color: #777777;
+  }
+
+  /* Variante branca com borda: fila de trabalho, onde a linha tem acao. */
+  .mobile-row-white {
+    background: #FFFFFF;
+    border: 1px solid #DDDDDD;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  }
+
+  .mobile-row-white .mobile-row-name {
+    border-bottom-color: #E6E6E6;
+  }
+
+  .mobile-row-action {
+    flex-shrink: 0;
+    padding: 8px 18px;
+    border-radius: 10px;
+    background: #3AA600;
+    font-family: var(--font-main);
+    font-size: 13px;
+    font-weight: 700;
+    color: #FFFFFF;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .mobile-row-action:hover {
+    background: #2E8A00;
+    color: #FFFFFF;
+  }
+
+  /* Moldura da lista: caixa branca de borda cinza em volta das linhas. */
+  .mobile-list {
+    padding: 16px 12px 4px 12px;
+    background: #FFFFFF;
+    border: 2px solid #A59C97;
+    border-radius: 16px;
+  }
+
+  .mobile-list .mobile-row {
+    width: auto;
+  }
+
+  .mobile-row-detail {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-main);
+    font-size: 12px;
+    font-weight: 500;
+    color: #777777;
+  }
+
+  /* ── Selos ── */
+  .mobile-badge {
+    display: inline-block;
+    width: 90px;
+    padding: 4px 0;
+    border-radius: 12px;
+    font-family: var(--font-main);
+    font-size: 11px;
+    font-weight: 800;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .mobile-badge-ok { background: #A7D0A1; color: #2A6E24; }
+  .mobile-badge-warning { background: #E4C89A; color: #9A651D; }
+  .mobile-badge-danger { background: #DBB0B4; color: #AC373E; }
+  .mobile-badge-neutral { background: #D5D5D5; color: #555555; }
+
+  /* Na linha de lista o selo e cheio, nao pastel. */
+  .mobile-row .mobile-badge {
+    width: auto;
+    padding: 8px 16px;
+    font-size: 12px;
+    color: #FFFFFF;
+  }
+
+  .mobile-row .mobile-badge-ok { background: #419F0D; }
+  .mobile-row .mobile-badge-warning { background: #D68B13; }
+  .mobile-row .mobile-badge-danger { background: #D93B3B; }
+  .mobile-row .mobile-badge-neutral { background: #8C8581; }
+
+  /* ── Fim de fluxo: selo verde, titulo e explicacao ── */
+  .mobile-success {
+    width: 120px;
+    height: 120px;
+    margin: 20px auto;
+    border-radius: 50%;
+    background: #3AA91A;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mobile-success i {
+    font-size: 70px;
+    color: #FFFFFF;
+    -webkit-text-stroke: 3px #FFFFFF;
+  }
+
+  .mobile-success-title {
+    margin-bottom: 10px;
+    font-family: var(--font-main);
+    font-size: 22px;
+    font-weight: 800;
+    color: #000000;
+    text-align: center;
+  }
+
+  .mobile-success-text {
+    margin: 0 auto 30px auto;
+    padding: 0 10px;
+    font-family: var(--font-main);
+    font-size: 13px;
+    font-weight: 500;
+    color: #333333;
+    text-align: center;
+  }
+
+  /* ── Cartao de pessoa: avatar, nome e papel ── */
+  .mobile-person {
+    margin-bottom: 20px;
+    padding: 24px 16px;
+    background: #DCDCDC;
+    border-radius: 16px;
+    text-align: center;
+  }
+
+  .mobile-avatar {
+    width: 50px;
+    height: 50px;
+    margin: 0 auto 12px auto;
+    border-radius: 50%;
+    background: #E25C5C;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-main);
+    font-size: 18px;
+    font-weight: 700;
+    color: #FFFFFF;
+  }
+
+  .mobile-person-name {
+    margin-bottom: 4px;
+    font-family: var(--font-main);
+    font-size: 16px;
+    font-weight: 800;
+    color: #000000;
+  }
+
+  .mobile-person-role {
+    font-family: var(--font-main);
+    font-size: 12px;
+    font-weight: 500;
+    color: #555555;
+  }
+
+  /* ── Cartao de canais: titulo vinho e linhas com icone ── */
+  .mobile-panel {
+    margin-bottom: 20px;
+    padding: 20px 16px;
+    background: #DCDCDC;
+    border-radius: 16px;
+  }
+
+  .mobile-panel-title {
+    margin: 0 0 16px 0;
+    font-family: var(--font-main);
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--sep-maroon);
+  }
+
+  .mobile-panel-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+    font-family: var(--font-main);
+    font-size: 14px;
+    color: #333333;
+    text-decoration: none;
+  }
+
+  .mobile-panel-row:last-child {
+    margin-bottom: 0;
+  }
+
+  .mobile-panel-row i {
+    font-size: 18px;
+    color: #000000;
+  }
+
+  /* ── Caixa de informacao ── */
+  .mobile-info {
+    margin-bottom: 32px;
+    padding: 20px 16px;
+    background: #8E8989;
+    border-radius: 16px;
+  }
+
+  .mobile-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #FFFFFF;
+    font-family: var(--font-main);
+    font-size: 13px;
+  }
+
+  .mobile-info-row:last-child {
+    margin-bottom: 0;
+  }
+
+  .mobile-info-label {
+    font-weight: 800;
+    color: #FFFFFF;
+  }
+
+  .mobile-info-value {
+    color: #EEEEEE;
+    text-align: right;
+  }
+
+  /* Variante clara: resumo sem separador, texto escuro. */
+  .mobile-info-light {
+    background: #DCDCDC;
+    padding: 14px 16px;
+  }
+
+  .mobile-info-light .mobile-info-row {
+    margin-bottom: 6px;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+
+  .mobile-info-light .mobile-info-label {
+    font-weight: 500;
+    color: #333333;
+  }
+
+  .mobile-info-light .mobile-info-value {
+    color: #333333;
+  }
+
+  /* ── Calendario dentro da faixa vinho (Aluno e Professor) ── */
+  .mobile-maroon-bg .calendar-card {
+    width: 332px;
+    max-width: calc(100% - 24px);
+    margin: 8px auto 16px auto;
+    padding: 14px 16px;
+    border-radius: 20px;
+    box-sizing: border-box;
+  }
+
+  .mobile-maroon-bg .cal-legend {
+    width: auto;
+    max-width: calc(100% - 24px);
+    margin: 0 auto;
+    padding: 6px 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    background: #FFFFFF;
+    border-radius: 20px;
+    box-sizing: border-box;
+  }
+
+  /* ── Formulario ── */
+  .mobile-form p {
+    margin: 0 0 16px 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .mobile-form label {
+    margin-bottom: 6px;
+    font-family: var(--font-main);
+    font-size: 13px;
+    font-weight: 800;
+    color: #333333;
+  }
+
+  .mobile-form input,
+  .mobile-form select,
+  .mobile-form textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px 14px;
+    background: #FFFFFF;
+    border: 1px solid #B6ACA7;
+    border-radius: 12px;
+    font-family: var(--font-main);
+    font-size: 15px;
+    color: #333333;
+    outline: none;
+  }
+
+  .mobile-form input:focus,
+  .mobile-form select:focus,
+  .mobile-form textarea:focus {
+    border-color: var(--sep-maroon);
+  }
+
+  .mobile-form ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Escolha: o rotulo envolve o radio, entao ele e que vira a caixa. */
+  .mobile-form label:has(input[type="radio"]),
+  .mobile-form label:has(input[type="checkbox"]) {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    padding: 12px 14px;
+    background: #FFFFFF;
+    border: 1px solid #B6ACA7;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 500;
+    color: #333333;
+  }
+
+  .mobile-form label:has(input[type="radio"]:checked),
+  .mobile-form label:has(input[type="checkbox"]:checked) {
+    border-color: var(--sep-maroon);
+    background: #F7F1F1;
+  }
+
+  .mobile-form input[type="radio"],
+  .mobile-form input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    padding: 0;
+    accent-color: var(--sep-maroon);
+  }
+
+  .mobile-form .helptext,
+  .mobile-form .errorlist {
+    font-size: 12px;
+  }
+
+  .mobile-form .errorlist {
+    list-style: none;
+    margin: 6px 0 0 0;
+    padding: 0;
+    color: #CC2A2A;
+    font-weight: 600;
+  }
+
+  .mobile-notice {
+    margin-bottom: 20px;
+    padding: 14px 16px;
+    background: #FFFFFF;
+    border: 1px solid #D9A01B;
+    border-radius: 12px;
+    font-family: var(--font-main);
+    font-size: 13px;
+    color: #333333;
+  }
+
+  /* ── Busca: campo pilula e botao Filtrar na mesma linha ── */
+  .mobile-filter {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .mobile-filter-field {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    padding: 0 14px;
+    background: #FFFFFF;
+    border: 1px solid #8C8581;
+    border-radius: 20px;
+  }
+
+  .mobile-filter-field i {
+    font-size: 12px;
+    color: #777777;
+  }
+
+  .mobile-filter-field input,
+  .mobile-filter-field select {
+    flex: 1;
+    min-width: 0;
+    padding: 8px 0;
+    border: none;
+    background: transparent;
+    font-family: var(--font-main);
+    font-size: 13px;
+    color: #333333;
+    outline: none;
+  }
+
+  .mobile-filter-button {
+    flex-shrink: 0;
+    padding: 8px 20px;
+    border: none;
+    border-radius: 20px;
+    background: var(--sep-maroon);
+    font-family: var(--font-main);
+    font-size: 13px;
+    font-weight: 700;
+    color: #FFFFFF;
+    cursor: pointer;
+  }
+
+  /* ── Tiles: grade de duas colunas com circulo de situacao (Salas) ── */
+  .mobile-tiles {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin: 0 auto;
+    padding: 0;
+    list-style: none;
+  }
+
+  .mobile-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 10px;
+    background: #DCDCDC;
+    border-radius: 16px;
+    text-align: center;
+  }
+
+  .mobile-tile-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 70px;
+    height: 70px;
+    margin-bottom: 8px;
+    border-radius: 50%;
+    background: #8C8581;
+    font-size: 28px;
+    color: #000000;
+  }
+
+  .mobile-tile-success .mobile-tile-icon { background: #3AA600; }
+  .mobile-tile-danger .mobile-tile-icon { background: #C1464C; }
+  .mobile-tile-warning .mobile-tile-icon { background: #DE8B0E; }
+
+  .mobile-tile-name {
+    margin: 0;
+    font-family: var(--font-main);
+    font-size: 17px;
+    font-weight: 800;
+    color: #000000;
+  }
+
+  .mobile-tile-status {
+    font-family: var(--font-main);
+    font-size: 11px;
+    font-weight: 700;
+    color: #555555;
+  }
+
+  .mobile-tile-success .mobile-tile-status { color: #3AA600; }
+  .mobile-tile-danger .mobile-tile-status { color: #C1464C; }
+  .mobile-tile-warning .mobile-tile-status { color: #DE8B0E; }
+
+  .mobile-tile-note {
+    font-family: var(--font-main);
+    font-size: 11px;
+    color: #777777;
+  }
+
+  /* ── Estado vazio ── */
+  .mobile-empty {
+    padding: 32px 16px;
+    text-align: center;
+    font-family: var(--font-main);
+    font-size: 14px;
+    color: #666666;
+  }
+}

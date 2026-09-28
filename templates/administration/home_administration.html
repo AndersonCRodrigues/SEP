@@ -12,22 +12,49 @@
 {% endblock %}
 
 {% block content %}
-<section class="greeting">
-  <h1 class="greeting-title">Olá, secretaria!</h1>
-  <p class="greeting-subtitle">Página inicial - Administrativo</p>
-</section>
+<!-- ══════════════════════════════════════
+     MOBILE
+     ══════════════════════════════════════ -->
+<div class="mobile-page">
+  <div class="mobile-maroon-bg">
+    {% url 'administration:home' as back_url %}
+    {% include "components/mobile_header.html" %}
+    {% include "components/mobile_stats.html" %}
 
-{% include "components/summary_list.html" with title="Resumo operacional" id="summary-title" %}
+    {% if pending_alert %}
+    {% include "components/mobile_alert.html" with alert_title=pending_alert.title alert_message=pending_alert.message alert_url=pending_alert.url alert_action=pending_alert.action %}
+    {% endif %}
+  </div>
 
-<div class="panel">
-  <section class="activities">
-    <h2>Atividades recentes</h2>
-    {% include "components/activity_list.html" %}
+  <div class="mobile-content">
+    {% include "components/mobile_tabs.html" with tabs_items="administration/mobile_tabs.html" %}
+    {% include "components/mobile_activity.html" with empty_message="Nenhuma atividade recente." %}
+  </div>
+
+  {% include "components/mobile_footer.html" %}
+</div>
+
+<!-- ══════════════════════════════════════
+     DESKTOP
+     ══════════════════════════════════════ -->
+<div class="desktop-page">
+  <section class="greeting">
+    <h1 class="greeting-title">Olá, secretaria!</h1>
+    <p class="greeting-subtitle">Página inicial - Administrativo</p>
   </section>
 
-  <section class="calendar">
-    <h2>Calendário</h2>
-    {% include "components/calendar_month.html" with legend_label="Com atendimento" %}
-  </section>
+  {% include "components/summary_list.html" with title="Resumo operacional" id="summary-title" %}
+
+  <div class="panel">
+    <section class="activities">
+      <h2>Atividades recentes</h2>
+      {% include "components/activity_list.html" %}
+    </section>
+
+    <section class="calendar">
+      <h2>Calendário</h2>
+      {% include "components/calendar_month.html" with legend_label="Com atendimento" %}
+    </section>
+  </div>
 </div>
 {% endblock %}

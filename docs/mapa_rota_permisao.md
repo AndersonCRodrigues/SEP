@@ -80,17 +80,24 @@ O `perfil/` continua no grupo do Django enquanto as outras rotas do Aluno confer
 | alunos/ | AlunosOrientacaoView | UserPassesTestMixin | PROFESSOR, SUPERVISOR |
 | alunos/\<pk\>/ | AlunoDetalheView | UserPassesTestMixin | PROFESSOR, SUPERVISOR |
 | prontuarios/ | ProntuariosView | UserPassesTestMixin | PROFESSOR, SUPERVISOR |
-| prontuarios/\<pk\>/ | ProntuarioDetalheView | UserPassesTestMixin | PROFESSOR, SUPERVISOR; sem link na interface, é MOCK |
-| presenca/ | PresencaFeedbackView | UserPassesTestMixin | PROFESSOR, SUPERVISOR |
+| prontuarios/\<pk\>/ | ProntuarioDetalheView | UserPassesTestMixin | PROFESSOR, SUPERVISOR; o cartão de atividade da home aponta para cá, mas a view bloqueia o acesso com mensagem enquanto o fluxo de confirmação é MOCK |
+| presenca/ | PresencaView | UserPassesTestMixin | PROFESSOR, SUPERVISOR |
 | presenca/marcar/\<aluno_id\>/ | marcar_presenca | login_required + Attendance.can_be_created_by | Orientador do aluno |
-| presenca/avaliar/\<aluno_id\>/ | registrar_feedback | login_required + checagem no model | Orientador do aluno |
-| triagens/ | TriagensPendentesView | UserPassesTestMixin | PROFESSOR, SUPERVISOR |
-| triagens/\<patient_id\>/ | DefinirTriagemView | UserPassesTestMixin | PROFESSOR, SUPERVISOR |
+| avaliacoes/ | AvaliacoesView | UserPassesTestMixin | PROFESSOR, SUPERVISOR |
+| avaliacoes/\<aluno_id\>/ | registrar_feedback | login_required + checagem no model | Orientador do aluno |
+| encaminhamentos/ | EncaminharView | UserPassesTestMixin | PROFESSOR, SUPERVISOR |
+| encaminhamentos/\<pk\>/ | EncaminharView | UserPassesTestMixin + CaseAssignment.can_be_created_by | Professor responsável pelo paciente |
 
 A rota `painel/` e a `PainelProfessorView` foram removidas: a decisão do Card 1 é
 uma tela inicial por papel, e `teacher:home` já absorveu o conteúdo. Quem sai de
 `vincular-aluno/` ou `lancar-horas/` volta para `teacher:home`, ou para
-`supervisor:orientacao` quando é Coordenador.
+`supervisor:orientacao` quando é Coordenador. A merge com a `dev` reintroduziu a
+rota; ela saiu de novo junto da estilização do Professor.
+
+Saíram também as rotas `area/prontuarios/`, `area/presenca/`, `area/atuacao/` e
+`area/triagem/atribuir/`, que existiam só para mostrar o desenho novo em rota
+própria. O desenho foi para as telas reais (`prontuarios/`, `presenca/`,
+`perfil/` e `triagens/`), que têm consulta e recorte por visibilidade.
  
 ## supervisor/ (prefixo /supervisor/)
  

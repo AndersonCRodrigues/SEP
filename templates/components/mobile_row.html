@@ -1,0 +1,20 @@
+{% if url %}<a class="mobile-row mobile-column{% if variant == 'white' %} mobile-row-white{% endif %}" href="{{ url }}">{% else %}<div class="mobile-row mobile-column{% if variant == 'white' %} mobile-row-white{% endif %}">{% endif %}
+  <div class="mobile-row-info">
+    {% if name %}<span class="mobile-row-name">{{ name }}</span>{% endif %}
+    {% if code %}<span class="mobile-row-code">ID: #{{ code }}</span>{% endif %}
+    {% if person %}
+    <span class="mobile-row-detail"><i class="bi bi-person"></i>{{ person }}</span>
+    {% endif %}
+    {% if when %}
+    <span class="mobile-row-detail"><i class="bi bi-calendar3"></i>{{ when }}</span>
+    {% endif %}
+    {% if place %}
+    <span class="mobile-row-detail"><i class="bi bi-door-closed"></i>{{ place }}</span>
+    {% endif %}
+  </div>
+  {% if action_url %}
+  <a class="mobile-row-action" href="{{ action_url }}">{{ action_label }}</a>
+  {% elif label %}
+  {% include "components/mobile_badge.html" with label=label level=level %}
+  {% endif %}
+{% if url %}</a>{% else %}</div>{% endif %}

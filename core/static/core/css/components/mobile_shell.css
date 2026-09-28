@@ -1,18 +1,150 @@
-/* No celular as telas desenham o proprio cabecalho dentro do conteudo, entao
-   a barra do desktop sai e o main perde o respiro lateral. Estava repetido
-   como <style> inline em cada tela da area do Paciente. */
+/* Moldura das telas no celular: a barra do desktop sai, a faixa vinho entra no
+   topo com o cabecalho dentro dela, e o rodape fecha a pagina. Vale para as
+   seis roles — o que muda por tela e o conteudo, nao a moldura.
+   Acompanha components/mobile_header.html e components/mobile_footer.html. */
+
+/* Quem aparece em cada tamanho. Nao usa `d-block`/`d-none` do Bootstrap de
+   proposito: as areas com shell proprio nao carregam o framework, e o
+   `!important` dos utilitarios impediria o rodape de descer. */
+.mobile-page,
+.mobile-only {
+  display: none;
+}
+
+/* As areas sem Bootstrap nao tem o border-box global; sem ele a coluna de
+   340px soma o padding e passa da largura do aparelho. */
+.mobile-page,
+.mobile-page *,
+.mobile-only,
+.mobile-only * {
+  box-sizing: border-box;
+}
 
 @media (max-width: 767.98px) {
+  .desktop-page {
+    display: none;
+  }
+
+  /* Pedaco de moldura em tela que renderiza o conteudo uma vez so para os
+     dois tamanhos (formulario com script que depende dos ids). */
+  .mobile-only {
+    display: block;
+  }
+
   html,
   body {
     background-color: #F8F9FA !important;
   }
 
-  .sep-navbar {
+  .sep-navbar,
+  .admin-navbar {
     display: none !important;
   }
 
-  main > .container-fluid {
+  main.container-fluid,
+  main > .container-fluid,
+  main.admin-content {
     padding: 0 !important;
+  }
+
+  .site-footer {
+    display: none;
+  }
+
+  /* A tela ocupa a altura toda do aparelho para o rodape encostar embaixo
+     mesmo quando o conteudo e curto. */
+  .mobile-page {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  .mobile-page .mobile-content {
+    flex: 1 0 auto;
+  }
+
+  .mobile-page .mobile-footer {
+    margin-top: auto;
+  }
+
+  /* ── Faixa vinho do topo ── */
+  .mobile-maroon-bg {
+    background-color: var(--sep-maroon);
+    border-bottom-left-radius: 30px;
+    border-bottom-right-radius: 30px;
+    padding-bottom: 20px;
+  }
+
+  /* ── Cabecalho ── */
+  .mobile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 20px 10px 20px;
+  }
+
+  .mobile-back {
+    text-decoration: none;
+    line-height: 1;
+  }
+
+  .mobile-back::before {
+    content: "\F284";
+    font-family: "bootstrap-icons";
+    font-size: 28px;
+    font-weight: 700;
+    color: #FFFFFF;
+  }
+
+  .mobile-greeting {
+    flex-grow: 1;
+    margin-left: 10px;
+    font-family: var(--font-main);
+    font-size: 22px;
+    font-weight: 700;
+    color: #FFFFFF;
+  }
+
+  .mobile-icons {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .mobile-icons i {
+    font-size: 22px;
+    color: #FFFFFF;
+  }
+
+  .mobile-icon-button {
+    display: flex;
+    align-items: center;
+    padding: 0;
+    border: none;
+    background: transparent;
+    line-height: 1;
+  }
+
+  /* ── Conteudo abaixo da faixa ── */
+  .mobile-content {
+    padding: 0 16px;
+    margin-top: 24px;
+  }
+
+  .mobile-content-tight {
+    padding: 0 12px;
+  }
+
+  /* ── Rodape ── */
+  .mobile-footer {
+    margin-top: 40px;
+    padding: 18px 0;
+    background-color: var(--sep-maroon);
+    text-align: center;
+  }
+
+  .mobile-footer img {
+    height: 30px;
+    width: auto;
   }
 }

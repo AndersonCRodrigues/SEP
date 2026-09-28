@@ -1,0 +1,6 @@
+<li class="mobile-tile {% if level == 'success' %}mobile-tile-success{% elif level == 'danger' %}mobile-tile-danger{% elif level == 'warning' %}mobile-tile-warning{% endif %}">
+  <span class="mobile-tile-icon" aria-hidden="true"><i class="bi {{ icon|default:"bi-door-closed" }}"></i></span>
+  <h2 class="mobile-tile-name">{{ name }}</h2>
+  <span class="mobile-tile-status">{{ label }}</span>
+  {% if note %}<span class="mobile-tile-note">{{ note }}</span>{% endif %}
+</li>

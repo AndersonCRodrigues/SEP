@@ -3,8 +3,7 @@
 
 {% block title %}Minhas triagens{% endblock %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'core/css/components/tokens.css' %}">
+{% block page_css %}
 <link rel="stylesheet" href="{% static 'core/css/components/list_panel.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/components/hover_lift.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/components/row_button.css' %}">
@@ -14,6 +13,38 @@
 {% block page_header %}{% endblock %}
 
 {% block content %}
+<!-- ══════════════════════════════════════
+     MOBILE
+     ══════════════════════════════════════ -->
+<div class="mobile-page">
+  <div class="mobile-maroon-bg">
+    {% url 'students:home' as back_url %}
+    {% include "components/mobile_header.html" %}
+  </div>
+
+  {% include "components/mobile_title.html" with title="Minhas triagens" %}
+
+  <div class="mobile-content">
+    {% for triagem in triagens %}
+    {% if triagem.status == "AB" %}
+    {% include "components/mobile_row.html" with variant="white" name=triagem.patient.get_full_name when=triagem.created_at|date:"d/m/Y" label=triagem.get_status_display level="danger" %}
+    {% elif triagem.status == "FE" or triagem.status == "EN" %}
+    {% include "components/mobile_row.html" with variant="white" name=triagem.patient.get_full_name when=triagem.created_at|date:"d/m/Y" label=triagem.get_status_display level="success" %}
+    {% else %}
+    {% include "components/mobile_row.html" with variant="white" name=triagem.patient.get_full_name when=triagem.created_at|date:"d/m/Y" label=triagem.get_status_display level="warning" %}
+    {% endif %}
+    {% empty %}
+    <p class="mobile-empty">Você ainda não fez nenhuma triagem.</p>
+    {% endfor %}
+  </div>
+
+  {% include "components/mobile_footer.html" %}
+</div>
+
+<!-- ══════════════════════════════════════
+     DESKTOP
+     ══════════════════════════════════════ -->
+<div class="desktop-page">
 <div class="list-panel-title">Minhas triagens</div>
 
 {% if triagens %}
@@ -45,4 +76,5 @@
 {% else %}
 {% include "components/empty_state.html" with message="Você ainda não fez nenhuma triagem." %}
 {% endif %}
+</div>
 {% endblock %}

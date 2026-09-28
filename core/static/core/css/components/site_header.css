@@ -157,21 +157,6 @@
   padding: 0 8px;
 }
 
-.user-menu-link {
-  display: block;
-  font-family: var(--font-main);
-  font-size: 14px;
-  color: #333333;
-  text-decoration: none;
-  padding: 8px;
-  border-radius: 8px;
-}
-
-.user-menu-link:hover {
-  background: #F0F0F0;
-  color: #333333;
-}
-
 .user-menu-logout {
   width: 100%;
   display: flex;

@@ -5,15 +5,15 @@
       aria-label="Mês anterior"><i class="bi bi-chevron-left"></i></a>
 
     <div class="cal-selects">
-      <label class="visually-hidden" for="calendar-month">Mês</label>
-      <select class="cal-select" id="calendar-month" name="mes" onchange="this.form.submit()">
+      <label class="visually-hidden" for="{{ calendar_id|default:"calendar" }}-month">Mês</label>
+      <select class="cal-select" id="{{ calendar_id|default:"calendar" }}-month" name="mes" onchange="this.form.submit()">
         {% for number, name in calendar_months %}
         <option value="{{ number }}" {% if number == calendar_month %}selected{% endif %}>{{ name }}</option>
         {% endfor %}
       </select>
 
-      <label class="visually-hidden" for="calendar-year">Ano</label>
-      <select class="cal-select" id="calendar-year" name="ano" onchange="this.form.submit()">
+      <label class="visually-hidden" for="{{ calendar_id|default:"calendar" }}-year">Ano</label>
+      <select class="cal-select" id="{{ calendar_id|default:"calendar" }}-year" name="ano" onchange="this.form.submit()">
         {% for year in calendar_years %}
         <option value="{{ year }}" {% if year == calendar_year %}selected{% endif %}>{{ year }}</option>
         {% endfor %}

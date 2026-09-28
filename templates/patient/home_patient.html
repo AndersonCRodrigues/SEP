@@ -9,154 +9,63 @@
 <link rel="stylesheet" href="{% static 'core/css/components/home_panel.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/components/activity_list.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/components/calendar.css' %}">
-<link rel="stylesheet" href="{% static 'core/css/patient_home.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/mobile_nav.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/mobile_cards.css' %}">
 {% endblock %}
 
 {% block content %}
 
-  <!-- ══════════════════════════════════════
-       MOBILE HOME
-       ══════════════════════════════════════ -->
-  <div class="d-block d-md-none mobile-maroon-bg">
-    <!-- Header Mobile -->
-    <div class="mobile-header">
-      <a href="{% url 'patient:home' %}" class="mobile-back"></a>
-      <span class="mobile-greeting">Olá, {{ request.user.first_name|default:"Paciente" }}!</span>
-      <div class="mobile-icons d-flex align-items-center gap-3">
-        <i class="bi bi-bell"></i>
-        <form method="post" action="{% url 'logout' %}" class="m-0 p-0 d-inline-flex">
-          {% csrf_token %}
-          <button type="submit" class="p-0 border-0 bg-transparent text-white d-flex align-items-center" style="line-height: 1;">
-            <i class="bi bi-person-circle" style="font-size: 24px;"></i>
-          </button>
-        </form>
-      </div>
-    </div>
+<!-- ══════════════════════════════════════
+     MOBILE
+     ══════════════════════════════════════ -->
+<div class="mobile-page">
+  <div class="mobile-maroon-bg">
+    {% url 'patient:home' as back_url %}
+    {% include "components/mobile_header.html" %}
+    {% include "components/mobile_stats.html" %}
 
-    <!-- Stat Cards -->
-    <div class="px-3 pt-3 pb-1">
-      <div class="patient-stats-grid">
-        <div class="p-stat-box p-stat-green">
-          <div class="p-stat-label">Sessões<br>realizadas</div>
-          <div class="p-stat-value">7</div>
-        </div>
-        <div class="p-stat-box p-stat-red">
-          <div class="p-stat-label">Status da<br>triagem</div>
-          <div class="p-stat-value">Concluída</div>
-        </div>
-        <div class="p-stat-box p-stat-orange">
-          <div class="p-stat-label">Próxima<br>sessão</div>
-          <div class="p-stat-value">Hoje</div>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Alerta Pendente -->
-    <div class="px-3 mt-4 pb-4">
-      <div class="p-alert-box">
-        <div class="p-alert-header">
-          <i class="bi bi-exclamation-triangle-fill"></i> Alerta pendente
-        </div>
-        <p class="p-alert-text"><strong>3 declarações</strong> aguardando emissão</p>
-        <button class="p-alert-btn">Gerar declarações</button>
-      </div>
-    </div>
-  </div> <!-- fim fundo vinho mobile -->
+    {% if pending_alert %}
+    {% include "components/mobile_alert.html" with alert_title=pending_alert.title alert_message=pending_alert.message alert_url=pending_alert.url alert_action=pending_alert.action %}
+    {% endif %}
+  </div>
 
-  <!-- Conteúdo abaixo do fundo vinho -->
-  <div class="d-block d-md-none px-3 mt-4">
+  <div class="mobile-content">
+    {% include "components/mobile_tabs.html" with tabs_items="patient/mobile_tabs.html" %}
+    {% include "components/mobile_activity.html" with empty_message="Nenhuma atividade recente." %}
+  </div>
 
-    <!-- Nav de serviços -->
-    <div class="d-flex justify-content-between align-items-baseline mb-2">
-      <h2 class="p-section-title">Opções de Serviço</h2>
-      <a href="#" class="p-see-all">Ver todos<i class="bi bi-chevron-right ms-1" style="font-size:10px;"></i></a>
-    </div>
+  {% include "components/mobile_footer.html" %}
+</div>
 
-    <div class="patient-mobile-nav">
-      <a href="{% url 'patient:home' %}" class="p-nav-tab active">Página inicial</a>
-      <a href="{% url 'patient:triagens' %}" class="p-nav-tab">Triagens</a>
-      <a href="{% url 'patient:agendamentos' %}" class="p-nav-tab">Agendamentos</a>
-      <a href="{% url 'patient:historico' %}" class="p-nav-tab">Histórico</a>
-      <a href="{% url 'patient:contato' %}" class="p-nav-tab">Contato</a>
-    </div>
+<!-- ══════════════════════════════════════
+     DESKTOP
+     ══════════════════════════════════════ -->
+<div class="desktop-page container-fluid px-lg-4 mt-4 mb-5">
 
-    <div class="p-nav-divider"></div>
+  <section class="greeting">
+    <h1 class="greeting-title">Olá, {{ request.user.first_name|default:"paciente" }}!</h1>
+    <p class="greeting-subtitle">Página inicial - Paciente</p>
+  </section>
 
-    <!-- Atividade Recente -->
-    <h3 class="p-activity-section-title">Atividade Recente</h3>
+  {% if home_error %}
+  {% include "components/error_state.html" with message=home_error retry_url=request.path %}
+  {% else %}
 
-    <!-- Mocks fixos para demonstração visual -->
-    <div class="p-activity-card">
-      <div class="p-activity-header">
-        <span class="p-activity-category">Agenda geral</span>
-        <span class="p-badge p-badge-warning">Atualizado</span>
-      </div>
-      <div class="p-activity-title">Sessão remarcada</div>
-      <div class="p-activity-desc">Sala 2 - 15:00</div>
-      <div class="p-activity-divider"></div>
-      <a href="#" class="p-activity-footer">
-        <i class="bi bi-chevron-right"></i>
-      </a>
-    </div>
+  {% include "components/summary_list.html" with title="Resumo" id="summary-title" %}
 
-    <div class="p-activity-card">
-      <div class="p-activity-header">
-        <span class="p-activity-category">Declarações</span>
-        <span class="p-badge p-badge-success">Concluído</span>
-      </div>
-      <div class="p-activity-title">Declaração emitida</div>
-      <div class="p-activity-desc">Paciente - Y</div>
-      <div class="p-activity-divider"></div>
-      <a href="#" class="p-activity-footer">
-        <i class="bi bi-chevron-right"></i>
-      </a>
-    </div>
-
-    <div class="p-activity-card">
-      <div class="p-activity-header">
-        <span class="p-activity-category">Salas</span>
-        <span class="p-badge p-badge-success">Disponível</span>
-      </div>
-      <div class="p-activity-title">Sala 3 liberada</div>
-      <div class="p-activity-desc">Disponível às 16:00</div>
-      <div class="p-activity-divider"></div>
-      <a href="#" class="p-activity-footer">
-        <i class="bi bi-chevron-right"></i>
-      </a>
-    </div>
-
-  </div> <!-- fim mobile conteúdo -->
-
-
-  <!-- ══════════════════════════════════════
-       DESKTOP HOME
-       ══════════════════════════════════════ -->
-  <div class="d-none d-md-block container-fluid px-lg-4 mt-4 mb-5">
-
-    <section class="greeting">
-      <h1 class="greeting-title">Olá, {{ request.user.first_name|default:"paciente" }}!</h1>
-      <p class="greeting-subtitle">Página inicial - Paciente</p>
+  <div class="panel">
+    <section class="activities">
+      <h2>Atividades recentes</h2>
+      {% include "components/activity_list.html" %}
     </section>
 
-    {% if home_error %}
-    {% include "components/error_state.html" with message=home_error retry_url=request.path %}
-    {% else %}
+    <section class="calendar">
+      <h2>Calendário</h2>
+      {% include "components/calendar_month.html" %}
+    </section>
+  </div>
 
-    {% include "components/summary_list.html" with title="Resumo" id="summary-title" %}
-
-    <div class="panel">
-      <section class="activities">
-        <h2>Atividades recentes</h2>
-        {% include "components/activity_list.html" %}
-      </section>
-
-      <section class="calendar">
-        <h2>Calendário</h2>
-        {% include "components/calendar_month.html" %}
-      </section>
-    </div>
-
-    {% endif %}
-  </div> <!-- fim desktop -->
+  {% endif %}
+</div>
 
 {% endblock %}

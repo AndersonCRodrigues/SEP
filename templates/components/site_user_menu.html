@@ -17,9 +17,6 @@
       </summary>
       <div class="user-menu-panel">
         <p class="user-menu-name">{{ request.user.nome_completo|default:request.user.email }}</p>
-        {% if profile_url %}
-        <a class="user-menu-link" href="{{ profile_url }}">Meu perfil</a>
-        {% endif %}
         <form method="post" action="{% url 'logout' %}">
           {% csrf_token %}
           <button type="submit" class="user-menu-logout">

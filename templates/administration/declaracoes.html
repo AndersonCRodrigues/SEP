@@ -11,6 +11,38 @@
 {% endblock %}
 
 {% block content %}
+<!-- ══════════════════════════════════════
+     MOBILE
+     ══════════════════════════════════════ -->
+<div class="mobile-page">
+  <div class="mobile-maroon-bg">
+    {% url 'administration:home' as back_url %}
+    {% include "components/mobile_header.html" %}
+  </div>
+
+  {% include "components/mobile_title.html" with title="Declarações" %}
+
+  <div class="mobile-content">
+    {% if declarations_error %}
+    <p class="mobile-empty">{{ declarations_error }}</p>
+    {% elif declarations %}
+    <div class="mobile-list mobile-column">
+      {% for row in declarations %}
+      {% include "components/mobile_row.html" with name=row.name person=row.person_kind when=row.subject label=row.label level=row.level %}
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="mobile-empty">Nenhuma declaração registrada.</p>
+    {% endif %}
+  </div>
+
+  {% include "components/mobile_footer.html" %}
+</div>
+
+<!-- ══════════════════════════════════════
+     DESKTOP
+     ══════════════════════════════════════ -->
+<div class="desktop-page">
 <div class="list-toolbar">
   <h1 class="list-toolbar-title">Declarações de comparecimento</h1>
   {# TODO: botão sem lógica; fica para fazer #}
@@ -46,4 +78,5 @@
 {% else %}
 {% include "components/empty_state.html" with message="Nenhuma declaração registrada." %}
 {% endif %}
+</div>
 {% endblock %}

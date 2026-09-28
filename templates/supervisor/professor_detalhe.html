@@ -1,38 +1,60 @@
 {% extends "supervisor/base_coordinator.html" %}
-{% load components %}
+{% load static %}
 
 {% block title %}{{ professor.get_full_name }}{% endblock %}
 
-{% block page_title %}{{ professor.get_full_name }}{% endblock %}
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'core/css/components/list_panel.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/hover_lift.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/list_filters.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/detail_panel.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/coordenacao/coordenacao_lists.css' %}">
+{% endblock %}
+
+{% block page_header %}{% endblock %}
 
 {% block content %}
-<dl class="teacher-detail">
-  <div class="teacher-field">
-    <dt>Áreas de atuação</dt>
-    <dd>{% for area in professor.acting_areas.all %}{{ area.nome }}{% if not forloop.last %}, {% endif %}{% empty %}Sem área{% endfor %}</dd>
-  </div>
-  <div class="teacher-field">
-    <dt>E-mail</dt>
-    <dd>{{ professor.email|default:"Não informado" }}</dd>
-  </div>
-  <div class="teacher-field">
-    <dt>CRP</dt>
-    <dd>{{ professor.crp|default:"Não informado" }}</dd>
-  </div>
-</dl>
+<div class="list-panel-title">{{ professor.get_full_name }}</div>
 
-{% section title="Alunos orientados" class="advisees" id="advisees-title" %}
-<ul class="advisee-list">
-  {% for aluno in advisees %}
-  <li class="advisee">
-    <a href="{% url 'supervisor:aluno_detalhe' aluno.pk %}">{{ aluno.get_full_name }}</a>
-    <span class="advisee-stage">{{ aluno.get_stage_display }}</span>
-  </li>
-  {% empty %}
-  <li class="advisee-empty">
+<p class="list-panel-subtitle">
+  <a class="btn-limpar" href="{% url 'supervisor:professores' %}">← Voltar para Professores</a>
+</p>
+
+<div class="list-panel">
+  <section class="detail-card">
+    <h2 class="detail-title">Dados do professor</h2>
+    <div class="list-panel-container">
+      <div class="list-panel-row detail-grid">
+        <div>Áreas de atuação</div>
+        <div class="text-end">
+          {% for area in professor.acting_areas.all %}{{ area.nome }}{% if not forloop.last %}, {% endif %}{% empty %}Sem área{% endfor %}
+        </div>
+      </div>
+      <div class="list-panel-row detail-grid">
+        <div>E-mail</div>
+        <div class="text-end">{{ professor.email|default:"Não informado" }}</div>
+      </div>
+      <div class="list-panel-row detail-grid">
+        <div>CRP</div>
+        <div class="text-end">{{ professor.crp|default:"Não informado" }}</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="detail-card">
+    <h2 class="detail-title">Alunos orientados</h2>
+    {% if advisees %}
+    <div class="list-panel-container">
+      {% for aluno in advisees %}
+      <a class="list-panel-row detail-grid hover-lift" href="{% url 'supervisor:aluno_detalhe' aluno.pk %}">
+        <div>{{ aluno.get_full_name }}</div>
+        <div class="text-end">{{ aluno.get_stage_display }}</div>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
     {% include "components/empty_state.html" with message="Este professor ainda não tem alunos vinculados." %}
-  </li>
-  {% endfor %}
-</ul>
-{% endsection %}
+    {% endif %}
+  </section>
+</div>
 {% endblock %}

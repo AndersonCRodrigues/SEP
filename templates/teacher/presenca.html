@@ -1,0 +1,56 @@
+{% extends "teacher/base_teacher.html" %}
+{% load static %}
+
+{% block title %}Presença{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'core/css/components/list_panel.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/hover_lift.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/list_filters.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/teacher_lists.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="list-panel-title">Presença</div>
+
+<p class="list-panel-subtitle">Referente a hoje, {{ today|date:"d/m/Y" }}</p>
+
+<form class="list-filters" method="get">
+  <label class="visually-hidden" for="busca-presenca">Buscar por nome</label>
+  <input type="text" id="busca-presenca" name="q" value="{{ search }}" placeholder="Buscar por nome do aluno...">
+
+  <button type="submit" class="btn-acao">Filtrar</button>
+  {% if search %}
+  <a class="btn-limpar" href="{% url 'teacher:presenca' %}">Limpar filtros</a>
+  {% endif %}
+</form>
+
+{% if rows %}
+<div class="list-panel">
+  <div class="list-panel-header presence-grid">
+    <div>Aluno:</div>
+    <div>Presença:</div>
+  </div>
+
+  <div class="list-panel-container">
+    {% for row in rows %}
+    <div class="list-panel-row presence-grid hover-lift">
+      <div>{{ row.student.get_full_name }}</div>
+      <div>
+        {% if row.attendance %}
+        <span class="badge-situacao concluida">Presente</span>
+        {% else %}
+        <form class="presence-form" method="post" action="{% url 'teacher:marcar_presenca' row.student.pk %}">
+          {% csrf_token %}
+          <button type="submit" class="btn-marcar">Marcar presença</button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% else %}
+{% include "components/empty_state.html" with message="Nenhum aluno vinculado." %}
+{% endif %}
+{% endblock %}

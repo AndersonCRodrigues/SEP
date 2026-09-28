@@ -1,0 +1,8 @@
+{% with current=request.resolver_match.url_name %}
+<a class="mobile-tab {% if current == 'home' %}active{% endif %}" href="{% url 'administration:home' %}">Página inicial</a>
+<a class="mobile-tab {% if current == 'agenda' %}active{% endif %}" href="{% url 'administration:agenda' %}">Agenda</a>
+<a class="mobile-tab {% if current == 'pacientes' %}active{% endif %}" href="{% url 'administration:pacientes' %}">Pacientes</a>
+<a class="mobile-tab {% if current == 'salas' %}active{% endif %}" href="{% url 'administration:salas' %}">Salas</a>
+<a class="mobile-tab {% if current == 'declaracoes' %}active{% endif %}" href="{% url 'administration:declaracoes' %}">Declarações</a>
+<a class="mobile-tab {% if current == 'atestados' %}active{% endif %}" href="{% url 'administration:atestados' %}">Atestados</a>
+{% endwith %}

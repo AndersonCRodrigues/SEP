@@ -11,6 +11,42 @@
 {% endblock %}
 
 {% block content %}
+<!-- ══════════════════════════════════════
+     MOBILE
+     ══════════════════════════════════════ -->
+<div class="mobile-page">
+  <div class="mobile-maroon-bg">
+    {% url 'administration:home' as back_url %}
+    {% include "components/mobile_header.html" %}
+  </div>
+
+  {% include "components/mobile_title.html" with title="Pacientes" %}
+
+  <div class="mobile-content">
+    {% include "components/mobile_search.html" with search_value=search search_label="Buscar por nome ou CPF" %}
+
+    {% if patients_error %}
+    <p class="mobile-empty">{{ patients_error }}</p>
+    {% else %}
+    {% for row in patients %}
+    {% include "components/mobile_row.html" with variant="white" name=row.name person=row.cpf when=row.registered_at|date:"d/m/Y" label=row.label level=row.level %}
+    {% empty %}
+    <p class="mobile-empty">Nenhum paciente encontrado.</p>
+    {% endfor %}
+    {% endif %}
+
+    <div class="mobile-actions">
+      <a class="mobile-button" href="{% url 'administration:cadastrar_paciente' %}">Novo cadastro</a>
+    </div>
+  </div>
+
+  {% include "components/mobile_footer.html" %}
+</div>
+
+<!-- ══════════════════════════════════════
+     DESKTOP
+     ══════════════════════════════════════ -->
+<div class="desktop-page">
 <div class="list-toolbar">
   <h1 class="list-toolbar-title">Pacientes</h1>
   <a class="btn-acao" href="{% url 'administration:cadastrar_paciente' %}">+ Novo cadastro</a>
@@ -63,4 +99,5 @@
 {% else %}
 {% include "components/empty_state.html" with message="Nenhum paciente encontrado. Comece pelo pré-cadastro de um novo paciente." %}
 {% endif %}
+</div>
 {% endblock %}

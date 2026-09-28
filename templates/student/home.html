@@ -3,8 +3,7 @@
 
 {% block title %}Página inicial{% endblock %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'core/css/components/tokens.css' %}">
+{% block page_css %}
 <link rel="stylesheet" href="{% static 'core/css/components/greeting.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/components/indicator_list.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/components/home_panel.css' %}">
@@ -15,26 +14,57 @@
 {% block page_header %}{% endblock %}
 
 {% block content %}
-{% if home_error %}
-{% include "components/error_state.html" with message=home_error retry_url=request.path %}
-{% else %}
-<section class="greeting">
-  <h1 class="greeting-title">Olá, {{ request.user.first_name|default:"aluno" }}!</h1>
-  <p class="greeting-subtitle">Página inicial - Aluno</p>
-</section>
 
-{% include "components/summary_list.html" with title="Resumo" id="summary-title" %}
+<!-- ══════════════════════════════════════
+     MOBILE
+     ══════════════════════════════════════ -->
+<div class="mobile-page">
+  <div class="mobile-maroon-bg">
+    {% url 'students:home' as back_url %}
+    {% include "components/mobile_header.html" %}
+    {% if not home_error %}
+    {% include "components/calendar_month.html" with calendar_id="mobile-calendar" %}
+    {% endif %}
+  </div>
 
-<div class="panel">
-  <section class="activities">
-    <h2>Atividades recentes</h2>
-    {% include "components/activity_list.html" %}
-  </section>
+  <div class="mobile-content">
+    {% include "components/mobile_tabs.html" with tabs_items="student/mobile_tabs.html" %}
 
-  <section class="calendar">
-    <h2>Calendário</h2>
-    {% include "components/calendar_month.html" %}
-  </section>
+    {% if home_error %}
+    <p class="mobile-empty">{{ home_error }}</p>
+    {% else %}
+    {% include "components/mobile_activity.html" with empty_message="Nenhuma atividade recente." %}
+    {% endif %}
+  </div>
+
+  {% include "components/mobile_footer.html" %}
 </div>
-{% endif %}
+
+<!-- ══════════════════════════════════════
+     DESKTOP
+     ══════════════════════════════════════ -->
+<div class="desktop-page">
+  {% if home_error %}
+  {% include "components/error_state.html" with message=home_error retry_url=request.path %}
+  {% else %}
+  <section class="greeting">
+    <h1 class="greeting-title">Olá, {{ request.user.first_name|default:"aluno" }}!</h1>
+    <p class="greeting-subtitle">Página inicial - Aluno</p>
+  </section>
+
+  {% include "components/summary_list.html" with title="Resumo" id="summary-title" %}
+
+  <div class="panel">
+    <section class="activities">
+      <h2>Atividades recentes</h2>
+      {% include "components/activity_list.html" %}
+    </section>
+
+    <section class="calendar">
+      <h2>Calendário</h2>
+      {% include "components/calendar_month.html" %}
+    </section>
+  </div>
+  {% endif %}
+</div>
 {% endblock %}

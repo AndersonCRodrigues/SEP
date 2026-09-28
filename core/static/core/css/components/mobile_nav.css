@@ -1,0 +1,79 @@
+/* "Opcoes de Servico" no celular: titulo da secao, o link de ver todos e a fila
+   de abas que rola na horizontal, com a regua vinho fechando a secao. Os
+   valores sao os do teacher_home.css e do patient_home.css de
+   html-css-juliana, que tinham a mesma fila com dois nomes diferentes.
+   Acompanha components/mobile_tabs.html. */
+
+@media (max-width: 767.98px) {
+  .mobile-section-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+  }
+
+  .mobile-section-title {
+    font-family: var(--font-main);
+    font-size: 17px;
+    font-weight: 800;
+    color: #000000;
+    margin: 0;
+  }
+
+  .mobile-section-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-family: var(--font-main);
+    font-size: 13px;
+    font-weight: 500;
+    color: #444444;
+    text-decoration: none;
+  }
+
+  .mobile-section-link i {
+    font-size: 10px;
+  }
+
+  .mobile-tabs {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding: 8px 0 16px 0;
+    margin-bottom: 20px;
+    border-bottom: 2px solid var(--sep-maroon);
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .mobile-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .mobile-tab {
+    flex-shrink: 0;
+    padding: 8px 24px;
+    border: none;
+    border-radius: 20px;
+    background: #E6E6E6;
+    font-family: var(--font-main);
+    font-size: 14px;
+    font-weight: 600;
+    color: #333333;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .mobile-tab.active {
+    background: #D0D0D0;
+    color: #333333;
+  }
+
+  .mobile-block-title {
+    font-family: var(--font-main);
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--sep-maroon);
+    margin: 0 0 12px 0;
+  }
+}
