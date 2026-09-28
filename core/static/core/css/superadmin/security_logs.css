@@ -209,3 +209,42 @@
     overflow-x: auto;
   }
 }
+
+/* Ações da busca: botão de buscar + limpar filtros.
+   Ficam junto do(s) campo(s) de filtro, dentro do proprio form,
+   pra busca so disparar quando o usuario confirmar (evita
+   requisicoes desnecessarias a cada mudanca de campo). */
+.logs-search-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.btn-buscar {
+  background-color: #611e25;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 0.6rem 1.6rem;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-buscar:hover {
+  background-color: #4a171c;
+}
+
+.btn-limpar-busca {
+  background: none;
+  border: none;
+  color: #611e25;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0.4rem 0;
+}

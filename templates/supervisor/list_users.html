@@ -36,6 +36,13 @@
       </option>
       {% endfor %}
     </select>
+
+    <div class="logs-search-actions">
+      <button type="submit" class="btn-buscar">Buscar</button>
+      {% if search or area_filter %}
+      <a class="btn-limpar-busca" href="{% url 'supervisor:professores' %}">Limpar filtros</a>
+      {% endif %}
+    </div>
   </form>
 </div>
 

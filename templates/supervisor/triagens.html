@@ -19,6 +19,13 @@
       <option value="{{ value }}" {% if situation_filter == value %}selected{% endif %}>{{ label }}</option>
       {% endfor %}
     </select>
+
+    <div class="logs-search-actions">
+      <button type="submit" class="btn-buscar">Filtrar</button>
+      {% if situation_filter %}
+      <a class="btn-limpar-busca" href="{% url 'supervisor:triagens' %}">Limpar filtro</a>
+      {% endif %}
+    </div>
   </form>
 </div>
 

@@ -1,4 +1,5 @@
-from django.db.models import Q
+from django.db.models import Q, Value
+from django.db.models.functions import Concat
 from django.views.generic import DetailView, ListView
 
 from areas.models import AreaActing
@@ -14,15 +15,16 @@ class CoordinatorStudentsView(CoordinatorOnly, ListView):
     context_object_name = "alunos"
 
     def get_queryset(self):
-        alunos = Student.objects.select_related("current_advisor").order_by(
-            "first_name", "last_name"
+        alunos = (
+            Student.objects.select_related("current_advisor")
+            .annotate(nome_busca=Concat("first_name", Value(" "), "last_name"))
+            .order_by("first_name", "last_name")
         )
 
         busca = self.request.GET.get("q", "").strip()
         if busca:
             alunos = alunos.filter(
-                Q(first_name__icontains=busca)
-                | Q(last_name__icontains=busca)
+                Q(nome_busca__icontains=busca)
                 | Q(matricula__icontains=busca)
             )
 
