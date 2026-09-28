@@ -11,6 +11,52 @@
 {% endblock %}
 
 {% block content %}
+<!-- ══════════════════════════════════════
+     MOBILE
+     ══════════════════════════════════════ -->
+<div class="mobile-page">
+  <div class="mobile-maroon-bg">
+    {% url 'administration:home' as back_url %}
+    {% include "components/mobile_header.html" %}
+  </div>
+
+  {% include "components/mobile_title.html" with title="Agenda" %}
+
+  <div class="mobile-content">
+    <form class="mobile-filter mobile-column" method="get">
+      <div class="mobile-filter-field">
+        <i class="bi bi-calendar3" aria-hidden="true"></i>
+        <label class="visually-hidden" for="mobile-period">Período</label>
+        <select id="mobile-period" name="periodo">
+          {% for value, period in periods.items %}
+          <option value="{{ value }}" {% if value == selected_period %}selected{% endif %}>{{ period.label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="mobile-filter-button">Filtrar</button>
+    </form>
+
+    {% for event in events %}
+    {% with hour=event.time|date:"H:i" %}
+    {% include "components/mobile_row.html" with variant="white" name=event.appointment.patient person=event.attendant|default:"Não atribuído" when=event.day_label|add:" - "|add:hour place=event.appointment.room.name|default:"Sem sala" label=event.appointment.get_status_display level=event.status_level %}
+    {% endwith %}
+    {% empty %}
+    <p class="mobile-empty">Nenhum agendamento para este filtro.</p>
+    {% endfor %}
+
+    <div class="mobile-actions">
+      {# TODO: botão sem lógica; fica para fazer #}
+      <button type="button" class="mobile-button" disabled>Novo agendamento</button>
+    </div>
+  </div>
+
+  {% include "components/mobile_footer.html" %}
+</div>
+
+<!-- ══════════════════════════════════════
+     DESKTOP
+     ══════════════════════════════════════ -->
+<div class="desktop-page">
 <div class="list-toolbar">
   <h1 class="list-toolbar-title">{{ heading }}{% if period_dates %} &middot; {{ period_dates }}{% endif %}</h1>
   {# TODO: botão sem lógica; fica para fazer #}
@@ -91,4 +137,5 @@
 {% else %}
 {% include "components/empty_state.html" with message="Nenhum agendamento para este filtro." %}
 {% endif %}
+</div>
 {% endblock %}

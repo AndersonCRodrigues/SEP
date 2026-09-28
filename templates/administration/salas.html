@@ -8,6 +8,39 @@
 {% endblock %}
 
 {% block content %}
+<!-- ══════════════════════════════════════
+     MOBILE
+     ══════════════════════════════════════ -->
+<div class="mobile-page">
+  <div class="mobile-maroon-bg">
+    {% url 'administration:home' as back_url %}
+    {% include "components/mobile_header.html" %}
+  </div>
+
+  {% include "components/mobile_title.html" with title="Status das salas" %}
+
+  <div class="mobile-content">
+    {% if rooms_error %}
+    <p class="mobile-empty">{{ rooms_error }}</p>
+    {% else %}
+    <ul class="mobile-tiles mobile-column">
+      {% for card in rooms %}
+      {% include "components/mobile_tile.html" with name=card.room.name label=card.label level=card.level note=card.activity %}
+      {% endfor %}
+    </ul>
+    {% if not rooms %}
+    <p class="mobile-empty">Nenhuma sala cadastrada.</p>
+    {% endif %}
+    {% endif %}
+  </div>
+
+  {% include "components/mobile_footer.html" %}
+</div>
+
+<!-- ══════════════════════════════════════
+     DESKTOP
+     ══════════════════════════════════════ -->
+<div class="desktop-page">
 <h1 class="page-banner">Status das salas</h1>
 
 {% if rooms_error %}
@@ -29,4 +62,5 @@
     {% endfor %}
   </ul>
 {% endif %}
+</div>
 {% endblock %}
