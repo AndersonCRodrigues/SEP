@@ -59,6 +59,9 @@
     {% endfor %}
   </select>
   <button type="submit" class="btn-acao">Filtrar</button>
+  {% if situation_filter %}
+  <a class="btn-limpar" href="{% url 'supervisor:triagens' %}">Limpar filtro</a>
+  {% endif %}
 </form>
 
 {% if rows %}

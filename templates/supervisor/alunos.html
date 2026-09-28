@@ -68,6 +68,9 @@
   </select>
 
   <button type="submit" class="btn-acao">Filtrar</button>
+  {% if search or area_filter %}
+  <a class="btn-limpar" href="{% url 'supervisor:alunos' %}">Limpar filtros</a>
+  {% endif %}
 </form>
 
 {% if students %}
