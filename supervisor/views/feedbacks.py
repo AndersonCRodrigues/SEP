@@ -1,9 +1,10 @@
 from django.contrib import messages
-from django.db.models import Count, Q
+from django.db.models import Count
 from django.shortcuts import get_object_or_404, redirect
 from django.views.generic import TemplateView
 
 from core.constants import TriageStatus
+from core.search import full_name_lookup
 from triage.models import TriageFeedback, TriageRecord
 
 from .access import CoordinatorOnly
@@ -102,12 +103,10 @@ class CoordinatorFeedbacksView(CoordinatorOnly, TemplateView):
         )
 
         if search:
-            registros = registros.filter(
-                Q(student_author__first_name__icontains=search)
-                | Q(student_author__last_name__icontains=search)
-                | Q(patient__first_name__icontains=search)
-                | Q(patient__last_name__icontains=search)
+            registros, por_nome = full_name_lookup(
+                registros, search, "student_author__", "patient__"
             )
+            registros = registros.filter(por_nome)
 
         return registros
 

@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.views.generic import DetailView, TemplateView, View
 from core.fields import only_digits
+from core.search import full_name_lookup
 from patient.models import Patient
 from utils.masking import mask_cpf
 from ..patient_registration import STEPS, PatientRegistration
@@ -81,7 +82,7 @@ class PatientsView(AdministrativeOnly, TemplateView):
     @staticmethod
     def matching(pacientes, busca):
         """O CPF é gravado com e sem pontuação, então a busca compara dígitos."""
-        procura = Q(first_name__icontains=busca) | Q(last_name__icontains=busca)
+        pacientes, procura = full_name_lookup(pacientes, busca)
 
         digitos = only_digits(busca)
         if digitos:

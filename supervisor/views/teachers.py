@@ -1,8 +1,9 @@
-from django.db.models import Count, Q
+from django.db.models import Count
 from django.views.generic import DetailView, ListView
 
 from areas.models import AreaActing
 from core.models import CustomUser
+from core.search import full_name_lookup
 from teacher.models import Teacher
 
 from .access import CoordinatorOnly
@@ -24,9 +25,8 @@ class CoordinatorTeachersView(CoordinatorOnly, ListView):
 
         busca = self.request.GET.get("q", "").strip()
         if busca:
-            professores = professores.filter(
-                Q(first_name__icontains=busca) | Q(last_name__icontains=busca)
-            )
+            professores, por_nome = full_name_lookup(professores, busca)
+            professores = professores.filter(por_nome)
 
         area = self.request.GET.get("area", "")
         if area.isdigit():

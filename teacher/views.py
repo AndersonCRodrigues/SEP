@@ -13,6 +13,7 @@ from django.views.generic import DetailView, ListView, TemplateView, UpdateView
 
 from core.models import CustomUser
 from core.month_calendar import displayed_month, month_calendar, month_range
+from core.search import full_name_lookup
 from core.utils import sincronizar_grupo
 from patient.models import Patient
 
@@ -308,14 +309,8 @@ class AlunosOrientacaoView(LoginRequiredMixin, UserPassesTestMixin, ListView):
 
         termo_busca = self.request.GET.get("q", "").strip()
         if termo_busca:
-            # nome_completo é uma @property em CustomUser (get_full_name()),
-            # não uma coluna -- não dá pra usar num filter()/Q(). Busca-se
-            # pelos campos reais (first_name/last_name) em vez disso.
-            alunos = alunos.filter(
-                Q(first_name__icontains=termo_busca)
-                | Q(last_name__icontains=termo_busca)
-                | Q(matricula__icontains=termo_busca)
-            )
+            alunos, por_nome = full_name_lookup(alunos, termo_busca)
+            alunos = alunos.filter(por_nome | Q(matricula__icontains=termo_busca))
 
         fase_filtro = self.request.GET.get("fase", "")
         if fase_filtro in Student.Stage.values:
@@ -399,15 +394,10 @@ class ProntuariosView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
 
         termo_busca = self.request.GET.get("q", "").strip()
         if termo_busca:
-            # Idem: nome_completo não existe como coluna em Patient/Student
-            # (é property herdada de CustomUser), então o filtro por nome
-            # precisa ir direto em first_name/last_name.
-            notas = notas.filter(
-                Q(patient__first_name__icontains=termo_busca)
-                | Q(patient__last_name__icontains=termo_busca)
-                | Q(student__first_name__icontains=termo_busca)
-                | Q(student__last_name__icontains=termo_busca)
+            notas, por_nome = full_name_lookup(
+                notas, termo_busca, "patient__", "student__"
             )
+            notas = notas.filter(por_nome)
 
         agora = timezone.now()
         linhas = []
@@ -506,9 +496,8 @@ class ProntuarioDetalheView(LoginRequiredMixin, UserPassesTestMixin, DetailView)
 def advisees_by_name(user, search):
     students = advisees_visible_to(user).order_by("first_name", "last_name")
     if search:
-        students = students.filter(
-            Q(first_name__icontains=search) | Q(last_name__icontains=search)
-        )
+        students, por_nome = full_name_lookup(students, search)
+        students = students.filter(por_nome)
     return students
 
 
