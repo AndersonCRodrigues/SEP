@@ -295,6 +295,31 @@
     background: var(--sep-maroon-dark);
   }
 
+  /* Acao ainda por fazer (Marcar presenca): preta, como na referencia. */
+  .mobile-row-action-dark {
+    background: #111111;
+  }
+
+  .mobile-row-action-dark:hover {
+    background: #333333;
+  }
+
+  /* A acao por POST vem num form; o botao herda o desenho do link. */
+  .mobile-row-form {
+    margin: 0;
+    flex-shrink: 0;
+  }
+
+  .mobile-row-form .mobile-row-action {
+    border: none;
+    cursor: pointer;
+  }
+
+  /* Botoes logo abaixo do filtro, no topo da lista. */
+  .mobile-actions-top {
+    margin: 0 0 16px 0;
+  }
+
   /* Moldura da lista: caixa branca de borda cinza em volta das linhas. */
   .mobile-list {
     padding: 16px 12px 4px 12px;
@@ -877,6 +902,15 @@
     margin: 4px 0 0 0;
     font-size: 13px;
     color: #555555;
+  }
+
+  /* ── Legenda curta abaixo do titulo (data de referencia) ── */
+  .mobile-caption {
+    margin: -8px 0 16px 0;
+    font-family: var(--font-main);
+    font-size: 13px;
+    color: #555555;
+    text-align: center;
   }
 
   /* ── Estado vazio ── */

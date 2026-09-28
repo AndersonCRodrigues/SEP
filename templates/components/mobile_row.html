@@ -15,8 +15,13 @@
     <span class="mobile-row-detail"><i class="bi {{ info_icon|default:"bi-info-circle" }}"></i>{{ info }}</span>
     {% endif %}
   </div>
-  {% if action_url %}
-  <a class="mobile-row-action{% if action_tone == 'maroon' %} mobile-row-action-maroon{% endif %}" href="{{ action_url }}">{{ action_label }}</a>
+  {% if action_url and action_post %}
+  <form class="mobile-row-form" method="post" action="{{ action_url }}">
+    {% csrf_token %}
+    <button type="submit" class="mobile-row-action{% if action_tone == 'maroon' %} mobile-row-action-maroon{% elif action_tone == 'dark' %} mobile-row-action-dark{% endif %}">{{ action_label }}</button>
+  </form>
+  {% elif action_url %}
+  <a class="mobile-row-action{% if action_tone == 'maroon' %} mobile-row-action-maroon{% elif action_tone == 'dark' %} mobile-row-action-dark{% endif %}" href="{{ action_url }}">{{ action_label }}</a>
   {% elif label %}
   {% include "components/mobile_badge.html" with label=label level=level %}
   {% endif %}
