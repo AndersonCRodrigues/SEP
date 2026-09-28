@@ -16,6 +16,15 @@
     margin: 0 auto;
   }
 
+  /* Titulo de bloco alinhado com a coluna: a coluna zera a margem de baixo. */
+  .mobile-block-title.mobile-column {
+    margin: 0 auto 12px auto;
+  }
+
+  .mobile-block-title.mobile-block-gap {
+    margin-top: 24px;
+  }
+
   /* ── Indicadores: tres pilulas ── */
   .mobile-stats {
     display: flex;
@@ -123,6 +132,17 @@
     display: flex;
     justify-content: center;
     margin: 24px 0;
+  }
+
+  /* Mais de um botao: um embaixo do outro, com a mesma largura. */
+  .mobile-actions-stack {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .mobile-actions-stack .mobile-button {
+    min-width: 220px;
   }
 
   /* ── Pilula de titulo das telas internas ── */
@@ -264,6 +284,15 @@
   .mobile-row-action:hover {
     background: #2E8A00;
     color: #FFFFFF;
+  }
+
+  /* Acao que abre algo (Feedback, Editar), nao que conclui: fica vinho. */
+  .mobile-row-action-maroon {
+    background: var(--sep-maroon);
+  }
+
+  .mobile-row-action-maroon:hover {
+    background: var(--sep-maroon-dark);
   }
 
   /* Moldura da lista: caixa branca de borda cinza em volta das linhas. */
@@ -716,6 +745,138 @@
     font-family: var(--font-main);
     font-size: 11px;
     color: #777777;
+  }
+
+  /* ── Caixa com titulo: secao das telas de detalhe (Dados do aluno) ── */
+  .mobile-box {
+    margin-bottom: 24px;
+  }
+
+  .mobile-box .mobile-list .mobile-empty {
+    padding: 8px 4px 20px 4px;
+  }
+
+  /* Dado da caixa: rotulo escuro em cima, valor vinho embaixo. */
+  .mobile-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 12px;
+    padding: 14px 12px;
+    background: #DCDCDC;
+    border-radius: 16px;
+    font-family: var(--font-main);
+  }
+
+  .mobile-field-label {
+    font-size: 14px;
+    font-weight: 700;
+    color: #333333;
+  }
+
+  .mobile-field-value {
+    font-size: 14px;
+    color: var(--sep-maroon);
+    overflow-wrap: anywhere;
+  }
+
+  /* ── Cartao do paciente em foco (Novo encaminhamento) ── */
+  .mobile-patient-card {
+    margin-bottom: 20px;
+    padding: 14px 16px;
+    background: #FFFFFF;
+    border: 1px solid #8C8581;
+    border-radius: 16px;
+    font-family: var(--font-main);
+    color: #000000;
+  }
+
+  .mobile-patient-card p {
+    margin: 0;
+  }
+
+  .mobile-patient-card-label {
+    font-size: 14px;
+  }
+
+  .mobile-patient-card-name,
+  .mobile-patient-card-detail {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+  }
+
+  .mobile-patient-card-name {
+    font-size: 22px;
+    font-weight: 800;
+  }
+
+  .mobile-patient-card-code {
+    font-size: 15px;
+    font-weight: 500;
+  }
+
+  .mobile-patient-card-detail {
+    margin-top: 4px;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .mobile-patient-card-detail span + span {
+    font-weight: 500;
+  }
+
+  /* ── Opcoes marcaveis: o rotulo envolve o checkbox, sem id ── */
+  .mobile-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .mobile-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    background: #DCDCDC;
+    border-radius: 12px;
+    font-family: var(--font-main);
+    font-size: 14px;
+    color: #333333;
+    cursor: pointer;
+  }
+
+  .mobile-option input {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    accent-color: var(--sep-maroon);
+  }
+
+  .mobile-option:has(input:checked) {
+    background: #EFE3E3;
+    outline: 1px solid var(--sep-maroon);
+  }
+
+  /* ── Feedback: autor e data, com o texto abaixo ── */
+  .mobile-feedback {
+    margin-bottom: 12px;
+    font-family: var(--font-main);
+    color: #000000;
+  }
+
+  .mobile-feedback-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 13px;
+  }
+
+  .mobile-feedback-content {
+    margin: 4px 0 0 0;
+    font-size: 13px;
+    color: #555555;
   }
 
   /* ── Estado vazio ── */

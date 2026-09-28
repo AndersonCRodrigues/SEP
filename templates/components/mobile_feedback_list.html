@@ -1,0 +1,15 @@
+{% if feedbacks %}
+<div class="mobile-list mobile-column">
+  {% for feedback in feedbacks %}
+  <div class="mobile-feedback">
+    <div class="mobile-feedback-head">
+      <strong>{{ feedback.author }}</strong>
+      <span>{{ feedback.when|date:"d/m/Y" }}</span>
+    </div>
+    {% if feedback.content %}<p class="mobile-feedback-content">{{ feedback.content }}</p>{% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<p class="mobile-empty">{{ empty_message|default:"Nenhum feedback registrado ainda." }}</p>
+{% endif %}

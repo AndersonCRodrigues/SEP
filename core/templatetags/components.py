@@ -35,3 +35,7 @@ register.tag("card", _build_slot_tag("card", "components/_card.html"))
 register.tag("section", _build_slot_tag("section", "components/_section.html"))
 register.tag("modal", _build_slot_tag("modal", "components/_modal.html"))
 register.tag("data_table", _build_slot_tag("data_table", "components/_data_table.html"))
+register.tag(
+    "mobile_filter", _build_slot_tag("mobile_filter", "components/_mobile_filter.html")
+)
+register.tag("mobile_box", _build_slot_tag("mobile_box", "components/_mobile_box.html"))

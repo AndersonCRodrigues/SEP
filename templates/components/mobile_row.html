@@ -11,9 +11,12 @@
     {% if place %}
     <span class="mobile-row-detail"><i class="bi bi-door-closed"></i>{{ place }}</span>
     {% endif %}
+    {% if info %}
+    <span class="mobile-row-detail"><i class="bi {{ info_icon|default:"bi-info-circle" }}"></i>{{ info }}</span>
+    {% endif %}
   </div>
   {% if action_url %}
-  <a class="mobile-row-action" href="{{ action_url }}">{{ action_label }}</a>
+  <a class="mobile-row-action{% if action_tone == 'maroon' %} mobile-row-action-maroon{% endif %}" href="{{ action_url }}">{{ action_label }}</a>
   {% elif label %}
   {% include "components/mobile_badge.html" with label=label level=level %}
   {% endif %}
