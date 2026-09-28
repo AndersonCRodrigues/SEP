@@ -3,8 +3,7 @@
 
 {% block title %}Ficha de triagem{% endblock %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'core/css/components/tokens.css' %}">
+{% block page_css %}
 <link rel="stylesheet" href="{% static 'core/css/components/question_wizard.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/student_triage_wizard.css' %}">
 {% endblock %}
@@ -12,6 +11,66 @@
 {% block page_header %}{% endblock %}
 
 {% block content %}
+<!-- ══════════════════════════════════════
+     MOBILE — Ficha de Triagem
+     ══════════════════════════════════════ -->
+<div class="mobile-page">
+  <div class="mobile-maroon-bg">
+    {% url 'students:home' as back_url %}
+    {% include "components/mobile_header.html" with back_url=back_url %}
+  </div>
+
+  <div class="mobile-content mobile-column">
+    <!-- Info do paciente -->
+    <div class="mobile-notice" style="background: #F5F0EB; border-radius: 8px; padding: 12px 16px; border: 1px solid #75151A; display: flex; flex-direction: column; gap: 4px; margin-top: 12px; position: relative;">
+      <span style="font-family: var(--font-main); font-size: 11px; color: #8F8F8F; line-height: 1;">Paciente</span>
+      <span style="font-family: var(--font-main); font-size: 14px; font-weight: 700; color: #3A0C10; line-height: 1;">{{ patient.get_full_name }}</span>
+    </div>
+    
+    <!-- Progress bar -->
+    <div style="background-color: #E3CFCF; border-radius: 8px; height: 12px; margin-top: 24px; margin-bottom: 8px;">
+      <div style="background-color: #652528; border-radius: 8px; height: 12px; width: calc({{ number }} / {{ total }} * 100%);"></div>
+    </div>
+
+    <section class="question" aria-labelledby="question-title-mobile" style="margin-top: 16px; padding: 0;">
+      <div class="question-body" style="padding: 0; box-shadow: none;">
+        <p class="question-counter">{{ step.section }} · pergunta {{ number }} de {{ total }}</p>
+        <h1 id="question-title-mobile" class="question-title">{{ step.title }}</h1>
+
+        <form class="question-form" method="post" novalidate>
+          {% csrf_token %}
+
+          <div class="question-fields">
+            {% for field in form %}
+            <div class="question-field question-field-{{ field.name }}">
+              <label for="{{ field.id_for_label }}" class="visually-hidden">{{ field.label }}</label>
+              {{ field }}
+              {% if field.help_text %}
+              <p class="question-help">{{ field.help_text }}</p>
+              {% endif %}
+              {% if field.errors %}
+              <div class="field-errors">{{ field.errors }}</div>
+              {% endif %}
+            </div>
+            {% endfor %}
+          </div>
+
+          <div class="question-actions" style="margin-top: 32px; flex-direction: column-reverse; gap: 12px;">
+            <button type="submit" name="action" value="back" class="mobile-button mobile-button-block" style="background: transparent; border: 1px solid var(--cor-borda); color: var(--cor-texto);" formnovalidate
+              {% if is_first %}disabled{% endif %}>Voltar</button>
+
+            <button type="submit" name="action" value="next" class="mobile-button mobile-button-block">Avançar</button>
+          </div>
+        </form>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     DESKTOP — Ficha de Triagem
+     ══════════════════════════════════════ -->
+<div class="desktop-page">
 <div class="registration">
   <aside class="registration-progress" aria-label="Progresso da triagem">
     <p class="registration-brand">
@@ -73,5 +132,6 @@
       </form>
     </div>
   </section>
+</div>
 </div>
 {% endblock %}

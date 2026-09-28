@@ -9,9 +9,48 @@
 <link rel="stylesheet" href="{% static 'core/css/components/home_panel.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/components/activity_list.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/components/alert_card.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/mobile_shell.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/mobile_cards.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/mobile_nav.css' %}">
 {% endblock %}
 
 {% block content %}
+
+<!-- ══════════════════════════════════════
+     MOBILE — Home Superadmin
+     ══════════════════════════════════════ -->
+<div class="mobile-page">
+  <div class="mobile-maroon-bg">
+    {% url 'superadmin:home' as back_url %}
+    {% include "components/mobile_header.html" with back_url=back_url %}
+
+    <!-- Stats pills -->
+    {% include "components/mobile_stats.html" %}
+
+    <!-- Alerta ativo (movido para dentro da faixa vinho) -->
+    {% if alert_server %}
+    {% url 'superadmin:servidores' as alert_url %}
+    {% include "components/mobile_alert.html" with alert_title="Alerta Ativo" alert_message=alert_message alert_url=alert_url alert_action="Ver logs de infraestrutura" %}
+    {% endif %}
+  </div>
+
+  <div class="mobile-content">
+
+    <!-- Opções de Serviço (tabs) -->
+    {% include "components/mobile_tabs.html" with tabs_title="Opções de Serviço" tabs_items="superadmin/_mobile_tabs.html" %}
+
+    <!-- Atividade Recente -->
+    {% include "superadmin/_mobile_activity.html" with activities=activities activities_title="Atividade Recente" %}
+
+  </div>
+
+  {% include "components/mobile_footer.html" %}
+</div>
+
+<!-- ══════════════════════════════════════
+     DESKTOP — Home Superadmin
+     ══════════════════════════════════════ -->
+<div class="desktop-page">
 <section class="greeting">
   <h1 class="greeting-title">Olá, equipe de TI!</h1>
   <p class="greeting-subtitle">Página inicial - Superadmin (TI)</p>
@@ -35,4 +74,6 @@
     {% endif %}
   </section>
 </div>
+</div>
+
 {% endblock %}

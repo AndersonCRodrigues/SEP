@@ -1,0 +1,40 @@
+<h3 class="mobile-block-title">{{ activities_title|default:"Atividade Recente" }}</h3>
+
+{% for activity in activities %}
+<div class="mobile-card mobile-column">
+  <div class="mobile-card-head">
+    <span class="mobile-card-section">
+      {% if activity.kind == 'backup' %}Backups
+      {% elif activity.kind == 'security' %}Segurança
+      {% elif activity.kind == 'document' %}Declarações
+      {% elif activity.kind == 'room' %}Salas
+      {% else %}{{ activity.kind|capfirst }}{% endif %}
+    </span>
+
+    {# Deduz badge pelo kind e pelo título, sem precisar de label/level do back #}
+    {% if activity.kind == 'backup' %}
+      {% if "concluído" in activity.title|lower %}
+      {% include "components/mobile_badge.html" with label="Concluído" level="success" %}
+      {% else %}
+      {% include "components/mobile_badge.html" with label="Agendado" level="neutral" %}
+      {% endif %}
+    {% elif activity.kind == 'security' %}
+      {% include "components/mobile_badge.html" with label="Revisar" level="warning" %}
+    {% elif activity.kind == 'document' %}
+      {% include "components/mobile_badge.html" with label="Pendente" level="danger" %}
+    {% endif %}
+  </div>
+
+  <p class="mobile-card-title">{{ activity.title }}</p>
+  <p class="mobile-card-detail">{{ activity.detail }}</p>
+
+  {% if activity.url %}
+  <div class="mobile-card-rule"></div>
+  <a class="mobile-card-go" href="{{ activity.url }}" aria-label="{{ activity.link_label|default:"Abrir" }}">
+    <i class="bi bi-chevron-right"></i>
+  </a>
+  {% endif %}
+</div>
+{% empty %}
+<p class="mobile-empty">Nenhuma atividade recente.</p>
+{% endfor %}

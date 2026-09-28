@@ -8,9 +8,46 @@
 <link rel="stylesheet" href="{% static 'core/css/components/hover_lift.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/components/list_filters.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/superadmin/superadmin_lists.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/mobile_shell.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/mobile_cards.css' %}">
 {% endblock %}
 
 {% block content %}
+
+<!-- ══════════════════════════════════════
+     MOBILE — Backups
+     ══════════════════════════════════════ -->
+<div class="mobile-page">
+  <div class="mobile-maroon-bg">
+    {% url 'superadmin:home' as back_url %}
+    {% include "components/mobile_header.html" with back_url=back_url %}
+  </div>
+
+  {% include "components/mobile_title.html" with title="Backups" %}
+
+  <div class="mobile-content mobile-column">
+    {% if backups %}
+      {% for backup in backups %}
+        {% if backup.status == "OK" %}
+          {% include "components/mobile_row.html" with variant="white" name=backup.escopo when=backup.executado_em|default:backup.agendado_para|date:"d/m/Y H:i" label="Concluído" level="success" %}
+        {% elif backup.status == "AG" %}
+          {% include "components/mobile_row.html" with variant="white" name=backup.escopo when=backup.agendado_para|date:"d/m/Y H:i" label="Agendado" level="neutral" %}
+        {% else %}
+          {% include "components/mobile_row.html" with variant="white" name=backup.escopo when=backup.executado_em|default:backup.agendado_para|date:"d/m/Y H:i" label="Falhou" level="danger" %}
+        {% endif %}
+      {% endfor %}
+    {% else %}
+      <p class="mobile-empty">Nenhum backup registrado.</p>
+    {% endif %}
+  </div>
+
+  {% include "components/mobile_footer.html" %}
+</div>
+
+<!-- ══════════════════════════════════════
+     DESKTOP — Backups
+     ══════════════════════════════════════ -->
+<div class="desktop-page">
 <div class="list-toolbar">
   <h1 class="list-toolbar-title">Backups</h1>
   {# TODO: botão sem lógica; fica para fazer #}
@@ -50,4 +87,5 @@
 {% else %}
 {% include "components/empty_state.html" with message="Nenhum backup registrado." %}
 {% endif %}
+</div>
 {% endblock %}

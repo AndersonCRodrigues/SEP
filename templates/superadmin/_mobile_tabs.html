@@ -1,0 +1,7 @@
+<a class="mobile-tab {% if current == 'home' %}active{% endif %}" href="{% url 'superadmin:home' %}">Página inicial</a>
+<a class="mobile-tab {% if current == 'servidores' %}active{% endif %}" href="{% url 'superadmin:servidores' %}">Servidores</a>
+<a class="mobile-tab {% if current == 'logs' %}active{% endif %}" href="{% url 'superadmin:logs' %}">Logs</a>
+<a class="mobile-tab {% if current == 'permissoes' %}active{% endif %}" href="{% url 'superadmin:permissoes' %}">Permissões</a>
+<a class="mobile-tab {% if current == 'backups' %}active{% endif %}" href="{% url 'superadmin:backups' %}">Backups</a>
+<a class="mobile-tab {% if current == 'register' %}active{% endif %}" href="{% url 'supervisor:register' %}">Supervisor</a>
+<a class="mobile-tab {% if current == 'cadastrar' %}active{% endif %}" href="{% url 'administration:cadastrar' %}">ADM</a>
