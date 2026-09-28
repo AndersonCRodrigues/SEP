@@ -40,6 +40,12 @@
   list-style: none;
 }
 
+/* Sem salas: a mensagem ocupa a grade inteira, senao fica presa na
+   primeira coluna. */
+.rooms-empty {
+  grid-column: 1 / -1;
+}
+
 /* ── Card Individual da Sala ── */
 .room {
   background-color: var(--sep-card-gray) !important;

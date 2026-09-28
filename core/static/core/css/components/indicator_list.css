@@ -42,6 +42,12 @@
   overflow-wrap: break-word;
 }
 
+/* Sem indicadores: a mensagem ocupa a faixa inteira, nao so a primeira
+   coluna. */
+.indicator-empty {
+  grid-column: 1 / -1;
+}
+
 /* Indicador cujo valor e palavra, e nao numero: cabe na largura do cartao. */
 .indicator-value.indicator-text {
   font-size: 30px;

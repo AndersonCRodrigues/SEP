@@ -1,0 +1,13 @@
+/* Mensagem de lista vazia ("Nenhum agendamento para este filtro."). Fica
+   centralizada na largura toda do bloco em que aparece, nas areas com e sem
+   Bootstrap. Acompanha components/empty_state.html. */
+.empty-state {
+  width: 100%;
+  margin: 0;
+  padding: 2rem 1rem;
+  box-sizing: border-box;
+  font-family: var(--font-main);
+  font-size: 0.95rem;
+  color: #6c757d;
+  text-align: center;
+}
