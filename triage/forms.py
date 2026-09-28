@@ -105,7 +105,9 @@ def _as_question(field):
         field, forms.MultipleChoiceField
     ):
         field.choices = [
-            (valor, rotulo) for valor, rotulo in field.choices if valor not in ("", None)
+            (valor, rotulo)
+            for valor, rotulo in field.choices
+            if valor not in ("", None)
         ]
         field.widget = forms.RadioSelect(choices=field.choices)
         return field

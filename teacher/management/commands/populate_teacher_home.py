@@ -84,9 +84,7 @@ class Command(BaseCommand):
             )
             return
 
-        coordenador = CustomUser.objects.filter(
-            role=CustomUser.Role.SUPERVISOR
-        ).first()
+        coordenador = CustomUser.objects.filter(role=CustomUser.Role.SUPERVISOR).first()
 
         with transaction.atomic():
             professor = self.demo_teacher(area)
@@ -256,9 +254,7 @@ class Command(BaseCommand):
         nomes = ", ".join(aluno.get_full_name() for aluno in alunos)
 
         self.stdout.write("")
-        self.stdout.write(
-            self.style.SUCCESS("Entre como o professor de demonstração:")
-        )
+        self.stdout.write(self.style.SUCCESS("Entre como o professor de demonstração:"))
         self.stdout.write(f"  E-mail : {DEMO_EMAIL}")
         self.stdout.write(f"  Senha  : {DEMO_PASSWORD}")
         self.stdout.write("  Telas  : /teacher/, encaminhamentos, prontuarios,")

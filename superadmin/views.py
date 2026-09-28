@@ -9,6 +9,7 @@ from django.db.models import Avg, Q
 from audit.models import SecurityLog
 from .models import ServerStatus, RolePermissionScope, BackupRecord
 
+
 class HomeSuperadminView(GroupRequiredMixin, TemplateView):
     required_group = "Superadmin"
     template_name = "superadmin/home_superadmin.html"
@@ -152,11 +153,13 @@ class SecurityLogView(GroupRequiredMixin, ListView):
         context["search"] = self.request.GET.get("q", "").strip()
         return context
 
+
 class SecurityLogDetailView(GroupRequiredMixin, DetailView):
     required_group = "Superadmin"
     model = SecurityLog
     template_name = "superadmin/security_log_detail.html"
     context_object_name = "log"
+
 
 class RolePermissionScopeView(GroupRequiredMixin, ListView):
     required_group = "Superadmin"

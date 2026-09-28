@@ -9,10 +9,14 @@ class ServerStatus(models.Model):
         OFFLINE = "OF", "Indisponível"
 
     nome = models.CharField(max_length=100, verbose_name="Servidor")
-    uptime_percent = models.DecimalField(max_digits=5, decimal_places=2, verbose_name="Uptime (%)")
+    uptime_percent = models.DecimalField(
+        max_digits=5, decimal_places=2, verbose_name="Uptime (%)"
+    )
     cpu_percent = models.PositiveSmallIntegerField(verbose_name="CPU (%)")
     memoria_percent = models.PositiveSmallIntegerField(verbose_name="Memória (%)")
-    health = models.CharField(max_length=2, choices=Health.choices, default=Health.SAUDAVEL)
+    health = models.CharField(
+        max_length=2, choices=Health.choices, default=Health.SAUDAVEL
+    )
     atualizado_em = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -50,7 +54,9 @@ class BackupRecord(models.Model):
 
     escopo = models.CharField(max_length=100, verbose_name="Escopo")
     tamanho = models.CharField(max_length=20, blank=True, verbose_name="Tamanho")
-    status = models.CharField(max_length=2, choices=Status.choices, default=Status.AGENDADO)
+    status = models.CharField(
+        max_length=2, choices=Status.choices, default=Status.AGENDADO
+    )
     executado_em = models.DateTimeField(null=True, blank=True)
     agendado_para = models.DateTimeField(null=True, blank=True)
 

@@ -14,8 +14,18 @@ class SupervisorCreationForm(ProfessorCreationForm):
     class Meta:
         model = Teacher
         fields = tuple(
-            f for f in PERSONAL_FIELDS
-            if f not in ("logradouro", "numero", "complemento", "bairro", "cidade", "estado", "cep")
+            f
+            for f in PERSONAL_FIELDS
+            if f
+            not in (
+                "logradouro",
+                "numero",
+                "complemento",
+                "bairro",
+                "cidade",
+                "estado",
+                "cep",
+            )
         )
 
     def __init__(self, *args, **kwargs):

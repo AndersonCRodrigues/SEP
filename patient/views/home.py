@@ -102,9 +102,7 @@ class PatientHomeView(PatientOnly, TemplateView):
                 {"label": "Próxima sessão", "value": next_session, "text": True},
                 {
                     "label": "Faltas",
-                    "value": appointments.filter(
-                        status=Status.PATIENT_NO_SHOW
-                    ).count(),
+                    "value": appointments.filter(status=Status.PATIENT_NO_SHOW).count(),
                 },
             ],
             "activities": [

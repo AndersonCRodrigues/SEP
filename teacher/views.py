@@ -223,7 +223,6 @@ class PerfilProfessorView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         return get_object_or_404(Teacher, pk=self.request.user.pk)
 
 
-
 def _painel_redirect_for(user):
     if user.role == CustomUser.Role.SUPERVISOR:
         return "supervisor:orientacao"
