@@ -13,22 +13,21 @@
 {% block content %}
 <div class="list-toolbar">
   <h1 class="list-toolbar-title">Pacientes</h1>
-  <a class="btn-acao" href="{% url 'administration:cadastrar_paciente' %}">+ Novo cadastro</a>
+  
 </div>
 
   <!-- ── Barra de Busca e Filtros ── -->
   <div class="patients-toolbar">
     <form method="get" class="search-form">
       <div class="search-input-wrapper">
-        <a class="btn-new-registration" href="{% url 'administration:cadastrar_paciente' %}">
-          + Novo Cadastro
-        </a>
+        
         <input
           type="text"
           name="q"
           placeholder="Buscar por nome ou CPF..."
           value="{{ search }}"
         >
+        <a class="btn-acao" href="{% url 'administration:cadastrar_paciente' %}">+ Novo cadastro</a>
       </div>
       <div class="search-input-wrapper">
         <select name="situacao" aria-label="Situação">
@@ -123,5 +122,6 @@
 
 {% else %}
 {% include "components/empty_state.html" with message="Nenhum paciente encontrado. Comece pelo pré-cadastro de um novo paciente." %}
+{% endif %}
 {% endif %}
 {% endblock %}
