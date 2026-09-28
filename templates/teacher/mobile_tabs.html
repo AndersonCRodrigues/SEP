@@ -1,0 +1,9 @@
+{% with current=request.resolver_match.url_name %}
+<a class="mobile-tab {% if current == 'home' %}active{% endif %}" href="{% url 'teacher:home' %}">Página inicial</a>
+<a class="mobile-tab {% if current == 'alunos' or current == 'aluno_detalhe' %}active{% endif %}" href="{% url 'teacher:alunos' %}">Meus alunos</a>
+<a class="mobile-tab {% if current == 'presenca' %}active{% endif %}" href="{% url 'teacher:presenca' %}">Presença</a>
+<a class="mobile-tab {% if current == 'prontuarios' %}active{% endif %}" href="{% url 'teacher:prontuarios' %}">Prontuários</a>
+<a class="mobile-tab {% if current == 'encaminhamentos' or current == 'encaminhar' %}active{% endif %}" href="{% url 'teacher:encaminhamentos' %}">Encaminhar</a>
+<a class="mobile-tab {% if current == 'avaliacoes' %}active{% endif %}" href="{% url 'teacher:avaliacoes' %}">Avaliações</a>
+<a class="mobile-tab {% if current == 'perfil' %}active{% endif %}" href="{% url 'teacher:perfil' %}">Área de atuação</a>
+{% endwith %}

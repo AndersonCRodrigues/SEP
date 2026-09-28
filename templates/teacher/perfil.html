@@ -11,7 +11,10 @@
 {% endblock %}
 
 {% block content %}
-<div class="list-panel-title">Área de atuação</div>
+{% url 'teacher:home' as back_url %}
+{% include "components/mobile_top.html" with title="Área de atuação" %}
+
+<div class="list-panel-title desktop-page">Área de atuação</div>
 
 {% if form.non_field_errors %}
 {% include "components/alert.html" with level="danger" message=form.non_field_errors %}
@@ -21,7 +24,7 @@
 {% include "components/alert.html" with level="danger" message=form.acting_areas.errors %}
 {% endif %}
 
-<form class="list-panel" method="post" novalidate>
+<form class="list-panel mobile-column" method="post" novalidate>
   {% csrf_token %}
 
   <div class="option-list">
@@ -39,4 +42,9 @@
     <button type="submit" class="btn-acao">Salvar área de atuação</button>
   </div>
 </form>
+{% endblock %}
+
+{% block footer %}
+{{ block.super }}
+{% include "components/mobile_footer.html" with standalone=True %}
 {% endblock %}

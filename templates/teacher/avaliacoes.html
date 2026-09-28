@@ -12,118 +12,56 @@
 <link rel="stylesheet" href="{% static 'core/css/components/feedback_list.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/form_cadastro.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/teacher_lists.css' %}">
-<link rel="stylesheet" href="{% static 'core/css/patient_home.css' %}">
 {% endblock %}
 
 {% block content %}
-
 <!-- ══════════════════════════════════════
-     MOBILE — Avaliações
+     MOBILE
      ══════════════════════════════════════ -->
-<div class="d-block d-md-none" style="min-height: 100vh; background-color: #F8F9FA;">
-
-  <!-- Header Mobile -->
-  <div class="mobile-maroon-bg" style="border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; padding-bottom: 24px;">
-    <div class="mobile-header" style="align-items: center;">
-      <div style="display: flex; align-items: center;">
-        <a href="javascript:history.back()" class="mobile-back" style="color: transparent; text-decoration: none;"></a>
-        <span class="mobile-greeting" style="margin-left: 8px;">Olá, {{ request.user.first_name|default:"Professor" }}!</span>
-      </div>
-      <div class="mobile-icons d-flex align-items-center gap-3">
-        <i class="bi bi-bell"></i>
-        <form method="post" action="{% url 'logout' %}" class="m-0 p-0 d-inline-flex">
-          {% csrf_token %}
-          <button type="submit" class="p-0 border-0 bg-transparent text-white d-flex align-items-center" style="line-height: 1;">
-            <i class="bi bi-person-circle" style="font-size: 24px;"></i>
-          </button>
-        </form>
-      </div>
-    </div>
+<div class="mobile-page">
+  <div class="mobile-maroon-bg">
+    {% if chosen %}{% url 'teacher:avaliacoes' as back_url %}{% else %}{% url 'teacher:home' as back_url %}{% endif %}
+    {% include "components/mobile_header.html" %}
   </div>
 
-  <!-- Pílula de título -->
-  <div class="text-center px-3" style="margin-top: 20px; margin-bottom: 24px;">
-    <span style="display: inline-block; background-color: #6D1D20; color: #fff; padding: 12px 48px; border-radius: 20px; font-weight: 700; font-family: 'Museo Sans', sans-serif; font-size: 16px;">
-      {% if chosen %}{{ chosen.get_full_name }}{% else %}Avaliações{% endif %}
-    </span>
-  </div>
+  {% include "components/mobile_title.html" with title="Avaliação" %}
 
-  <div class="px-3">
+  <div class="mobile-content">
     {% if chosen %}
-    <!-- ── Detalhe: feedback do aluno ── -->
-    <div>
-      <p style="font-family: 'Museo Sans', sans-serif; font-size: 13px; font-weight: 700; color: #6D1D20; margin-bottom: 8px;">Avaliação de desempenho</p>
-
-      <!-- Card do formulário -->
-      <div style="border: 1px solid #C4C4C4; border-radius: 16px; padding: 16px; background: #EDEDED; margin-bottom: 20px;">
-        <p style="font-family: 'Museo Sans', sans-serif; font-size: 13px; font-weight: 700; color: #111; margin-bottom: 12px;">
-          Avaliação para: {{ chosen.get_full_name }}
-        </p>
-        <form method="post" action="{% url 'teacher:registrar_feedback' chosen.pk %}">
-          {% csrf_token %}
-          <textarea name="content" placeholder="Feedback aqui..."
-            style="width: 100%; border: 1px solid #C4C4C4; border-radius: 12px; padding: 12px; font-family: 'Museo Sans', sans-serif; font-size: 13px; background: #fff; resize: none; min-height: 80px; margin-bottom: 12px;"></textarea>
-          <button type="submit"
-            style="width: 100%; background-color: #6D1D20; color: white; border: none; border-radius: 20px; padding: 12px; font-family: 'Museo Sans', sans-serif; font-size: 14px; font-weight: 700;">
-            Enviar
-          </button>
-        </form>
+    <h2 class="mobile-block-title mobile-column">Avaliação de desempenho</h2>
+    <form class="mobile-form mobile-list mobile-column" method="post" action="{% url 'teacher:registrar_feedback' chosen.pk %}">
+      {% csrf_token %}
+      <p>
+        <label for="mobile-content">Avaliação para {{ chosen.get_full_name }}</label>
+        <textarea id="mobile-content" name="content" rows="4" placeholder="Feedback aqui..."></textarea>
+      </p>
+      <div class="mobile-actions">
+        <button type="submit" class="mobile-button">Enviar</button>
       </div>
-
-      <!-- Avaliações anteriores -->
-      <p style="font-family: 'Museo Sans', sans-serif; font-size: 13px; font-weight: 700; color: #6D1D20; margin-bottom: 8px;">Avaliações anteriores</p>
-      <div style="border: 1px solid #C4C4C4; border-radius: 16px; padding: 12px; background: transparent; margin-bottom: 24px;">
-        {% for fb in feedbacks %}
-        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #E0E0E0;">
-          <span style="font-family: 'Museo Sans', sans-serif; font-size: 13px; font-weight: 700; color: #111;">{{ fb.teacher.nome_completo }}</span>
-          <span style="font-family: 'Museo Sans', sans-serif; font-size: 12px; color: #666;">{{ fb.updated_at|date:"d/m/Y" }}</span>
-        </div>
-        {% empty %}
-        <p style="text-align:center; color:#888; font-family:'Museo Sans',sans-serif; padding: 10px 0;">Nenhuma avaliação anterior.</p>
-        {% endfor %}
-      </div>
-
-      <a href="{% url 'teacher:avaliacoes' %}"
-        style="display: block; text-align: center; color: #6D1D20; font-family: 'Museo Sans', sans-serif; font-size: 13px; font-weight: 700; text-decoration: none; margin-bottom: 24px;">
-        ← Voltar para lista
-      </a>
-    </div>
-
-    {% else %}
-    <!-- ── Lista de alunos para avaliar ── -->
-    <form method="get" class="d-flex gap-2 mb-4">
-      <input type="text" name="q" value="{{ search }}" placeholder="Buscar por nome..."
-        style="flex: 1; border: 1px solid #C4C4C4; border-radius: 20px; padding: 8px 16px; font-family: 'Museo Sans', sans-serif; font-size: 13px; background: #fff;">
-      <button type="submit"
-        style="background-color: #6D1D20; color: white; border: none; border-radius: 20px; padding: 8px 18px; font-family: 'Museo Sans', sans-serif; font-size: 13px; font-weight: 700;">
-        Filtrar
-      </button>
     </form>
 
-    <div>
-      {% for aluno in students %}
-      <div style="background-color: #DCDCDC; border-radius: 16px; padding: 14px 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
-        <div style="font-family: 'Museo Sans', sans-serif; font-size: 13px; font-weight: 700; color: #111;">
-          {{ aluno.get_full_name }}
-        </div>
-        <a href="?aluno={{ aluno.pk }}"
-          style="background-color: #6D1D20; color: white; padding: 8px 16px; border-radius: 12px; font-family: 'Museo Sans', sans-serif; font-size: 12px; font-weight: 700; text-decoration: none; white-space: nowrap;">
-          Feedback
-        </a>
-      </div>
-      {% empty %}
-      <p style="text-align:center; color:#888; font-family:'Museo Sans',sans-serif; padding: 20px 0;">Nenhum aluno encontrado.</p>
-      {% endfor %}
-    </div>
+    <h2 class="mobile-block-title mobile-column mobile-block-gap">Avaliações anteriores</h2>
+    {% include "components/mobile_feedback_list.html" with empty_message="Nenhuma avaliação anterior." %}
+    {% else %}
+    {% include "components/mobile_search.html" with search_value=search search_label="Buscar por nome" %}
+
+    {% for student in students %}
+    {% with pk=student.pk|stringformat:"s" %}
+    {% include "components/mobile_row.html" with name=student.get_full_name action_url="?aluno="|add:pk action_label="Feedback" action_tone="maroon" %}
+    {% endwith %}
+    {% empty %}
+    <p class="mobile-empty">Nenhum aluno vinculado.</p>
+    {% endfor %}
     {% endif %}
   </div>
+
+  {% include "components/mobile_footer.html" %}
 </div>
 
-
 <!-- ══════════════════════════════════════
-     DESKTOP — Avaliações
+     DESKTOP
      ══════════════════════════════════════ -->
-<div class="d-none d-md-block">
+<div class="desktop-page">
 <div class="list-panel-title">Avaliações de desempenho</div>
 
 {% if chosen %}
@@ -179,7 +117,5 @@
 {% include "components/empty_state.html" with message="Nenhum aluno vinculado." %}
 {% endif %}
 {% endif %}
-
 </div>
-
 {% endblock %}

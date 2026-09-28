@@ -11,6 +11,41 @@
 {% endblock %}
 
 {% block content %}
+<!-- ══════════════════════════════════════
+     MOBILE
+     ══════════════════════════════════════ -->
+<div class="mobile-page">
+  <div class="mobile-maroon-bg">
+    {% url 'teacher:home' as back_url %}
+    {% include "components/mobile_header.html" %}
+  </div>
+
+  {% include "components/mobile_title.html" with title="Presença" %}
+
+  <div class="mobile-content">
+    <p class="mobile-caption">Referente a hoje, {{ today|date:"d/m/Y" }}</p>
+
+    {% include "components/mobile_search.html" with search_value=search search_label="Buscar por nome" %}
+
+    {% for row in rows %}
+    {% if row.attendance %}
+    {% include "components/mobile_row.html" with name=row.student.get_full_name label="Presente" level="success" %}
+    {% else %}
+    {% url 'teacher:marcar_presenca' row.student.pk as mark_url %}
+    {% include "components/mobile_row.html" with name=row.student.get_full_name action_url=mark_url action_post=True action_label="Marcar" action_tone="dark" %}
+    {% endif %}
+    {% empty %}
+    <p class="mobile-empty">Nenhum aluno vinculado.</p>
+    {% endfor %}
+  </div>
+
+  {% include "components/mobile_footer.html" %}
+</div>
+
+<!-- ══════════════════════════════════════
+     DESKTOP
+     ══════════════════════════════════════ -->
+<div class="desktop-page">
 <div class="list-panel-title">Presença</div>
 
 <p class="list-panel-subtitle">Referente a hoje, {{ today|date:"d/m/Y" }}</p>
@@ -53,4 +88,5 @@
 {% else %}
 {% include "components/empty_state.html" with message="Nenhum aluno vinculado." %}
 {% endif %}
+</div>
 {% endblock %}
