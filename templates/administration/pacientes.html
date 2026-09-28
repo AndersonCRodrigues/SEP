@@ -49,7 +49,6 @@
 <div class="desktop-page">
 <div class="list-toolbar">
   <h1 class="list-toolbar-title">Pacientes</h1>
-  <a class="btn-acao" href="{% url 'administration:cadastrar_paciente' %}">+ Novo cadastro</a>
 </div>
 
 <form class="list-filters" method="get">
@@ -68,6 +67,7 @@
   </select>
 
   <button type="submit" class="btn-acao">Filtrar</button>
+  <a class="btn-acao" href="{% url 'administration:cadastrar_paciente' %}">+ Novo cadastro</a>
 </form>
 
 {% if patients_error %}

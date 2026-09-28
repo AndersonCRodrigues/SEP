@@ -84,6 +84,12 @@ class PatientsView(AdministrativeOnly, TemplateView):
         """O CPF é gravado com e sem pontuação, então a busca compara dígitos."""
         pacientes, procura = full_name_lookup(pacientes, busca)
 
+        nome, *sobrenome = busca.split()
+        if sobrenome:
+            procura |= Q(first_name__icontains=nome) & Q(
+                last_name__icontains=" ".join(sobrenome)
+            )
+
         digitos = only_digits(busca)
         if digitos:
             apenas_digitos = Replace(
@@ -109,6 +115,12 @@ class PatientRegistrationStartView(CanRegisterPatients, View):
 
 class PatientRegistrationStepView(CanRegisterPatients, View):
     template_name = "administration/cadastrar_paciente.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        wizard = PatientRegistration(request.session)
+        if wizard.session_complete:
+            return redirect("administration:pacientes")
+        return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, step):
         wizard = PatientRegistration(request.session)
@@ -154,7 +166,7 @@ class PatientRegistrationStepView(CanRegisterPatients, View):
         return redirect("administration:cadastro_concluido", pk=patient.pk)
 
     def respond(self, request, wizard, step, form):
-        return render(
+        response = render(
             request,
             self.template_name,
             {
@@ -166,6 +178,8 @@ class PatientRegistrationStepView(CanRegisterPatients, View):
                 "sections": wizard.sections(step),
             },
         )
+        response["Cache-Control"] = "no-store"
+        return response
 
 
 class RegistrationCompletedView(CanRegisterPatients, DetailView):
