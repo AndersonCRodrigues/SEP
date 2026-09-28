@@ -1,9 +1,11 @@
+from datetime import timedelta
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import OuterRef, Q, Subquery
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
@@ -31,6 +33,35 @@ from .forms import (
     VincularAlunoForm,
 )
 from .models import Teacher
+
+REVIEW_WINDOW_DAYS = 30
+NOTE_DEADLINE_DAYS = 7
+
+
+def active_term():
+    return Subquery(
+        Advising.objects.filter(student=OuterRef("pk"), end_date__isnull=True).values(
+            "term"
+        )[:1]
+    )
+
+
+def unreviewed_advisees(user, students, today):
+    from students.models import PerformanceReview
+
+    reviewed = PerformanceReview.objects.filter(
+        teacher_id=user.pk,
+        updated_at__date__gt=today - timedelta(days=REVIEW_WINDOW_DAYS),
+    ).values("student_id")
+    return students.exclude(pk__in=reviewed).count()
+
+
+def note_situation(note, now):
+    if not note.pending_confirmation:
+        return "Revisada", "success"
+    if note.created_at < now - timedelta(days=NOTE_DEADLINE_DAYS):
+        return "Atrasada", "danger"
+    return "Analisar", "warning"
 
 
 class HomeProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
@@ -98,6 +129,9 @@ class HomeProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
             {"label": "Presença hoje", "value": f"{presentes}/{orientados}"},
             {"label": "Avaliações pendentes", "value": evolucoes_pendentes.count()},
         ]
+        context["pending_alert"] = self.pending_alert(
+            unreviewed_advisees(self.request.user, alunos, hoje)
+        )
 
         atividades = []
         for nota in evolucoes_pendentes.select_related("patient", "student").order_by(
@@ -139,6 +173,18 @@ class HomeProfessorView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         atividades.sort(key=lambda item: item["when"], reverse=True)
         context["activities"] = atividades[:5]
         return context
+
+    @staticmethod
+    def pending_alert(unreviewed):
+        if not unreviewed:
+            return None
+        noun = "aluno" if unreviewed == 1 else "alunos"
+        return {
+            "title": "Atenção pendente",
+            "message": f"Avaliação de desempenho de {unreviewed} {noun} em aberto",
+            "url": reverse("teacher:avaliacoes"),
+            "action": "Avaliar orientados",
+        }
 
 
 @login_required
@@ -275,7 +321,7 @@ class AlunosOrientacaoView(LoginRequiredMixin, UserPassesTestMixin, ListView):
         if fase_filtro in Student.Stage.values:
             alunos = alunos.filter(stage=fase_filtro)
 
-        return alunos.order_by("first_name", "last_name")
+        return alunos.annotate(term=active_term()).order_by("first_name", "last_name")
 
     def get_context_data(self, **kwargs):
         from students.models import Student
@@ -320,6 +366,11 @@ class AlunoDetalheView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
             end_date__isnull=False
         ).select_related("patient")
         context["feedbacks"] = student_feedbacks(self.request.user, aluno)
+        context["term"] = (
+            aluno.advising_history.filter(end_date__isnull=True)
+            .values_list("term", flat=True)
+            .first()
+        )
         return context
 
 
@@ -358,17 +409,12 @@ class ProntuariosView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
                 | Q(student__last_name__icontains=termo_busca)
             )
 
-        # MOCK: ainda não existe regra de prazo/SLA para "Pendente" vs "Revisar"
-        # no backend. Por ora só refletimos pending_confirmation (o que já
-        # existe) e usamos o índice pra variar o badge na tela. Quando a regra
-        # de prazo for definida como task, trocar por ela aqui.
-        context["linhas"] = [
-            {
-                "nota": nota,
-                "atrasada": nota.pending_confirmation and indice % 2 == 0,
-            }
-            for indice, nota in enumerate(notas)
-        ]
+        agora = timezone.now()
+        linhas = []
+        for nota in notas:
+            label, level = note_situation(nota, agora)
+            linhas.append({"nota": nota, "label": label, "level": level})
+        context["linhas"] = linhas
         context["termo_busca"] = termo_busca
         return context
 
@@ -486,7 +532,7 @@ def student_feedbacks(user, student):
 
 
 class PresencaView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
-    template_name = "teacher/presenca_feedback.html"
+    template_name = "teacher/presenca.html"
 
     def test_func(self):
         return self.request.user.role in (
