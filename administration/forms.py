@@ -15,6 +15,8 @@ from patient.models import Patient
 from scheduling.models import Appointment
 from students.models import Student
 from utils.masking import mask_cpf
+from datetime import date
+from django.core.exceptions import ValidationError
 
 PATIENT = "patient"
 STUDENT = "student"
@@ -302,12 +304,23 @@ class BirthDateForm(RegistrationStepForm):
     )
 
     def clean_data_nascimento(self):
-        birth_date = self.cleaned_data["data_nascimento"]
-        if birth_date > timezone.localdate():
-            raise forms.ValidationError(
-                "A data de nascimento não pode estar no futuro."
-            )
-        return birth_date
+        data_nascimento= self.cleaned_data["data_nascimento"]
+        hoje = date.today()
+        
+        idade = hoje.year -data_nascimento.year -(
+            (hoje.month,hoje.day)<(data_nascimento.month,data_nascimento.day)
+        )
+        
+        if data_nascimento > hoje:
+            raise ValidationError("A data de nascimento não pode ser no futuro.")
+
+        if idade < 5:
+            raise ValidationError("É necessário ter no mínimo 5 anos.")
+
+        if idade > 100:
+            raise ValidationError("É necessário ter no máximo 100 anos.")
+
+        return data_nascimento
 
 
 class PhoneForm(RegistrationStepForm):
