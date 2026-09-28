@@ -25,6 +25,10 @@
   <div class="mobile-content">
     {% include "components/mobile_search.html" with search_value=search search_label="Buscar por nome ou CPF" %}
 
+    <div class="mobile-actions mobile-actions-top">
+      <a class="mobile-button" href="{% url 'administration:cadastrar_paciente' %}">Cadastrar novo paciente</a>
+    </div>
+
     {% if patients_error %}
     <p class="mobile-empty">{{ patients_error }}</p>
     {% else %}
@@ -34,10 +38,6 @@
     <p class="mobile-empty">Nenhum paciente encontrado.</p>
     {% endfor %}
     {% endif %}
-
-    <div class="mobile-actions">
-      <a class="mobile-button" href="{% url 'administration:cadastrar_paciente' %}">Novo cadastro</a>
-    </div>
   </div>
 
   {% include "components/mobile_footer.html" %}

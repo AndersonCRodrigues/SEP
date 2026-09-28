@@ -27,6 +27,10 @@
   <div class="mobile-content">
     {% include "components/mobile_search.html" with search_value=search search_label="Buscar por nome ou CRP" %}
 
+    <div class="mobile-actions mobile-actions-top">
+      <a class="mobile-button" href="{% url 'teacher:cadastrar' %}">Cadastrar professor</a>
+    </div>
+
     {% for row in teachers %}
     {% url 'supervisor:professor_detalhe' row.teacher.pk as teacher_url %}
     {% with advisees=row.advisees|stringformat:"s" plural=row.advisees|pluralize %}
@@ -35,10 +39,6 @@
     {% empty %}
     <p class="mobile-empty">Nenhum professor encontrado.</p>
     {% endfor %}
-
-    <div class="mobile-actions">
-      <a class="mobile-button" href="{% url 'teacher:cadastrar' %}">Cadastrar professor</a>
-    </div>
   </div>
 
   {% include "components/mobile_footer.html" %}

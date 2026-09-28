@@ -27,16 +27,16 @@
   <div class="mobile-content">
     {% include "components/mobile_search.html" with search_value=search search_label="Buscar por nome ou matrícula" %}
 
+    <div class="mobile-actions mobile-actions-top">
+      <a class="mobile-button" href="{% url 'students:cadastrar' %}">Cadastrar aluno</a>
+    </div>
+
     {% for row in students %}
     {% url 'supervisor:aluno_detalhe' row.student.pk as student_url %}
     {% include "components/mobile_row.html" with variant="white" url=student_url name=row.student.get_full_name person=row.advisor info=row.stage info_icon="bi-mortarboard" label=row.label level=row.level %}
     {% empty %}
     <p class="mobile-empty">Nenhum aluno encontrado.</p>
     {% endfor %}
-
-    <div class="mobile-actions">
-      <a class="mobile-button" href="{% url 'students:cadastrar' %}">Cadastrar aluno</a>
-    </div>
   </div>
 
   {% include "components/mobile_footer.html" %}

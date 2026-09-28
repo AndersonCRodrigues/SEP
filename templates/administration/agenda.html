@@ -32,6 +32,11 @@
     </select>
     {% endmobile_filter %}
 
+    <div class="mobile-actions mobile-actions-top">
+      {# TODO: botão sem lógica; fica para fazer #}
+      <button type="button" class="mobile-button" disabled>Novo agendamento</button>
+    </div>
+
     {% for event in events %}
     {% with hour=event.time|date:"H:i" %}
     {% include "components/mobile_row.html" with variant="white" name=event.appointment.patient person=event.attendant|default:"Não atribuído" when=event.day_label|add:" - "|add:hour place=event.appointment.room.name|default:"Sem sala" label=event.appointment.get_status_display level=event.status_level %}
@@ -39,11 +44,6 @@
     {% empty %}
     <p class="mobile-empty">Nenhum agendamento para este filtro.</p>
     {% endfor %}
-
-    <div class="mobile-actions">
-      {# TODO: botão sem lógica; fica para fazer #}
-      <button type="button" class="mobile-button" disabled>Novo agendamento</button>
-    </div>
   </div>
 
   {% include "components/mobile_footer.html" %}
