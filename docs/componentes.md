@@ -56,6 +56,7 @@ precisa de aspas.
 | Cartão de paciente (celular) | `mobile_patient_card.html` | include | Paciente em foco: `name`, `code`, `detail` e `detail_date` |
 | Opções marcáveis (celular) | `mobile_option_list.html` | include | Checkboxes envolvidos pelo rótulo, sem `id` (convive com a versão desktop na mesma página): `options`, `field_name`, `empty_message` |
 | Feedbacks (celular) | `mobile_feedback_list.html` | include | Autor, data e texto numa moldura; `feedbacks` e `empty_message` |
+| Topo do wizard (celular) | `wizard_mobile_head.html` | include | Cartão com `label`/`name` e barra de progresso com `number`/`total`; vai no topo da `<section class="question">` e só aparece com o `mobile_wizard.css` |
 | Topo parcial (celular) | `mobile_top.html` | include | Faixa vinho com cabeçalho e pílula de `title`, só no celular; para telas de formulário renderizadas uma vez |
 | Alerta | `alert.html` | include | Mensagem única; para aviso de sistema use as mensagens do Django, que o `base.html` já exibe |
 | Loading | `loading.html` | include | Estado estático; não há carregamento assíncrono no projeto |
@@ -100,12 +101,13 @@ regra própria para o que aquela tela realmente tem de diferente.
 | `alert_card.css` | Cartão de alerta cinza com título laranja e botão de ação | Home do Superadmin |
 | `feedback_list.css` | Entradas de feedback: autor e data na mesma linha, texto com as quebras preservadas | Avaliações e perfil do aluno (Professor) |
 | `referral_panel.css` | Tela de encaminhamento: duas colunas, caixa do paciente, filtro, rolagem da lista de opções, recentes e fila | Encaminhamentos do Coordenador e do Professor |
-| `question_wizard.css` | Uma pergunta por vez: cartão branco, barra vinho de progresso à esquerda, contador, título, campos e os botões Voltar/Avançar | Pré-cadastro de paciente (Administrativo) e ficha de triagem (Aluno) |
+| `question_wizard.css` | Uma pergunta por vez: cartão branco, barra vinho de progresso à esquerda, contador, título, campos, o erro do campo (`field-errors`) e os botões Voltar/Avançar | Pré-cadastro de paciente (Administrativo) e ficha de triagem (Aluno) |
 | `<área>/<área>_lists.css` | Só a grade de colunas de cada tela de lista e o que é exclusivo dela | Uma por área: `administrativo`, `superadmin`, `coordenacao`, `teacher_lists.css` |
 | `empty_state.css` | A mensagem de lista vazia, centralizada | `base.html` e os três shells próprios |
 | `password_toggle.css` | Campo de senha com o olho de mostrar/ocultar dentro, à direita | Troca de senha do primeiro acesso |
 | `mobile_shell.css` | Moldura do celular: a troca `mobile-page`/`desktop-page`, o `mobile-only` das telas renderizadas uma vez, faixa vinho, cabeçalho, conteúdo e rodapé; esconde a barra e o rodapé do desktop (`.sep-navbar`, `.admin-navbar`, `.site-footer`) | Shells de Paciente, Aluno, Professor, Administrativo e Coordenador; no Superadmin, cada tela |
 | `mobile_nav.css` | "Opções de Serviço": título, ver todos, abas roláveis, a régua e o título de bloco (`mobile-block-title`) | Telas iniciais e telas com seções |
+| `mobile_wizard.css` | O wizard de uma pergunta por vez no celular, no desenho da ficha de triagem | Pré-cadastro de paciente |
 | `mobile_cards.css` | Coluna de 340px (`mobile-column`), indicadores, alerta, cartão de atividade, linha de lista e as ações dela, moldura de lista, selos, busca e filtro, tiles, caixa com título e dado, cartão de paciente, opções marcáveis, feedbacks, pessoa, painel de canais, caixa de informação, conclusão, formulário, pílula de título, botões e estado vazio | Telas de celular de todas as áreas |
 
 Nenhum componente depende de utilitários do Bootstrap (`d-flex`, `mx-auto`,

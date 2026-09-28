@@ -89,6 +89,7 @@ Selos: concluído (fundo `#B3D8A8`, texto `#2D5A27`), atenção (`#EAD0A3` / `#7
 |---|---|
 | `mobile_shell.css` | A troca `mobile-page`/`desktop-page` e o `mobile-only`; faixa vinho, cabeçalho, área de conteúdo e rodapé; esconde a barra e o rodapé do desktop; `box-sizing: border-box` no bloco de celular, que as áreas sem Bootstrap não têm |
 | `mobile_nav.css` | "Opções de Serviço", abas roláveis, a régua e o título de bloco |
+| `mobile_wizard.css` | O wizard de uma pergunta por vez (`question_wizard.css`) no celular, com o desenho da ficha de triagem: esconde a barra lateral e faz das opções pílulas, do Avançar um botão de largura inteira e do Voltar um texto discreto. Carregado depois do CSS da tela |
 | `mobile_cards.css` | Todo o resto: coluna de 340px, indicadores, alerta, atividade, linha de lista e ações, moldura de lista, selos, busca e filtro, tiles, caixa com título, dado, cartão de paciente, opções marcáveis, feedbacks, pessoa, canais, caixa de informação, conclusão, formulário, pílula de título, botões, legenda e estado vazio |
 
 **Templates** (em `templates/components/`):
@@ -113,6 +114,7 @@ Selos: concluído (fundo `#B3D8A8`, texto `#2D5A27`), atenção (`#EAD0A3` / `#7
 | `mobile_patient_card.html` | include | Paciente em foco no encaminhamento |
 | `mobile_option_list.html` | include | Caixas de marcar sem `id`, para conviver com a versão desktop |
 | `mobile_feedback_list.html` | include | Autor, data e texto dos feedbacks |
+| `wizard_mobile_head.html` | include | Topo do wizard no celular: cartão com `label` e `name` e a barra de progresso (`<progress>` com `number` e `total`) |
 
 Parâmetros de cada um estão em [componentes.md](componentes.md).
 
@@ -132,7 +134,7 @@ próprio (Administrativo, Superadmin e Coordenador) não carregam o framework.
 |---|---|---|
 | Paciente | Home, Histórico, Agendamentos, Solicitar horário, Minhas triagens, Triagem concluída, Contato | Indicadores na faixa vinho; cartão de pessoa e painel de canais no Contato |
 | Aluno | Home, Triagens a realizar, Prontuários, Encaminhamentos, Feedbacks, Minhas triagens, Triagem concluída | Calendário na faixa vinho (com `calendar_id` próprio, para não repetir o `id` do calendário do desktop); linha branca com botão **Iniciar** na fila de trabalho; moldura `mobile-list` em Prontuários e Encaminhamentos; resumo claro (`mobile-info-light`) na conclusão |
-| Administrativo | Home, Pacientes, Agenda, Salas, Declarações, Atestados, Meu perfil, Painel de gestão, Pré-cadastro concluído | Alerta de declarações pendentes (`pending_alert` da view); busca com **Filtrar** (`mobile_search.html`) em Pacientes e seletor de período na Agenda; grade de salas (`mobile_tile.html`); local da sessão na linha (`place`) |
+| Administrativo | Home, Pacientes, Agenda, Salas, Declarações, Atestados, Meu perfil, Painel de gestão, Pré-cadastro (wizard) e Pré-cadastro concluído | Alerta de declarações pendentes (`pending_alert` da view); busca com **Filtrar** (`mobile_search.html`) em Pacientes e seletor de período na Agenda; grade de salas (`mobile_tile.html`); local da sessão na linha (`place`) |
 | Professor | Home, Meus alunos, Detalhe do aluno, Presença, Prontuários, Encaminhar, Avaliações (lista e escrita), Área de atuação | Calendário na faixa vinho com os indicadores e o alerta abaixo das abas, como na referência; período do aluno vindo da orientação ativa (`Advising.term`); **Marcar** presença por POST na linha (`action_post`, tom `dark`); selo do prontuário por prazo de revisão (`note_situation`: Revisada, Analisar ou Atrasada após 7 dias) |
 | Superadmin | Home, Servidores, Logs de segurança, Detalhe do log, Permissões, Permissão (form), Backups, Adicionar supervisor, Adicionar administrativo | Abas em `superadmin/_mobile_tabs.html` e cartões de atividade próprios em `superadmin/_mobile_activity.html`; o CSS de celular é carregado tela a tela (ver pendências) |
 | Coordenador | Home, Triagens, Detalhe da triagem, Encaminhamentos, Alunos, Detalhe do aluno, Professores, Detalhe do professor, Feedbacks (lista e escrita), Usuários cadastrados, Áreas, Área (form), Meu perfil, Cadastro de aluno e de professor, Meus orientandos | Alerta de triagens aguardando encaminhamento; caixas com título (`{% mobile_box %}`) e dado rótulo/valor (`mobile_field.html`) nos detalhes; cartão do paciente (`mobile_patient_card.html`) e opções marcáveis sem `id` (`mobile_option_list.html`) em Encaminhamentos; botão vinho na linha (`action_tone="maroon"`) em Feedbacks e Áreas; lista de feedbacks (`mobile_feedback_list.html`) |
@@ -140,9 +142,7 @@ próprio (Administrativo, Superadmin e Coordenador) não carregam o framework.
 Cada área entra no mobile pelo próprio shell: `base_<área>.html` carrega os três CSS de
 componente e expõe `{% block page_css %}` para o CSS da tela. No Administrativo e no
 Coordenador, que não usam Bootstrap, os três ficam no `{% block mobile_css %}` do
-`base_admin.html` e do `base_coordinator.html`; o wizard de
-pré-cadastro (`cadastrar_paciente.html`) esvazia esse bloco porque tem o mobile próprio em
-`mobile_patient_registration.css`. As abas de "Opções de Serviço" ficam num partial da área
+`base_admin.html` e do `base_coordinator.html`. As abas de "Opções de Serviço" ficam num partial da área
 (`patient/mobile_tabs.html`, `student/mobile_tabs.html`, `administration/mobile_tabs.html`,
 `supervisor/mobile_tabs.html`), porque são as rotas dela.
 
@@ -166,6 +166,11 @@ papel, também usa o `mobile_top.html` e o rodapé `standalone`, com o título "
 Mensagens de lista vazia usam `mobile-empty` (centralizada), no lugar do `empty_state.html`
 do desktop.
 
+O pré-cadastro de paciente (`administration/cadastrar_paciente.html`) usa o `mobile_wizard.css`
+com o `wizard_mobile_head.html` sobre o mesmo formulário do desktop, renderizado uma vez só —
+o script de máscara de CPF e CEP depende dos `id`s. O campo de data usa o seletor nativo do
+celular; o seletor em rolo do mobile antigo saiu junto com o `mobile_patient_registration.css`.
+
 A ficha de triagem (`triage/create_triage.html`) ganhou um bloco `mobile-page` próprio, com o
 cartão do paciente, a barra de progresso e os botões Voltar/Avançar em largura inteira. A
 referência de celular dela está em `docs/referencia-triagem/`.
@@ -181,8 +186,12 @@ O que ainda foge do padrão acima, para a próxima rodada não precisar redescob
   `components/mobile_activity.html` e deduz o selo pelo título da atividade; o padrão é a view
   mandar `label` e `level`, como nas outras homes. As abas seguem o mesmo caso: o partial das
   outras áreas se chama `<área>/mobile_tabs.html`, sem sublinhado.
-- **`style=` no HTML.** A ficha de triagem tem 9 e os cadastros de supervisor e de
-  administrativo têm 1 cada; o resto do mobile não tem nenhum.
+- **Ficha de triagem com o formulário duplicado.** O bloco de celular desenha o formulário uma
+  segunda vez, então os `id`s se repetem e o rótulo de cada opção aponta para o campo escondido
+  do desktop. O pré-cadastro já resolve isso com o `mobile_wizard.css` sobre o formulário
+  único; a triagem pode passar para o mesmo componente, o que também tira os 9 `style=` dela.
+- **`style=` no HTML.** Além da triagem, os cadastros de supervisor e de administrativo têm 1
+  cada; o resto do mobile não tem nenhum.
 - **Telas que nunca abrem.** O detalhe do prontuário do Professor
   (`prontuario_detalhe.html`) é bloqueado pela view e ficou sem mobile; o
   `presenca_feedback.html` saiu de uso quando a Presença voltou para o `presenca.html`.
