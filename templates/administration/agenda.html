@@ -1,5 +1,5 @@
 {% extends "administration/base_admin.html" %}
-{% load static %}
+{% load static components %}
 
 {% block title %}Agenda{% endblock %}
 
@@ -23,18 +23,14 @@
   {% include "components/mobile_title.html" with title="Agenda" %}
 
   <div class="mobile-content">
-    <form class="mobile-filter mobile-column" method="get">
-      <div class="mobile-filter-field">
-        <i class="bi bi-calendar3" aria-hidden="true"></i>
-        <label class="visually-hidden" for="mobile-period">Período</label>
-        <select id="mobile-period" name="periodo">
-          {% for value, period in periods.items %}
-          <option value="{{ value }}" {% if value == selected_period %}selected{% endif %}>{{ period.label }}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <button type="submit" class="mobile-filter-button">Filtrar</button>
-    </form>
+    {% mobile_filter icon="bi-calendar3" %}
+    <label class="visually-hidden" for="mobile-period">Período</label>
+    <select id="mobile-period" name="periodo">
+      {% for value, period in periods.items %}
+      <option value="{{ value }}" {% if value == selected_period %}selected{% endif %}>{{ period.label }}</option>
+      {% endfor %}
+    </select>
+    {% endmobile_filter %}
 
     {% for event in events %}
     {% with hour=event.time|date:"H:i" %}

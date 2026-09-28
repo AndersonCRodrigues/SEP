@@ -9,14 +9,8 @@
 {% endblock %}
 
 {% block content %}
-<div class="mobile-only">
-  <div class="mobile-maroon-bg">
-    {% url 'administration:home' as back_url %}
-    {% include "components/mobile_header.html" %}
-  </div>
-
-  {% include "components/mobile_title.html" with title="Meu perfil" %}
-</div>
+{% url 'administration:home' as back_url %}
+{% include "components/mobile_top.html" with title="Meu perfil" %}
 
 <div class="list-panel-title desktop-page">Meu perfil</div>
 
@@ -27,7 +21,5 @@
 
 {% block footer %}
 {{ block.super }}
-<div class="mobile-only">
-  {% include "components/mobile_footer.html" %}
-</div>
+{% include "components/mobile_footer.html" with standalone=True %}
 {% endblock %}
