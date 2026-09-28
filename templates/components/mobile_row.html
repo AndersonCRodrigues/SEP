@@ -1,4 +1,4 @@
-<div class="mobile-row mobile-column">
+{% if url %}<a class="mobile-row mobile-column" href="{{ url }}">{% else %}<div class="mobile-row mobile-column">{% endif %}
   <div class="mobile-row-info">
     {% if name %}<span class="mobile-row-name">{{ name }}</span>{% endif %}
     {% if person %}
@@ -11,4 +11,4 @@
   {% if label %}
   {% include "components/mobile_badge.html" with label=label level=level %}
   {% endif %}
-</div>
+{% if url %}</a>{% else %}</div>{% endif %}

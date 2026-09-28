@@ -7,44 +7,93 @@
 <link rel="stylesheet" href="{% static 'core/css/patient_home.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/patient_banner.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/patient_triage_detail.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/mobile_cards.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/form_cadastro.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="page-banner-container">
-  <h1 class="page-banner">Solicitar novo horário</h1>
-</div>
 
-{% if request_error %}
-{% include "components/error_state.html" with message=request_error retry_url=request.path %}
-
-{% elif pending_request %}
-<div class="figma-form-container">
-  <div class="figma-error-alert" role="status">
-    Você já pediu um horário para {{ pending_request.preferred_date|date:"d/m/Y" }}
-    ({{ pending_request.get_preferred_period_display }}). Aguarde a resposta do
-    Administrativo para pedir outro.
+<!-- ══════════════════════════════════════
+     MOBILE
+     ══════════════════════════════════════ -->
+<div class="mobile-page">
+  <div class="mobile-maroon-bg">
+    {% url 'patient:agendamentos' as back_url %}
+    {% include "components/mobile_header.html" %}
   </div>
-</div>
 
-{% else %}
-<p class="section-subtitle text-center">
-  Escolha a data e o período de sua preferência. O Administrativo vai responder
-  sua solicitação.
-</p>
+  {% include "components/mobile_title.html" with title="Solicitar horário" %}
 
-<div class="figma-form-container">
-  <form class="figma-custom-form" method="post" novalidate>
-    {% csrf_token %}
-    {{ form.as_p }}
-    <div class="figma-actions-center">
-      <button type="submit" class="btn-submit-figma">Enviar solicitação</button>
+  <div class="mobile-content">
+    {% if request_error %}
+    <p class="mobile-empty">{{ request_error }}</p>
+
+    {% elif pending_request %}
+    <div class="mobile-notice mobile-column" role="status">
+      Você já pediu um horário para {{ pending_request.preferred_date|date:"d/m/Y" }}
+      ({{ pending_request.get_preferred_period_display }}). Aguarde a resposta do
+      Administrativo para pedir outro.
     </div>
-  </form>
-</div>
-{% endif %}
 
-<div class="back-link-container">
-  <a class="back-link" href="{% url 'patient:agendamentos' %}">Voltar para meus agendamentos</a>
+    {% else %}
+    <p class="mobile-success-text">
+      Escolha a data e o período de sua preferência. O Administrativo responde a
+      sua solicitação.
+    </p>
+
+    <form class="mobile-form mobile-column" method="post" novalidate>
+      {% csrf_token %}
+      {{ form.as_p }}
+
+      <div class="mobile-actions">
+        <button type="submit" class="mobile-button">Enviar solicitação</button>
+      </div>
+    </form>
+    {% endif %}
+  </div>
+
+  {% include "components/mobile_footer.html" %}
+</div>
+
+<!-- ══════════════════════════════════════
+     DESKTOP
+     ══════════════════════════════════════ -->
+<div class="desktop-page">
+  <div class="page-banner-container">
+    <h1 class="page-banner">Solicitar novo horário</h1>
+  </div>
+
+  {% if request_error %}
+  {% include "components/error_state.html" with message=request_error retry_url=request.path %}
+
+  {% elif pending_request %}
+  <div class="figma-form-container">
+    <div class="figma-error-alert" role="status">
+      Você já pediu um horário para {{ pending_request.preferred_date|date:"d/m/Y" }}
+      ({{ pending_request.get_preferred_period_display }}). Aguarde a resposta do
+      Administrativo para pedir outro.
+    </div>
+  </div>
+
+  {% else %}
+  <p class="section-subtitle text-center">
+    Escolha a data e o período de sua preferência. O Administrativo vai responder
+    sua solicitação.
+  </p>
+
+  <div class="figma-form-container">
+    <form class="figma-custom-form" method="post" novalidate>
+      {% csrf_token %}
+      {{ form.as_p }}
+      <div class="figma-actions-center">
+        <button type="submit" class="btn-submit-figma">Enviar solicitação</button>
+      </div>
+    </form>
+  </div>
+  {% endif %}
+
+  <div class="back-link-container">
+    <a class="back-link" href="{% url 'patient:agendamentos' %}">Voltar para meus agendamentos</a>
+  </div>
 </div>
 {% endblock %}

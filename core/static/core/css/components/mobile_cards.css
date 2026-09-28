@@ -259,6 +259,43 @@
   .mobile-row .mobile-badge-danger { background: #D93B3B; }
   .mobile-row .mobile-badge-neutral { background: #8C8581; }
 
+  /* ── Fim de fluxo: selo verde, titulo e explicacao ── */
+  .mobile-success {
+    width: 120px;
+    height: 120px;
+    margin: 20px auto;
+    border-radius: 50%;
+    background: #3AA91A;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mobile-success i {
+    font-size: 70px;
+    color: #FFFFFF;
+    -webkit-text-stroke: 3px #FFFFFF;
+  }
+
+  .mobile-success-title {
+    margin-bottom: 10px;
+    font-family: var(--font-main);
+    font-size: 22px;
+    font-weight: 800;
+    color: #000000;
+    text-align: center;
+  }
+
+  .mobile-success-text {
+    margin: 0 auto 30px auto;
+    padding: 0 10px;
+    font-family: var(--font-main);
+    font-size: 13px;
+    font-weight: 500;
+    color: #333333;
+    text-align: center;
+  }
+
   /* ── Cartao de pessoa: avatar, nome e papel ── */
   .mobile-person {
     margin-bottom: 20px;
@@ -366,6 +403,102 @@
   .mobile-info-value {
     color: #EEEEEE;
     text-align: right;
+  }
+
+  /* ── Formulario ── */
+  .mobile-form p {
+    margin: 0 0 16px 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .mobile-form label {
+    margin-bottom: 6px;
+    font-family: var(--font-main);
+    font-size: 13px;
+    font-weight: 800;
+    color: #333333;
+  }
+
+  .mobile-form input,
+  .mobile-form select,
+  .mobile-form textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px 14px;
+    background: #FFFFFF;
+    border: 1px solid #B6ACA7;
+    border-radius: 12px;
+    font-family: var(--font-main);
+    font-size: 15px;
+    color: #333333;
+    outline: none;
+  }
+
+  .mobile-form input:focus,
+  .mobile-form select:focus,
+  .mobile-form textarea:focus {
+    border-color: var(--sep-maroon);
+  }
+
+  .mobile-form ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Escolha: o rotulo envolve o radio, entao ele e que vira a caixa. */
+  .mobile-form label:has(input[type="radio"]),
+  .mobile-form label:has(input[type="checkbox"]) {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    padding: 12px 14px;
+    background: #FFFFFF;
+    border: 1px solid #B6ACA7;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 500;
+    color: #333333;
+  }
+
+  .mobile-form label:has(input[type="radio"]:checked),
+  .mobile-form label:has(input[type="checkbox"]:checked) {
+    border-color: var(--sep-maroon);
+    background: #F7F1F1;
+  }
+
+  .mobile-form input[type="radio"],
+  .mobile-form input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    padding: 0;
+    accent-color: var(--sep-maroon);
+  }
+
+  .mobile-form .helptext,
+  .mobile-form .errorlist {
+    font-size: 12px;
+  }
+
+  .mobile-form .errorlist {
+    list-style: none;
+    margin: 6px 0 0 0;
+    padding: 0;
+    color: #CC2A2A;
+    font-weight: 600;
+  }
+
+  .mobile-notice {
+    margin-bottom: 20px;
+    padding: 14px 16px;
+    background: #FFFFFF;
+    border: 1px solid #D9A01B;
+    border-radius: 12px;
+    font-family: var(--font-main);
+    font-size: 13px;
+    color: #333333;
   }
 
   /* ── Estado vazio ── */

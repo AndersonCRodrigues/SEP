@@ -16,7 +16,7 @@
 <!-- ══════════════════════════════════════
      MOBILE
      ══════════════════════════════════════ -->
-<div class="d-block d-md-none">
+<div class="mobile-page">
   <div class="mobile-maroon-bg">
     {% url 'patient:home' as back_url %}
     {% include "components/mobile_header.html" %}
@@ -29,7 +29,8 @@
     <p class="mobile-empty">{{ triages_error }}</p>
     {% else %}
     {% for item in triages %}
-    {% include "components/mobile_row.html" with name=item.created_at|date:"d/m/Y - H:i" person=item.label label=item.label level=item.level %}
+    {% url 'patient:triagem_detalhe' item.pk as detalhe_url %}
+    {% include "components/mobile_row.html" with name=item.created_at|date:"d/m/Y - H:i" label=item.label level=item.level url=detalhe_url %}
     {% empty %}
     <p class="mobile-empty">{{ empty_message }}</p>
     {% endfor %}
@@ -42,7 +43,7 @@
 <!-- ══════════════════════════════════════
      DESKTOP
      ══════════════════════════════════════ -->
-<div class="d-none d-md-block">
+<div class="desktop-page">
   <div class="list-panel-title">Minhas triagens</div>
 
   {% if triages_error %}
