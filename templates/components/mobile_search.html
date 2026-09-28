@@ -1,0 +1,8 @@
+<form class="mobile-filter mobile-column" method="get">
+  <div class="mobile-filter-field">
+    <i class="bi bi-search" aria-hidden="true"></i>
+    <label class="visually-hidden" for="mobile-search">{{ search_label|default:"Buscar por nome" }}</label>
+    <input type="search" id="mobile-search" name="{{ search_name|default:"q" }}" value="{{ search_value }}" placeholder="{{ search_label|default:"Buscar por nome" }}...">
+  </div>
+  <button type="submit" class="mobile-filter-button">Filtrar</button>
+</form>
