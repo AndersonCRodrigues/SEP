@@ -7,49 +7,82 @@
 <link rel="stylesheet" href="{% static 'core/css/components/list_panel.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/components/hover_lift.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/components/row_button.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/mobile_cards.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/patient_triagens.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="list-panel-title">Minhas triagens</div>
 
-{% if triages_error %}
-{% include "components/error_state.html" with message=triages_error retry_url=request.path %}
-{% else %}
-<p class="list-panel-subtitle">Triagens concluídas</p>
-
-{% if in_progress and triages %}
-<p class="list-panel-subtitle triage-progress" role="status">{{ in_progress_message }}</p>
-{% endif %}
-
-{% if triages %}
-<div class="list-panel">
-  <div class="list-panel-header triage-grid">
-    <div>Triagem:</div>
-    <div>Concluída em:</div>
-    <div>Situação:</div>
-    <div></div>
+<!-- ══════════════════════════════════════
+     MOBILE
+     ══════════════════════════════════════ -->
+<div class="d-block d-md-none">
+  <div class="mobile-maroon-bg">
+    {% url 'patient:home' as back_url %}
+    {% include "components/mobile_header.html" %}
   </div>
 
-  <div class="list-panel-container">
+  {% include "components/mobile_title.html" with title="Minhas triagens" %}
+
+  <div class="mobile-content">
+    {% if triages_error %}
+    <p class="mobile-empty">{{ triages_error }}</p>
+    {% else %}
     {% for item in triages %}
-    <div class="list-panel-row triage-grid hover-lift">
-      <div>Triagem de {{ item.created_at|date:"d/m/Y" }}</div>
-      <div>
-        <time datetime="{{ item.created_at|date:'Y-m-d' }}">{{ item.created_at|date:"d/m/Y - H:i" }}h</time>
-      </div>
-      <div>{% include "components/badge_situacao.html" with label=item.label level=item.level %}</div>
-      <div class="text-end">
-        <a class="btn-ver" href="{% url 'patient:triagem_detalhe' item.pk %}">
-          Ver detalhes<span class="visually-hidden"> da triagem de {{ item.created_at|date:"d/m/Y" }}</span>
-        </a>
-      </div>
-    </div>
+    {% include "components/mobile_row.html" with name=item.created_at|date:"d/m/Y - H:i" person=item.label label=item.label level=item.level %}
+    {% empty %}
+    <p class="mobile-empty">{{ empty_message }}</p>
     {% endfor %}
+    {% endif %}
   </div>
+
+  {% include "components/mobile_footer.html" %}
 </div>
-{% else %}
-{% include "components/empty_state.html" with message=empty_message %}
-{% endif %}
-{% endif %}
+
+<!-- ══════════════════════════════════════
+     DESKTOP
+     ══════════════════════════════════════ -->
+<div class="d-none d-md-block">
+  <div class="list-panel-title">Minhas triagens</div>
+
+  {% if triages_error %}
+  {% include "components/error_state.html" with message=triages_error retry_url=request.path %}
+  {% else %}
+  <p class="list-panel-subtitle">Triagens concluídas</p>
+
+  {% if in_progress and triages %}
+  <p class="list-panel-subtitle triage-progress" role="status">{{ in_progress_message }}</p>
+  {% endif %}
+
+  {% if triages %}
+  <div class="list-panel">
+    <div class="list-panel-header triage-grid">
+      <div>Triagem:</div>
+      <div>Concluída em:</div>
+      <div>Situação:</div>
+      <div></div>
+    </div>
+
+    <div class="list-panel-container">
+      {% for item in triages %}
+      <div class="list-panel-row triage-grid hover-lift">
+        <div>Triagem de {{ item.created_at|date:"d/m/Y" }}</div>
+        <div>
+          <time datetime="{{ item.created_at|date:'Y-m-d' }}">{{ item.created_at|date:"d/m/Y - H:i" }}h</time>
+        </div>
+        <div>{% include "components/badge_situacao.html" with label=item.label level=item.level %}</div>
+        <div class="text-end">
+          <a class="btn-ver" href="{% url 'patient:triagem_detalhe' item.pk %}">
+            Ver detalhes<span class="visually-hidden"> da triagem de {{ item.created_at|date:"d/m/Y" }}</span>
+          </a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% else %}
+  {% include "components/empty_state.html" with message=empty_message %}
+  {% endif %}
+  {% endif %}
+</div>
 {% endblock %}
