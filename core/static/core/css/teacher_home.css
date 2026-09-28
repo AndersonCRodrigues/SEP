@@ -279,23 +279,14 @@
     border-bottom-right-radius: 40px;
     padding-bottom: 24px;
     margin-bottom: 20px;
-    /* Faz o bloco esticar ignorando o padding do container-fluid (que tem py-4 px-4) */
-    margin-left: -24px;
-    margin-right: -24px;
-    margin-top: -24px;
   }
 
   /* ── Header mobile (Usado em todas as telas mobile) ── */
   .mobile-header {
-    display: grid !important;
-    grid-template-columns: 1fr auto;
-    grid-template-rows: auto auto;
-    background-color: var(--sep-maroon);
-    padding: 20px 20px 24px 20px;
-    margin: -24px -24px 0 -24px;
-    border-bottom-left-radius: 30px;
-    border-bottom-right-radius: 30px;
+    display: flex;
+    justify-content: space-between;
     align-items: center;
+    padding: 24px 20px 10px 20px;
   }
 
   /* Na home, o header fica dentro do fundo vinho que já puxa as margens */
@@ -305,51 +296,37 @@
     padding-top: 40px !important;
   }
 
-  .mobile-header .mobile-back {
-    grid-column: 1 / -1;
-    grid-row: 1;
-    width: 36px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    color: transparent;
-    font-size: 0;
-    text-decoration: none;
-    margin-bottom: 4px;
-    margin-left: -4px; /* Compensate padding for alignment */
-  }
-
-  .mobile-header .mobile-back::before {
-    content: '';
-    display: block;
-    width: 14px;
-    height: 14px;
-    border-left: 4px solid #FFFFFF;
-    border-bottom: 4px solid #FFFFFF;
-    transform: rotate(45deg);
-    border-radius: 2.5px;
-  }
-
-  .mobile-header .mobile-greeting {
-    grid-column: 1;
-    grid-row: 2;
+  .mobile-back::before {
+    content: "\F284"; /* chevron-left bootstrap icon */
+    font-family: "bootstrap-icons";
+    font-size: 28px;
     color: #fff;
-    font-family: 'Museo Sans', sans-serif;
-    font-size: 20px;
-    font-weight: 700;
-    text-align: left;
-    align-self: center;
+    font-weight: bold;
+  }
+  
+  .mobile-back {
+    text-decoration: none;
+    color: transparent;
   }
 
-  .mobile-header .mobile-icons {
-    grid-column: 2;
-    grid-row: 2;
+  .mobile-greeting {
+    font-family: 'Museo Sans', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: #fff;
+    flex-grow: 1;
+    margin-left: 10px;
+  }
+
+  .mobile-icons {
     display: flex;
     gap: 16px;
     align-items: center;
+  }
+
+  .mobile-icons i {
+    font-size: 22px;
     color: #fff;
-    font-size: 20px;
   }
 
   /* ── Ocultar saudação de desktop no mobile ── */

@@ -11,9 +11,90 @@
 <link rel="stylesheet" href="{% static 'core/css/components/detail_panel.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/form_cadastro.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/teacher_lists.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/patient_home.css' %}">
 {% endblock %}
 
 {% block content %}
+
+<!-- ══════════════════════════════════════
+     MOBILE — Presença
+     ══════════════════════════════════════ -->
+<div class="d-block d-md-none" style="min-height: 100vh; background-color: #F8F9FA;">
+
+  <!-- Header Mobile -->
+  <div class="mobile-header" style="background-color: #6D1D20; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; padding-bottom: 20px;">
+    <a href="{% url 'teacher:home' %}" class="mobile-back"></a>
+    <span class="mobile-greeting">Olá, {{ request.user.first_name|default:"Professor" }}!</span>
+    <div class="mobile-icons d-flex align-items-center gap-3">
+      <i class="bi bi-bell"></i>
+      <form method="post" action="{% url 'logout' %}" class="m-0 p-0 d-inline-flex">
+        {% csrf_token %}
+        <button type="submit" class="p-0 border-0 bg-transparent text-white d-flex align-items-center" style="line-height: 1;">
+          <i class="bi bi-person-circle" style="font-size: 24px;"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div class="px-3 text-center mt-4">
+
+    <!-- Pílula de título -->
+    <div class="mb-4 text-center">
+      <span style="display: inline-block; background-color: #6D1D20; color: white; padding: 10px 40px; border-radius: 20px; font-weight: 700; font-family: 'Museo Sans', sans-serif; font-size: 16px;">
+        Presença
+      </span>
+    </div>
+
+    <!-- Barra de busca + filtrar -->
+    {% if not aluno_selecionado %}
+    <form method="get" class="d-flex gap-2 mb-4">
+      <input type="text" name="q" value="{{ termo_busca }}" placeholder="Buscar por nome..."
+        style="flex: 1; border: 1px solid #C4C4C4; border-radius: 20px; padding: 8px 16px; font-family: 'Museo Sans', sans-serif; font-size: 13px; background: #fff;">
+      <button type="submit"
+        style="background-color: #6D1D20; color: white; border: none; border-radius: 20px; padding: 8px 18px; font-family: 'Museo Sans', sans-serif; font-size: 13px; font-weight: 700;">
+        Filtrar
+      </button>
+    </form>
+    {% endif %}
+
+    <!-- Lista de presença -->
+    <div style="border: 1px solid #C4C4C4; border-radius: 20px; padding: 12px; text-align: left; background: transparent;">
+
+      {% if linhas %}
+        {% for linha in linhas %}
+        <div style="background-color: #DCDCDC; border-radius: 16px; padding: 14px 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-family: 'Museo Sans', sans-serif; font-size: 13px; font-weight: 700; color: #111;">
+              {{ linha.aluno.nome_completo }}
+            </div>
+          </div>
+          <div>
+            {% if linha.presenca %}
+            <span style="background-color: #419F0D; color: white; padding: 6px 14px; border-radius: 12px; font-family: 'Museo Sans', sans-serif; font-size: 11px; font-weight: 700; white-space: nowrap;">Presente</span>
+            {% elif linha.faltou %}
+            <span style="background-color: #BE4A4F; color: white; padding: 6px 14px; border-radius: 12px; font-family: 'Museo Sans', sans-serif; font-size: 11px; font-weight: 700; white-space: nowrap;">Faltou</span>
+            {% else %}
+            <form method="post" action="{% url 'teacher:marcar_presenca' linha.aluno.pk %}" class="m-0">
+              {% csrf_token %}
+              <button type="submit" style="background-color: #111; color: white; border: none; padding: 6px 14px; border-radius: 12px; font-family: 'Museo Sans', sans-serif; font-size: 11px; font-weight: 700; white-space: nowrap; cursor: pointer;">Marcar</button>
+            </form>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <p style="text-align:center; color:#888; font-family:'Museo Sans',sans-serif; padding: 20px 0;">Nenhum aluno vinculado.</p>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     DESKTOP — Presença e feedback
+     ══════════════════════════════════════ -->
+<div class="d-none d-md-block">
 <div class="list-panel-title">Presença e feedback</div>
 
 <p class="list-panel-subtitle">Referente a hoje, {{ hoje|date:"d/m/Y" }}</p>
@@ -63,7 +144,6 @@
         <form class="presence-form" method="post" action="{% url 'teacher:marcar_presenca' linha.aluno.pk %}">
           {% csrf_token %}
           <button type="submit" class="btn-marcar">Marcar presença</button>
-          {# TODO: campo de horas sem lógica; fica para fazer #}
           <input type="number" name="horas" step="0.5" min="0" placeholder="Horas"
             aria-label="Horas (ainda sem funcionalidade)">
         </form>
@@ -109,4 +189,8 @@
   {% endif %}
 </section>
 {% endif %}
+</div>
+
 {% endblock %}
+
+

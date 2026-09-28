@@ -11,9 +11,145 @@
 <link rel="stylesheet" href="{% static 'core/css/components/option_list.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/components/referral_panel.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/teacher_lists.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/patient_home.css' %}">
 {% endblock %}
 
 {% block content %}
+
+<!-- ══════════════════════════════════════
+     MOBILE — Encaminhamentos
+     ══════════════════════════════════════ -->
+<div class="d-block d-md-none" style="min-height: 100vh; background-color: #F8F9FA;">
+
+  <!-- Header Mobile -->
+  <div class="mobile-header" style="background-color: #6D1D20; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; padding-bottom: 20px;">
+    <a href="{% url 'teacher:home' %}" class="mobile-back"></a>
+    <span class="mobile-greeting">Olá, {{ request.user.first_name|default:"Professor" }}!</span>
+    <div class="mobile-icons d-flex align-items-center gap-3">
+      <i class="bi bi-bell"></i>
+      <form method="post" action="{% url 'logout' %}" class="m-0 p-0 d-inline-flex">
+        {% csrf_token %}
+        <button type="submit" class="p-0 border-0 bg-transparent text-white d-flex align-items-center" style="line-height: 1;">
+          <i class="bi bi-person-circle" style="font-size: 24px;"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div class="px-3 text-center mt-4">
+
+    <!-- Pílula de título -->
+    <div class="mb-4 text-center">
+      <span style="display: inline-block; background-color: #6D1D20; color: white; padding: 10px 40px; border-radius: 20px; font-weight: 700; font-family: 'Museo Sans', sans-serif; font-size: 16px;">
+        Encaminhamentos
+      </span>
+    </div>
+
+    <!-- ── Novo encaminhamento ── -->
+    {% if patient %}
+    <div style="text-align: left; margin-bottom: 16px;">
+      <p style="font-family: 'Museo Sans', sans-serif; font-size: 13px; font-weight: 700; color: #6D1D20; margin-bottom: 8px;">Novo encaminhamento</p>
+
+      <!-- Card do paciente -->
+      <div style="border: 1px solid #C4C4C4; border-radius: 16px; padding: 14px 16px; background: #fff; margin-bottom: 16px; text-align: left;">
+        <div style="font-family: 'Museo Sans', sans-serif; font-size: 11px; color: #888; margin-bottom: 4px;">Paciente</div>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="font-family: 'Museo Sans', sans-serif; font-size: 16px; font-weight: 700; color: #111;">{{ patient.get_full_name }}</div>
+          <div style="font-family: 'Museo Sans', sans-serif; font-size: 11px; color: #888;">#{{ patient.pk }}</div>
+        </div>
+        <div style="font-family: 'Museo Sans', sans-serif; font-size: 11px; color: #555; margin-top: 4px;">
+          <strong>Recebido em:</strong> {{ patient.created_at|date:"d/m/Y" }}
+        </div>
+      </div>
+
+      <!-- Formulário de encaminhamento -->
+      <form method="post" action="{% url 'teacher:encaminhar' patient.pk %}">
+        {% csrf_token %}
+
+        <!-- Filtro de área -->
+        <div class="d-flex gap-2 mb-3">
+          <select name="area" style="flex: 1; border: 1px solid #C4C4C4; border-radius: 20px; padding: 8px 16px; font-family: 'Museo Sans', sans-serif; font-size: 13px; background: #fff;">
+            {% for area in areas %}
+            <option value="{{ area.pk }}">{{ area.nome }}</option>
+            {% endfor %}
+          </select>
+          <button type="button" style="background-color: #6D1D20; color: white; border: none; border-radius: 20px; padding: 8px 18px; font-family: 'Museo Sans', sans-serif; font-size: 13px; font-weight: 700;">
+            Filtrar
+          </button>
+        </div>
+
+        <!-- Alocar para aluno -->
+        <p style="font-family: 'Museo Sans', sans-serif; font-size: 12px; font-weight: 700; color: #6D1D20; text-align: left; margin-bottom: 8px;">Alocar professor</p>
+        <div style="border: 1px solid #C4C4C4; border-radius: 16px; padding: 12px; background: transparent; margin-bottom: 16px;">
+          {% for option in options %}
+          <label style="display: flex; align-items: center; gap: 10px; background: #DCDCDC; border-radius: 12px; padding: 12px 14px; margin-bottom: 10px; cursor: pointer;">
+            <input type="checkbox" name="alunos" value="{{ option.pk }}" style="width: 18px; height: 18px; accent-color: #6D1D20;">
+            <span style="font-family: 'Museo Sans', sans-serif; font-size: 13px; font-weight: 600; color: #111;">{{ option.nome_completo }}</span>
+          </label>
+          {% empty %}
+          <p style="text-align:center; color:#888; font-family:'Museo Sans',sans-serif; padding: 10px 0;">Nenhum aluno disponível.</p>
+          {% endfor %}
+        </div>
+
+        <!-- Botão confirmar -->
+        <button type="submit" style="width: 100%; background-color: #6D1D20; color: white; border: none; border-radius: 20px; padding: 13px; font-family: 'Museo Sans', sans-serif; font-size: 14px; font-weight: 700; margin-bottom: 24px;">
+          Confirmar
+        </button>
+      </form>
+    </div>
+    {% else %}
+    <div class="mb-4" style="text-align: left;">
+      <p style="font-family: 'Museo Sans', sans-serif; font-size: 13px; font-weight: 700; color: #6D1D20; margin-bottom: 8px;">Novo encaminhamento</p>
+      <p style="text-align: center; color: #888; font-family: 'Museo Sans', sans-serif; padding: 20px 0;">Nenhum paciente aguardando encaminhamento.</p>
+    </div>
+    {% endif %}
+
+    <!-- ── Encaminhamentos recentes ── -->
+    <div style="text-align: left; margin-bottom: 24px;">
+      <p style="font-family: 'Museo Sans', sans-serif; font-size: 13px; font-weight: 700; color: #6D1D20; margin-bottom: 8px;">Encaminhamentos recentes</p>
+      <div style="border: 1px solid #C4C4C4; border-radius: 20px; padding: 12px; background: transparent;">
+        {% for item in recent %}
+        <div style="background-color: #DCDCDC; border-radius: 16px; padding: 12px 14px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+          <div style="font-family: 'Museo Sans', sans-serif; font-size: 13px; font-weight: 700; color: #111;">{{ item.student.nome_completo }}</div>
+          <span style="display: inline-block; width: 40px; height: 12px; background-color: #6D1D20; border-radius: 6px;"></span>
+        </div>
+        {% empty %}
+        <p style="text-align:center; color:#888; font-family:'Museo Sans',sans-serif; padding: 10px 0;">Nenhum encaminhamento recente.</p>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- ── Aguardando encaminhamento ── -->
+    {% if queue %}
+    <div style="text-align: left; margin-bottom: 40px;">
+      <p style="font-family: 'Museo Sans', sans-serif; font-size: 13px; font-weight: 700; color: #6D1D20; margin-bottom: 8px;">Aguardando encaminhamento</p>
+      {% for item in queue %}
+      <a href="{% url 'teacher:encaminhar' item.patient.pk %}" style="text-decoration: none;">
+        <div style="background-color: #DCDCDC; border-radius: 16px; padding: 14px 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-family: 'Museo Sans', sans-serif; font-size: 13px; font-weight: 700; color: #111; margin-bottom: 4px;">{{ item.patient.get_full_name }}</div>
+            <div style="font-family: 'Museo Sans', sans-serif; font-size: 11px; color: #555; margin-bottom: 4px;">
+              <i class="bi bi-person" style="margin-right:4px;"></i> Aluna Marina Costa
+            </div>
+            <div style="font-family: 'Museo Sans', sans-serif; font-size: 11px; color: #555;">
+              <i class="bi bi-calendar-event" style="margin-right:4px;"></i> Recebida ás {{ item.patient.created_at|date:"H:i" }}
+            </div>
+          </div>
+          <span style="display: inline-block; width: 40px; height: 12px; background-color: #6D1D20; border-radius: 6px;"></span>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     DESKTOP — Encaminhamentos
+     ══════════════════════════════════════ -->
+<div class="d-none d-md-block">
 <div class="referral-layout">
 
   <section class="referral-new">
@@ -74,4 +210,7 @@
   </div>
 </section>
 {% endif %}
+</div>
+
 {% endblock %}
+

@@ -8,9 +8,92 @@
 <link rel="stylesheet" href="{% static 'core/css/components/hover_lift.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/components/list_filters.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/teacher_lists.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/patient_home.css' %}">
 {% endblock %}
 
 {% block content %}
+
+<!-- ══════════════════════════════════════
+     MOBILE — Prontuários
+     ══════════════════════════════════════ -->
+<div class="d-block d-md-none" style="min-height: 100vh; background-color: #F8F9FA;">
+
+  <!-- Header Mobile -->
+  <div class="mobile-header" style="background-color: #6D1D20; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; padding-bottom: 20px;">
+    <a href="{% url 'teacher:home' %}" class="mobile-back"></a>
+    <span class="mobile-greeting">Olá, {{ request.user.first_name|default:"Professor" }}!</span>
+    <div class="mobile-icons d-flex align-items-center gap-3">
+      <i class="bi bi-bell"></i>
+      <form method="post" action="{% url 'logout' %}" class="m-0 p-0 d-inline-flex">
+        {% csrf_token %}
+        <button type="submit" class="p-0 border-0 bg-transparent text-white d-flex align-items-center" style="line-height: 1;">
+          <i class="bi bi-person-circle" style="font-size: 24px;"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div class="px-3 text-center mt-4">
+
+    <!-- Pílula de título -->
+    <div class="mb-4 text-center">
+      <span style="display: inline-block; background-color: #6D1D20; color: white; padding: 10px 40px; border-radius: 20px; font-weight: 700; font-family: 'Museo Sans', sans-serif; font-size: 16px;">
+        Prontuários
+      </span>
+    </div>
+
+    <!-- Barra de busca + filtrar -->
+    <form method="get" class="d-flex gap-2 mb-4">
+      <input type="text" name="q" value="{{ termo_busca }}" placeholder="Buscar por nome..."
+        style="flex: 1; border: 1px solid #C4C4C4; border-radius: 20px; padding: 8px 16px; font-family: 'Museo Sans', sans-serif; font-size: 13px; background: #fff;">
+      <button type="submit"
+        style="background-color: #6D1D20; color: white; border: none; border-radius: 20px; padding: 8px 18px; font-family: 'Museo Sans', sans-serif; font-size: 13px; font-weight: 700;">
+        Filtrar
+      </button>
+    </form>
+
+    <!-- Lista de prontuários -->
+    <div style="border: 1px solid #C4C4C4; border-radius: 20px; padding: 12px; text-align: left; background: transparent;">
+
+      {% if linhas %}
+        {% for linha in linhas %}
+        <div style="background-color: #DCDCDC; border-radius: 16px; padding: 14px 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-family: 'Museo Sans', sans-serif; font-size: 13px; font-weight: 700; color: #111; margin-bottom: 4px;">
+              {{ linha.nota.patient.nome_completo }}
+            </div>
+            <div style="font-family: 'Museo Sans', sans-serif; font-size: 11px; font-weight: 500; color: #555; margin-bottom: 4px;">
+              <i class="bi bi-person" style="margin-right: 4px;"></i> {{ linha.nota.student.nome_completo }}
+            </div>
+            <div style="font-family: 'Museo Sans', sans-serif; font-size: 11px; font-weight: 500; color: #555;">
+              <i class="bi bi-clock" style="margin-right: 4px;"></i> Atualizada ás {{ linha.nota.created_at|date:"H:i" }}
+            </div>
+          </div>
+          <div>
+            {% if linha.atrasada %}
+            <span style="display: inline-block; min-width: 75px; text-align: center; background-color: #BE4A4F; color: white; padding: 6px 14px; border-radius: 12px; font-family: 'Museo Sans', sans-serif; font-size: 11px; font-weight: 700; white-space: nowrap;">Atrasada</span>
+            {% else %}
+            <span style="display: inline-block; min-width: 75px; text-align: center; background-color: #D68B13; color: white; padding: 6px 14px; border-radius: 12px; font-family: 'Museo Sans', sans-serif; font-size: 11px; font-weight: 700; white-space: nowrap;">Analisar</span>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <!-- Mocks fixos se banco vazio -->
+        {% for badge_color, badge_label in "" %}{% empty %}
+        <p style="text-align:center; color:#888; font-family:'Museo Sans',sans-serif; padding: 20px 0;">Nenhuma evolução encontrada.</p>
+        {% endfor %}
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     DESKTOP — Prontuários
+     ══════════════════════════════════════ -->
+<div class="d-none d-md-block">
 <div class="list-panel-title">Prontuários e evolução</div>
 
 <form class="list-filters" method="get">
@@ -52,4 +135,7 @@
 {% else %}
 {% include "components/empty_state.html" with message="Nenhuma evolução encontrada." %}
 {% endif %}
+</div>
+
 {% endblock %}
+
