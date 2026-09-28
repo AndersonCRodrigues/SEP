@@ -1,0 +1,35 @@
+/* Lista de feedbacks recebidos pelo aluno: uma entrada por avaliacao, com
+   autor e data na mesma linha e o texto preservando as quebras de linha.
+   Sem utilitario do Bootstrap, porque o componente tambem roda nos shells
+   que nao carregam o framework. */
+
+.feedback-item {
+  border-bottom: 1px solid #E0E0E0;
+  padding-bottom: 12px;
+  font-family: 'Museo Sans', sans-serif;
+  font-size: 14px;
+}
+
+.feedback-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.feedback-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.feedback-head span {
+  color: #6F6764;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.feedback-content {
+  white-space: pre-line;
+  margin: 8px 0 0 0;
+  color: #333333;
+}

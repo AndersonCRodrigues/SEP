@@ -1,20 +1,57 @@
-{% extends "base.html" %}
+{% extends "superadmin/base_superadmin.html" %}
+{% load static %}
 
-{% block title %}Editar Permissão | Sistema SEP{% endblock %}
+{% block title %}Editar permissão{% endblock %}
 
-{% block breadcrumbs %}
-{{ block.super }}
-<li class="breadcrumb-item"><a href="{% url 'superadmin:home' %}">Superadmin</a></li>
-<li class="breadcrumb-item"><a href="{% url 'superadmin:permissoes' %}">Permissões</a></li>
-<li class="breadcrumb-item active" aria-current="page">Editar</li>
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'core/css/components/list_panel.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/list_filters.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/form_cadastro.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/mobile_shell.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/mobile_cards.css' %}">
 {% endblock %}
 
-{% block page_title %}Editar permissão — {{ object.get_role_display }}{% endblock %}
-
 {% block content %}
-<section class="card">
-    <div class="card-body">
-        {% include "components/form.html" with form=form submit_label="Salvar" %}
+
+<!-- ══════════════════════════════════════
+     MOBILE — Editar Permissão
+     ══════════════════════════════════════ -->
+<div class="mobile-page">
+  <div class="mobile-maroon-bg">
+    {% url 'superadmin:permissoes' as back_url %}
+    {% include "components/mobile_header.html" with back_url=back_url %}
+  </div>
+
+  {% include "components/mobile_title.html" with title="Editar permissão" %}
+
+  <div class="mobile-content mobile-column">
+    <div class="mobile-notice">
+      <form class="mobile-form" method="post" novalidate>
+        {% csrf_token %}
+        {{ form.as_p }}
+        
+        <div class="mobile-actions">
+          <button type="submit" class="mobile-button mobile-button-block">Editar</button>
+        </div>
+      </form>
     </div>
-</section>
+  </div>
+
+  {% include "components/mobile_footer.html" %}
+</div>
+
+<!-- ══════════════════════════════════════
+     DESKTOP — Editar Permissão
+     ══════════════════════════════════════ -->
+<div class="desktop-page">
+<div class="list-panel-title">Editar permissão - {{ object.get_role_display }}</div>
+
+<p class="list-toolbar">
+  <a class="btn-limpar" href="{% url 'superadmin:permissoes' %}">← Voltar para Permissões</a>
+</p>
+
+<div class="figma-form-container">
+  {% include "components/form.html" with submit_label="Salvar" %}
+</div>
+</div>
 {% endblock %}

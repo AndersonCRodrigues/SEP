@@ -1,5 +1,5 @@
 from .activity import StudentActivity
-from .advising import Advising
+from .advising import TERM_VALIDATOR, Advising
 from .case import CaseAssignment
 from .records import Attendance, PerformanceReview
 from .scoping import (
@@ -11,6 +11,7 @@ from .scoping import (
 from .student import Student
 
 __all__ = [
+    "TERM_VALIDATOR",
     "AdviseeScopedQuerySet",
     "Advising",
     "Attendance",

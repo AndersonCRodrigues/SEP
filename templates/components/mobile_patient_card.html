@@ -1,0 +1,13 @@
+<div class="mobile-patient-card mobile-column">
+  <p class="mobile-patient-card-label">{{ label|default:"Paciente" }}</p>
+  <p class="mobile-patient-card-name">
+    <span>{{ name }}</span>
+    {% if code %}<span class="mobile-patient-card-code">#{{ code }}</span>{% endif %}
+  </p>
+  {% if detail %}
+  <p class="mobile-patient-card-detail">
+    <span>{{ detail }}</span>
+    {% if detail_date %}<span>{{ detail_date|date:"d/m/Y" }}</span>{% endif %}
+  </p>
+  {% endif %}
+</div>

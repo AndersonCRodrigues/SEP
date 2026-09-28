@@ -1,61 +1,93 @@
 {% extends "supervisor/base_coordinator.html" %}
-{% load static %}
+{% load static components %}
 
-{% block title %}Triagens para analisar{% endblock %}
+{% block title %}Triagens{% endblock %}
 
 {% block page_css %}
-<link rel="stylesheet" href="{% static 'core/css/superadmin/security_logs.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/list_panel.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/hover_lift.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/list_filters.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/coordenacao/coordenacao_lists.css' %}">
 {% endblock %}
 
-{% block page_title %}Triagens para analisar{% endblock %}
+{% block page_header %}{% endblock %}
 
 {% block content %}
-<div class="logs-header">
-  <form class="logs-search-form" method="get" action="">
-    <label class="visually-hidden" for="filter-situation">Situação</label>
-    <select class="form-control-search" id="filter-situation" name="situacao">
-      <option value="">Todas as situações</option>
+<!-- ══════════════════════════════════════
+     MOBILE
+     ══════════════════════════════════════ -->
+<div class="mobile-page">
+  <div class="mobile-maroon-bg">
+    {% url 'supervisor:home' as back_url %}
+    {% include "components/mobile_header.html" %}
+  </div>
+
+  {% include "components/mobile_title.html" with title="Triagens" %}
+
+  <div class="mobile-content">
+    {% mobile_filter icon="bi-funnel" %}
+    <label class="visually-hidden" for="mobile-situation">Situação</label>
+    <select id="mobile-situation" name="situacao">
       {% for value, label in situations %}
       <option value="{{ value }}" {% if situation_filter == value %}selected{% endif %}>{{ label }}</option>
       {% endfor %}
     </select>
-  </form>
+    {% endmobile_filter %}
+
+    {% for row in rows %}
+    {% url 'supervisor:triagem_detalhe' row.triage.pk as triage_url %}
+    {% include "components/mobile_row.html" with variant="white" url=triage_url name=row.patient person=row.student when=row.received label=row.label level=row.level %}
+    {% empty %}
+    <p class="mobile-empty">Nenhuma triagem para acompanhar.</p>
+    {% endfor %}
+  </div>
+
+  {% include "components/mobile_footer.html" %}
 </div>
 
-<div class="logs-container">
-  {% if rows %}
-  <table class="table-logs">
-    <thead>
-      <tr>
-        <th style="width: 28%;">Paciente:</th>
-        <th style="width: 27%;">Realizada por:</th>
-        <th style="width: 25%;">Recebida:</th>
-        <th style="width: 20%;"></th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for row in rows %}
-      <tr>
-        <td class="log-event">
-          <a href="{% url 'supervisor:triagem_detalhe' row.triage.pk %}">{{ row.patient }}</a>
-        </td>
-        <td class="log-details">{{ row.student }}</td>
-        <td class="log-time">{{ row.received }}</td>
-        <td class="text-end">
-          {% if row.level == "danger" %}
-          <span class="badge-status badge-status-critico">{{ row.label }}</span>
-          {% elif row.level == "success" %}
-          <span class="badge-status badge-status-info">{{ row.label }}</span>
-          {% else %}
-          <span class="badge-status badge-status-atencao">{{ row.label }}</span>
-          {% endif %}
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  {% else %}
-  {% include "components/empty_state.html" with message="Nenhuma triagem aguardando análise." %}
+<!-- ══════════════════════════════════════
+     DESKTOP
+     ══════════════════════════════════════ -->
+<div class="desktop-page">
+<div class="list-panel-title">Triagens</div>
+
+<form class="list-filters" method="get" action="">
+  <label class="visually-hidden" for="filter-situation">Situação</label>
+  <select id="filter-situation" name="situacao">
+    {% for value, label in situations %}
+    <option value="{{ value }}" {% if situation_filter == value %}selected{% endif %}>{{ label }}</option>
+    {% endfor %}
+  </select>
+  <button type="submit" class="btn-acao">Filtrar</button>
+  {% if situation_filter %}
+  <a class="btn-limpar" href="{% url 'supervisor:triagens' %}">Limpar filtro</a>
   {% endif %}
+</form>
+
+{% if rows %}
+<div class="list-panel">
+  <div class="list-panel-header triage-grid">
+    <div>Paciente:</div>
+    <div>Realizada por:</div>
+    <div>Recebida:</div>
+    <div></div>
+  </div>
+
+  <div class="list-panel-container">
+    {% for row in rows %}
+    <a class="list-panel-row triage-grid hover-lift" href="{% url 'supervisor:triagem_detalhe' row.triage.pk %}">
+      <div>{{ row.patient }}</div>
+      <div>{{ row.student }}</div>
+      <div>{{ row.received }}</div>
+      <div class="text-end">
+        {% include "components/badge_situacao.html" with label=row.label level=row.level %}
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+</div>
+{% else %}
+{% include "components/empty_state.html" with message="Nenhuma triagem para acompanhar." %}
+{% endif %}
 </div>
 {% endblock %}

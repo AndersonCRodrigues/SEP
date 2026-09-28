@@ -35,9 +35,6 @@ class VincularAlunoForm(forms.Form):
 
 
 class ProfessorCreationForm(UserCreationForm):
-    password1 = None
-    password2 = None
-
     acting_areas = forms.ModelMultipleChoiceField(
         queryset=AreaActing.objects.all(),
         widget=forms.CheckboxSelectMultiple,
@@ -63,7 +60,7 @@ class ProfessorCreationForm(UserCreationForm):
         self.instance.role = CustomUser.Role.PROFESSOR
 
     def save(self, commit=True):
-        professor = forms.ModelForm.save(self, commit=False)
+        professor = super().save(commit=False)
         professor.role = CustomUser.Role.PROFESSOR
         if commit:
             professor.save()

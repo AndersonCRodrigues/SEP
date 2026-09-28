@@ -1,0 +1,5 @@
+<span class="mobile-badge
+  {% if level == 'success' %}mobile-badge-ok
+  {% elif level == 'warning' %}mobile-badge-warning
+  {% elif level == 'danger' %}mobile-badge-danger
+  {% else %}mobile-badge-neutral{% endif %}">{{ label }}</span>

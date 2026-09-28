@@ -1,31 +1,79 @@
 {% extends "student/base_student.html" %}
-{% load components %}
+{% load static %}
 
 {% block title %}Encaminhamentos recebidos{% endblock %}
 
-{% block breadcrumbs %}
-<li class="breadcrumb-item"><a href="{% url 'students:home' %}">Página inicial</a></li>
-<li class="breadcrumb-item active" aria-current="page">Encaminhamentos</li>
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'core/css/components/list_panel.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/hover_lift.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/student_referral.css' %}">
 {% endblock %}
 
-{% block page_title %}Encaminhamentos recebidos{% endblock %}
+{% block page_header %}{% endblock %}
 
 {% block content %}
+<!-- ══════════════════════════════════════
+     MOBILE
+     ══════════════════════════════════════ -->
+<div class="mobile-page">
+  <div class="mobile-maroon-bg">
+    {% url 'students:home' as back_url %}
+    {% include "components/mobile_header.html" %}
+  </div>
+
+  {% include "components/mobile_title.html" with title="Encaminhamentos" %}
+
+  <div class="mobile-content">
+    {% if referrals_error %}
+    <p class="mobile-empty">{{ referrals_error }}</p>
+    {% else %}
+    <div class="mobile-list mobile-column">
+      {% for referral in referrals %}
+      {% include "components/mobile_row.html" with name=referral.patient when=referral.situation label=referral.label level=referral.level %}
+      {% empty %}
+      <p class="mobile-empty">Nenhum encaminhamento recebido.</p>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  {% include "components/mobile_footer.html" %}
+</div>
+
+<!-- ══════════════════════════════════════
+     DESKTOP
+     ══════════════════════════════════════ -->
+<div class="desktop-page">
+<div class="list-panel-title">Encaminhamentos recebidos</div>
+
 {% if referrals_error %}
 {% include "components/error_state.html" with message=referrals_error retry_url=request.path %}
 {% elif referrals %}
-{% data_table columns=columns label="Encaminhamentos que você recebeu" %}
-{% for referral in referrals %}
-<tr class="referral">
-  <td class="referral-patient">{{ referral.patient }}</td>
-  <td class="referral-situation">{{ referral.situation }}</td>
-  <td class="referral-status">
-    {% include "components/badge.html" with label=referral.label level=referral.level %}
-  </td>
-</tr>
-{% endfor %}
-{% enddata_table %}
+<div class="list-panel">
+  <div class="list-panel-header referral-grid">
+    <div>Pacientes:</div>
+    <div>Situação</div>
+    <div></div>
+  </div>
+
+  <div class="list-panel-container">
+    {% for referral in referrals %}
+    <div class="list-panel-row referral-grid hover-lift">
+      <div>{{ referral.patient }}</div>
+      <div>{{ referral.situation }}</div>
+      <div class="text-end">
+        {% if referral.level == "success" %}
+        <span class="badge-ativo">{{ referral.label }}</span>
+        {% else %}
+        <span class="badge-pendente">{{ referral.label }}</span>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
 {% else %}
-{% include "components/empty_state.html" with message="Você ainda não recebeu encaminhamentos." %}
+{% include "components/empty_state.html" with message="Nenhum encaminhamento recebido." %}
 {% endif %}
+</div>
 {% endblock %}

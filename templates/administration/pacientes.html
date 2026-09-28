@@ -1,84 +1,103 @@
 {% extends "administration/base_admin.html" %}
 {% load static %}
 
-{% block title %}Pacientes | SEP Maricá{% endblock %}
+{% block title %}Pacientes{% endblock %}
 
 {% block page_css %}
-<link rel="stylesheet" href="{% static 'core/css/administrativo/pacientes_lista.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/list_panel.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/hover_lift.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/list_filters.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/administrativo/administrativo_lists.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="patients-container">
-  <!-- ── Cabeçalho da Página ── -->
-  <header class="patients-header">
-    <div class="patients-title-group">
-      <h1>Pacientes</h1>
-      <p class="patients-subtitle">Gestão de fichas e pré-cadastros do sistema</p>
-    </div>
-  </header>
-
-  <!-- ── Barra de Busca e Filtros ── -->
-  <div class="patients-toolbar">
-    <form method="get" class="search-form">
-      <div class="search-input-wrapper">
-        <input
-          type="text"
-          name="q"
-          placeholder="Buscar por nome ou CPF..."
-          value="{{ search }}"
-        >
-      </div>
-      <div class="search-input-wrapper">
-        <select name="situacao" aria-label="Situação">
-          <option value="">Todas as situações</option>
-          {% for value, label in situations %}
-          <option value="{{ value }}" {% if situation_filter == value %}selected{% endif %}>{{ label }}</option>
-          {% endfor %}
-        </select>
-      </div>
-    </form>
+<!-- ══════════════════════════════════════
+     MOBILE
+     ══════════════════════════════════════ -->
+<div class="mobile-page">
+  <div class="mobile-maroon-bg">
+    {% url 'administration:home' as back_url %}
+    {% include "components/mobile_header.html" %}
   </div>
 
-  <!-- ── Tabela de Pacientes ── -->
-  <div class="patients-card">
+  {% include "components/mobile_title.html" with title="Pacientes" %}
+
+  <div class="mobile-content">
+    {% include "components/mobile_search.html" with search_value=search search_label="Buscar por nome ou CPF" %}
+
+    <div class="mobile-actions mobile-actions-top">
+      <a class="mobile-button" href="{% url 'administration:cadastrar_paciente' %}">Cadastrar novo paciente</a>
+    </div>
+
     {% if patients_error %}
-      {% include "components/error_state.html" with message=patients_error retry_url=request.path %}
-    {% elif patients %}
-      <table class="patients-table">
-        <thead>
-          <tr>
-            <th>Código</th>
-            <th>Nome Completo</th>
-            <th>CPF</th>
-            <th>Situação</th>
-            <th>Data de Cadastro</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for row in patients %}
-          <tr>
-            <td class="patient-id">#{{ row.patient.pk }}</td>
-            <td class="patient-name">
-              <strong>{{ row.name }}</strong>
-            </td>
-            <td>{{ row.cpf }}</td>
-            <td>{% include "components/badge.html" with label=row.label level=row.level %}</td>
-            <td>{{ row.registered_at|date:"d/m/Y H:i" }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+    <p class="mobile-empty">{{ patients_error }}</p>
     {% else %}
-      <!-- Estado Vazio (Sem registros) -->
-      <div class="patients-empty">
-        <div class="empty-icon">📁</div>
-        <h3>Nenhum paciente encontrado</h3>
-        <p>Comece realizando o pré-cadastro de um novo paciente no sistema.</p>
-        <a class="btn-new-registration" href="{% url 'administration:cadastrar_paciente' %}">
-          + Novo Cadastro
-        </a>
-      </div>
+    {% for row in patients %}
+    {% include "components/mobile_row.html" with variant="white" name=row.name person=row.cpf when=row.registered_at|date:"d/m/Y" label=row.label level=row.level %}
+    {% empty %}
+    <p class="mobile-empty">Nenhum paciente encontrado.</p>
+    {% endfor %}
     {% endif %}
   </div>
+
+  {% include "components/mobile_footer.html" %}
+</div>
+
+<!-- ══════════════════════════════════════
+     DESKTOP
+     ══════════════════════════════════════ -->
+<div class="desktop-page">
+<div class="list-toolbar">
+  <h1 class="list-toolbar-title">Pacientes</h1>
+</div>
+
+<form class="list-filters" method="get">
+  <div class="list-search">
+    <i class="bi bi-search" aria-hidden="true"></i>
+    <label class="visually-hidden" for="busca-paciente">Buscar por nome ou CPF</label>
+    <input type="search" id="busca-paciente" name="q" value="{{ search }}" placeholder="Buscar por nome ou CPF...">
+  </div>
+
+  <label class="visually-hidden" for="filtro-situacao">Situação</label>
+  <select id="filtro-situacao" name="situacao">
+    <option value="">Todas as situações</option>
+    {% for value, label in situations %}
+    <option value="{{ value }}" {% if situation_filter == value %}selected{% endif %}>{{ label }}</option>
+    {% endfor %}
+  </select>
+
+  <button type="submit" class="btn-acao">Filtrar</button>
+  <a class="btn-acao" href="{% url 'administration:cadastrar_paciente' %}">+ Novo cadastro</a>
+</form>
+
+{% if patients_error %}
+{% include "components/error_state.html" with message=patients_error retry_url=request.path %}
+
+{% elif patients %}
+<div class="list-panel">
+  <div class="list-panel-header patient-grid">
+    <div>Nome completo:</div>
+    <div>CPF:</div>
+    <div>Cadastro:</div>
+    <div></div>
+  </div>
+
+  <div class="list-panel-container">
+    {% for row in patients %}
+    <div class="list-panel-row patient-grid hover-lift">
+      <div>{{ row.name }} #{{ row.patient.pk }}</div>
+      <div>{{ row.cpf }}</div>
+      <div>{{ row.registered_at|date:"d/m/Y H:i" }}</div>
+      <div class="text-end">
+        {% include "components/badge_situacao.html" with label=row.label level=row.level %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+{% else %}
+{% include "components/empty_state.html" with message="Nenhum paciente encontrado. Comece pelo pré-cadastro de um novo paciente." %}
+{% endif %}
 </div>
 {% endblock %}

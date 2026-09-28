@@ -1,0 +1,5 @@
+<span class="badge-situacao
+  {% if level == 'success' %}ok
+  {% elif level == 'warning' %}atencao
+  {% elif level == 'danger' %}critica
+  {% else %}neutra{% endif %}">{{ label }}</span>

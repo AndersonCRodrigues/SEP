@@ -37,6 +37,7 @@ class PerfilAdministrativoView(AdministrativeOnly, UpdateView):
     def get_object(self, queryset=None):
         return self.request.user
 
+
 @login_required
 def cadastrar_administrativo(request):
     if not request.user.has_perm("core.add_customuser"):
@@ -50,9 +51,7 @@ def cadastrar_administrativo(request):
             senha_temporaria = gerar_senha_temporaria()
             user.set_password(senha_temporaria)
             user.must_change_password = True
-            user.save()   
-
-               
+            user.save()
 
             sincronizar_grupo(user)
 
@@ -60,7 +59,10 @@ def cadastrar_administrativo(request):
             telefone_ok = enviar_credenciais_por_telefone(user, senha_temporaria)
 
             if email_ok and telefone_ok:
-                messages.success(request, "Administrativo cadastrado e credenciais enviadas com sucesso!")
+                messages.success(
+                    request,
+                    "Administrativo cadastrado e credenciais enviadas com sucesso!",
+                )
             else:
                 messages.warning(
                     request,

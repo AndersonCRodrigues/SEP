@@ -4,112 +4,134 @@
 {% block title %}Agenda{% endblock %}
 
 {% block page_css %}
-<link rel="stylesheet" href="{% static 'core/css/administrativo/administrativo_agenda.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/list_panel.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/hover_lift.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/list_filters.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/administrativo/administrativo_lists.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="page-header-row">
-  <h1 class="page-title">{{ heading }}{% if period_dates %} &middot; {{ period_dates }}{% endif %}</h1>
-  <button type="button" class="btn-wine">+ Novo agendamento</button>
+<!-- ══════════════════════════════════════
+     MOBILE
+     ══════════════════════════════════════ -->
+<div class="mobile-page">
+  <div class="mobile-maroon-bg">
+    {% url 'administration:home' as back_url %}
+    {% include "components/mobile_header.html" %}
+  </div>
+
+  {% include "components/mobile_title.html" with title="Agenda" %}
+
+  <div class="mobile-content">
+    {% mobile_filter icon="bi-calendar3" %}
+    <label class="visually-hidden" for="mobile-period">Período</label>
+    <select id="mobile-period" name="periodo">
+      {% for value, period in periods.items %}
+      <option value="{{ value }}" {% if value == selected_period %}selected{% endif %}>{{ period.label }}</option>
+      {% endfor %}
+    </select>
+    {% endmobile_filter %}
+
+    <div class="mobile-actions mobile-actions-top">
+      {# TODO: botão sem lógica; fica para fazer #}
+      <button type="button" class="mobile-button" disabled>Novo agendamento</button>
+    </div>
+
+    {% for event in events %}
+    {% with hour=event.time|date:"H:i" %}
+    {% include "components/mobile_row.html" with variant="white" name=event.appointment.patient person=event.attendant|default:"Não atribuído" when=event.day_label|add:" - "|add:hour place=event.appointment.room.name|default:"Sem sala" label=event.appointment.get_status_display level=event.status_level %}
+    {% endwith %}
+    {% empty %}
+    <p class="mobile-empty">Nenhum agendamento para este filtro.</p>
+    {% endfor %}
+  </div>
+
+  {% include "components/mobile_footer.html" %}
 </div>
 
-{% section title="Filtros" %}
-<form class="schedule-filters" method="get" action="">
-  <p class="filter">
-    <label for="filter-period">Período</label>
-    <select id="filter-period" name="periodo">
-      {% for value, period in periods.items %}
-      <option value="{{ value }}" {% if value == selected_period %}selected{% endif %}>
-        {{ period.label }}
-      </option>
-      {% endfor %}
-    </select>
-  </p>
+<!-- ══════════════════════════════════════
+     DESKTOP
+     ══════════════════════════════════════ -->
+<div class="desktop-page">
+<div class="list-toolbar">
+  <h1 class="list-toolbar-title">{{ heading }}{% if period_dates %} &middot; {{ period_dates }}{% endif %}</h1>
+  {# TODO: botão sem lógica; fica para fazer #}
+  <button type="button" class="btn-acao" disabled>+ Novo agendamento</button>
+</div>
 
-  <p class="filter">
-    <label for="filter-status">Situação</label>
-    <select id="filter-status" name="situacao">
-      <option value="">Todas</option>
-      {% for value, label in statuses %}
-      <option value="{{ value }}" {% if value == selected_status %}selected{% endif %}>
-        {{ label }}
-      </option>
-      {% endfor %}
-    </select>
-  </p>
+<form class="list-filters" method="get" action="">
+  <label class="visually-hidden" for="filter-period">Período</label>
+  <select id="filter-period" name="periodo">
+    {% for value, period in periods.items %}
+    <option value="{{ value }}" {% if value == selected_period %}selected{% endif %}>{{ period.label }}</option>
+    {% endfor %}
+  </select>
 
-  <p class="filter">
-    <label for="filter-kind">Tipo</label>
-    <select id="filter-kind" name="tipo">
-      <option value="">Todos</option>
-      {% for value, label in kinds %}
-      <option value="{{ value }}" {% if value == selected_kind %}selected{% endif %}>
-        {{ label }}
-      </option>
-      {% endfor %}
-    </select>
-  </p>
+  <label class="visually-hidden" for="filter-status">Situação</label>
+  <select id="filter-status" name="situacao">
+    <option value="">Todas as situações</option>
+    {% for value, label in statuses %}
+    <option value="{{ value }}" {% if value == selected_status %}selected{% endif %}>{{ label }}</option>
+    {% endfor %}
+  </select>
 
-  <p class="filter">
-    <label for="filter-room">Sala</label>
-    <select id="filter-room" name="sala">
-      <option value="">Todas</option>
-      {% for room in rooms %}
-      <option value="{{ room.pk }}" {% if room.pk == selected_room %}selected{% endif %}>
-        {{ room.name }}
-      </option>
-      {% endfor %}
-    </select>
-  </p>
+  <label class="visually-hidden" for="filter-kind">Tipo</label>
+  <select id="filter-kind" name="tipo">
+    <option value="">Todos os tipos</option>
+    {% for value, label in kinds %}
+    <option value="{{ value }}" {% if value == selected_kind %}selected{% endif %}>{{ label }}</option>
+    {% endfor %}
+  </select>
 
-  <button type="submit">Filtrar</button>
+  <label class="visually-hidden" for="filter-room">Sala</label>
+  <select id="filter-room" name="sala">
+    <option value="">Todas as salas</option>
+    {% for room in rooms %}
+    <option value="{{ room.pk }}" {% if room.pk == selected_room %}selected{% endif %}>{{ room.name }}</option>
+    {% endfor %}
+  </select>
+
+  <button type="submit" class="btn-acao">Filtrar</button>
 </form>
-{% endsection %}
 
-<div class="table-container">
-  {% data_table columns=column_labels label="Agendamentos" %}
-  {% for event in events %}
-  <tr class="event">
-    <td class="event-time">{{ event.day_label }} - {{ event.time|date:"H:i" }}</td>
-    <td class="event-room"><strong>{{ event.appointment.room.name|default:"—" }}</strong></td>
-    <td class="event-attendant">{{ event.attendant|default:"—" }}</td>
-    <td class="event-status">
-      {% include "components/badge.html" with label=event.appointment.get_status_display level=event.status_level %}
-    </td>
-  </tr>
-  <tr class="event-detail">
-    <td colspan="{{ column_labels|length }}">
-      <details>
-        <summary>Detalhes do atendimento</summary>
-        <dl>
-          <dt>Paciente</dt>
-          <dd>{{ event.appointment.patient }}</dd>
+{% if events %}
+<div class="list-panel">
+  <div class="list-panel-header agenda-grid">
+    {% for label in column_labels %}<div>{{ label }}</div>{% endfor %}
+  </div>
 
-          <dt>Tipo</dt>
-          <dd>{{ event.appointment.get_kind_display }}</dd>
+  <div class="list-panel-container">
+    {% for event in events %}
+    <details class="list-panel-row agenda-row hover-lift">
+      <summary class="agenda-grid">
+        <div>{{ event.day_label }} - {{ event.time|date:"H:i" }}</div>
+        <div>{{ event.appointment.room.name|default:"—" }}</div>
+        <div>{{ event.attendant|default:"—" }}</div>
+        <div class="text-end">
+          {% include "components/badge_situacao.html" with label=event.appointment.get_status_display level=event.status_level %}
+        </div>
+      </summary>
 
-          <dt>Aluno que atende</dt>
-          <dd>{{ event.appointment.assigned_student|default:"Não atribuído" }}</dd>
-
-          <dt>Professor responsável</dt>
-          <dd>{{ event.appointment.teacher|default:"Não atribuído" }}</dd>
-
-          <dt>Duração</dt>
-          <dd>{{ event.appointment.duration_minutes }} minutos</dd>
-
-          <dt>Observações</dt>
-          <dd>{{ event.appointment.notes|default:"—" }}</dd>
-        </dl>
-      </details>
-    </td>
-  </tr>
-  {% empty %}
-  <tr class="event-empty">
-    <td colspan="{{ column_labels|length }}">
-      {% include "components/empty_state.html" with message="Nenum agendamento para este filtro." %}
-    </td>
-  </tr>
-  {% endfor %}
-  {% enddata_table %}
+      <dl class="agenda-detail">
+        <dt>Paciente</dt>
+        <dd>{{ event.appointment.patient }}</dd>
+        <dt>Tipo</dt>
+        <dd>{{ event.appointment.get_kind_display }}</dd>
+        <dt>Aluno que atende</dt>
+        <dd>{{ event.appointment.assigned_student|default:"Não atribuído" }}</dd>
+        <dt>Professor responsável</dt>
+        <dd>{{ event.appointment.teacher|default:"Não atribuído" }}</dd>
+        <dt>Duração</dt>
+        <dd>{{ event.appointment.duration_minutes }} minutos</dd>
+        <dt>Observações</dt>
+        <dd>{{ event.appointment.notes|default:"—" }}</dd>
+      </dl>
+    </details>
+    {% endfor %}
+  </div>
+</div>
+{% else %}
+{% include "components/empty_state.html" with message="Nenhum agendamento para este filtro." %}
+{% endif %}
 </div>
 {% endblock %}

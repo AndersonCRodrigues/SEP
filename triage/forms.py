@@ -67,12 +67,60 @@ def get_iarv_form_class_for_instance(iarv):
 
 
 SESSION_KEY = "triage_registration"
-SECTIONS = ("Triagem", "IARV")
+
+RISK_SECTION = "Instrumento de risco"
+SECTIONS = (
+    "Identificação",
+    "Vínculo institucional",
+    "Contexto clínico",
+    "Rede de apoio",
+    "Encerramento",
+    RISK_SECTION,
+)
+
+SECTION_STARTS = {
+    "arrival_method": "Identificação",
+    "is_university_student": "Vínculo institucional",
+    "chief_complaint": "Contexto clínico",
+    "has_primary_care_connection": "Rede de apoio",
+    "treatment_expectations": "Encerramento",
+}
+
+SECTION_BARS = 3
+
+BOOLEAN_CHOICES = (("true", "Sim"), ("false", "Não"))
+
+
+def _as_question(field):
+    """O campo da ficha vira a pergunta da vez: sim/não em botão e texto em caixa."""
+    if isinstance(field, forms.BooleanField):
+        return forms.ChoiceField(
+            label=field.label,
+            required=field.required,
+            choices=BOOLEAN_CHOICES,
+            widget=forms.RadioSelect,
+        )
+
+    if isinstance(field, forms.ChoiceField) and not isinstance(
+        field, forms.MultipleChoiceField
+    ):
+        field.choices = [
+            (valor, rotulo)
+            for valor, rotulo in field.choices
+            if valor not in ("", None)
+        ]
+        field.widget = forms.RadioSelect(choices=field.choices)
+        return field
+
+    if isinstance(field.widget, (forms.TextInput, forms.Textarea)):
+        field.widget = forms.Textarea(attrs={"rows": 6, "placeholder": "Resposta..."})
+
+    return field
 
 
 def _single_field_form_class(source_form_class, field_name):
     """Gera dinamicamente uma forms.Form contendo só um campo de source_form_class."""
-    field = copy.deepcopy(source_form_class.base_fields[field_name])
+    field = _as_question(copy.deepcopy(source_form_class.base_fields[field_name]))
     return type(
         f"{source_form_class.__name__}__{field_name}",
         (forms.Form,),
@@ -110,13 +158,17 @@ class TriageRegistration:
         return get_iarv_form_class(self.patient)  # pode levantar ValidationError
 
     def steps(self):
-        steps = [
-            TriageStep(f"triagem__{name}", "Triagem", field.label, "triagem", name)
-            for name, field in TriageRecordForm.base_fields.items()
-        ]
+        steps = []
+        section = SECTIONS[0]
+        for name, field in TriageRecordForm.base_fields.items():
+            section = SECTION_STARTS.get(name, section)
+            steps.append(
+                TriageStep(f"triagem__{name}", section, field.label, "triagem", name)
+            )
+
         iarv_form_class = self.iarv_form_class
         steps += [
-            TriageStep(f"iarv__{name}", "IARV", field.label, "iarv", name)
+            TriageStep(f"iarv__{name}", RISK_SECTION, field.label, "iarv", name)
             for name, field in iarv_form_class.base_fields.items()
         ]
         return steps
@@ -166,11 +218,32 @@ class TriageRegistration:
         return self.steps().index(step) + 1
 
     def sections(self, current):
+        steps = self.steps()
         position = SECTIONS.index(current.section)
-        return [
-            {"name": name, "state": self.section_state(index, position)}
-            for index, name in enumerate(SECTIONS)
-        ]
+
+        resumo = []
+        for index, name in enumerate(SECTIONS):
+            state = self.section_state(index, position)
+            da_secao = [step for step in steps if step.section == name]
+            resumo.append(
+                {
+                    "name": name,
+                    "state": state,
+                    "bars": self.section_bars(state, da_secao, current),
+                }
+            )
+        return resumo
+
+    @staticmethod
+    def section_bars(state, section_steps, current):
+        if state == "done":
+            cheias = SECTION_BARS
+        elif state == "pending" or not section_steps:
+            cheias = 0
+        else:
+            lugar = section_steps.index(current) + 1
+            cheias = -(-lugar * SECTION_BARS // len(section_steps))
+        return [posicao < cheias for posicao in range(SECTION_BARS)]
 
     @staticmethod
     def section_state(index, position):

@@ -1,132 +1,130 @@
-{% extends "home.html" %}
+{% extends "supervisor/base_coordinator.html" %}
+{% load static %}
 
-{% block home_title %}Orientação e Encaminhamentos{% endblock %}
+{% block title %}Meus orientandos{% endblock %}
 
-{% block home_content %}
-<div class="col-12 col-md-6">
-    <section class="card h-100">
-        <div class="card-body">
-            <h2 class="h5 card-title">Alunos Vinculados</h2>
-            {% if alunos_vinculados %}
-            <ul class="list-group list-group-flush">
-                {% for aluno in alunos_vinculados %}
-                <li class="list-group-item px-0">{{ aluno.nome_completo }} — {{ aluno.matricula }}</li>
-                {% endfor %}
-            </ul>
-            {% else %}
-            <p class="card-text text-body-secondary mb-0">Nenhum aluno vinculado ainda.</p>
-            {% endif %}
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'core/css/components/list_panel.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/hover_lift.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/list_filters.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/detail_panel.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/form_cadastro.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/coordenacao/coordenacao_lists.css' %}">
+{% endblock %}
+
+{% block page_header %}{% endblock %}
+
+{% block content %}
+{% url 'supervisor:home' as back_url %}
+{% include "components/mobile_top.html" with title="Meus orientandos" %}
+
+<div class="list-panel-title desktop-page">Meus orientandos</div>
+
+<div class="list-panel mobile-column">
+  <section class="detail-card">
+    <h2 class="detail-title">Alunos vinculados</h2>
+    {% if alunos_vinculados %}
+    <div class="list-panel-container">
+      {% for aluno in alunos_vinculados %}
+      <div class="list-panel-row detail-grid">
+        <div>{{ aluno.nome_completo }}</div>
+        <div class="text-end">{{ aluno.matricula|default:"—" }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    {% include "components/empty_state.html" with message="Nenhum aluno vinculado ainda." %}
+    {% endif %}
+  </section>
+
+  <section class="detail-card">
+    <h2 class="detail-title">Triagens pendentes</h2>
+    {% if triagens_pendentes %}
+    <div class="list-panel-container">
+      {% for triagem in triagens_pendentes %}
+      <a class="list-panel-row detail-grid hover-lift"
+        href="{% url 'triage:triage_detail_supervisor' triagem.pk %}">
+        <div>{{ triagem.patient.nome_completo }}</div>
+        <div class="text-end">{{ triagem.created_at|date:"d/m/Y" }}</div>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    {% include "components/empty_state.html" with message="Nenhuma triagem pendente de parecer ou encaminhamento." %}
+    {% endif %}
+  </section>
+
+  <section class="detail-card">
+    <h2 class="detail-title">Histórico de triagens</h2>
+    {% if historico_triagens %}
+    <div class="list-panel-header history-grid">
+      <div>Paciente:</div>
+      <div>Realizada por:</div>
+      <div>Recebida:</div>
+      <div></div>
+    </div>
+    <div class="list-panel-container">
+      {% for triagem in historico_triagens %}
+      <a class="list-panel-row history-grid hover-lift"
+        href="{% url 'triage:triage_detail_supervisor' triagem.pk %}">
+        <div>{{ triagem.patient.nome_completo }}</div>
+        <div>{{ triagem.student_author.nome_completo }}</div>
+        <div>{{ triagem.created_at|date:"d/m/Y H:i" }}</div>
+        <div class="text-end">
+          <span class="badge-situacao neutra">{{ triagem.get_status_display }}</span>
         </div>
-    </section>
-</div>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    {% include "components/empty_state.html" with message="Nenhuma triagem no histórico ainda." %}
+    {% endif %}
+  </section>
 
-<div class="col-12 col-md-6">
-    <section class="card h-100">
-        <div class="card-body">
-            <h2 class="h5 card-title">Triagens Pendentes</h2>
-            {% if triagens_pendentes %}
-            <ul class="list-group list-group-flush">
-                {% for triagem in triagens_pendentes %}
-                <li class="list-group-item px-0">
-                    <a href="{% url 'triage_detail_supervisor' triagem.pk %}">{{ triagem.patient.nome_completo }}</a>
-                </li>
-                {% endfor %}
-            </ul>
-            {% else %}
-            <p class="card-text text-body-secondary mb-0">Nenhuma triagem pendente de parecer/encaminhamento.</p>
-            {% endif %}
-        </div>
-    </section>
-</div>
+  <section class="detail-card">
+    <h2 class="detail-title">Todos os encaminhamentos</h2>
+    {% if todos_encaminhamentos %}
+    <div class="list-panel-container">
+      {% for encaminhamento in todos_encaminhamentos %}
+      <a class="list-panel-row detail-grid hover-lift"
+        href="{% url 'triage:triage_detail_supervisor' encaminhamento.triage.pk %}">
+        <div>{{ encaminhamento.patient.nome_completo }}</div>
+        <div class="text-end">Ver triagem</div>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    {% include "components/empty_state.html" with message="Nenhum encaminhamento no sistema." %}
+    {% endif %}
+  </section>
 
-<div class="col-12">
-    <section class="card">
-        <div class="card-body">
-            <h2 class="h5 card-title">Histórico de Triagens</h2>
-            {% if historico_triagens %}
-            <div class="table-responsive">
-                <table class="table table-striped align-middle mb-0">
-                    <thead>
-                        <tr>
-                            <th scope="col">Paciente</th>
-                            <th scope="col">Realizada por</th>
-                            <th scope="col">Recebida</th>
-                            <th scope="col">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for triagem in historico_triagens %}
-                        <tr>
-                            <td><a href="{% url 'triage_detail_supervisor' triagem.pk %}">{{ triagem.patient.nome_completo }}</a></td>
-                            <td>{{ triagem.student_author.nome_completo }}</td>
-                            <td>{{ triagem.created_at }}</td>
-                            <td>
-                                <span class="badge text-bg-secondary">{{ triagem.get_status_display }}</span>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% else %}
-            <p class="card-text text-body-secondary mb-0">Nenhuma triagem no histórico ainda.</p>
-            {% endif %}
-        </div>
-    </section>
-</div>
+  <section class="detail-card">
+    <h2 class="detail-title">Vincular aluno</h2>
+    {% if alunos_disponiveis %}
+    {% url 'teacher:vincular_aluno' as url_vincular %}
+    <div class="figma-form-container">
+      {% include "components/form.html" with form=form_vincular action_url=url_vincular submit_label="Vincular aluno" %}
+    </div>
+    {% else %}
+    {% include "components/empty_state.html" with message="Não há alunos disponíveis no momento." %}
+    {% endif %}
+  </section>
 
-<div class="col-12 col-md-6">
-    <section class="card h-100">
-        <div class="card-body">
-            <h2 class="h5 card-title">Todos os Encaminhamentos</h2>
-            {% if todos_encaminhamentos %}
-            <ul class="list-group list-group-flush">
-                {% for encaminhamento in todos_encaminhamentos %}
-                <li class="list-group-item px-0">
-                    <a href="{% url 'triage_detail_supervisor' encaminhamento.triage.pk %}">
-                        {{ encaminhamento.patient.nome_completo }}
-                    </a>
-                </li>
-                {% endfor %}
-            </ul>
-            {% else %}
-            <p class="card-text text-body-secondary mb-0">Nenhum encaminhamento no sistema.</p>
-            {% endif %}
-        </div>
-    </section>
+  <section class="detail-card">
+    <h2 class="detail-title">Lançar horas</h2>
+    {% if alunos_vinculados %}
+    {% url 'teacher:lancar_horas' as url_horas %}
+    <div class="figma-form-container">
+      {% include "components/form.html" with form=form_horas action_url=url_horas submit_label="Registrar horas" %}
+    </div>
+    {% else %}
+    {% include "components/empty_state.html" with message="Vincule um aluno antes de lançar horas." %}
+    {% endif %}
+  </section>
 </div>
+{% endblock %}
 
-<div class="col-12 col-md-6">
-    <section class="card h-100">
-        <div class="card-body">
-            <h2 class="h5 card-title">Alunos Disponíveis pra Vincular</h2>
-            {% if alunos_disponiveis %}
-            <form method="post" action="{% url 'teacher:vincular_aluno' %}">
-                {% csrf_token %}
-                {{ form_vincular.as_p }}
-                <button type="submit" class="btn btn-primary">Vincular Aluno</button>
-            </form>
-            {% else %}
-            <p class="card-text text-body-secondary mb-0">Não há alunos disponíveis no momento.</p>
-            {% endif %}
-        </div>
-    </section>
-</div>
-
-<div class="col-12 col-md-6">
-    <section class="card h-100">
-        <div class="card-body">
-            <h2 class="h5 card-title">Lançar Horas</h2>
-            {% if alunos_vinculados %}
-            <form method="post" action="{% url 'teacher:lancar_horas' %}">
-                {% csrf_token %}
-                {{ form_horas.as_p }}
-                <button type="submit" class="btn btn-primary">Registrar Horas</button>
-            </form>
-            {% else %}
-            <p class="card-text text-body-secondary mb-0">Vincule um aluno antes de lançar horas.</p>
-            {% endif %}
-        </div>
-    </section>
-</div>
+{% block footer %}
+{{ block.super }}
+{% include "components/mobile_footer.html" with standalone=True %}
 {% endblock %}

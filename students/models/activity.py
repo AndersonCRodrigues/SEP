@@ -99,9 +99,9 @@ class StudentActivity(AdviseeRecord):
         )
         if category is not None:
             linhas = linhas.filter(category=category)
-        return linhas.aggregate(
-            total=Coalesce(Sum("hours_worked"), Value(Decimal(0)))
-        )["total"]
+        return linhas.aggregate(total=Coalesce(Sum("hours_worked"), Value(Decimal(0))))[
+            "total"
+        ]
 
     def __str__(self):
         return (

@@ -1,71 +1,90 @@
 {% extends "superadmin/base_superadmin.html" %}
 {% load static %}
 
-{% block extra_css %}
-  <link rel="stylesheet" href="{% static 'core/css/superadmin/server_status.css' %}">
-{% endblock %}
+{% block title %}Status dos servidores{% endblock %}
 
-{% block title %}Status dos Servidores | Sistema SEP{% endblock %}
-
-{% block breadcrumbs %}
-{{ block.super }}
-<li class="breadcrumb-item"><a href="{% url 'superadmin:home' %}">Superadmin</a></li>
-<li class="breadcrumb-item active" aria-current="page">Servidores</li>
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'core/css/components/list_panel.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/hover_lift.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/superadmin/superadmin_lists.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/mobile_shell.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/mobile_cards.css' %}">
 {% endblock %}
 
 {% block content %}
-<!-- Banner Superior do Figma -->
-<div class="page-header-banner">
-    <h1>Status dos servidores</h1>
+
+<!-- ══════════════════════════════════════
+     MOBILE — Servidores
+     ══════════════════════════════════════ -->
+<div class="mobile-page">
+  <div class="mobile-maroon-bg">
+    {% url 'superadmin:home' as back_url %}
+    {% include "components/mobile_header.html" with back_url=back_url %}
+  </div>
+
+  {% include "components/mobile_title.html" with title="Servidores" %}
+
+  <div class="mobile-content mobile-column">
+    {% if servidores %}
+      {% for server in servidores %}
+      {% if server.health == "OF" %}
+      {% include "components/mobile_row.html" with variant="white" name=server.nome person="Servidor indisponível, sem resposta." label="Off-line" level="danger" %}
+      {% elif server.health == "OK" %}
+      {% include "components/mobile_row.html" with variant="white" name=server.nome person=server.uptime_percent|stringformat:"s%%"|add:" Uptime" place=server.cpu_percent|stringformat:"s%%"|add:" CPU" label="Saudável" level="success" %}
+      {% else %}
+      {% include "components/mobile_row.html" with variant="white" name=server.nome person=server.uptime_percent|stringformat:"s%%"|add:" Uptime" place=server.cpu_percent|stringformat:"s%%"|add:" CPU" label="Atenção" level="warning" %}
+      {% endif %}
+      {% endfor %}
+    {% else %}
+    <p class="mobile-empty">Nenhum servidor cadastrado.</p>
+    {% endif %}
+  </div>
+
+  {% include "components/mobile_footer.html" %}
 </div>
 
-<!-- Contêiner Principal -->
-<div class="servers-container">
-    <table class="table-servers">
-        <thead>
-            <tr>
-                <th>Servidores:</th>
-                <th>Uptime:</th>
-                <th>CPU:</th>
-                <th>Memória:</th>
-                <th class="text-end text-sm-center">Status:</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for server in servidores %}
-            {% if server.health == "OF" %}
-            <tr class="server-offline">
-                <td><strong>{{ server.nome }}</strong></td>
-                <td colspan="3">
-                    {% include "components/error_state.html" with message="Servidor indisponível, sem resposta." %}
-                </td>
-                <td class="text-end text-sm-center">
-                    <span class="badge-status badge-status-warning">Off-line</span>
-                </td>
-            </tr>
-            {% else %}
-            <tr>
-                <td><strong>{{ server.nome }}</strong></td>
-                <td>{{ server.uptime_percent }}%</td>
-                <td>CPU {{ server.cpu_percent }}%</td>
-                <td>MEM {{ server.memoria_percent }}%</td>
-                <td class="text-end text-sm-center">
-                    {% if server.health == "OK" %}
-                    <span class="badge-status badge-status-ok">Saudável</span>
-                    {% else %}
-                    <span class="badge-status badge-status-warning">Atenção</span>
-                    {% endif %}
-                </td>
-            </tr>
-            {% endif %}
-            {% empty %}
-            <tr>
-                <td colspan="5">
-                    {% include "components/empty_state.html" with message="Nenhum servidor cadastrado." %}
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<!-- ══════════════════════════════════════
+     DESKTOP — Servidores
+     ══════════════════════════════════════ -->
+<div class="desktop-page">
+<div class="list-panel-title">Status dos servidores</div>
+
+{% if servidores %}
+<div class="list-panel">
+  <div class="list-panel-header server-grid">
+    <div>Servidores:</div>
+    <div>Uptime:</div>
+    <div>CPU:</div>
+    <div>Memória:</div>
+    <div></div>
+  </div>
+
+  <div class="list-panel-container">
+    {% for server in servidores %}
+    <div class="list-panel-row server-grid hover-lift">
+      <div>{{ server.nome }}</div>
+      {% if server.health == "OF" %}
+      <div class="server-offline">Servidor indisponível, sem resposta.</div>
+      <div class="text-end"><span class="badge-situacao critica">Off-line</span></div>
+      {% else %}
+      <div>{{ server.uptime_percent }}%</div>
+      <div>CPU {{ server.cpu_percent }}%</div>
+      <div>MEM {{ server.memoria_percent }}%</div>
+      <div class="text-end">
+        {% if server.health == "OK" %}
+        <span class="badge-situacao ok">Saudável</span>
+        {% else %}
+        <span class="badge-situacao atencao">Atenção</span>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
 </div>
+{% else %}
+{% include "components/empty_state.html" with message="Nenhum servidor cadastrado." %}
+{% endif %}
+</div>
+
 {% endblock %}

@@ -4,13 +4,17 @@
 {% block title %}Atestados{% endblock %}
 
 {% block page_css %}
+<link rel="stylesheet" href="{% static 'core/css/form_cadastro.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/administrativo/administrativo_atestados.css' %}">
 {% endblock %}
 
 {% block content %}
-<h1 class="page-banner">Emitir atestados</h1>
+{% url 'administration:home' as back_url %}
+{% include "components/mobile_top.html" with title="Emitir atestados" %}
 
-<div class="certificates">
+<h1 class="page-banner desktop-page">Emitir atestados</h1>
+
+<div class="certificates mobile-column">
   <div class="certificate-form">
     {% include "components/form.html" with form=form submit_label="Gerar atestado em PDF" %}
   </div>
@@ -33,6 +37,11 @@
     </ul>
   </div>
 </div>
+{% endblock %}
+
+{% block footer %}
+{{ block.super }}
+{% include "components/mobile_footer.html" with standalone=True %}
 {% endblock %}
 
 {% block extra_js %}

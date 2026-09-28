@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title_suffix %} | SEP Maricá{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/components/tokens.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/mobile_shell.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/mobile_nav.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/mobile_cards.css' %}">
+{% block page_css %}{% endblock %}
+{% endblock %}
+
+{% block brand %}
+{% url 'teacher:home' as home_url %}
+{% include "components/site_brand.html" %}
+{% endblock %}
+
+{% block main_nav %}
+{% with current=request.resolver_match.url_name %}
+<nav class="main-nav" aria-label="Navegação principal">
+  <ul class="navbar-nav">
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'teacher:home' %}" {% if current == 'home' %}aria-current="page"{% endif %}>
+        Página inicial
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'teacher:alunos' %}"
+        {% if current == 'alunos' or current == 'aluno_detalhe' or current == 'painel' %}aria-current="page"{% endif %}>
+        Meus alunos
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'teacher:prontuarios' %}"
+        {% if current == 'prontuarios' or current == 'prontuario_detalhe' %}aria-current="page"{% endif %}>
+        Prontuários
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'teacher:presenca' %}" {% if current == 'presenca' %}aria-current="page"{% endif %}>
+        Presença
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'teacher:encaminhamentos' %}"
+        {% if current == 'encaminhamentos' or current == 'encaminhar' %}aria-current="page"{% endif %}>
+        Encaminhar
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'teacher:avaliacoes' %}"
+        {% if current == 'avaliacoes' %}aria-current="page"{% endif %}>
+        Avaliações
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'teacher:perfil' %}" {% if current == 'perfil' %}aria-current="page"{% endif %}>
+        Área de atuação
+      </a>
+    </li>
+  </ul>
+</nav>
+{% endwith %}
+{% endblock %}
+
+{% block page_header %}{% endblock %}

@@ -3,134 +3,48 @@
 
 {% block title %}Meus Agendamentos{% endblock %}
 
-{% block extra_css %}
-  {{ block.super }}
-  <link rel="stylesheet" href="{% static 'core/css/patient_home.css' %}?v=10"> <!-- para herdar header mobile -->
-  <link rel="stylesheet" href="{% static 'core/css/patient_agendamentos.css' %}">
-  <style>
-    @media (max-width: 767.98px) {
-      html, body { background-color: #F8F9FA !important; }
-      .sep-navbar  { display: none !important; }
-      main > .container-fluid { padding: 0 !important; }
-    }
-  </style>
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'core/css/components/hover_lift.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/mobile_cards.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/patient_agendamentos.css' %}">
 {% endblock %}
 
 {% block content %}
 
 <!-- ══════════════════════════════════════
-     MOBILE AGENDAMENTOS
+     MOBILE
      ══════════════════════════════════════ -->
-<div class="d-block d-md-none p-mobile-triage-bg" style="min-height: 100vh; display: flex; flex-direction: column; background-color: #F8F9FA;">
-  
-  <!-- Header Mobile -->
-  <div class="mobile-header" style="background-color: #6D1D20; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; padding-bottom: 20px;">
-    <a href="{% url 'patient:home' %}" class="mobile-back"></a>
-    <span class="mobile-greeting">Olá, {{ request.user.first_name|default:"Paciente" }}!</span>
-    <div class="mobile-icons d-flex align-items-center gap-3">
-      <i class="bi bi-bell"></i>
-      <form method="post" action="{% url 'logout' %}" class="m-0 p-0 d-inline-flex">
-        {% csrf_token %}
-        <button type="submit" class="p-0 border-0 bg-transparent text-white d-flex align-items-center" style="line-height: 1;">
-          <i class="bi bi-person-circle" style="font-size: 24px;"></i>
-        </button>
-      </form>
+<div class="mobile-page">
+  <div class="mobile-maroon-bg">
+    {% url 'patient:home' as back_url %}
+    {% include "components/mobile_header.html" %}
+  </div>
+
+  {% include "components/mobile_title.html" with title="Agendamentos" %}
+
+  <div class="mobile-content">
+    {% if appointments_error %}
+    <p class="mobile-empty">{{ appointments_error }}</p>
+    {% else %}
+    {% for row in appointments %}
+    {% include "components/mobile_row.html" with name=row.when_label person=row.attendant label=row.label level=row.level %}
+    {% empty %}
+    <p class="mobile-empty">Nenhuma sessão agendada.</p>
+    {% endfor %}
+    {% endif %}
+
+    <div class="mobile-actions">
+      <a class="mobile-button" href="{% url 'patient:solicitar_horario' %}">Solicitar novo horário</a>
     </div>
   </div>
 
-  <div class="px-3 text-center mt-4 flex-grow-1">
-    
-    <div class="mb-4 text-center">
-      <span style="display: inline-block; background-color: #6D1D20; color: white; padding: 10px 40px; border-radius: 20px; font-weight: 700; font-family: 'Museo Sans', sans-serif; font-size: 16px;">
-        Agendamentos
-      </span>
-    </div>
-
-    <!-- Lista de agendamentos com mock falso (design) e variaveis reais (fallback) -->
-    <div style="border: 1px solid #C4C4C4; border-radius: 20px; padding: 12px; text-align: left; background: transparent;">
-      
-      {% if appointments %}
-        {% for ag in appointments %}
-        <div style="background-color: #DCDCDC; border-radius: 16px; padding: 14px 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
-          <div>
-            <div style="font-family: 'Museo Sans', sans-serif; font-size: 11px; font-weight: 500; color: #555; margin-bottom: 6px;">
-              <i class="bi bi-person" style="margin-right: 4px;"></i> {{ ag.attendant|default:"Aluna Marina Costa" }}
-            </div>
-            <div style="font-family: 'Museo Sans', sans-serif; font-size: 11px; font-weight: 500; color: #555;">
-              <i class="bi bi-calendar-event" style="margin-right: 4px;"></i> {{ ag.when_label }}
-            </div>
-          </div>
-          <div>
-            {% if ag.level == 'success' %}
-              <span style="background-color: #419F0D; color: white; padding: 6px 12px; border-radius: 12px; font-family: 'Museo Sans', sans-serif; font-size: 11px; font-weight: 600;">Confirmada</span>
-            {% elif ag.level == 'warning' %}
-              <span style="background-color: #D68B13; color: white; padding: 6px 12px; border-radius: 12px; font-family: 'Museo Sans', sans-serif; font-size: 11px; font-weight: 600;">A confirmar</span>
-            {% else %}
-              <span style="background-color: #797676; color: white; padding: 6px 12px; border-radius: 12px; font-family: 'Museo Sans', sans-serif; font-size: 11px; font-weight: 600;">Agendada</span>
-            {% endif %}
-          </div>
-        </div>
-        {% endfor %}
-      {% else %}
-        <!-- Mocks fixos se banco estiver vazio -->
-        <div style="background-color: #DCDCDC; border-radius: 16px; padding: 14px 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
-          <div>
-            <div style="font-family: 'Museo Sans', sans-serif; font-size: 11px; font-weight: 500; color: #555; margin-bottom: 6px;"><i class="bi bi-person" style="margin-right: 4px;"></i> Aluna Marina Costa</div>
-            <div style="font-family: 'Museo Sans', sans-serif; font-size: 11px; font-weight: 500; color: #555;"><i class="bi bi-calendar3" style="margin-right: 4px;"></i> Hoje ás 14:20</div>
-          </div>
-          <div><span style="background-color: #419F0D; color: white; padding: 6px 12px; border-radius: 12px; font-family: 'Museo Sans', sans-serif; font-size: 11px; font-weight: 600;">Confirmada</span></div>
-        </div>
-
-        <div style="background-color: #DCDCDC; border-radius: 16px; padding: 14px 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
-          <div>
-            <div style="font-family: 'Museo Sans', sans-serif; font-size: 11px; font-weight: 500; color: #555; margin-bottom: 6px;"><i class="bi bi-person" style="margin-right: 4px;"></i> Aluna Marina Costa</div>
-            <div style="font-family: 'Museo Sans', sans-serif; font-size: 11px; font-weight: 500; color: #555;"><i class="bi bi-calendar3" style="margin-right: 4px;"></i> Hoje ás 14:20</div>
-          </div>
-          <div><span style="background-color: #D68B13; color: white; padding: 6px 12px; border-radius: 12px; font-family: 'Museo Sans', sans-serif; font-size: 11px; font-weight: 600;">A confirmar</span></div>
-        </div>
-
-        <div style="background-color: #DCDCDC; border-radius: 16px; padding: 14px 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
-          <div>
-            <div style="font-family: 'Museo Sans', sans-serif; font-size: 11px; font-weight: 500; color: #555; margin-bottom: 6px;"><i class="bi bi-person" style="margin-right: 4px;"></i> Aluna Marina Costa</div>
-            <div style="font-family: 'Museo Sans', sans-serif; font-size: 11px; font-weight: 500; color: #555;"><i class="bi bi-calendar3" style="margin-right: 4px;"></i> Hoje ás 14:20</div>
-          </div>
-          <div><span style="background-color: #797676; color: white; padding: 6px 12px; border-radius: 12px; font-family: 'Museo Sans', sans-serif; font-size: 11px; font-weight: 600;">Agendada</span></div>
-        </div>
-        
-        <div style="background-color: #DCDCDC; border-radius: 16px; padding: 14px 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
-          <div>
-            <div style="font-family: 'Museo Sans', sans-serif; font-size: 11px; font-weight: 500; color: #555; margin-bottom: 6px;"><i class="bi bi-person" style="margin-right: 4px;"></i> Aluna Marina Costa</div>
-            <div style="font-family: 'Museo Sans', sans-serif; font-size: 11px; font-weight: 500; color: #555;"><i class="bi bi-calendar3" style="margin-right: 4px;"></i> Hoje ás 14:20</div>
-          </div>
-          <div><span style="background-color: #797676; color: white; padding: 6px 12px; border-radius: 12px; font-family: 'Museo Sans', sans-serif; font-size: 11px; font-weight: 600;">Agendada</span></div>
-        </div>
-        
-        <div style="background-color: #DCDCDC; border-radius: 16px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center;">
-          <div>
-            <div style="font-family: 'Museo Sans', sans-serif; font-size: 11px; font-weight: 500; color: #555; margin-bottom: 6px;"><i class="bi bi-person" style="margin-right: 4px;"></i> Aluna Marina Costa</div>
-            <div style="font-family: 'Museo Sans', sans-serif; font-size: 11px; font-weight: 500; color: #555;"><i class="bi bi-calendar3" style="margin-right: 4px;"></i> Hoje ás 14:20</div>
-          </div>
-          <div><span style="background-color: #797676; color: white; padding: 6px 12px; border-radius: 12px; font-family: 'Museo Sans', sans-serif; font-size: 11px; font-weight: 600;">Agendada</span></div>
-        </div>
-      {% endif %}
-
-    </div>
-
-    <div class="mt-4 mb-5 pb-5">
-      <a href="{% url 'patient:solicitar_horario' %}" style="background-color: #6D1D20; color: white; padding: 12px 30px; border-radius: 20px; text-decoration: none; font-weight: 700; font-family: 'Museo Sans', sans-serif; font-size: 14px; display: inline-block;">
-        Novo agendamento
-      </a>
-    </div>
-
-  </div>
-
+  {% include "components/mobile_footer.html" %}
 </div>
-
 
 <!-- ══════════════════════════════════════
      DESKTOP AGENDAMENTOS
      ══════════════════════════════════════ -->
-<div class="d-none d-md-block container mt-4 mb-5" style="max-width: 960px;">
+<div class="desktop-page container mt-4 mb-5">
 
   {# ── Cabeçalho ── #}
   <div class="agend-header">
@@ -154,7 +68,7 @@
 
     {% if appointments %}
       {% for ag in appointments %}
-      <div class="agend-row">
+      <div class="agend-row hover-lift">
         <span class="agend-date">{{ ag.when_label }}</span>
         <span class="agend-student">{{ ag.attendant }}</span>
         <span class="agend-badge badge-{{ ag.level }}">{{ ag.label }}</span>
@@ -162,22 +76,22 @@
       {% endfor %}
     {% else %}
       {# Dados falsos do Figma para demonstração #}
-      <div class="agend-row">
+      <div class="agend-row hover-lift">
         <span class="agend-date">Hoje - 14:00</span>
         <span class="agend-student">Aluna Marina Costa</span>
         <span class="agend-badge badge-confirmada">Confirmada</span>
       </div>
-      <div class="agend-row">
+      <div class="agend-row hover-lift">
         <span class="agend-date">22/08/2026 - 14:00</span>
         <span class="agend-student">Aluno Pedro Alves</span>
         <span class="agend-badge badge-a-confirmar">A confirmar</span>
       </div>
-      <div class="agend-row">
+      <div class="agend-row hover-lift">
         <span class="agend-date">29/08/2026 - 14:00</span>
         <span class="agend-student">Aluno João Ribeiro</span>
         <span class="agend-badge badge-agendada">Agendada</span>
       </div>
-      <div class="agend-row">
+      <div class="agend-row hover-lift">
         <span class="agend-date">05/09/2026 - 14:00</span>
         <span class="agend-student">Aluna Beatriz Lima</span>
         <span class="agend-badge badge-agendada">Agendada</span>

@@ -1,0 +1,149 @@
+{% extends "teacher/base_teacher.html" %}
+{% load static components %}
+
+{% block title %}Encaminhar{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'core/css/components/list_panel.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/hover_lift.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/list_filters.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/detail_panel.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/option_list.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/referral_panel.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/teacher_lists.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- ══════════════════════════════════════
+     MOBILE
+     ══════════════════════════════════════ -->
+<div class="mobile-page">
+  <div class="mobile-maroon-bg">
+    {% url 'teacher:home' as back_url %}
+    {% include "components/mobile_header.html" %}
+  </div>
+
+  {% include "components/mobile_title.html" with title="Encaminhamentos" %}
+
+  <div class="mobile-content">
+    <h2 class="mobile-block-title mobile-column">Novo encaminhamento</h2>
+
+    {% if patient %}
+    {% include "components/mobile_patient_card.html" with name=patient.get_full_name code=patient.pk detail="Recebido em:" detail_date=patient.created_at %}
+
+    <form method="post" action="{% url 'teacher:encaminhar' patient.pk %}">
+      {% csrf_token %}
+      <div class="mobile-form mobile-column">
+        <p>
+          <label for="mobile-area">Área de atuação do caso</label>
+          <select id="mobile-area" name="area">
+            {% for area in areas %}
+            <option value="{{ area.pk }}">{{ area.nome }}</option>
+            {% endfor %}
+          </select>
+        </p>
+      </div>
+
+      <h3 class="mobile-block-title mobile-column">Alocar para aluno(s) orientado(s)</h3>
+      {% include "components/mobile_option_list.html" with options=options field_name="alunos" empty_message="Nenhum aluno sob sua orientação." %}
+
+      <div class="mobile-actions">
+        <button type="submit" class="mobile-button">Confirmar</button>
+      </div>
+    </form>
+    {% else %}
+    <p class="mobile-empty">Nenhum paciente aguardando encaminhamento.</p>
+    {% endif %}
+
+    {% mobile_box title="Encaminhamentos recentes" %}
+    {% for item in recent %}
+    {% include "components/mobile_row.html" with name=item.title person=item.subtitle label=item.label level=item.level %}
+    {% empty %}
+    <p class="mobile-empty">Nenhum aluno encaminhado ainda.</p>
+    {% endfor %}
+    {% endmobile_box %}
+
+    {% if queue %}
+    <h2 class="mobile-block-title mobile-column">Aguardando encaminhamento</h2>
+    {% for item in queue %}
+    {% url 'teacher:encaminhar' item.patient.pk as item_url %}
+    {% with received=item.patient.created_at|date:"d/m/Y" %}
+    {% if item.selected %}
+    {% include "components/mobile_row.html" with url=item_url name=item.patient.get_full_name when="Recebido em "|add:received label="Selecionado" level="neutral" %}
+    {% else %}
+    {% include "components/mobile_row.html" with url=item_url name=item.patient.get_full_name when="Recebido em "|add:received %}
+    {% endif %}
+    {% endwith %}
+    {% endfor %}
+    {% endif %}
+  </div>
+
+  {% include "components/mobile_footer.html" %}
+</div>
+
+<!-- ══════════════════════════════════════
+     DESKTOP
+     ══════════════════════════════════════ -->
+<div class="desktop-page">
+<div class="referral-layout">
+
+  <section class="referral-new">
+    <h1 class="list-toolbar-title">Novo encaminhamento</h1>
+
+    {% if patient %}
+    {% include "components/patient_card.html" with name=patient.get_full_name code=patient.pk detail="Encaminhado pela coordenação para você." %}
+
+    <form method="post" action="{% url 'teacher:encaminhar' patient.pk %}">
+      {% csrf_token %}
+
+      <div class="referral-filter">
+        <label class="visually-hidden" for="filter-area">Área de atuação do caso</label>
+        <select id="filter-area" name="area">
+          {% for area in areas %}
+          <option value="{{ area.pk }}">{{ area.nome }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <fieldset class="option-fieldset">
+        <legend class="detail-title">Alocar para aluno(s) orientado(s)</legend>
+        {% include "components/option_list.html" with options=options field_name="alunos" empty_message="Nenhum aluno sob sua orientação." %}
+      </fieldset>
+
+      <div class="referral-actions">
+        <button type="submit" class="btn-acao">Confirmar encaminhamento</button>
+      </div>
+    </form>
+
+    {% else %}
+    {% include "components/empty_state.html" with message="Nenhum paciente aguardando encaminhamento." %}
+    {% endif %}
+  </section>
+
+  {% include "components/referral_recent.html" with items=recent empty_message="Nenhum aluno encaminhado ainda." %}
+</div>
+
+{% if queue %}
+<section class="referral-queue">
+  <h2 class="detail-title">Pacientes aguardando encaminhamento</h2>
+
+  <div class="list-panel-header referral-grid">
+    <div>Paciente:</div>
+    <div>Cadastrado em:</div>
+    <div>Situação:</div>
+  </div>
+
+  <div class="list-panel-container">
+    {% for item in queue %}
+    <a class="list-panel-row referral-grid hover-lift" href="{% url 'teacher:encaminhar' item.patient.pk %}"
+      {% if item.selected %}aria-current="true"{% endif %}>
+      <div>{{ item.patient.get_full_name }} #{{ item.patient.pk }}</div>
+      <div>{{ item.patient.created_at|date:"d/m/Y" }}</div>
+      <div>{{ item.patient.get_flow_status_display }}</div>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+</div>
+{% endblock %}

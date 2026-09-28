@@ -1,36 +1,74 @@
 {% extends "superadmin/base_superadmin.html" %}
-
 {% load static %}
 
+{% block title %}Adicionar administrativo{% endblock %}
+
 {% block page_css %}
+<link rel="stylesheet" href="{% static 'core/css/components/list_panel.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/list_filters.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/form_cadastro.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/mobile_shell.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/mobile_cards.css' %}">
 {% endblock %}
-{% block title %}Cadastrar Adiministrativo | Sistema SEP{% endblock %}
 
 {% block content %}
 
-<!-- Banner do Supervisor -->
-<div class="figma-header-banner">
-    <h1>Adicionar Adiministrativo</h1>
-</div>
+<!-- ══════════════════════════════════════
+     MOBILE — Adicionar administrativo
+     ══════════════════════════════════════ -->
+<div class="mobile-page">
+  <div class="mobile-maroon-bg">
+    {% url 'superadmin:home' as back_url %}
+    {% include "components/mobile_header.html" with back_url=back_url %}
+  </div>
 
-<div class="figma-form-container">
+  {% include "components/mobile_title.html" with title="Adicionar administrativo" %}
+
+  <div class="mobile-content mobile-column">
+    
     {% if form.errors %}
-        <div class="figma-error-alert">
-            <strong>Erros encontrados:</strong>
-            {{ form.errors }}
-        </div>
+    <div class="mobile-alert" style="margin-bottom: 16px;">
+      <p class="mobile-alert-title"><i class="bi bi-exclamation-triangle-fill"></i> Erro</p>
+      <p class="mobile-alert-text">Confira os campos destacados abaixo.</p>
+    </div>
     {% endif %}
 
-    <form method="post" class="figma-custom-form">
-        {% csrf_token %}
-        
-        <!-- Renderiza todos os campos do supervisor automaticamente -->
-        {{ form.as_p }}
+    <form class="mobile-form" method="post" novalidate>
+      {% csrf_token %}
+      {{ form.as_p }}
 
-        <div class="figma-actions-center">
-            <button type="submit" class="btn-submit-figma">Cadastrar</button>
-        </div>
+      <div class="mobile-actions">
+        <button type="submit" class="mobile-button mobile-button-block">Cadastrar</button>
+      </div>
     </form>
+  </div>
+
+  {% include "components/mobile_footer.html" %}
+</div>
+
+<!-- ══════════════════════════════════════
+     DESKTOP — Adicionar administrativo
+     ══════════════════════════════════════ -->
+<div class="desktop-page">
+<div class="list-panel-title">Adicionar administrativo</div>
+
+<p class="list-panel-subtitle">
+  <a class="btn-limpar" href="{% url 'superadmin:home' %}">← Voltar para a página inicial</a>
+</p>
+
+<div class="figma-form-container">
+  {% if form.errors %}
+  <div class="figma-error-alert">Confira os campos destacados abaixo.</div>
+  {% endif %}
+
+  <form class="figma-custom-form" method="post" novalidate>
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <div class="figma-actions-center">
+      <button type="submit" class="btn-submit-figma">Cadastrar administrativo</button>
+    </div>
+  </form>
+</div>
 </div>
 {% endblock %}

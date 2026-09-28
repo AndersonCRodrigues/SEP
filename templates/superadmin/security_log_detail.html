@@ -1,98 +1,141 @@
-{% extends "base.html" %}
+{% extends "superadmin/base_superadmin.html" %}
+{% load static %}
 
-{% block title %}Detalhe do Log | Sistema SEP{% endblock %}
+{% block title %}Detalhe do log{% endblock %}
 
-{% block breadcrumbs %}
-{{ block.super }}
-<li class="breadcrumb-item">
-    <a href="{% url 'superadmin:home' %}">Superadmin</a>
-</li>
-<li class="breadcrumb-item">
-    <a href="{% url 'superadmin:logs' %}">Logs de Segurança</a>
-</li>
-<li class="breadcrumb-item active" aria-current="page">
-    Detalhe
-</li>
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'core/css/components/list_panel.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/list_filters.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/detail_panel.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/superadmin/superadmin_lists.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/mobile_shell.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/mobile_cards.css' %}">
 {% endblock %}
-
-{% block page_title %}Detalhe do log{% endblock %}
 
 {% block content %}
 
-<section class="card">
-    <div class="card-body">
+<!-- ══════════════════════════════════════
+     MOBILE — Detalhe do log
+     ══════════════════════════════════════ -->
+<div class="mobile-page">
+  <div class="mobile-maroon-bg">
+    {% url 'superadmin:logs' as back_url %}
+    {% include "components/mobile_header.html" with back_url=back_url %}
+  </div>
 
-        <dl class="row mb-0">
+  {% include "components/mobile_title.html" with title="Detalhe do log" %}
 
-            <dt class="col-sm-3">Data e hora</dt>
-            <dd class="col-sm-9">
-                {{ log.created_at|date:"d/m/Y H:i:s" }}
-            </dd>
+  <div class="mobile-content mobile-column">
 
-            <dt class="col-sm-3">Evento</dt>
-            <dd class="col-sm-9">
-                {{ log.get_action_display }}
-            </dd>
+    <p class="mobile-block-title">Dados do log</p>
 
-            <dt class="col-sm-3">Usuário</dt>
-            <dd class="col-sm-9">
-                {{ log.user_identifier|default:"-" }}
-            </dd>
-
-            <dt class="col-sm-3">IP</dt>
-            <dd class="col-sm-9">
-                {{ log.ip_address|default:"-" }}
-            </dd>
-
-            <dt class="col-sm-3">Modelo afetado</dt>
-            <dd class="col-sm-9">
-                {{ log.target_model|default:"-" }}
-                {% if log.target_id %}
-                #{{ log.target_id }}
-                {% endif %}
-            </dd>
-
-            <dt class="col-sm-3">Detalhe</dt>
-            <dd class="col-sm-9">
-                {{ log.detail|default:"-" }}
-            </dd>
-
-            <dt class="col-sm-3">Alterações</dt>
-            <dd class="col-sm-9">
-
-                {% if log.changes %}
-
-                <table class="table table-sm">
-                    <thead>
-                        <tr>
-                            <th>Campo</th>
-                            <th>Antes</th>
-                            <th>Depois</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        {% for field, change in log.changes.items %}
-                        <tr>
-                            <td>{{ field }}</td>
-                            <td>{{ change.old|default:"-" }}</td>
-                            <td>{{ change.new|default:"-" }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-
-                {% else %}
-
-                {% include "components/empty_state.html" with message="Nenhuma alteração registrada." %}
-
-                {% endif %}
-
-            </dd>
-
-        </dl>
-
+    <div class="mobile-info mobile-info-light">
+      <div class="mobile-info-row">
+        <span class="mobile-info-label">Data e hora</span>
+        <span class="mobile-info-value">{{ log.created_at|date:"d/m/Y H:i:s" }}</span>
+      </div>
+      <div class="mobile-info-row">
+        <span class="mobile-info-label">Evento</span>
+        <span class="mobile-info-value">{{ log.get_action_display }}</span>
+      </div>
+      <div class="mobile-info-row">
+        <span class="mobile-info-label">Usuário</span>
+        <span class="mobile-info-value">{{ log.user_identifier|default:"—" }}</span>
+      </div>
+      <div class="mobile-info-row">
+        <span class="mobile-info-label">IP</span>
+        <span class="mobile-info-value">{{ log.ip_address|default:"—" }}</span>
+      </div>
+      <div class="mobile-info-row">
+        <span class="mobile-info-label">Modelo afetado</span>
+        <span class="mobile-info-value">{{ log.target_model|default:"—" }}{% if log.target_id %} #{{ log.target_id }}{% endif %}</span>
+      </div>
     </div>
-</section>
+
+    <p class="mobile-block-title" style="margin-top: 8px;">Alterações</p>
+    {% if log.changes %}
+    <div class="mobile-info mobile-info-light">
+      {% for field, change in log.changes.items %}
+      <div class="mobile-info-row">
+        <span class="mobile-info-label">{{ field }}</span>
+        <span class="mobile-info-value">{{ change.old|default:"—" }} → {{ change.new|default:"—" }}</span>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="mobile-empty" style="padding-top: 8px; text-align: left;">Nenhuma alteração registrada.</p>
+    {% endif %}
+
+  </div>
+
+  {% include "components/mobile_footer.html" %}
+</div>
+
+<!-- ══════════════════════════════════════
+     DESKTOP — Detalhe do log
+     ══════════════════════════════════════ -->
+<div class="desktop-page">
+<div class="list-panel-title">Detalhe do log</div>
+
+<p class="list-toolbar">
+  <a class="btn-limpar" href="{% url 'superadmin:logs' %}">← Voltar para Logs de segurança</a>
+</p>
+
+<div class="list-panel">
+  <section class="detail-card">
+    <h2 class="detail-title">Registro</h2>
+    <div class="list-panel-container">
+      <div class="list-panel-row detail-grid">
+        <div>Data e hora</div>
+        <div class="text-end">{{ log.created_at|date:"d/m/Y H:i:s" }}</div>
+      </div>
+      <div class="list-panel-row detail-grid">
+        <div>Evento</div>
+        <div class="text-end">{{ log.get_action_display }}</div>
+      </div>
+      <div class="list-panel-row detail-grid">
+        <div>Usuário</div>
+        <div class="text-end">{{ log.user_identifier|default:"—" }}</div>
+      </div>
+      <div class="list-panel-row detail-grid">
+        <div>IP</div>
+        <div class="text-end">{{ log.ip_address|default:"—" }}</div>
+      </div>
+      <div class="list-panel-row detail-grid">
+        <div>Modelo afetado</div>
+        <div class="text-end">
+          {{ log.target_model|default:"—" }}{% if log.target_id %} #{{ log.target_id }}{% endif %}
+        </div>
+      </div>
+      <div class="list-panel-row detail-grid">
+        <div>Detalhe</div>
+        <div class="text-end">{{ log.detail|default:"—" }}</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="detail-card">
+    <h2 class="detail-title">Alterações</h2>
+    {% if log.changes %}
+    <div class="list-panel-header change-grid">
+      <div>Campo:</div>
+      <div>Antes:</div>
+      <div>Depois:</div>
+    </div>
+    <div class="list-panel-container">
+      {% for field, change in log.changes.items %}
+      <div class="list-panel-row change-grid">
+        <div>{{ field }}</div>
+        <div>{{ change.old|default:"—" }}</div>
+        <div>{{ change.new|default:"—" }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    {% include "components/empty_state.html" with message="Nenhuma alteração registrada." %}
+    {% endif %}
+  </section>
+</div>
+</div>
 
 {% endblock %}

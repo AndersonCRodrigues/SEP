@@ -6,7 +6,6 @@ app_name = "teacher"
 
 urlpatterns = [
     path("", views.HomeProfessorView.as_view(), name="home"),
-    path("painel/", views.PainelProfessorView.as_view(), name="painel"),
     path("cadastrar/", views.cadastrar_professor, name="cadastrar"),
     path("perfil/", views.PerfilProfessorView.as_view(), name="perfil"),
     path("vincular-aluno/", views.vincular_aluno, name="vincular_aluno"),
@@ -21,41 +20,25 @@ urlpatterns = [
         views.ProntuarioDetalheView.as_view(),
         name="prontuario_detalhe",
     ),
-    # Card: Presença e feedback
-    path("presenca/", views.PresencaFeedbackView.as_view(), name="presenca"),
+    # Card: Presença
+    path("presenca/", views.PresencaView.as_view(), name="presenca"),
     path(
         "presenca/marcar/<int:aluno_id>/",
         views.marcar_presenca,
         name="marcar_presenca",
     ),
+    # Card: Avaliações
+    path("avaliacoes/", views.AvaliacoesView.as_view(), name="avaliacoes"),
     path(
-        "presenca/avaliar/<int:aluno_id>/",
+        "avaliacoes/<int:aluno_id>/",
         views.registrar_feedback,
         name="registrar_feedback",
     ),
-    # Card: Definição de realização de triagem
-    path("triagens/", views.TriagensPendentesView.as_view(), name="triagens"),
+    # Card: Encaminhar
+    path("encaminhamentos/", views.EncaminharView.as_view(), name="encaminhamentos"),
     path(
-        "triagens/<int:patient_id>/",
-        views.DefinirTriagemView.as_view(),
-        name="triagem_definir",
-    ),
-    # Telas do front, em rota própria enquanto o desenho não é portado para as
-    # telas acima, que já têm consulta e recorte por visibilidade.
-    path(
-        "area/prontuarios/",
-        views.ProntuariosProfessorView.as_view(),
-        name="area_prontuarios",
-    ),
-    path("area/presenca/", views.PresencaProfessorView.as_view(), name="area_presenca"),
-    path(
-        "area/atuacao/",
-        views.AreaAtuacaoProfessorView.as_view(),
-        name="area_atuacao",
-    ),
-    path(
-        "area/triagem/atribuir/",
-        views.TeacherAssignTriageView.as_view(),
-        name="assign_triage",
+        "encaminhamentos/<int:pk>/",
+        views.EncaminharView.as_view(),
+        name="encaminhar",
     ),
 ]

@@ -13,6 +13,11 @@ from .student import Student
 
 Role = CustomUser.Role
 
+TERM_VALIDATOR = RegexValidator(
+    regex=r"^\d{4}\.[12]$",
+    message="O  período deve estar no formato AAAA.1 ou AAAA.2 (exemplo.:2026.1).",
+)
+
 
 class AdvisingQuerySet(RoleScopedQuerySet):
     VISIBLE_TO = {
@@ -75,12 +80,7 @@ class Advising(BusinessRulesMixin, models.Model):
 
     term = models.CharField(
         max_length=6,
-        validators=[
-            RegexValidator(
-                regex=r"^\d{4}\.[12]$",
-                message="O  período deve estar no formato AAAA.1 ou AAAA.2 (exemplo.:2026.1).",
-            )
-        ],
+        validators=[TERM_VALIDATOR],
         verbose_name="Período",
     )  # ex: "2026.1"
 

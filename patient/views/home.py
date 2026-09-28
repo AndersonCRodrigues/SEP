@@ -86,15 +86,25 @@ class PatientHomeView(PatientOnly, TemplateView):
         patient = Patient.objects.visible_to(user).first()
         triage = TRIAGE_STATUS.get(patient.flow_status if patient else "", NOT_STARTED)
 
+        next_session = (
+            relative_day(self.local_day(next_appointment), today)
+            if next_appointment
+            else "Nenhuma"
+        )
+
         return self.calendar(user, today) | {
-            "sessions_done": appointments.filter(status=Status.ATTENDED).count(),
-            "triage_status": triage[0],
-            "next_session": (
-                relative_day(self.local_day(next_appointment), today)
-                if next_appointment
-                else "Nenhuma"
-            ),
-            "absences": appointments.filter(status=Status.PATIENT_NO_SHOW).count(),
+            "indicators": [
+                {
+                    "label": "Sessões realizadas",
+                    "value": appointments.filter(status=Status.ATTENDED).count(),
+                },
+                {"label": "Status da triagem", "value": triage[0], "text": True},
+                {"label": "Próxima sessão", "value": next_session, "text": True},
+                {
+                    "label": "Faltas",
+                    "value": appointments.filter(status=Status.PATIENT_NO_SHOW).count(),
+                },
+            ],
             "activities": [
                 self.history_activity(last_session, today),
                 self.appointment_activity(next_appointment, now),

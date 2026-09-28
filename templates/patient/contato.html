@@ -4,140 +4,67 @@
 
 {% block title %}Métodos de contato{% endblock %}
 
-{% block extra_css %}
-  {{ block.super }}
-  <link rel="stylesheet" href="{% static 'core/css/patient_home.css' %}?v=11"> <!-- para herdar header mobile -->
-  <link rel="stylesheet" href="{% static 'core/css/patient_contato.css' %}">
-  <style>
-    /* CSS para o mobile */
-    @media (max-width: 767.98px) {
-      html, body { background-color: #F8F9FA !important; }
-      .sep-navbar  { display: none !important; }
-      main > .container-fluid { padding: 0 !important; }
-    }
-  </style>
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'core/css/components/mobile_cards.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/patient_contato.css' %}">
 {% endblock %}
 
 {% block content %}
 
 <!-- ══════════════════════════════════════
-     MOBILE CONTATO
+     MOBILE
      ══════════════════════════════════════ -->
-<div class="d-block d-md-none" style="min-height: 100vh; display: flex; flex-direction: column; background-color: #F8F9FA;">
-  
-  <!-- Header Mobile -->
-  <div class="mobile-header" style="background-color: #6D1D20; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; padding-bottom: 20px;">
-    <a href="{% url 'patient:home' %}" class="mobile-back"></a>
-    <span class="mobile-greeting">Olá, {{ request.user.first_name|default:"Paciente" }}!</span>
-    <div class="mobile-icons d-flex align-items-center gap-3">
-      <i class="bi bi-bell"></i>
-      <form method="post" action="{% url 'logout' %}" class="m-0 p-0 d-inline-flex">
-        {% csrf_token %}
-        <button type="submit" class="p-0 border-0 bg-transparent text-white d-flex align-items-center" style="line-height: 1;">
-          <i class="bi bi-person-circle" style="font-size: 24px;"></i>
-        </button>
-      </form>
-    </div>
+<div class="mobile-page">
+  <div class="mobile-maroon-bg">
+    {% url 'patient:home' as back_url %}
+    {% include "components/mobile_header.html" %}
   </div>
 
-  <div class="px-3 text-center mt-4 flex-grow-1">
-    
-    <div class="mb-4 text-center">
-      <span style="display: inline-block; background-color: #6D1D20; color: white; padding: 10px 40px; border-radius: 20px; font-weight: 700; font-family: 'Museo Sans', sans-serif; font-size: 16px;">
-        Contato
-      </span>
-    </div>
+  {% include "components/mobile_title.html" with title="Contato" %}
 
+  <div class="mobile-content">
     {% if caregivers_error %}
-      {% include "components/error_state.html" with message=caregivers_error retry_url=request.path %}
+    <p class="mobile-empty">{{ caregivers_error }}</p>
     {% else %}
-      {% for person in caregivers %}
-        <div style="background-color: #DCDCDC; border-radius: 16px; padding: 24px 16px; margin-bottom: 20px; text-align: center;">
-          <div style="width: 50px; height: 50px; border-radius: 50%; background-color: #E25C5C; color: white; display: flex; align-items: center; justify-content: center; font-family: 'Museo Sans', sans-serif; font-weight: 700; font-size: 18px; margin: 0 auto 12px auto;">
-            {{ person.initials }}
-          </div>
-          <div style="font-family: 'Museo Sans', sans-serif; font-size: 16px; font-weight: 800; color: #000; margin-bottom: 4px;">
-            Aluno {{ person.name|default:"André Ferreira" }}
-          </div>
-          <div style="font-family: 'Museo Sans', sans-serif; font-size: 12px; font-weight: 500; color: #555;">
-            Responsável pelo seu atendimento
-          </div>
-        </div>
-
-        <div class="mb-5 text-center">
-          <button type="button" style="background-color: #6D1D20; color: white; padding: 12px 30px; border-radius: 20px; text-decoration: none; font-weight: 700; font-family: 'Museo Sans', sans-serif; font-size: 14px; border: none;">
-            Enviar mensagem
-          </button>
-        </div>
-      {% empty %}
-        <!-- Mock se não tiver ninguem -->
-        <div style="background-color: #DCDCDC; border-radius: 16px; padding: 24px 16px; margin-bottom: 20px; text-align: center;">
-          <div style="width: 50px; height: 50px; border-radius: 50%; background-color: #E25C5C; color: white; display: flex; align-items: center; justify-content: center; font-family: 'Museo Sans', sans-serif; font-weight: 700; font-size: 18px; margin: 0 auto 12px auto;">
-            AF
-          </div>
-          <div style="font-family: 'Museo Sans', sans-serif; font-size: 16px; font-weight: 800; color: #000; margin-bottom: 4px;">
-            Aluno André Ferreira
-          </div>
-          <div style="font-family: 'Museo Sans', sans-serif; font-size: 12px; font-weight: 500; color: #555;">
-            Responsável pelo seu atendimento
-          </div>
-        </div>
-
-        <div class="mb-5 text-center">
-          <button type="button" style="background-color: #6D1D20; color: white; padding: 12px 30px; border-radius: 20px; text-decoration: none; font-weight: 700; font-family: 'Museo Sans', sans-serif; font-size: 14px; border: none;">
-            Enviar mensagem
-          </button>
-        </div>
-      {% endfor %}
+    {% for person in caregivers %}
+    <div class="mobile-person mobile-column">
+      <div class="mobile-avatar">{{ person.initials }}</div>
+      <p class="mobile-person-name">{{ person.name }}</p>
+      <p class="mobile-person-role">Responsável pelo seu atendimento</p>
+    </div>
+    {% empty %}
+    <p class="mobile-empty">Nenhum responsável pelo seu atendimento ainda.</p>
+    {% endfor %}
     {% endif %}
 
-    <div style="background-color: #DCDCDC; border-radius: 16px; padding: 20px 16px; margin-bottom: 30px; text-align: left;">
-      <div style="font-family: 'Museo Sans', sans-serif; font-size: 15px; font-weight: 800; color: #6D1D20; margin-bottom: 16px;">
-        {{ service_name|default:"Serviço Escolar de Psicologia" }}
-      </div>
-      
-      {% if channels %}
-        {% for channel in channels %}
-          <div style="display: flex; align-items: center; margin-bottom: 12px;">
-            {% if channel.kind == 'location' %}
-              <i class="bi bi-geo-alt" style="font-size: 18px; margin-right: 12px; color: #000;"></i>
-            {% elif channel.kind == 'phone' %}
-              <i class="bi bi-telephone" style="font-size: 18px; margin-right: 12px; color: #000;"></i>
-            {% elif channel.kind == 'email' %}
-              <i class="bi bi-envelope" style="font-size: 18px; margin-right: 12px; color: #000;"></i>
-            {% else %}
-              <i class="bi bi-link-45deg" style="font-size: 18px; margin-right: 12px; color: #000;"></i>
-            {% endif %}
-            <a href="{{ channel.href }}" style="font-family: 'Museo Sans', sans-serif; font-size: 13px; font-weight: 500; color: #333; text-decoration: none;" {% if channel.external %}target="_blank"{% endif %}>
-              {{ channel.value }}
-            </a>
-          </div>
-        {% endfor %}
-      {% else %}
-        <!-- Mocks se não houver canais -->
-        <div style="display: flex; align-items: center; margin-bottom: 12px;">
-          <i class="bi bi-geo-alt" style="font-size: 18px; margin-right: 12px; color: #000;"></i>
-          <span style="font-family: 'Museo Sans', sans-serif; font-size: 13px; font-weight: 500; color: #333;">Maricá, RJ</span>
-        </div>
-        <div style="display: flex; align-items: center; margin-bottom: 12px;">
-          <i class="bi bi-telephone" style="font-size: 18px; margin-right: 12px; color: #000;"></i>
-          <span style="font-family: 'Museo Sans', sans-serif; font-size: 13px; font-weight: 500; color: #333;">(21) 2000-0000</span>
-        </div>
-        <div style="display: flex; align-items: center; margin-bottom: 0;">
-          <i class="bi bi-envelope" style="font-size: 18px; margin-right: 12px; color: #000;"></i>
-          <span style="font-family: 'Museo Sans', sans-serif; font-size: 13px; font-weight: 500; color: #333;">sep@univassouras.edu.br</span>
-        </div>
-      {% endif %}
+    {# TODO: botão sem lógica; fica para fazer #}
+    <div class="mobile-actions">
+      <button type="button" class="mobile-button">Enviar mensagem</button>
     </div>
 
+    <div class="mobile-panel mobile-column">
+      <h2 class="mobile-panel-title">{{ service_name }}</h2>
+      {% for channel in channels %}
+      <a class="mobile-panel-row" href="{{ channel.href }}"{% if channel.external %} target="_blank" rel="noopener"{% endif %}>
+        {% if channel.kind == 'location' %}<i class="bi bi-geo-alt"></i>
+        {% elif channel.kind == 'phone' %}<i class="bi bi-telephone"></i>
+        {% elif channel.kind == 'email' %}<i class="bi bi-envelope"></i>
+        {% else %}<i class="bi bi-link-45deg"></i>{% endif %}
+        <span>{{ channel.value }}</span>
+      </a>
+      {% empty %}
+      <p class="mobile-empty">Nenhum canal de contato cadastrado.</p>
+      {% endfor %}
+    </div>
   </div>
-</div>
 
+  {% include "components/mobile_footer.html" %}
+</div>
 
 <!-- ══════════════════════════════════════
      DESKTOP CONTATO
      ══════════════════════════════════════ -->
-<div class="d-none d-md-block container-fluid px-lg-4 mt-4 mb-5">
+<div class="desktop-page container-fluid px-lg-4 mt-4 mb-5">
 
   <div class="page-banner-container">
     <h1 class="page-banner">Métodos de contato</h1>

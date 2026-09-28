@@ -6,7 +6,6 @@ from django.urls import reverse_lazy
 from django.views.generic import TemplateView, UpdateView
 
 from core.mixins import GroupRequiredMixin
-from supervisor.views.mocks import student_enrollment_fields
 from core.utils import sincronizar_grupo
 
 from ..forms import AlunoCreationForm
@@ -65,8 +64,4 @@ def cadastrar_aluno(request):
     else:
         form = AlunoCreationForm()
 
-    return render(
-        request,
-        "student/cadastro.html",
-        {"form": form, "matricula_academica": student_enrollment_fields()},
-    )
+    return render(request, "student/cadastro.html", {"form": form})

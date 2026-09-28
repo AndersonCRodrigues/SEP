@@ -1,112 +1,136 @@
 {% extends "superadmin/base_superadmin.html" %}
 {% load static %}
 
-{% block extra_css %}
-  <link rel="stylesheet" href="{% static 'core/css/superadmin/security_logs.css' %}">
-{% endblock %}
+{% block title %}Logs de segurança{% endblock %}
 
-{% block title %}Logs de Segurança | Sistema SEP{% endblock %}
-
-{% block breadcrumbs %}
-{{ block.super }}
-<li class="breadcrumb-item"><a href="{% url 'superadmin:home' %}">Superadmin</a></li>
-<li class="breadcrumb-item active" aria-current="page">Logs de Segurança</li>
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'core/css/components/list_panel.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/hover_lift.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/list_filters.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/superadmin/superadmin_lists.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/mobile_shell.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/mobile_cards.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/mobile_nav.css' %}">
 {% endblock %}
 
 {% block content %}
-<!-- Cabeçalho com Título e Campo de Busca alinhados -->
-<div class="logs-header">
-    <h1 class="logs-title">Logs de segurança</h1>
-    
-    <form method="get" class="logs-search-form">
-        <div class="search-input-wrapper">
-            <svg class="search-icon" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-            </svg>
-            <input 
-                type="search" 
-                name="q" 
-                class="form-control-search" 
-                placeholder="Buscar por evento ou usuário" 
-                value="{{ request.GET.q|default:'' }}"
-            >
-        </div>
-    </form>
-</div>
 
-<!-- Contêiner Principal da Tabela -->
-<div class="logs-container">
-    <table class="table-logs">
-        <thead>
-            <tr>
-                <th style="width: 15%;">Hora:</th>
-                <th style="width: 35%;">Evento:</th>
-                <th style="width: 35%;">Detalhes:</th>
-                <th style="width: 15%;"></th> <!-- Espaço da pílula de severidade -->
-            </tr>
-        </thead>
-        <tbody>
-            {% for log in logs %}
-            <tr>
-                <td class="log-time">{{ log.created_at|date:"H:i:s" }}</td>
-                <td class="log-event">
-                    <a href="{% url 'superadmin:log_detail' log.pk %}">
-                        {{ log.get_action_display }}
-                    </a>
-                </td>
-                <td class="log-details">
-                    {% if log.detail %}
-                        {{ log.detail }}
-                    {% elif log.user_identifier %}
-                        Usuário: {{ log.user_identifier }}
-                    {% elif log.target_model %}
-                        {{ log.target_model }} #{{ log.target_id }}
-                    {% else %}
-                        -
-                    {% endif %}
-                </td>
-                <td class="text-end">
-                    {% if log.severidade == "critico" %}
-                        <span class="badge-status badge-status-critico">Crítico</span>
-                    {% elif log.severidade == "atencao" %}
-                        <span class="badge-status badge-status-atencao">Atenção</span>
-                    {% else %}
-                        <span class="badge-status badge-status-info">Info</span>
-                    {% endif %}
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="4">
-                    {% include "components/empty_state.html" with message="Nenhum log encontrado." %}
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<!-- ══════════════════════════════════════
+     MOBILE — Logs de segurança
+     ══════════════════════════════════════ -->
+<div class="mobile-page">
+  <div class="mobile-maroon-bg">
+    {% url 'superadmin:home' as back_url %}
+    {% include "components/mobile_header.html" with back_url=back_url %}
+  </div>
 
-    {% if is_paginated %}
-    <div class="logs-pagination-wrapper">
-        <nav aria-label="Paginação de logs">
-            <ul class="pagination-custom">
-                {% if page_obj.has_previous %}
-                <li>
-                    <a class="page-link-custom" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">&lt; Anterior</a>
-                </li>
-                {% endif %}
-                
-                <li class="page-info">
-                    Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
-                </li>
+  {% include "components/mobile_title.html" with title="Logs de segurança" %}
 
-                {% if page_obj.has_next %}
-                <li>
-                    <a class="page-link-custom" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">Próxima &gt;</a>
-                </li>
-                {% endif %}
-            </ul>
-        </nav>
-    </div>
+  <div class="mobile-content mobile-column">
+
+    {% include "components/mobile_search.html" with search_value=search search_name="q" search_label="Buscar evento" %}
+
+    {% if logs %}
+      {% for log in logs %}
+      {# Deduz badge pelo campo severidade que a view já calcula #}
+      {% url 'superadmin:log_detail' log.pk as log_url %}
+      {% if log.severidade == "critico" %}
+        {% include "components/mobile_row.html" with variant="white" url=log_url name=log.get_action_display person=log.detail|default:log.user_identifier|default:"—" when=log.created_at|date:"d/m H:i" label="Crítico" level="danger" %}
+      {% elif log.severidade == "atencao" %}
+        {% include "components/mobile_row.html" with variant="white" url=log_url name=log.get_action_display person=log.detail|default:log.user_identifier|default:"—" when=log.created_at|date:"d/m H:i" label="Atenção" level="warning" %}
+      {% else %}
+        {% include "components/mobile_row.html" with variant="white" url=log_url name=log.get_action_display person=log.detail|default:log.user_identifier|default:"—" when=log.created_at|date:"d/m H:i" label="Info" level="success" %}
+      {% endif %}
+      {% endfor %}
+
+      {% if page_obj.paginator.num_pages > 1 %}
+      <div style="display:flex; justify-content:space-between; align-items:center; margin: 16px 0; font-family: var(--font-main); font-size: 13px;">
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}{% if search %}&q={{ search }}{% endif %}" class="mobile-button" style="padding: 8px 20px;">‹ Anterior</a>
+        {% else %}<span></span>{% endif %}
+        <span>{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% if search %}&q={{ search }}{% endif %}" class="mobile-button" style="padding: 8px 20px;">Próxima ›</a>
+        {% else %}<span></span>{% endif %}
+      </div>
+      {% endif %}
+
+    {% else %}
+    <p class="mobile-empty">Nenhum log encontrado.</p>
     {% endif %}
+
+  </div>
+
+  {% include "components/mobile_footer.html" %}
 </div>
+
+<!-- ══════════════════════════════════════
+     DESKTOP — Logs de segurança
+     ══════════════════════════════════════ -->
+<div class="desktop-page">
+<div class="list-toolbar">
+  <h1 class="list-toolbar-title">Logs de segurança</h1>
+</div>
+
+<form class="list-filters list-filters-spread" method="get">
+  <div class="list-search">
+    <i class="bi bi-search" aria-hidden="true"></i>
+    <label class="visually-hidden" for="busca-log">Buscar por evento ou usuário</label>
+    <input type="search" id="busca-log" name="q" value="{{ search }}"
+      placeholder="Buscar por evento ou usuário">
+  </div>
+  <button type="submit" class="btn-acao">Filtrar</button>
+</form>
+
+{% if logs %}
+<div class="list-panel">
+  <div class="list-panel-header log-grid">
+    <div>Hora:</div>
+    <div>Evento:</div>
+    <div>Detalhes:</div>
+    <div></div>
+  </div>
+
+  <div class="list-panel-container">
+    {% for log in logs %}
+    <a class="list-panel-row log-grid hover-lift" href="{% url 'superadmin:log_detail' log.pk %}">
+      <div class="log-time">{{ log.created_at|date:"H:i:s" }}</div>
+      <div>{{ log.get_action_display }}</div>
+      <div class="log-details">
+        {% if log.detail %}{{ log.detail }}
+        {% elif log.user_identifier %}Usuário: {{ log.user_identifier }}
+        {% elif log.target_model %}{{ log.target_model }} #{{ log.target_id }}
+        {% else %}—{% endif %}
+      </div>
+      <div class="text-end">
+        {% if log.severidade == "critico" %}
+        <span class="badge-situacao critica">Crítico</span>
+        {% elif log.severidade == "atencao" %}
+        <span class="badge-situacao atencao">Atenção</span>
+        {% else %}
+        <span class="badge-situacao ok">Info</span>
+        {% endif %}
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+</div>
+
+{% if page_obj.paginator.num_pages > 1 %}
+<nav class="list-pagination" aria-label="Paginação de logs">
+  {% if page_obj.has_previous %}
+  <a class="btn-limpar" href="?page={{ page_obj.previous_page_number }}{% if search %}&q={{ search }}{% endif %}">&lt; Anterior</a>
+  {% endif %}
+  <span class="list-pagination-info">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+  {% if page_obj.has_next %}
+  <a class="btn-limpar" href="?page={{ page_obj.next_page_number }}{% if search %}&q={{ search }}{% endif %}">Próxima &gt;</a>
+  {% endif %}
+</nav>
+{% endif %}
+
+{% else %}
+{% include "components/empty_state.html" with message="Nenhum log encontrado." %}
+{% endif %}
+</div>
+
 {% endblock %}

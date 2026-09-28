@@ -1,23 +1,19 @@
-{% extends "base.html" %}
+{% extends "teacher/base_teacher.html" %}
+{% load static %}
 
 {% block title %}Evolução de {{ nota.patient.nome_completo }} | Sistema SEP{% endblock %}
 
-{% block breadcrumbs %}
-  <li class="breadcrumb-item"><a href="{% url 'home_redirect' %}">Página inicial</a></li>
-  <!-- Passo intermediário para a listagem -->
-  <li class="breadcrumb-item"><a href="{% url 'teacher:prontuarios' %}">Prontuários</a></li>
-  <li class="breadcrumb-item active" aria-current="page">Evolução</li>
-{% endblock %}
-
-{% block page_title %}Evolução de {{ nota.patient.nome_completo }}{% endblock %}
-
-{% block page_actions %}
-  <a href="{% url 'teacher:prontuarios' %}" class="btn btn-outline-secondary btn-sm">
-      <i class="bi bi-arrow-left"></i> Voltar para Prontuários
-  </a>
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'core/css/components/list_panel.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/list_filters.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/teacher_lists.css' %}">
 {% endblock %}
 
 {% block content %}
+<div class="list-panel-title">Evolução de {{ nota.patient.nome_completo }}</div>
+
+<p class="list-panel-subtitle"><a class="btn-limpar" href="{% url 'teacher:prontuarios' %}">← Voltar para Prontuários</a></p>
+
 <div class="row g-3">
     <div class="col-12 col-lg-8">
         <section class="card mb-3">

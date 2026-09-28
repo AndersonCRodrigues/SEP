@@ -1,28 +1,38 @@
-{% extends "base.html" %}
+{% extends "supervisor/base_coordinator.html" %}
+{% load static %}
 
-{% block title %}{% if form.instance.pk %}Editar{% else %}Nova{% endif %} Área de Atuação | Sistema SEP{% endblock %}
+{% block title %}{% if object %}Editar área{% else %}Nova área{% endif %}{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'core/css/components/list_panel.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/list_filters.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/form_cadastro.css' %}">
+{% endblock %}
+
+{% block page_header %}{% endblock %}
 
 {% block content %}
-<header class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="h3 mb-0">
-        {% if form.instance.pk %}Editar{% else %}Nova{% endif %} Área de Atuação
-    </h1>
-    <a href="{% url 'supervisor:areas' %}" class="btn btn-outline-secondary btn-sm">
-        <i class="bi bi-arrow-left"></i> Voltar para as Áreas
-    </a>
-</header>
+{% url 'supervisor:areas' as back_url %}
+{% if object %}
+{% include "components/mobile_top.html" with title="Editar área" %}
+{% else %}
+{% include "components/mobile_top.html" with title="Nova área" %}
+{% endif %}
 
-<div class="row">
-    <div class="col-12 col-lg-8">
-        <section class="card">
-            <div class="card-body">
-                <form method="post">
-                    {% csrf_token %}
-                    {{ form.as_p }}
-                    <button type="submit" class="btn btn-primary">Salvar</button>
-                </form>
-            </div>
-        </section>
-    </div>
+<div class="desktop-page">
+  <div class="list-panel-title">{% if object %}Editar área de atuação{% else %}Nova área de atuação{% endif %}</div>
+
+  <p class="list-panel-subtitle">
+    <a class="btn-limpar" href="{% url 'supervisor:areas' %}">← Voltar para Áreas de atuação</a>
+  </p>
 </div>
+
+<div class="figma-form-container mobile-column">
+  {% include "components/form.html" with submit_label="Salvar" %}
+</div>
+{% endblock %}
+
+{% block footer %}
+{{ block.super }}
+{% include "components/mobile_footer.html" with standalone=True %}
 {% endblock %}

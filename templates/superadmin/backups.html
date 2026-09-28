@@ -1,74 +1,91 @@
 {% extends "superadmin/base_superadmin.html" %}
 {% load static %}
 
-{% block extra_css %}
-  <!-- CSS exclusivo para a página de backups -->
-  <link rel="stylesheet" href="{% static 'core/css/superadmin/backups.css' %}">
-{% endblock %}
+{% block title %}Backups{% endblock %}
 
-{% block title %}Backups | Sistema SEP{% endblock %}
-
-{% block breadcrumbs %}
-{{ block.super }}
-<li class="breadcrumb-item"><a href="{% url 'superadmin:home' %}">Superadmin</a></li>
-<li class="breadcrumb-item active" aria-current="page">Backups</li>
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'core/css/components/list_panel.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/hover_lift.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/list_filters.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/superadmin/superadmin_lists.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/mobile_shell.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/mobile_cards.css' %}">
 {% endblock %}
 
 {% block content %}
-<!-- Cabeçalho com Título e Botão de Ação -->
-<div class="backups-header">
-    <h1 class="backups-title">Backups</h1>
-    
-    <button 
-        class="btn-executar-backup" 
-        disabled 
-        title="Ação de backup real ainda não aprovada pelo time"
-    >
-        Executar backup agora
-    </button>
+
+<!-- ══════════════════════════════════════
+     MOBILE — Backups
+     ══════════════════════════════════════ -->
+<div class="mobile-page">
+  <div class="mobile-maroon-bg">
+    {% url 'superadmin:home' as back_url %}
+    {% include "components/mobile_header.html" with back_url=back_url %}
+  </div>
+
+  {% include "components/mobile_title.html" with title="Backups" %}
+
+  <div class="mobile-content mobile-column">
+    {% if backups %}
+      {% for backup in backups %}
+        {% if backup.status == "OK" %}
+          {% include "components/mobile_row.html" with variant="white" name=backup.escopo when=backup.executado_em|default:backup.agendado_para|date:"d/m/Y H:i" label="Concluído" level="success" %}
+        {% elif backup.status == "AG" %}
+          {% include "components/mobile_row.html" with variant="white" name=backup.escopo when=backup.agendado_para|date:"d/m/Y H:i" label="Agendado" level="neutral" %}
+        {% else %}
+          {% include "components/mobile_row.html" with variant="white" name=backup.escopo when=backup.executado_em|default:backup.agendado_para|date:"d/m/Y H:i" label="Falhou" level="danger" %}
+        {% endif %}
+      {% endfor %}
+    {% else %}
+      <p class="mobile-empty">Nenhum backup registrado.</p>
+    {% endif %}
+  </div>
+
+  {% include "components/mobile_footer.html" %}
 </div>
 
-<!-- Contêiner Principal -->
-<div class="backups-container">
-    <table class="table-backups">
-        <thead>
-            <tr>
-                <th style="width: 25%;">Hora:</th>
-                <th style="width: 40%;">Escopo:</th>
-                <th style="width: 20%;">Tamanho:</th>
-                <th style="width: 15%;" class="text-end"></th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for backup in backups %}
-            <tr>
-                <td class="backup-time">
-                    {{ backup.executado_em|default:backup.agendado_para|date:"d/m/Y H:i"|default:"—" }}
-                </td>
-                <td class="backup-scope">
-                    <strong>{{ backup.escopo }}</strong>
-                </td>
-                <td class="backup-size">
-                    {{ backup.tamanho|default:"—" }}
-                </td>
-                <td class="text-end">
-                    {% if backup.status == "OK" %}
-                        <span class="badge-status badge-status-ok">Concluído</span>
-                    {% elif backup.status == "AG" %}
-                        <span class="badge-status badge-status-agendado">Agendado</span>
-                    {% else %}
-                        <span class="badge-status badge-status-erro">Falhou</span>
-                    {% endif %}
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="4">
-                    {% include "components/empty_state.html" with message="Nenhum backup registrado." %}
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<!-- ══════════════════════════════════════
+     DESKTOP — Backups
+     ══════════════════════════════════════ -->
+<div class="desktop-page">
+<div class="list-toolbar">
+  <h1 class="list-toolbar-title">Backups</h1>
+  {# TODO: botão sem lógica; fica para fazer #}
+  <button type="button" class="btn-acao" disabled title="Ação de backup real ainda não aprovada pelo time">
+    Executar backup agora
+  </button>
+</div>
+
+{% if backups %}
+<div class="list-panel">
+  <div class="list-panel-header backup-grid">
+    <div>Hora:</div>
+    <div>Escopo:</div>
+    <div>Tamanho:</div>
+    <div></div>
+  </div>
+
+  <div class="list-panel-container">
+    {% for backup in backups %}
+    <div class="list-panel-row backup-grid hover-lift">
+      <div>{{ backup.executado_em|default:backup.agendado_para|date:"d/m/Y H:i"|default:"—" }}</div>
+      <div>{{ backup.escopo }}</div>
+      <div>{{ backup.tamanho|default:"—" }}</div>
+      <div class="text-end">
+        {% if backup.status == "OK" %}
+        <span class="badge-situacao ok">Concluído</span>
+        {% elif backup.status == "AG" %}
+        <span class="badge-situacao neutra">Agendado</span>
+        {% else %}
+        <span class="badge-situacao critica">Falhou</span>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% else %}
+{% include "components/empty_state.html" with message="Nenhum backup registrado." %}
+{% endif %}
 </div>
 {% endblock %}

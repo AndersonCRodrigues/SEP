@@ -185,8 +185,14 @@ alimenta tanto o formulário (`?triagem=<pk>`) quanto o `post()` — pedir parec
 de uma triagem em andamento responde 404 em vez de gravar.
 
 O `POST` recusa parecer em branco com `messages.error` e, dando certo, cria o
-`TriageFeedback` e avisa o nome do aluno. O filtro `?situacao=` aceita
-`em_triagem`, `pendente` e `enviado`.
+`TriageFeedback` e avisa o nome do aluno. O filtro é o `?q=`, uma busca só, que
+casa com o nome do aluno **ou** do paciente (em `first_name`/`last_name`, porque
+`nome_completo` é property e não entra em `filter()`).
+
+A tela segue o mesmo desenho de Avaliações do Professor: escolher uma triagem
+(`?triagem=<pk>`) troca a lista e a busca pelo formulário, por um botão Voltar e
+pelos **feedbacks anteriores daquele aluno** — todos os pareceres que ele já
+recebeu, não os desta triagem, que por definição não tem nenhum.
 
 ### 3.7 `/supervisor/orientacao/` — Painel de orientação
 
@@ -268,8 +274,7 @@ formulário na área correspondente, ou "Editar" abre o detalhe.
 | Encaminhamento: alocação ao professor | Responsáveis pelo paciente | Real |
 | Encaminhamentos recentes: Concluído e Pendente | Paciente já em atendimento | Real |
 | Feedback: aluno, paciente e situação | Status da triagem e pareceres | Real |
-| Cadastro de professor: as duas permissões | Não existem como campo | **Mock com TODO** |
-| Cadastro de aluno: curso e período | Não existem como campo | **Mock com TODO** |
+| Cadastro de aluno: período | `Advising.term` da orientação aberta | Real |
 
 ## 7. Mocks e TODOs
 
@@ -279,8 +284,6 @@ Tudo que não existe no banco fica em `supervisor/views/mocks.py`:
 |---|---|---|
 | `submitted_at(record)` | "Recebida às" | Data de envio da ficha |
 | `triage_status(record, now)` | Selo Analisar/Atrasada/Editada | Prazo de análise e data de edição |
-| `teacher_permissions()` | As duas caixas do cadastro de professor | As permissões como campo |
-| `student_enrollment_fields()` | Curso e período no cadastro de aluno | Os campos no cadastro |
 
 `submitted_at` devolve `created_at` — a ficha já tem `submitted_at` como campo,
 mas nem todo registro antigo tem valor, então a fila continua no mock até a

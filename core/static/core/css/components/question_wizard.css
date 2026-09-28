@@ -1,0 +1,335 @@
+/* Formulario de uma pergunta por vez: cartao branco com a barra vinho de
+   progresso a esquerda e a pergunta a direita. Saiu do pre-cadastro de
+   paciente (Administrativo) quando a ficha de triagem (Aluno) passou a usar o
+   mesmo desenho — os valores sao os mesmos de la.
+
+   As cores proprias do wizard ficam na propria caixa, para nao sobrescrever os
+   tokens das outras telas que carregam este arquivo junto. */
+
+.registration {
+  --wizard-field-bg: #F4F4F4;
+  --wizard-field-border: #CCCCCC;
+  --wizard-progress-track: #D5D0CE;
+  --wizard-progress-fill: #E63946;
+  --wizard-back: #A8A29E;
+  --wizard-back-hover: #8C8581;
+
+  display: flex;
+  width: 100%;
+  max-width: 960px;
+  min-height: 580px;
+  margin: 40px auto;
+  background: #FFFFFF;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+}
+
+/* ── Barra lateral (vinho) ── */
+.registration-progress {
+  width: 320px;
+  background-color: var(--sep-maroon);
+  color: #FFFFFF;
+  padding: 36px 32px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.registration-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 40px;
+}
+
+.registration-brand-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.registration-name {
+  display: block;
+  font-family: var(--font-main);
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.registration-subtitle {
+  display: block;
+  font-family: var(--font-main);
+  font-size: 12px;
+  font-weight: 500;
+  opacity: 0.8;
+}
+
+/* ── Lista de secoes ── */
+.progress-sections {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.progress-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.progress-name {
+  font-family: var(--font-main);
+  font-size: 15px;
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+/* ── Area da pergunta ── */
+.question {
+  flex: 1;
+  padding: 40px 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-sizing: border-box;
+}
+
+.question-counter {
+  font-family: var(--font-main);
+  font-size: 14px;
+  font-weight: 600;
+  color: #555555;
+  margin: 0 0 16px 0;
+}
+
+.question-title {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-family: var(--font-main);
+  font-size: 32px;
+  font-weight: 800;
+  color: #000000;
+  margin: 0 0 32px 0;
+}
+
+.question-form {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  justify-content: space-between;
+}
+
+.question-fields {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+.question-field input[type="text"],
+.question-field input[type="email"],
+.question-field input[type="tel"],
+.question-field select {
+  width: 100%;
+  height: 56px;
+  background-color: var(--wizard-field-bg);
+  border: 1px solid var(--wizard-field-border);
+  border-radius: 12px;
+  padding: 0 20px;
+  font-family: var(--font-main);
+  font-size: 16px;
+  font-weight: 600;
+  color: #333333;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.question-field input::placeholder {
+  color: #888888;
+  font-weight: 500;
+}
+
+.question-field input:focus {
+  border-color: var(--sep-maroon);
+  background-color: #FFFFFF;
+}
+
+/* Erro do campo, abaixo dele: igual no pre-cadastro e na triagem. */
+.field-errors ul {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0 0;
+}
+
+.field-errors li {
+  font-family: var(--font-main);
+  font-size: 13px;
+  font-weight: 600;
+  color: #CC2A2A;
+}
+
+/* ── Botoes de acao ── */
+.question-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 40px;
+}
+
+.question-back,
+.question-next {
+  height: 48px;
+  padding: 0 36px;
+  border-radius: 999px;
+  font-family: var(--font-main);
+  font-size: 16px;
+  font-weight: 800;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+
+.question-back {
+  background-color: var(--wizard-back);
+  color: #FFFFFF;
+}
+
+.question-back:hover:not(:disabled) {
+  background-color: var(--wizard-back-hover);
+}
+
+.question-back:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.question-next {
+  background-color: var(--sep-maroon);
+  color: #FFFFFF;
+}
+
+.question-next:hover {
+  background-color: var(--sep-maroon-dark);
+}
+
+@media (max-width: 767.98px) {
+  .registration {
+    flex-direction: column;
+    margin: 0;
+    border-radius: 0;
+    min-height: 100vh;
+    box-shadow: none;
+  }
+
+  .registration-progress {
+    width: 100%;
+    padding: 24px 20px;
+  }
+
+  .question {
+    padding: 28px 20px;
+  }
+
+  .question-title {
+    font-size: 24px;
+  }
+}
+
+/* -- Fim do fluxo: cartao de conclusao -- */
+
+.registration-completed {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  max-width: 500px;
+  margin: 60px auto;
+  padding: 20px;
+  text-align: center;
+}
+
+/* Ícone de Visto (Check) Verde em Círculo */
+.completed-icon {
+  width: 64px;
+  height: 64px;
+  background-color: #28A745;
+  border-radius: 50%;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='20 6 9 17 4 12'></polyline></svg>");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 32px;
+}
+
+.completed-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #1E293B;
+  margin-bottom: 28px;
+}
+
+/* Card do Resumo (Cinza Escuro / Taupe) */
+.completed-summary {
+  width: 100%;
+  max-width: 380px;
+  background-color: #8C8581;
+  color: #FFFFFF;
+  border-radius: 12px;
+  padding: 12px 20px;
+  margin: 0 0 32px 0;
+  box-sizing: border-box;
+}
+
+.completed-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+  font-size: 13px;
+}
+
+.completed-row:last-child {
+  border-bottom: none;
+}
+
+.completed-row dt {
+  font-weight: 600;
+  opacity: 0.9;
+  text-align: left;
+}
+
+.completed-row dd {
+  font-weight: 700;
+  margin: 0;
+  text-align: right;
+}
+
+/* Botão Continuar */
+.completed-continue {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 220px;
+  height: 44px;
+  background-color: #6D1D20;
+  color: #FFFFFF !important;
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none !important;
+  border-radius: 999px;
+  transition: background-color 0.2s ease;
+  box-shadow: 0 4px 10px rgba(109, 29, 32, 0.2);
+}
+
+.completed-continue:hover {
+  background-color: #541618;
+}

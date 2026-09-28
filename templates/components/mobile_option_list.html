@@ -1,0 +1,10 @@
+<div class="mobile-options mobile-column">
+  {% for option in options %}
+  <label class="mobile-option">
+    <input type="checkbox" name="{{ field_name }}" value="{{ option.value }}" {% if option.checked %}checked{% endif %}>
+    <span>{{ option.label }}</span>
+  </label>
+  {% empty %}
+  <p class="mobile-empty">{{ empty_message }}</p>
+  {% endfor %}
+</div>

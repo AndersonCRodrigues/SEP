@@ -1,0 +1,182 @@
+/* Ficha de triagem do Aluno: o cartao e a area da pergunta vem de
+   components/question_wizard.css. Aqui fica o que e proprio da ficha — o
+   paciente no topo da barra lateral, as tres barras de progresso por secao e
+   os campos de resposta (caixa de texto e botoes de escolha). */
+
+body {
+  background-color: #F8F9FA;
+}
+
+.registration {
+  margin: 30px auto;
+  min-height: 540px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+/* ── Paciente no topo da barra lateral ── */
+.registration-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background-color: #E63946;
+  color: #FFFFFF;
+  font-family: var(--font-main);
+  font-size: 18px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ── Tres barras por secao, preenchidas conforme a pergunta avanca ── */
+.progress-bars {
+  display: flex;
+  gap: 8px;
+}
+
+.progress-bar {
+  flex: 1;
+  height: 6px;
+  border-radius: 999px;
+  background-color: rgba(255, 255, 255, 0.35);
+  transition: background-color 0.3s ease;
+}
+
+.progress-bar-filled {
+  background-color: #E63946;
+}
+
+.completed-text {
+  font-family: var(--font-main);
+  font-size: 15px;
+  color: #333333;
+  margin: -16px 0 28px 0;
+}
+
+/* ── Pergunta ── */
+.question-title {
+  line-height: 1.15;
+}
+
+.question-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.question-fields {
+  margin: 36px 0;
+}
+
+.question-help {
+  font-family: var(--font-main);
+  font-size: 13px;
+  color: #6F6764;
+  margin: 8px 0 0 0;
+}
+
+.field-errors ul {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0 0;
+}
+
+.field-errors li {
+  font-family: var(--font-main);
+  font-size: 13px;
+  font-weight: 600;
+  color: #CC2A2A;
+}
+
+/* ── Resposta em texto ── */
+.question-field textarea {
+  width: 100%;
+  min-height: 220px;
+  background-color: #F8F8F8;
+  border: 1px solid #CCCCCC;
+  border-radius: 16px;
+  padding: 18px 20px;
+  font-family: var(--font-main);
+  font-size: 16px;
+  font-weight: 500;
+  color: #333333;
+  box-sizing: border-box;
+  outline: none;
+  resize: vertical;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.question-field textarea::placeholder {
+  color: #888888;
+}
+
+.question-field textarea:focus {
+  border-color: var(--sep-maroon);
+  background-color: #FFFFFF;
+}
+
+/* ── Resposta em escolha: o rotulo vira o botao ── */
+.question-field ul,
+.question-field ul li {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.question-field input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.question-field label:has(input[type="radio"]) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 440px;
+  min-height: 72px;
+  margin: 0 auto 20px auto;
+  padding: 12px 24px;
+  background-color: #D9D9D9;
+  border-radius: 999px;
+  font-family: var(--font-main);
+  font-size: 26px;
+  font-weight: 800;
+  color: #000000;
+  text-align: center;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.question-field label:has(input[type="radio"]):hover {
+  background-color: #CFCFCF;
+}
+
+.question-field label:has(input[type="radio"]:checked) {
+  background-color: var(--sep-maroon);
+  color: #FFFFFF;
+}
+
+/* Lista longa de opcoes (escolaridade, motivo do encaminhamento) nao precisa do
+   tamanho de um sim/nao. */
+.question-field ul li:nth-child(n + 4) label:has(input[type="radio"]),
+.question-field ul:has(li:nth-child(4)) label:has(input[type="radio"]) {
+  min-height: 56px;
+  font-size: 18px;
+  margin-bottom: 14px;
+}
+
+@media (max-width: 767.98px) {
+  .question-field textarea {
+    min-height: 160px;
+  }
+
+  .question-field label:has(input[type="radio"]) {
+    font-size: 20px;
+    min-height: 60px;
+  }
+}

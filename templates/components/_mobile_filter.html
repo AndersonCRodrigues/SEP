@@ -1,0 +1,7 @@
+<form class="mobile-filter mobile-column" method="get"{% if action %} action="{{ action }}"{% endif %}>
+  <div class="mobile-filter-field">
+    <i class="bi {{ icon|default:"bi-funnel" }}" aria-hidden="true"></i>
+    {{ body }}
+  </div>
+  <button type="submit" class="mobile-filter-button">Filtrar</button>
+</form>

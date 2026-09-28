@@ -1,0 +1,8 @@
+<div class="mobile-stats mobile-column">
+  {% for indicator in indicators|slice:":3" %}
+  <div class="mobile-stat mobile-stat-{{ forloop.counter }}">
+    <span class="mobile-stat-label">{{ indicator.label }}</span>
+    <span class="mobile-stat-value">{{ indicator.value }}</span>
+  </div>
+  {% endfor %}
+</div>

@@ -1,12 +1,19 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title_suffix %} | SEP Maricá{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/components/tokens.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/mobile_shell.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/mobile_nav.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/mobile_cards.css' %}">
+{% block page_css %}{% endblock %}
+{% endblock %}
+
 {% block brand %}
-<a class="navbar-brand brand" href="{% url 'students:home' %}">
-  <span class="brand-name">SEP Maricá</span>
-  <span class="brand-institution">Universidade de Vassouras</span>
-</a>
+{% url 'students:home' as home_url %}
+{% include "components/site_brand.html" %}
 {% endblock %}
 
 {% block main_nav %}
@@ -59,29 +66,4 @@
   </ul>
 </nav>
 {% endwith %}
-{% endblock %}
-
-{% block user_links %}
-{# TODO: botões sem lógica; ficam para fazer #}
-<li class="nav-item">
-  <button type="button" class="header-action" aria-label="Mensagens">
-    <span aria-hidden="true">✉</span>
-  </button>
-</li>
-<li class="nav-item">
-  <button type="button" class="header-action" aria-label="Notificações">
-    <span aria-hidden="true">🔔</span>
-  </button>
-</li>
-<li class="nav-item">
-  <button type="button" class="header-action" aria-label="Minha conta">
-    <span aria-hidden="true">👤</span>
-  </button>
-</li>
-{% endblock %}
-
-{% block footer %}
-<footer class="site-footer">
-  <p>Univassouras</p>
-</footer>
 {% endblock %}

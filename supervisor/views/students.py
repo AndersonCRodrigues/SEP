@@ -2,6 +2,7 @@ from django.db.models import Q
 from django.views.generic import DetailView, ListView
 
 from areas.models import AreaActing
+from core.search import full_name_lookup
 from students.models import Student
 
 from .access import CoordinatorOnly
@@ -20,11 +21,8 @@ class CoordinatorStudentsView(CoordinatorOnly, ListView):
 
         busca = self.request.GET.get("q", "").strip()
         if busca:
-            alunos = alunos.filter(
-                Q(first_name__icontains=busca)
-                | Q(last_name__icontains=busca)
-                | Q(matricula__icontains=busca)
-            )
+            alunos, por_nome = full_name_lookup(alunos, busca)
+            alunos = alunos.filter(por_nome | Q(matricula__icontains=busca))
 
         area = self.request.GET.get("area", "")
         if area.isdigit():

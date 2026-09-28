@@ -8,7 +8,7 @@
   
   /* Esconde navbar, footer padrão e padding extra */
   .sep-navbar,
-  .sep-footer {
+  .site-footer {
     display: none !important;
   }
   body, 

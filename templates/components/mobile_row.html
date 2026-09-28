@@ -1,0 +1,28 @@
+{% if url %}<a class="mobile-row mobile-column{% if variant == 'white' %} mobile-row-white{% endif %}" href="{{ url }}">{% else %}<div class="mobile-row mobile-column{% if variant == 'white' %} mobile-row-white{% endif %}">{% endif %}
+  <div class="mobile-row-info">
+    {% if name %}<span class="mobile-row-name">{{ name }}</span>{% endif %}
+    {% if code %}<span class="mobile-row-code">ID: #{{ code }}</span>{% endif %}
+    {% if person %}
+    <span class="mobile-row-detail"><i class="bi bi-person"></i>{{ person }}</span>
+    {% endif %}
+    {% if when %}
+    <span class="mobile-row-detail"><i class="bi bi-calendar3"></i>{{ when }}</span>
+    {% endif %}
+    {% if place %}
+    <span class="mobile-row-detail"><i class="bi bi-door-closed"></i>{{ place }}</span>
+    {% endif %}
+    {% if info %}
+    <span class="mobile-row-detail"><i class="bi {{ info_icon|default:"bi-info-circle" }}"></i>{{ info }}</span>
+    {% endif %}
+  </div>
+  {% if action_url and action_post %}
+  <form class="mobile-row-form" method="post" action="{{ action_url }}">
+    {% csrf_token %}
+    <button type="submit" class="mobile-row-action{% if action_tone == 'maroon' %} mobile-row-action-maroon{% elif action_tone == 'dark' %} mobile-row-action-dark{% endif %}">{{ action_label }}</button>
+  </form>
+  {% elif action_url %}
+  <a class="mobile-row-action{% if action_tone == 'maroon' %} mobile-row-action-maroon{% elif action_tone == 'dark' %} mobile-row-action-dark{% endif %}" href="{{ action_url }}">{{ action_label }}</a>
+  {% elif label %}
+  {% include "components/mobile_badge.html" with label=label level=level %}
+  {% endif %}
+{% if url %}</a>{% else %}</div>{% endif %}

@@ -1,32 +1,81 @@
 {% extends "student/base_student.html" %}
-{% load components %}
+{% load static %}
 
 {% block title %}Feedbacks recebidos{% endblock %}
 
-{% block breadcrumbs %}
-<li class="breadcrumb-item"><a href="{% url 'students:home' %}">Página inicial</a></li>
-<li class="breadcrumb-item active" aria-current="page">Feedbacks</li>
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'core/css/components/list_panel.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/hover_lift.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/student_feedback.css' %}">
 {% endblock %}
 
-{% block page_title %}Feedbacks recebidos{% endblock %}
+{% block page_header %}{% endblock %}
 
 {% block content %}
+<!-- ══════════════════════════════════════
+     MOBILE
+     ══════════════════════════════════════ -->
+<div class="mobile-page">
+  <div class="mobile-maroon-bg">
+    {% url 'students:home' as back_url %}
+    {% include "components/mobile_header.html" %}
+  </div>
+
+  {% include "components/mobile_title.html" with title="Feedbacks" %}
+
+  <div class="mobile-content">
+    {% if feedbacks_error %}
+    <p class="mobile-empty">{{ feedbacks_error }}</p>
+    {% else %}
+    {% for feedback in feedbacks %}
+    {% include "components/mobile_row.html" with name=feedback.subject person=feedback.author when=feedback.received label=feedback.label level=feedback.level %}
+    {% empty %}
+    <p class="mobile-empty">Nenhum feedback recebido.</p>
+    {% endfor %}
+    {% endif %}
+  </div>
+
+  {% include "components/mobile_footer.html" %}
+</div>
+
+<!-- ══════════════════════════════════════
+     DESKTOP
+     ══════════════════════════════════════ -->
+<div class="desktop-page">
+<div class="list-panel-title">Feedbacks recebidos</div>
+
 {% if feedbacks_error %}
 {% include "components/error_state.html" with message=feedbacks_error retry_url=request.path %}
 {% elif feedbacks %}
-{% data_table columns=columns label="Feedbacks que você recebeu" %}
-{% for feedback in feedbacks %}
-<tr class="feedback">
-  <td class="feedback-subject">{{ feedback.subject }}</td>
-  <td class="feedback-author">{{ feedback.author }}</td>
-  <td class="feedback-received">{{ feedback.received }}</td>
-  <td class="feedback-status">
-    {% include "components/badge.html" with label=feedback.label level=feedback.level %}
-  </td>
-</tr>
-{% endfor %}
-{% enddata_table %}
+<div class="list-panel">
+  <div class="list-panel-header feedback-grid">
+    <div>Referente a:</div>
+    <div>Realizada por:</div>
+    <div>Recebida:</div>
+    <div>Status:</div>
+  </div>
+
+  <div class="list-panel-container">
+    {% for feedback in feedbacks %}
+    <div class="list-panel-row feedback-grid hover-lift">
+      <div>{{ feedback.subject }}</div>
+      <div>{{ feedback.author }}</div>
+      <div>{{ feedback.received }}</div>
+      <div class="text-end">
+        {% if feedback.label == "Novo" %}
+        <span class="badge-novo">{{ feedback.label }}</span>
+        {% elif feedback.label == "Lida" %}
+        <span class="badge-lida">{{ feedback.label }}</span>
+        {% else %}
+        <span class="badge-editada">{{ feedback.label }}</span>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
 {% else %}
 {% include "components/empty_state.html" with message="Você ainda não recebeu feedbacks." %}
 {% endif %}
+</div>
 {% endblock %}

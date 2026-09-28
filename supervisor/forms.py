@@ -6,11 +6,26 @@ from teacher.models import Teacher
 
 
 class SupervisorCreationForm(ProfessorCreationForm):
+    # Aqui quem define a senha e a view: ela gera uma temporaria e envia por
+    # e-mail, entao o Superadmin nao digita senha nenhuma.
+    password1 = None
+    password2 = None
+
     class Meta:
         model = Teacher
         fields = tuple(
-            f for f in PERSONAL_FIELDS
-            if f not in ("logradouro", "numero", "complemento", "bairro", "cidade", "estado", "cep")
+            f
+            for f in PERSONAL_FIELDS
+            if f
+            not in (
+                "logradouro",
+                "numero",
+                "complemento",
+                "bairro",
+                "cidade",
+                "estado",
+                "cep",
+            )
         )
 
     def __init__(self, *args, **kwargs):

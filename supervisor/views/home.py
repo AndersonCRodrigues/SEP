@@ -43,6 +43,7 @@ class CoordinatorHomeView(CoordinatorOnly, TemplateView):
         )
 
         return self.calendar(user, today) | {
+            "pending_alert": self.pending_alert(pending.count()),
             "indicators": [
                 {"label": "Triagens pendentes", "value": pending.count()},
                 {
@@ -81,6 +82,18 @@ class CoordinatorHomeView(CoordinatorOnly, TemplateView):
             )
         )
         return month_calendar(year, month, today, days)
+
+    @staticmethod
+    def pending_alert(pending):
+        if not pending:
+            return None
+        noun = "triagem" if pending == 1 else "triagens"
+        return {
+            "title": "Alerta pendente",
+            "message": f"{pending} {noun} aguardando encaminhamento",
+            "url": reverse("supervisor:encaminhamentos"),
+            "action": "Encaminhar",
+        }
 
     @staticmethod
     def active_teachers():

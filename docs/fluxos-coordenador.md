@@ -71,7 +71,7 @@ professor" abre o formulário, ou "Editar" abre o detalhe do professor.
 | Role | O que acontece |
 |---|---|
 | Coordenador | Única role com acesso às oito telas |
-| Professor | Vê as telas equivalentes da própria área (`teacher:alunos`, `teacher:prontuarios`, `teacher:triagens`), com o recorte dos próprios orientandos |
+| Professor | Vê as telas equivalentes da própria área (`teacher:alunos`, `teacher:prontuarios`, `teacher:encaminhamentos`), com o recorte dos próprios orientandos |
 | Aluno, Administrativo e Paciente | Sem acesso; o `handler403` redireciona para a home da própria role e deixa o aviso |
 | Anônimo | Redirecionado para `/login/` com retorno para a página pedida |
 

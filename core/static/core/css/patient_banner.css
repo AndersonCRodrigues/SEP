@@ -1,0 +1,37 @@
+/* Faixa de titulo das telas do Paciente que ainda usam o banner do Figma em
+   vez da pilula de components/list_panel.css. Estava dentro do CSS da lista de
+   triagens, que so a lista usa. */
+
+.page-banner-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  margin-bottom: 40px;
+}
+
+.page-banner {
+  background-color: var(--sep-maroon);
+  color: #FFFFFF;
+  font-family: var(--font-main);
+  font-size: 26px;
+  font-weight: 700;
+  padding: 16px 60px;
+  border-radius: 40px;
+  margin: 0;
+  text-align: center;
+}
+
+.section-subtitle {
+  font-family: var(--font-main);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--sep-maroon);
+  margin-bottom: 20px;
+}
+
+@media (max-width: 576px) {
+  .page-banner {
+    font-size: 20px;
+    padding: 14px 30px;
+  }
+}

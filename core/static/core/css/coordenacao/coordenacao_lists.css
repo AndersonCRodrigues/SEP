@@ -1,0 +1,49 @@
+/* Telas de lista do Coordenador: usam o painel de components/list_panel.css.
+   Aqui fica so o que e proprio de cada tela — a grade de colunas. */
+
+.student-grid {
+  grid-template-columns: 2fr 2fr 1.2fr 130px;
+}
+
+.teacher-grid {
+  grid-template-columns: 2fr 2fr 1.2fr 130px;
+}
+
+.triage-grid {
+  grid-template-columns: 2fr 2fr 1.2fr 130px;
+}
+
+.feedback-grid {
+  grid-template-columns: 2fr 2fr 130px 110px;
+}
+
+.area-grid {
+  grid-template-columns: 1fr 100px;
+}
+
+.history-grid {
+  grid-template-columns: 2fr 2fr 1.2fr 130px;
+}
+
+.user-grid {
+  grid-template-columns: 1fr 140px;
+}
+
+.referral-grid {
+  grid-template-columns: 2fr 2fr 1.2fr;
+}
+
+.referral-recent-grid {
+  grid-template-columns: 2fr 2fr 130px;
+}
+
+.list-panel-back {
+  max-width: 900px;
+  margin: 0 auto 20px auto;
+}
+
+.list-toolbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}

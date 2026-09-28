@@ -1,0 +1,106 @@
+/* Painel de lista: pilula de titulo, cabecalho de colunas e linhas.
+   E o padrao que Feedbacks, Encaminhamentos e Triagens ja repetiam; as regras
+   sao as mesmas daquelas telas, sem alteracao de valor. A grade de colunas
+   fica por tela, porque cada uma tem um numero de colunas. A elevacao no hover
+   vem de components/hover_lift.css, carregado junto deste arquivo. */
+
+.list-panel-title {
+  background-color: var(--sep-maroon);
+  color: #FFFFFF;
+  font-family: var(--font-main);
+  font-size: 24px;
+  font-weight: 700;
+  text-align: center;
+  border-radius: 40px;
+  padding: 12px 0;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto 36px auto;
+}
+
+.list-panel-subtitle {
+  max-width: 900px;
+  margin: -20px auto 20px auto;
+  font-family: var(--font-main);
+  font-size: 14px;
+  color: var(--sep-maroon);
+}
+
+.list-panel {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.list-panel-container {
+  background: #FFFFFF;
+  border: 1px solid #A59C97;
+  border-radius: 20px;
+  padding: 18px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.list-panel-header {
+  display: grid;
+  padding: 0 28px 10px 28px;
+  font-family: var(--font-main);
+  font-size: 14px;
+  font-weight: 700;
+  color: #000000;
+}
+
+.list-panel-row {
+  background-color: #E6E6E6;
+  border-radius: 20px;
+  padding: 14px 20px;
+  display: grid;
+  align-items: center;
+  font-family: var(--font-main);
+  font-size: 14px;
+  font-weight: 700;
+  color: #000000;
+}
+
+.list-panel-row:hover {
+  background-color: #D4D4D4;
+}
+
+/* Linha inteira clicavel: continua com a cara de linha, nao de link. */
+a.list-panel-row {
+  text-decoration: none;
+  color: var(--sep-black);
+}
+
+/* Selos de situacao, com os mesmos valores dos ja usados nas telas do Aluno. */
+.badge-situacao {
+  color: #FFFFFF;
+  font-family: var(--font-main);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 5px 0;
+  border-radius: 20px;
+  text-align: center;
+  display: inline-block;
+  white-space: nowrap;
+  min-width: 90px;
+}
+
+.badge-situacao.aberta,
+.badge-situacao.critica {
+  background-color: #B43B3B;
+}
+
+.badge-situacao.andamento,
+.badge-situacao.atencao {
+  background-color: #D98C20;
+}
+
+.badge-situacao.concluida,
+.badge-situacao.ok {
+  background-color: #3AA600;
+}
+
+.badge-situacao.neutra {
+  background-color: #9E9E9E;
+}
