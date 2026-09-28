@@ -21,6 +21,9 @@
   <div class="patients-toolbar">
     <form method="get" class="search-form">
       <div class="search-input-wrapper">
+        <a class="btn-new-registration" href="{% url 'administration:cadastrar_paciente' %}">
+          + Novo Cadastro
+        </a>
         <input
           type="text"
           name="q"
@@ -74,9 +77,7 @@
         <div class="empty-icon">📁</div>
         <h3>Nenhum paciente encontrado</h3>
         <p>Comece realizando o pré-cadastro de um novo paciente no sistema.</p>
-        <a class="btn-new-registration" href="{% url 'administration:cadastrar_paciente' %}">
-          + Novo Cadastro
-        </a>
+        
       </div>
     {% endif %}
   </div>
