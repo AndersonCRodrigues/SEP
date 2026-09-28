@@ -8,6 +8,7 @@ from patient.models import Patient
 from . import forms
 
 SESSION_KEY = "patient_registration"
+SESSION_KEY_COMPLETED = "patient_registration_completed"
 
 SECTIONS = ("Identificação", "Contatos", "Endereço", "Acompanhante", "Encerramento")
 
@@ -23,34 +24,48 @@ class Step:
 
 
 STEPS = (
-    Step("nome", "Identificação", "Nome completo", "person", forms.FullNameForm),
-    Step(
-        "nome-social",
-        "Identificação",
-        "Nome social e identidade de gênero",
-        "person",
-        forms.SocialIdentityForm,
-    ),
-    Step("cpf", "Identificação", "CPF", "person", forms.CpfForm),
-    Step(
-        "nascimento",
-        "Identificação",
-        "Data de nascimento",
-        "calendar",
-        forms.BirthDateForm,
-    ),
-    Step("genero", "Identificação", "Gênero/Identidade de Gênero", "person", forms.GenderForm),
-    Step("raca", "Identificação", "Cor/Raça", "person", forms.RaceForm),
-    Step("naturalidade", "Identificação", "Naturalidade", "person", forms.NaturalnessForm),
-    Step("escolaridade", "Identificação", "Escolaridade", "person", forms.SchoolingForm),
-    Step("religiao", "Identificação", "Religião", "person", forms.ReligionForm),
-    Step("estado-civil", "Identificação", "Estado civil", "person", forms.MaritalStatusForm),
-    Step("telefone", "Contatos", "Telefone de contato", "phone", forms.PhoneForm),
-    Step("email", "Contatos", "E-mail de contato", "phone", forms.EmailForm),
-    Step("logradouro", "Endereço", "Endereço completo", "address", forms.LogradouroForm),
-    Step("bairro", "Endereço", "Bairro", "address", forms.BairroForm),
-    Step("profissao", "Identificação", "Profissão", "person", forms.ProfessionForm),
-    Step("ocupacao", "Identificação", "Ocupação atual", "person", forms.OccupationForm),
+    Step("nome", 
+         "Identificação", 
+         "Nome completo", 
+         "person", 
+         forms.FullNameForm),
+    
+    Step("cpf", 
+         "Identificação", 
+         "CPF", 
+         "person", 
+         forms.CpfForm),
+    
+    Step("nascimento",
+         "Identificação",
+         "Data de nascimento",
+         "calendar",
+         forms.BirthDateForm,),
+    
+    Step("telefone", 
+         "Contatos", 
+         "Telefone de contato", 
+         "phone", 
+         forms.PhoneForm),
+    
+    Step("email", 
+         "Contatos", 
+         "E-mail de contato", 
+         "phone", 
+         forms.EmailForm),
+    
+    Step("logradouro", 
+         "Endereço", 
+         "Endereço completo", 
+         "address", 
+         forms.LogradouroForm),
+    
+    Step("bairro", 
+         "Endereço", 
+         "Bairro", 
+         "address", 
+         forms.BairroForm),
+    
     Step(
         "acompanhante",
         "Acompanhante",
@@ -81,10 +96,12 @@ class PatientRegistration:
     def __init__(self, session):
         self.session = session
         self.answers = session.get(SESSION_KEY, {})
+        self.session_complete = session.get(SESSION_KEY_COMPLETED,False)
 
     @classmethod
     def start(cls, session):
         session[SESSION_KEY] = {}
+        session[SESSION_KEY_COMPLETED] = False
         return cls(session)
 
     @property
@@ -173,4 +190,5 @@ class PatientRegistration:
         sincronizar_grupo(patient)
 
         self.session.pop(SESSION_KEY, None)
+        self.session[SESSION_KEY_COMPLETED]=True
         return patient
