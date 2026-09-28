@@ -158,6 +158,20 @@
   background-color: #FFFFFF;
 }
 
+/* Erro do campo, abaixo dele: igual no pre-cadastro e na triagem. */
+.field-errors ul {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0 0;
+}
+
+.field-errors li {
+  font-family: var(--font-main);
+  font-size: 13px;
+  font-weight: 600;
+  color: #CC2A2A;
+}
+
 /* ── Botoes de acao ── */
 .question-actions {
   display: flex;
