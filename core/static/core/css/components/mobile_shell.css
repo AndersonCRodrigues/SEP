@@ -59,8 +59,11 @@
     min-height: 100vh;
   }
 
+  /* O respiro antes do rodape fica no conteudo: o margin-top: auto do rodape
+     zera quando a tela e comprida, e ele colava na ultima caixa. */
   .mobile-page .mobile-content {
     flex: 1 0 auto;
+    padding-bottom: 40px;
   }
 
   .mobile-page .mobile-footer {
