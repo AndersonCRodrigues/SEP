@@ -1,5 +1,5 @@
 {% extends "supervisor/base_coordinator.html" %}
-{% load static %}
+{% load static components %}
 
 {% block title %}Triagens{% endblock %}
 
@@ -13,6 +13,42 @@
 {% block page_header %}{% endblock %}
 
 {% block content %}
+<!-- ══════════════════════════════════════
+     MOBILE
+     ══════════════════════════════════════ -->
+<div class="mobile-page">
+  <div class="mobile-maroon-bg">
+    {% url 'supervisor:home' as back_url %}
+    {% include "components/mobile_header.html" %}
+  </div>
+
+  {% include "components/mobile_title.html" with title="Triagens" %}
+
+  <div class="mobile-content">
+    {% mobile_filter icon="bi-funnel" %}
+    <label class="visually-hidden" for="mobile-situation">Situação</label>
+    <select id="mobile-situation" name="situacao">
+      {% for value, label in situations %}
+      <option value="{{ value }}" {% if situation_filter == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    {% endmobile_filter %}
+
+    {% for row in rows %}
+    {% url 'supervisor:triagem_detalhe' row.triage.pk as triage_url %}
+    {% include "components/mobile_row.html" with variant="white" url=triage_url name=row.patient person=row.student when=row.received label=row.label level=row.level %}
+    {% empty %}
+    <p class="mobile-empty">Nenhuma triagem para acompanhar.</p>
+    {% endfor %}
+  </div>
+
+  {% include "components/mobile_footer.html" %}
+</div>
+
+<!-- ══════════════════════════════════════
+     DESKTOP
+     ══════════════════════════════════════ -->
+<div class="desktop-page">
 <div class="list-panel-title">Triagens</div>
 
 <form class="list-filters" method="get" action="">
@@ -50,4 +86,5 @@
 {% else %}
 {% include "components/empty_state.html" with message="Nenhuma triagem para acompanhar." %}
 {% endif %}
+</div>
 {% endblock %}

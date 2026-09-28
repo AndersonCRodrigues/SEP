@@ -14,6 +14,37 @@
 {% block page_header %}{% endblock %}
 
 {% block content %}
+<!-- ══════════════════════════════════════
+     MOBILE
+     ══════════════════════════════════════ -->
+<div class="mobile-page">
+  <div class="mobile-maroon-bg">
+    {% url 'supervisor:home' as back_url %}
+    {% include "components/mobile_header.html" %}
+  </div>
+
+  {% include "components/mobile_title.html" with title="Áreas de atuação" %}
+
+  <div class="mobile-content">
+    {% for area in areas %}
+    {% url 'supervisor:area_editar' area.pk as edit_url %}
+    {% include "components/mobile_row.html" with variant="white" name=area.nome action_url=edit_url action_label="Editar" action_tone="maroon" %}
+    {% empty %}
+    <p class="mobile-empty">Nenhuma área cadastrada ainda.</p>
+    {% endfor %}
+
+    <div class="mobile-actions">
+      <a class="mobile-button" href="{% url 'supervisor:area_criar' %}">Nova área</a>
+    </div>
+  </div>
+
+  {% include "components/mobile_footer.html" %}
+</div>
+
+<!-- ══════════════════════════════════════
+     DESKTOP
+     ══════════════════════════════════════ -->
+<div class="desktop-page">
 <div class="list-toolbar">
   <h1 class="list-toolbar-title">Áreas de atuação</h1>
   <a class="btn-acao" href="{% url 'supervisor:area_criar' %}">+ Nova área</a>
@@ -37,4 +68,5 @@
 {% else %}
 {% include "components/empty_state.html" with message="Nenhuma área cadastrada ainda." %}
 {% endif %}
+</div>
 {% endblock %}

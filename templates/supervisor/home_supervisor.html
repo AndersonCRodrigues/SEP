@@ -14,6 +14,39 @@
 {% block page_header %}{% endblock %}
 
 {% block content %}
+<!-- ══════════════════════════════════════
+     MOBILE
+     ══════════════════════════════════════ -->
+<div class="mobile-page">
+  <div class="mobile-maroon-bg">
+    {% url 'supervisor:home' as back_url %}
+    {% include "components/mobile_header.html" %}
+    {% if not home_error %}
+    {% include "components/mobile_stats.html" %}
+
+    {% if pending_alert %}
+    {% include "components/mobile_alert.html" with alert_title=pending_alert.title alert_message=pending_alert.message alert_url=pending_alert.url alert_action=pending_alert.action %}
+    {% endif %}
+    {% endif %}
+  </div>
+
+  <div class="mobile-content">
+    {% include "components/mobile_tabs.html" with tabs_items="supervisor/mobile_tabs.html" %}
+
+    {% if home_error %}
+    <p class="mobile-empty">{{ home_error }}</p>
+    {% else %}
+    {% include "components/mobile_activity.html" with empty_message="Nenhuma atividade recente." %}
+    {% endif %}
+  </div>
+
+  {% include "components/mobile_footer.html" %}
+</div>
+
+<!-- ══════════════════════════════════════
+     DESKTOP
+     ══════════════════════════════════════ -->
+<div class="desktop-page">
 {% if home_error %}
 {% include "components/error_state.html" with message=home_error retry_url=request.path %}
 {% else %}
@@ -36,4 +69,5 @@
   </section>
 </div>
 {% endif %}
+</div>
 {% endblock %}

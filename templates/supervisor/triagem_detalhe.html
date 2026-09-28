@@ -1,5 +1,5 @@
 {% extends "supervisor/base_coordinator.html" %}
-{% load static %}
+{% load static components %}
 
 {% block title %}Triagem de {{ triagem.patient.get_full_name }}{% endblock %}
 
@@ -13,6 +13,43 @@
 {% block page_header %}{% endblock %}
 
 {% block content %}
+<!-- ══════════════════════════════════════
+     MOBILE
+     ══════════════════════════════════════ -->
+<div class="mobile-page">
+  <div class="mobile-maroon-bg">
+    {% url 'supervisor:triagens' as back_url %}
+    {% include "components/mobile_header.html" %}
+  </div>
+
+  {% include "components/mobile_title.html" with title=triagem.patient.get_full_name %}
+
+  <div class="mobile-content">
+    {% mobile_box title="Dados da triagem" %}
+    {% include "components/mobile_field.html" with label="Realizada por" value=triagem.student_author.get_full_name %}
+    {% include "components/mobile_field.html" with label="Recebida" value=received %}
+    {% include "components/mobile_field.html" with label="Situação" value=label %}
+    {% include "components/mobile_field.html" with label="Classificação de risco" value=risk|default:"Sem instrumento preenchido" %}
+    {% endmobile_box %}
+
+    {% mobile_box title="Queixa principal" %}
+    {% include "components/mobile_field.html" with label="Relato do paciente" value=triagem.chief_complaint %}
+    {% endmobile_box %}
+
+    {% if can_refer %}
+    <div class="mobile-actions">
+      <a class="mobile-button" href="{% url 'supervisor:encaminhar' triagem.pk %}">Encaminhar</a>
+    </div>
+    {% endif %}
+  </div>
+
+  {% include "components/mobile_footer.html" %}
+</div>
+
+<!-- ══════════════════════════════════════
+     DESKTOP
+     ══════════════════════════════════════ -->
+<div class="desktop-page">
 <div class="list-panel-title">Triagem de {{ triagem.patient.get_full_name }}</div>
 
 <div class="list-toolbar">
@@ -53,5 +90,6 @@
       <p class="detail-text">{{ triagem.chief_complaint }}</p>
     </div>
   </section>
+</div>
 </div>
 {% endblock %}

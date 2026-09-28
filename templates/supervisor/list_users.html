@@ -13,6 +13,41 @@
 {% block page_header %}{% endblock %}
 
 {% block content %}
+<!-- ══════════════════════════════════════
+     MOBILE
+     ══════════════════════════════════════ -->
+<div class="mobile-page">
+  <div class="mobile-maroon-bg">
+    {% url 'supervisor:home' as back_url %}
+    {% include "components/mobile_header.html" %}
+  </div>
+
+  {% include "components/mobile_title.html" with title="Professores" %}
+
+  <div class="mobile-content">
+    {% include "components/mobile_search.html" with search_value=search search_label="Buscar por nome ou CRP" %}
+
+    {% for row in teachers %}
+    {% url 'supervisor:professor_detalhe' row.teacher.pk as teacher_url %}
+    {% with advisees=row.advisees|stringformat:"s" plural=row.advisees|pluralize %}
+    {% include "components/mobile_row.html" with variant="white" url=teacher_url name=row.teacher.get_full_name info=row.areas|default:"Sem área" info_icon="bi-diagram-3" person=advisees|add:" aluno"|add:plural label=row.label level=row.level %}
+    {% endwith %}
+    {% empty %}
+    <p class="mobile-empty">Nenhum professor encontrado.</p>
+    {% endfor %}
+
+    <div class="mobile-actions">
+      <a class="mobile-button" href="{% url 'teacher:cadastrar' %}">Cadastrar professor</a>
+    </div>
+  </div>
+
+  {% include "components/mobile_footer.html" %}
+</div>
+
+<!-- ══════════════════════════════════════
+     DESKTOP
+     ══════════════════════════════════════ -->
+<div class="desktop-page">
 <div class="list-toolbar">
   <h1 class="list-toolbar-title">Professores</h1>
   <a class="btn-acao" href="{% url 'teacher:cadastrar' %}">+ Cadastrar professor</a>
@@ -61,4 +96,5 @@
 {% else %}
 {% include "components/empty_state.html" with message="Nenhum professor encontrado." %}
 {% endif %}
+</div>
 {% endblock %}

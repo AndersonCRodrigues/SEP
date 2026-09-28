@@ -1,5 +1,5 @@
 {% extends "supervisor/base_coordinator.html" %}
-{% load static %}
+{% load static components %}
 
 {% block title %}{{ aluno.get_full_name }}{% endblock %}
 
@@ -13,6 +13,40 @@
 {% block page_header %}{% endblock %}
 
 {% block content %}
+<!-- ══════════════════════════════════════
+     MOBILE
+     ══════════════════════════════════════ -->
+<div class="mobile-page">
+  <div class="mobile-maroon-bg">
+    {% url 'supervisor:alunos' as back_url %}
+    {% include "components/mobile_header.html" %}
+  </div>
+
+  {% include "components/mobile_title.html" with title=aluno.get_full_name %}
+
+  <div class="mobile-content">
+    {% mobile_box title="Dados do aluno" %}
+    {% include "components/mobile_field.html" with label="Orientador" value=aluno.current_advisor.get_full_name|default:"Sem orientador" %}
+    {% include "components/mobile_field.html" with label="Fase do estágio" value=aluno.get_stage_display %}
+    {% include "components/mobile_field.html" with label="Matrícula" value=aluno.matricula|default:"Não informada" %}
+    {% endmobile_box %}
+
+    {% mobile_box title="Pacientes em atendimento" %}
+    {% for caso in open_cases %}
+    {% include "components/mobile_row.html" with name=caso.patient.get_full_name info=caso.acting_area.nome|default:"Sem área" info_icon="bi-diagram-3" %}
+    {% empty %}
+    <p class="mobile-empty">Este aluno ainda não atende nenhum paciente.</p>
+    {% endfor %}
+    {% endmobile_box %}
+  </div>
+
+  {% include "components/mobile_footer.html" %}
+</div>
+
+<!-- ══════════════════════════════════════
+     DESKTOP
+     ══════════════════════════════════════ -->
+<div class="desktop-page">
 <div class="list-panel-title">{{ aluno.get_full_name }}</div>
 
 <p class="list-panel-subtitle"><a class="btn-limpar" href="{% url 'supervisor:alunos' %}">← Voltar para Alunos</a></p>
@@ -51,5 +85,6 @@
     {% include "components/empty_state.html" with message="Este aluno ainda não atende nenhum paciente." %}
     {% endif %}
   </section>
+</div>
 </div>
 {% endblock %}

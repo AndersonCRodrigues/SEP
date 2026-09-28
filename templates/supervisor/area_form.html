@@ -12,13 +12,27 @@
 {% block page_header %}{% endblock %}
 
 {% block content %}
-<div class="list-panel-title">{% if object %}Editar área de atuação{% else %}Nova área de atuação{% endif %}</div>
+{% url 'supervisor:areas' as back_url %}
+{% if object %}
+{% include "components/mobile_top.html" with title="Editar área" %}
+{% else %}
+{% include "components/mobile_top.html" with title="Nova área" %}
+{% endif %}
 
-<p class="list-panel-subtitle">
-  <a class="btn-limpar" href="{% url 'supervisor:areas' %}">← Voltar para Áreas de atuação</a>
-</p>
+<div class="desktop-page">
+  <div class="list-panel-title">{% if object %}Editar área de atuação{% else %}Nova área de atuação{% endif %}</div>
 
-<div class="figma-form-container">
+  <p class="list-panel-subtitle">
+    <a class="btn-limpar" href="{% url 'supervisor:areas' %}">← Voltar para Áreas de atuação</a>
+  </p>
+</div>
+
+<div class="figma-form-container mobile-column">
   {% include "components/form.html" with submit_label="Salvar" %}
 </div>
+{% endblock %}
+
+{% block footer %}
+{{ block.super }}
+{% include "components/mobile_footer.html" with standalone=True %}
 {% endblock %}

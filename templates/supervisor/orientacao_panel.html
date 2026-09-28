@@ -15,9 +15,12 @@
 {% block page_header %}{% endblock %}
 
 {% block content %}
-<div class="list-panel-title">Meus orientandos</div>
+{% url 'supervisor:home' as back_url %}
+{% include "components/mobile_top.html" with title="Meus orientandos" %}
 
-<div class="list-panel">
+<div class="list-panel-title desktop-page">Meus orientandos</div>
+
+<div class="list-panel mobile-column">
   <section class="detail-card">
     <h2 class="detail-title">Alunos vinculados</h2>
     {% if alunos_vinculados %}
@@ -119,4 +122,9 @@
     {% endif %}
   </section>
 </div>
+{% endblock %}
+
+{% block footer %}
+{{ block.super }}
+{% include "components/mobile_footer.html" with standalone=True %}
 {% endblock %}

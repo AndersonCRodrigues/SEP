@@ -1,5 +1,5 @@
 {% extends "supervisor/base_coordinator.html" %}
-{% load static %}
+{% load static components %}
 
 {% block title %}Encaminhamentos{% endblock %}
 
@@ -16,6 +16,75 @@
 {% block page_header %}{% endblock %}
 
 {% block content %}
+<!-- ══════════════════════════════════════
+     MOBILE
+     ══════════════════════════════════════ -->
+<div class="mobile-page">
+  <div class="mobile-maroon-bg">
+    {% url 'supervisor:home' as back_url %}
+    {% include "components/mobile_header.html" %}
+  </div>
+
+  {% include "components/mobile_title.html" with title="Encaminhamentos" %}
+
+  <div class="mobile-content">
+    <h2 class="mobile-block-title mobile-column">Novo encaminhamento</h2>
+
+    {% if triagem %}
+    {% include "components/mobile_patient_card.html" with name=triagem.patient.get_full_name code=triagem.patient.pk detail="Triagem concluída em:" detail_date=concluida_em %}
+
+    {% url 'supervisor:encaminhar' triagem.pk as refer_url %}
+    {% mobile_filter action=refer_url icon="bi-diagram-3" %}
+    <label class="visually-hidden" for="mobile-area">Área de atuação do caso</label>
+    <select id="mobile-area" name="area">
+      <option value="">Todas as áreas</option>
+      {% for area in areas %}
+      <option value="{{ area.pk }}" {% if area_filter == area.pk|stringformat:"s" %}selected{% endif %}>{{ area.nome }}</option>
+      {% endfor %}
+    </select>
+    {% endmobile_filter %}
+
+    <form method="post" action="{{ refer_url }}">
+      {% csrf_token %}
+      <h3 class="mobile-block-title mobile-column">Alocar professor</h3>
+      {% include "components/mobile_option_list.html" with options=options field_name="professores" empty_message="Nenhum professor com essa área de atuação." %}
+
+      <div class="mobile-actions">
+        <button type="submit" class="mobile-button">Confirmar</button>
+      </div>
+    </form>
+    {% else %}
+    <p class="mobile-empty">Nenhuma triagem aguardando encaminhamento.</p>
+    {% endif %}
+
+    {% mobile_box title="Encaminhamentos recentes" %}
+    {% for item in recent %}
+    {% include "components/mobile_row.html" with name=item.title person=item.subtitle label=item.label level=item.level %}
+    {% empty %}
+    <p class="mobile-empty">Nenhum encaminhamento recente.</p>
+    {% endfor %}
+    {% endmobile_box %}
+
+    {% if triagens %}
+    <h2 class="mobile-block-title mobile-column">Aguardando encaminhamento</h2>
+    {% for item in triagens %}
+    {% url 'supervisor:encaminhar' item.triage.pk as item_url %}
+    {% if item.selected %}
+    {% include "components/mobile_row.html" with url=item_url name=item.patient person=item.student when=item.received label="Selecionada" level="neutral" %}
+    {% else %}
+    {% include "components/mobile_row.html" with url=item_url name=item.patient person=item.student when=item.received %}
+    {% endif %}
+    {% endfor %}
+    {% endif %}
+  </div>
+
+  {% include "components/mobile_footer.html" %}
+</div>
+
+<!-- ══════════════════════════════════════
+     DESKTOP
+     ══════════════════════════════════════ -->
+<div class="desktop-page">
 <div class="referral-layout">
 
   <section class="referral-new">
@@ -77,4 +146,5 @@
   </div>
 </section>
 {% endif %}
+</div>
 {% endblock %}

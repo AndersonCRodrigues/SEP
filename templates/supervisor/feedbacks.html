@@ -17,6 +17,59 @@
 {% block page_header %}{% endblock %}
 
 {% block content %}
+<!-- ══════════════════════════════════════
+     MOBILE
+     ══════════════════════════════════════ -->
+<div class="mobile-page">
+  <div class="mobile-maroon-bg">
+    {% if chosen %}{% url 'supervisor:feedbacks' as back_url %}{% else %}{% url 'supervisor:home' as back_url %}{% endif %}
+    {% include "components/mobile_header.html" %}
+  </div>
+
+  {% include "components/mobile_title.html" with title="Feedbacks" %}
+
+  <div class="mobile-content">
+    {% if chosen %}
+    <h2 class="mobile-block-title mobile-column">Avaliação de desempenho</h2>
+    <form class="mobile-form mobile-list mobile-column" method="post" action="{% url 'supervisor:feedbacks' %}">
+      {% csrf_token %}
+      <input type="hidden" name="triagem" value="{{ chosen.pk }}">
+      <p>
+        <label for="mobile-parecer">Feedback para {{ chosen.student_author.get_full_name }}</label>
+        <textarea id="mobile-parecer" name="parecer" rows="4"
+          placeholder="Triagem de {{ chosen.patient.get_full_name }}..."></textarea>
+      </p>
+      <div class="mobile-actions">
+        <button type="submit" class="mobile-button">Enviar</button>
+      </div>
+    </form>
+
+    <h2 class="mobile-block-title mobile-column mobile-block-gap">Feedbacks anteriores</h2>
+    {% include "components/mobile_feedback_list.html" with empty_message="Nenhum feedback enviado ainda para este aluno." %}
+    {% else %}
+    {% include "components/mobile_search.html" with search_value=search search_label="Buscar por aluno ou paciente" %}
+
+    {% for row in rows %}
+    {% if row.can_write %}
+    {% with pk=row.triage.pk|stringformat:"s" %}
+    {% include "components/mobile_row.html" with name=row.student person=row.patient action_url="?triagem="|add:pk action_label="Feedback" action_tone="maroon" %}
+    {% endwith %}
+    {% else %}
+    {% include "components/mobile_row.html" with name=row.student person=row.patient label=row.label level=row.level %}
+    {% endif %}
+    {% empty %}
+    <p class="mobile-empty">Nenhuma triagem para acompanhar.</p>
+    {% endfor %}
+    {% endif %}
+  </div>
+
+  {% include "components/mobile_footer.html" %}
+</div>
+
+<!-- ══════════════════════════════════════
+     DESKTOP
+     ══════════════════════════════════════ -->
+<div class="desktop-page">
 <div class="list-panel-title">Feedbacks</div>
 
 {% if chosen %}
@@ -86,4 +139,5 @@
 {% include "components/empty_state.html" with message="Nenhuma triagem para acompanhar." %}
 {% endif %}
 {% endif %}
+</div>
 {% endblock %}

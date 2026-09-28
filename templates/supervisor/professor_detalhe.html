@@ -1,5 +1,5 @@
 {% extends "supervisor/base_coordinator.html" %}
-{% load static %}
+{% load static components %}
 
 {% block title %}{{ professor.get_full_name }}{% endblock %}
 
@@ -14,6 +14,41 @@
 {% block page_header %}{% endblock %}
 
 {% block content %}
+<!-- ══════════════════════════════════════
+     MOBILE
+     ══════════════════════════════════════ -->
+<div class="mobile-page">
+  <div class="mobile-maroon-bg">
+    {% url 'supervisor:professores' as back_url %}
+    {% include "components/mobile_header.html" %}
+  </div>
+
+  {% include "components/mobile_title.html" with title=professor.get_full_name %}
+
+  <div class="mobile-content">
+    {% mobile_box title="Dados do professor" %}
+    {% include "components/mobile_field.html" with label="Áreas de atuação" value=professor.acting_areas.all|join:", "|default:"Sem área" %}
+    {% include "components/mobile_field.html" with label="E-mail" value=professor.email|default:"Não informado" %}
+    {% include "components/mobile_field.html" with label="CRP" value=professor.crp|default:"Não informado" %}
+    {% endmobile_box %}
+
+    {% mobile_box title="Alunos orientados" %}
+    {% for aluno in advisees %}
+    {% url 'supervisor:aluno_detalhe' aluno.pk as student_url %}
+    {% include "components/mobile_row.html" with url=student_url name=aluno.get_full_name info=aluno.get_stage_display info_icon="bi-mortarboard" %}
+    {% empty %}
+    <p class="mobile-empty">Este professor ainda não tem alunos vinculados.</p>
+    {% endfor %}
+    {% endmobile_box %}
+  </div>
+
+  {% include "components/mobile_footer.html" %}
+</div>
+
+<!-- ══════════════════════════════════════
+     DESKTOP
+     ══════════════════════════════════════ -->
+<div class="desktop-page">
 <div class="list-panel-title">{{ professor.get_full_name }}</div>
 
 <p class="list-panel-subtitle">
@@ -56,5 +91,6 @@
     {% include "components/empty_state.html" with message="Este professor ainda não tem alunos vinculados." %}
     {% endif %}
   </section>
+</div>
 </div>
 {% endblock %}

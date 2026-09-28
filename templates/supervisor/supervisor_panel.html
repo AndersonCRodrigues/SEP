@@ -13,6 +13,37 @@
 {% block page_header %}{% endblock %}
 
 {% block content %}
+<!-- ══════════════════════════════════════
+     MOBILE
+     ══════════════════════════════════════ -->
+<div class="mobile-page">
+  <div class="mobile-maroon-bg">
+    {% url 'supervisor:home' as back_url %}
+    {% include "components/mobile_header.html" %}
+  </div>
+
+  {% include "components/mobile_title.html" with title="Usuários cadastrados" %}
+
+  <div class="mobile-content">
+    {% for usuario in usuarios_listados %}
+    {% include "components/mobile_row.html" with variant="white" name=usuario.get_full_name label=usuario.get_role_display %}
+    {% empty %}
+    <p class="mobile-empty">Nenhum usuário cadastrado.</p>
+    {% endfor %}
+
+    <div class="mobile-actions mobile-actions-stack">
+      <a class="mobile-button" href="{% url 'students:cadastrar' %}">Cadastrar aluno</a>
+      <a class="mobile-button" href="{% url 'teacher:cadastrar' %}">Cadastrar professor</a>
+    </div>
+  </div>
+
+  {% include "components/mobile_footer.html" %}
+</div>
+
+<!-- ══════════════════════════════════════
+     DESKTOP
+     ══════════════════════════════════════ -->
+<div class="desktop-page">
 <div class="list-toolbar">
   <h1 class="list-toolbar-title">Usuários cadastrados</h1>
   <span class="list-toolbar-actions">
@@ -42,4 +73,5 @@
 {% else %}
 {% include "components/empty_state.html" with message="Nenhum usuário cadastrado." %}
 {% endif %}
+</div>
 {% endblock %}
