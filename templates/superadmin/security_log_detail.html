@@ -8,9 +8,73 @@
 <link rel="stylesheet" href="{% static 'core/css/components/list_filters.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/components/detail_panel.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/superadmin/superadmin_lists.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/mobile_shell.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/mobile_cards.css' %}">
 {% endblock %}
 
 {% block content %}
+
+<!-- ══════════════════════════════════════
+     MOBILE — Detalhe do log
+     ══════════════════════════════════════ -->
+<div class="mobile-page">
+  <div class="mobile-maroon-bg">
+    {% url 'superadmin:logs' as back_url %}
+    {% include "components/mobile_header.html" with back_url=back_url %}
+  </div>
+
+  {% include "components/mobile_title.html" with title="Detalhe do log" %}
+
+  <div class="mobile-content mobile-column">
+
+    <p class="mobile-block-title">Dados do log</p>
+
+    <div class="mobile-info mobile-info-light">
+      <div class="mobile-info-row">
+        <span class="mobile-info-label">Data e hora</span>
+        <span class="mobile-info-value">{{ log.created_at|date:"d/m/Y H:i:s" }}</span>
+      </div>
+      <div class="mobile-info-row">
+        <span class="mobile-info-label">Evento</span>
+        <span class="mobile-info-value">{{ log.get_action_display }}</span>
+      </div>
+      <div class="mobile-info-row">
+        <span class="mobile-info-label">Usuário</span>
+        <span class="mobile-info-value">{{ log.user_identifier|default:"—" }}</span>
+      </div>
+      <div class="mobile-info-row">
+        <span class="mobile-info-label">IP</span>
+        <span class="mobile-info-value">{{ log.ip_address|default:"—" }}</span>
+      </div>
+      <div class="mobile-info-row">
+        <span class="mobile-info-label">Modelo afetado</span>
+        <span class="mobile-info-value">{{ log.target_model|default:"—" }}{% if log.target_id %} #{{ log.target_id }}{% endif %}</span>
+      </div>
+    </div>
+
+    <p class="mobile-block-title" style="margin-top: 8px;">Alterações</p>
+    {% if log.changes %}
+    <div class="mobile-info mobile-info-light">
+      {% for field, change in log.changes.items %}
+      <div class="mobile-info-row">
+        <span class="mobile-info-label">{{ field }}</span>
+        <span class="mobile-info-value">{{ change.old|default:"—" }} → {{ change.new|default:"—" }}</span>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="mobile-empty" style="padding-top: 8px; text-align: left;">Nenhuma alteração registrada.</p>
+    {% endif %}
+
+  </div>
+
+  {% include "components/mobile_footer.html" %}
+</div>
+
+<!-- ══════════════════════════════════════
+     DESKTOP — Detalhe do log
+     ══════════════════════════════════════ -->
+<div class="desktop-page">
 <div class="list-panel-title">Detalhe do log</div>
 
 <p class="list-toolbar">
@@ -72,4 +136,6 @@
     {% endif %}
   </section>
 </div>
+</div>
+
 {% endblock %}

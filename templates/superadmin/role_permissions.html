@@ -8,9 +8,41 @@
 <link rel="stylesheet" href="{% static 'core/css/components/hover_lift.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/components/row_button.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/superadmin/superadmin_lists.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/mobile_shell.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/mobile_cards.css' %}">
 {% endblock %}
 
 {% block content %}
+
+<!-- ══════════════════════════════════════
+     MOBILE — Permissões
+     ══════════════════════════════════════ -->
+<div class="mobile-page">
+  <div class="mobile-maroon-bg">
+    {% url 'superadmin:home' as back_url %}
+    {% include "components/mobile_header.html" with back_url=back_url %}
+  </div>
+
+  {% include "components/mobile_title.html" with title="Permissões" %}
+
+  <div class="mobile-content mobile-column">
+    {% if escopos %}
+      {% for escopo in escopos %}
+        {% url 'superadmin:permissao_editar' escopo.pk as edit_url %}
+        {% include "components/mobile_row.html" with name=escopo.get_role_display action_url=edit_url action_label="Ver" %}
+      {% endfor %}
+    {% else %}
+      <p class="mobile-empty">Nenhum escopo cadastrado.</p>
+    {% endif %}
+  </div>
+
+  {% include "components/mobile_footer.html" %}
+</div>
+
+<!-- ══════════════════════════════════════
+     DESKTOP — Permissões
+     ══════════════════════════════════════ -->
+<div class="desktop-page">
 <div class="list-panel-title">Permissões por perfil</div>
 
 {% if escopos %}
@@ -38,4 +70,5 @@
 {% else %}
 {% include "components/empty_state.html" with message="Nenhum escopo cadastrado." %}
 {% endif %}
+</div>
 {% endblock %}

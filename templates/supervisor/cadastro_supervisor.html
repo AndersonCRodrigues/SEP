@@ -7,9 +7,49 @@
 <link rel="stylesheet" href="{% static 'core/css/components/list_panel.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/components/list_filters.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/form_cadastro.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/mobile_shell.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/mobile_cards.css' %}">
 {% endblock %}
 
 {% block content %}
+
+<!-- ══════════════════════════════════════
+     MOBILE — Adicionar supervisor
+     ══════════════════════════════════════ -->
+<div class="mobile-page">
+  <div class="mobile-maroon-bg">
+    {% url 'superadmin:home' as back_url %}
+    {% include "components/mobile_header.html" with back_url=back_url %}
+  </div>
+
+  {% include "components/mobile_title.html" with title="Adicionar supervisor" %}
+
+  <div class="mobile-content mobile-column">
+    
+    {% if form.errors %}
+    <div class="mobile-alert" style="margin-bottom: 16px;">
+      <p class="mobile-alert-title"><i class="bi bi-exclamation-triangle-fill"></i> Erro</p>
+      <p class="mobile-alert-text">Confira os campos destacados abaixo.</p>
+    </div>
+    {% endif %}
+
+    <form class="mobile-form" method="post" novalidate>
+      {% csrf_token %}
+      {{ form.as_p }}
+
+      <div class="mobile-actions">
+        <button type="submit" class="mobile-button mobile-button-block">Cadastrar</button>
+      </div>
+    </form>
+  </div>
+
+  {% include "components/mobile_footer.html" %}
+</div>
+
+<!-- ══════════════════════════════════════
+     DESKTOP — Adicionar supervisor
+     ══════════════════════════════════════ -->
+<div class="desktop-page">
 <div class="list-panel-title">Adicionar supervisor</div>
 
 <p class="list-panel-subtitle">
@@ -29,5 +69,6 @@
       <button type="submit" class="btn-submit-figma">Cadastrar supervisor</button>
     </div>
   </form>
+</div>
 </div>
 {% endblock %}

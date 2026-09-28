@@ -7,9 +7,43 @@
 <link rel="stylesheet" href="{% static 'core/css/components/list_panel.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/components/list_filters.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/form_cadastro.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/mobile_shell.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/mobile_cards.css' %}">
 {% endblock %}
 
 {% block content %}
+
+<!-- ══════════════════════════════════════
+     MOBILE — Editar Permissão
+     ══════════════════════════════════════ -->
+<div class="mobile-page">
+  <div class="mobile-maroon-bg">
+    {% url 'superadmin:permissoes' as back_url %}
+    {% include "components/mobile_header.html" with back_url=back_url %}
+  </div>
+
+  {% include "components/mobile_title.html" with title="Editar permissão" %}
+
+  <div class="mobile-content mobile-column">
+    <div class="mobile-notice">
+      <form class="mobile-form" method="post" novalidate>
+        {% csrf_token %}
+        {{ form.as_p }}
+        
+        <div class="mobile-actions">
+          <button type="submit" class="mobile-button mobile-button-block">Editar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  {% include "components/mobile_footer.html" %}
+</div>
+
+<!-- ══════════════════════════════════════
+     DESKTOP — Editar Permissão
+     ══════════════════════════════════════ -->
+<div class="desktop-page">
 <div class="list-panel-title">Editar permissão - {{ object.get_role_display }}</div>
 
 <p class="list-toolbar">
@@ -18,5 +52,6 @@
 
 <div class="figma-form-container">
   {% include "components/form.html" with submit_label="Salvar" %}
+</div>
 </div>
 {% endblock %}

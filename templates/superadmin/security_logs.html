@@ -8,9 +8,66 @@
 <link rel="stylesheet" href="{% static 'core/css/components/hover_lift.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/components/list_filters.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/superadmin/superadmin_lists.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/mobile_shell.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/mobile_cards.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/mobile_nav.css' %}">
 {% endblock %}
 
 {% block content %}
+
+<!-- ══════════════════════════════════════
+     MOBILE — Logs de segurança
+     ══════════════════════════════════════ -->
+<div class="mobile-page">
+  <div class="mobile-maroon-bg">
+    {% url 'superadmin:home' as back_url %}
+    {% include "components/mobile_header.html" with back_url=back_url %}
+  </div>
+
+  {% include "components/mobile_title.html" with title="Logs de segurança" %}
+
+  <div class="mobile-content mobile-column">
+
+    {% include "components/mobile_search.html" with search_value=search search_name="q" search_label="Buscar evento" %}
+
+    {% if logs %}
+      {% for log in logs %}
+      {# Deduz badge pelo campo severidade que a view já calcula #}
+      {% url 'superadmin:log_detail' log.pk as log_url %}
+      {% if log.severidade == "critico" %}
+        {% include "components/mobile_row.html" with variant="white" url=log_url name=log.get_action_display person=log.detail|default:log.user_identifier|default:"—" when=log.created_at|date:"d/m H:i" label="Crítico" level="danger" %}
+      {% elif log.severidade == "atencao" %}
+        {% include "components/mobile_row.html" with variant="white" url=log_url name=log.get_action_display person=log.detail|default:log.user_identifier|default:"—" when=log.created_at|date:"d/m H:i" label="Atenção" level="warning" %}
+      {% else %}
+        {% include "components/mobile_row.html" with variant="white" url=log_url name=log.get_action_display person=log.detail|default:log.user_identifier|default:"—" when=log.created_at|date:"d/m H:i" label="Info" level="success" %}
+      {% endif %}
+      {% endfor %}
+
+      {% if page_obj.paginator.num_pages > 1 %}
+      <div style="display:flex; justify-content:space-between; align-items:center; margin: 16px 0; font-family: var(--font-main); font-size: 13px;">
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}{% if search %}&q={{ search }}{% endif %}" class="mobile-button" style="padding: 8px 20px;">‹ Anterior</a>
+        {% else %}<span></span>{% endif %}
+        <span>{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% if search %}&q={{ search }}{% endif %}" class="mobile-button" style="padding: 8px 20px;">Próxima ›</a>
+        {% else %}<span></span>{% endif %}
+      </div>
+      {% endif %}
+
+    {% else %}
+    <p class="mobile-empty">Nenhum log encontrado.</p>
+    {% endif %}
+
+  </div>
+
+  {% include "components/mobile_footer.html" %}
+</div>
+
+<!-- ══════════════════════════════════════
+     DESKTOP — Logs de segurança
+     ══════════════════════════════════════ -->
+<div class="desktop-page">
 <div class="list-toolbar">
   <h1 class="list-toolbar-title">Logs de segurança</h1>
 </div>
@@ -62,11 +119,11 @@
 {% if page_obj.paginator.num_pages > 1 %}
 <nav class="list-pagination" aria-label="Paginação de logs">
   {% if page_obj.has_previous %}
-  <a class="btn-limpar" href="?page={{ page_obj.previous_page_number }}{% if search %}&amp;q={{ search }}{% endif %}">&lt; Anterior</a>
+  <a class="btn-limpar" href="?page={{ page_obj.previous_page_number }}{% if search %}&q={{ search }}{% endif %}">&lt; Anterior</a>
   {% endif %}
   <span class="list-pagination-info">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
   {% if page_obj.has_next %}
-  <a class="btn-limpar" href="?page={{ page_obj.next_page_number }}{% if search %}&amp;q={{ search }}{% endif %}">Próxima &gt;</a>
+  <a class="btn-limpar" href="?page={{ page_obj.next_page_number }}{% if search %}&q={{ search }}{% endif %}">Próxima &gt;</a>
   {% endif %}
 </nav>
 {% endif %}
@@ -74,4 +131,6 @@
 {% else %}
 {% include "components/empty_state.html" with message="Nenhum log encontrado." %}
 {% endif %}
+</div>
+
 {% endblock %}

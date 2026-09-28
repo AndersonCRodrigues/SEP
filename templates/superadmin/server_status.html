@@ -7,9 +7,46 @@
 <link rel="stylesheet" href="{% static 'core/css/components/list_panel.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/components/hover_lift.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/superadmin/superadmin_lists.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/mobile_shell.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/mobile_cards.css' %}">
 {% endblock %}
 
 {% block content %}
+
+<!-- ══════════════════════════════════════
+     MOBILE — Servidores
+     ══════════════════════════════════════ -->
+<div class="mobile-page">
+  <div class="mobile-maroon-bg">
+    {% url 'superadmin:home' as back_url %}
+    {% include "components/mobile_header.html" with back_url=back_url %}
+  </div>
+
+  {% include "components/mobile_title.html" with title="Servidores" %}
+
+  <div class="mobile-content mobile-column">
+    {% if servidores %}
+      {% for server in servidores %}
+      {% if server.health == "OF" %}
+      {% include "components/mobile_row.html" with variant="white" name=server.nome person="Servidor indisponível, sem resposta." label="Off-line" level="danger" %}
+      {% elif server.health == "OK" %}
+      {% include "components/mobile_row.html" with variant="white" name=server.nome person=server.uptime_percent|stringformat:"s%%"|add:" Uptime" place=server.cpu_percent|stringformat:"s%%"|add:" CPU" label="Saudável" level="success" %}
+      {% else %}
+      {% include "components/mobile_row.html" with variant="white" name=server.nome person=server.uptime_percent|stringformat:"s%%"|add:" Uptime" place=server.cpu_percent|stringformat:"s%%"|add:" CPU" label="Atenção" level="warning" %}
+      {% endif %}
+      {% endfor %}
+    {% else %}
+    <p class="mobile-empty">Nenhum servidor cadastrado.</p>
+    {% endif %}
+  </div>
+
+  {% include "components/mobile_footer.html" %}
+</div>
+
+<!-- ══════════════════════════════════════
+     DESKTOP — Servidores
+     ══════════════════════════════════════ -->
+<div class="desktop-page">
 <div class="list-panel-title">Status dos servidores</div>
 
 {% if servidores %}
@@ -48,4 +85,6 @@
 {% else %}
 {% include "components/empty_state.html" with message="Nenhum servidor cadastrado." %}
 {% endif %}
+</div>
+
 {% endblock %}
