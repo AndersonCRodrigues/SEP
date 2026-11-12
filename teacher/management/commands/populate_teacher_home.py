@@ -44,10 +44,10 @@ NOTES = (
 ADDRESS = dict(
     telefone="21999990000",
     logradouro="Rua da Demonstração",
-    numero="10",
+    number="10",
     bairro="Centro",
-    cidade="Maricá",
-    estado="RJ",
+    city="Maricá",
+    state="RJ",
     cep="24900-000",
 )
 
@@ -152,8 +152,8 @@ class Command(BaseCommand):
         self.stdout.write(f"{len(alunos)} alunos orientados por {professor}.")
         return alunos
 
-    def patient(self, first_name, last_name, numero):
-        email = f"paciente.prof{numero}@teste.com"
+    def patient(self, first_name, last_name, number):
+        email = f"paciente.prof{number}@teste.com"
         paciente = Patient.objects.filter(email=email).first()
         if paciente is None:
             paciente = Patient(
@@ -174,8 +174,8 @@ class Command(BaseCommand):
 
     def queue(self, professor, alunos, coordenador):
         fila = []
-        for indice, (first_name, last_name, numero) in enumerate(QUEUE):
-            paciente = self.patient(first_name, last_name, numero)
+        for indice, (first_name, last_name, number) in enumerate(QUEUE):
+            paciente = self.patient(first_name, last_name, number)
             autor = alunos[indice % len(alunos)]
             fila.append(self.refer(paciente, autor, professor, coordenador))
 
@@ -187,9 +187,9 @@ class Command(BaseCommand):
 
     def assigned(self, professor, alunos, area, coordenador):
         casos = []
-        for first_name, last_name, numero, indice in ASSIGNED:
+        for first_name, last_name, number, indice in ASSIGNED:
             aluno = alunos[indice]
-            paciente = self.patient(first_name, last_name, numero)
+            paciente = self.patient(first_name, last_name, number)
             self.refer(paciente, aluno, professor, coordenador)
             casos.append(
                 CaseAssignment.objects.assign(aluno, paciente, acting_area=area)
