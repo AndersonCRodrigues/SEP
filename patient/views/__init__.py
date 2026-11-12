@@ -2,7 +2,8 @@ from .appointments import AppointmentRequestView, PatientAppointmentsView
 from .contact import PatientContactView
 from .history import PatientHistoryView, PatientSessionDetailView
 from .home import PatientHomeView
-from .profile import enviar_email
+from .profile import PatientProfileView
+
 from .triages import PatientTriageDetailView, PatientTriagesView
 
 __all__ = [
@@ -14,5 +15,6 @@ __all__ = [
     "PatientSessionDetailView",
     "PatientTriageDetailView",
     "PatientTriagesView",
-    "enviar_email",
+    "PatientProfileView",
+    
 ]
