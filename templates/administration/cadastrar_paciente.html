@@ -51,7 +51,7 @@
 
       <form class="question-form" method="post" novalidate>
         {% csrf_token %}
-
+        <button type="submit" style="display: none;" aria-hidden="true" ></button>
         <div class="question-fields">
           {% for field in form %}
           <div class="question-field question-field-{{ field.name }}">
@@ -138,7 +138,7 @@
     });
 
     const noNumber = document.getElementById("id_no_number");
-    const number = document.getElementById("id_numero");
+    const number = document.getElementById("id_number");
     if (noNumber && number) {
       function syncNumber() {
         number.disabled = noNumber.checked;
