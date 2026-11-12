@@ -412,7 +412,7 @@ class NumberForm(RegistrationStepForm):
             number = cleaned_data.get("number", "")
             
             if not number:
-                self.add_error("number", "Informe o número ou marque sem número.")
+                self.add_error("number", "Informe o número.")
             elif not (number.isascii() and number.isdigit()):
                 self.add_error("number", "Use somente números.")
             return cleaned_data
