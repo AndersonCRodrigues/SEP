@@ -25,4 +25,6 @@ urlpatterns = [
         name="triagem_detalhe",
     ),
     path("contato/", views.PatientContactView.as_view(), name="contato"),
+    path("primeiro-acesso/<str:token>/",views.PatientFirstAccessView.as_view(),name="primeiro_acesso",
+),
 ]
