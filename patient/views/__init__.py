@@ -16,6 +16,6 @@ __all__ = [
     "PatientSessionDetailView",
     "PatientTriageDetailView",
     "PatientTriagesView",
-    "enviar_email",
-    "PatientFirstAccessView"
+    "PatientProfileView",
+    "PatientFirstAccessView",
 ]
