@@ -149,6 +149,9 @@ EMAIL_BACKEND = os.getenv(
     "django.core.mail.backends.console.EmailBackend",
 )
 
+#validade do token de primerio acesso, 15 minutos só para teste
+FIRST_ACCESS_TOKEN_TIMEOUT_MINUTES = 15
+FIRST_ACCESS_BASE_URL = "http://127.0.0.1:8000"
 
 DEFAULT_FROM_EMAIL = os.getenv("DJANGO_DEFAULT_FROM_EMAIL", "no-reply@sep.local")
 
@@ -247,4 +250,7 @@ __all__ = [
     "CRISPY_TEMPLATE_PACK",
     "SEP_CONTACT",
     "WSGI_APPLICATION",
+    "FIRST_ACCESS_TOKEN_TIMEOUT_MINUTES",
+    "FIRST_ACCESS_BASE_URL",
+
 ]
