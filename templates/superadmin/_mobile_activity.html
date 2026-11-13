@@ -11,13 +11,8 @@
       {% else %}{{ activity.kind|capfirst }}{% endif %}
     </span>
 
-    {# Deduz badge pelo kind e pelo título, sem precisar de label/level do back #}
     {% if activity.kind == 'backup' %}
-      {% if "concluído" in activity.title|lower %}
-      {% include "components/mobile_badge.html" with label="Concluído" level="success" %}
-      {% else %}
-      {% include "components/mobile_badge.html" with label="Agendado" level="neutral" %}
-      {% endif %}
+      {% include "components/mobile_badge.html" with label=activity.label level=activity.level %}
     {% elif activity.kind == 'security' %}
       {% include "components/mobile_badge.html" with label="Revisar" level="warning" %}
     {% elif activity.kind == 'document' %}
