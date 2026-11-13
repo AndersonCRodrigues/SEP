@@ -22,10 +22,10 @@ from teacher.models import Teacher
 ENDERECO_PADRAO = dict(
     telefone="(99) 99999-9999",
     logradouro="Rua de Teste",
-    numero="0",
+    number="0",
     bairro="Centro",
-    cidade="Maricá",
-    estado="RJ",
+    city="Maricá",
+    state="RJ",
     cep="24900-000",
 )
 

@@ -14,10 +14,10 @@ INITIAL_PASSWORD = "PrimeiroAcesso@123"  # nosec B105
 ADDRESS = dict(
     telefone="21999990000",
     logradouro="Rua da Demonstração",
-    numero="10",
+    number="10",
     bairro="Centro",
-    cidade="Maricá",
-    estado="RJ",
+    city="Maricá",
+    state="RJ",
     cep="24900-000",
 )
 
