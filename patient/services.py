@@ -172,6 +172,10 @@ def reissue_first_access_invitation(patient, responsible_user):
     access_url = build_first_access_url(token)
 
     def send_after_commit():
+        invitation.refresh_from_db()
+        if invitation.revoked_at is not None or invitation.used_at is not None:
+            return
+        
         send_first_access_sms(invitation=invitation, access_url=access_url, responsible_user=responsible_user,)
         
     transaction.on_commit(send_after_commit)
