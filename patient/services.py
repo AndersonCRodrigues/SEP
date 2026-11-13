@@ -18,6 +18,9 @@ sms_test_outbox = []
 def build_first_access_url(token):
     base_url = settings.FIRST_ACCESS_BASE_URL.rstrip("/")
 
+    if not base_url:
+        raise ImproperlyConfigured("Configure FIRST_ACCESS_BASE_URL com o endereço publico do sistema")
+
     access_path = reverse("patient:primeiro_acesso",kwargs={"token": token})
 
     return f"{base_url}{access_path}"
