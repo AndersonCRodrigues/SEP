@@ -9,7 +9,7 @@ from localflavor.br.br_states import STATE_CHOICES
 from localflavor.br.forms import BRCPFField
 from core.fields import format_cep, only_digits
 from core.models import CustomUser
-from core.validators import NO_NUMBER, validate_letters, validate_phone
+from core.validators import validate_letters, validate_phone
 from documents.models import AttendanceCertificate
 from patient.models import Patient
 from scheduling.models import Appointment
@@ -361,60 +361,6 @@ class EmailForm(RegistrationStepForm):
 CEP_PATTERN = re.compile(r"^[0-9]{5}-?[0-9]{3}$")
 
 
-class AddressForm(RegistrationStepForm):
-    cep = forms.CharField(
-        label="CEP",
-        widget=forms.TextInput(
-            attrs={
-                "placeholder": "ex: 24900-000",
-                "inputmode": "numeric",
-                "maxlength": 9,
-                "data-mask": "cep",
-            }
-        ),
-    )
-    logradouro = forms.CharField(label="Logradouro", max_length=200)
-    numero = forms.CharField(
-        label="Número",
-        max_length=10,
-        required=False,
-        widget=forms.TextInput(
-            attrs={"inputmode": "numeric", "maxlength": 10, "data-only": "digits"}
-        ),
-    )
-    no_number = forms.BooleanField(label="S/N (sem número)", required=False)
-    complemento = forms.CharField(label="Complemento", max_length=100, required=False)
-    bairro = forms.CharField(label="Bairro", max_length=100)
-    cidade = forms.CharField(
-        label="Cidade",
-        max_length=100,
-        validators=[validate_letters],
-        widget=forms.TextInput(
-            attrs={"placeholder": "ex: Maricá", "data-only": "letters"}
-        ),
-    )
-    estado = forms.ChoiceField(
-        label="Estado",
-        choices=[("", "---------"), *STATE_CHOICES],
-        error_messages={"invalid_choice": "Escolha um estado válido."},
-    )
-
-    def clean_cep(self):
-        cep = self.cleaned_data["cep"]
-        if not CEP_PATTERN.match(cep):
-            raise forms.ValidationError("Informe o CEP no formato 00000-000.")
-        return format_cep(cep)
-
-    def clean(self):
-        cleaned_data = super().clean()
-        number = cleaned_data.get("numero", "")
-        if cleaned_data.pop("no_number", False):
-            cleaned_data["numero"] = NO_NUMBER
-        elif not number:
-            self.add_error("numero", "Informe o número ou marque sem número.")
-        elif not (number.isascii() and number.isdigit()):
-            self.add_error("numero", "Use somente números.")
-        return cleaned_data
 
 
 class LogradouroForm(RegistrationStepForm):
@@ -424,6 +370,7 @@ class LogradouroForm(RegistrationStepForm):
         label="Endereço",
         max_length=200,
         widget=forms.TextInput(attrs={"placeholder": "Ex: Rua das Flores, 123"}),
+        
     )
 
 
@@ -435,6 +382,71 @@ class BairroForm(RegistrationStepForm):
         max_length=100,
         widget=forms.TextInput(attrs={"placeholder": "Ex: Centro"}),
     )
+    
+
+class CEPForm(RegistrationStepForm):
+    cep=forms.CharField(
+        label="CEP",
+                widget=forms.TextInput(
+                    attrs={
+                        "placeholder": "ex: 24900-000",
+                        "inputmode": "numeric",
+                        "maxlength": 9,
+                        "data-mask": "cep",
+                    }
+                ),
+    )
+    def clean_cep(self):
+            cep = self.cleaned_data["cep"]
+            if not CEP_PATTERN.match(cep):
+                raise forms.ValidationError("Informe o CEP no formato 00000-000.")
+            return format_cep(cep)
+class NumberForm(RegistrationStepForm):
+    number=forms.CharField(
+        label="numero",max_length=10,
+        widget=forms.TextInput(attrs={"placeholder":"Exemplo: 354"})
+        
+    )
+    def clean(self):
+            cleaned_data = super().clean()
+            number = cleaned_data.get("number", "")
+            
+            if not number:
+                self.add_error("number", "Informe o número.")
+            elif not (number.isascii() and number.isdigit()):
+                self.add_error("number", "Use somente números.")
+            return cleaned_data
+        
+class MunicipalityForm(RegistrationStepForm):
+    municipality=forms.CharField(
+        label="municipio",max_length=100,
+        widget=forms.TextInput(attrs={"placeholder":"Exemplo: Niterói, São Gonçalo"})
+    )
+class StateForm(RegistrationStepForm):
+    state=forms.ChoiceField(
+        label="Estado",
+                choices=[("", "---------"), *STATE_CHOICES],
+                error_messages={"invalid_choice": "Escolha um estado válido."},
+                )
+    
+
+
+class CityForm(RegistrationStepForm):
+    city = forms.CharField(
+        label="Cidade",max_length=100,
+        widget=forms.TextInput(attrs={"placeholder":"Exemplo:Maricá"})
+    )
+    
+    
+class ComplementForm(RegistrationStepForm):
+    complement = forms.CharField(
+        label="Cidade",max_length=50,
+        widget=forms.TextInput(attrs={
+            "placeholder":"Exemplo:Casa 1 em frente ao condomínio A "})
+    )
+    
+
+
 
 
 class AccompaniedForm(RegistrationStepForm):

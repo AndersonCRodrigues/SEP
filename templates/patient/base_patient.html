@@ -33,6 +33,9 @@
     <li class="nav-item">
       <a class="nav-link {% if current == 'contato' %}active{% endif %}" href="{% url 'patient:contato' %}">Contato</a>
     </li>
+    <li class="nav-item">
+      <a class="nav-link {% if current == 'perfil' %}active{% endif %}" href="{% url 'patient:perfil' %}">Perfil</a>
+    </li>
   </ul>
 </nav>
 {% endwith %}

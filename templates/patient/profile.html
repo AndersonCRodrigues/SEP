@@ -1,0 +1,289 @@
+{% extends "patient/base_patient.html" %}
+{% load static %}
+
+{% block title %}Meus Agendamentos{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'core/css/components/hover_lift.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/mobile_cards.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/patient_agendamentos.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center gap-4">
+
+    <div class="bg-secondary rounded-circle d-flex justify-content-center align-items-center" style="width: 100px; height: 100px;">
+        <h1 class="mb-0">{{ nome.0 }} {{ sobrenome.0 }}</h1>
+    </div>
+    <ul class="list-unstyled">
+        <li>
+            <h2>{{ nome }} {{ sobrenome }}</h2>
+        </li>
+        <li class="d-flex align-items-center gap-4">Paciente dede agosto de 2026
+            <div class="bg-secondary rounded-5 w-25 d-flex justify-content-center align-items-center">
+                Ativo
+            </div>
+        </li>
+</ul>
+    
+</div>
+
+<div class="desktop-page container mt-3 mb-5">
+    <div class="d-flex align-items-center gap-4">
+
+        <div class="agend-list">
+            <h2>Dados pessoais</h2>
+            <p>Mantenha seus dados atualizados</p>
+            <div class="d-flex align-items-center gap-4">
+
+                <ul class="list-unstyled">
+                    <li>
+                        <h5 class="mb-0">Nome Completo</h5>
+                    </li>
+                    <div class=" border border-secondary text-black p-1 rounded w-auto">
+                        <li>
+                            <p>{{ nome }} {{ sobrenome }}</p>
+                        </li>
+                    </div>
+                </ul>
+                <ul class="list-unstyled">
+                    <li>
+                        <h5 class="mb-0">Data de nascimento</h5>
+                    </li>
+                    <div class=" border border-secondary text-black p-1 rounded w-auto">
+                        <li>
+                            <p>{{ data_nascimento }}</p>
+                        </li>
+                    </div>
+                </ul>
+                <ul class="list-unstyled">
+                    <li>
+                        <h5 class="mb-0">CPF</h5>
+                    </li>
+                    <div class=" border border-secondary text-black p-1 rounded w-100">
+                        <li>
+                            <p>{{ cpf }}</p>
+                        </li>
+                    </div>
+                </ul>
+            </div>
+        </div>
+        <div class="agend-list">
+
+            <ul class="list-unstyled">
+                <!--DA LINHA 76 ATÉ A LINHA 96 SÃO DADOS MOKADOS POR FAVOR TROCAR PARA DADOS REAIS-->
+                <li>
+                    <h2>Resumo</h2>
+                    <hr>
+                    <h5>PRÓXIMA SESSÃO</h5>
+                </li>
+
+                <li>
+                    <p>11/11/2026-14:00</p>
+                </li>
+                <hr>
+                <li>
+                    <h5>SESSÕES REALIZADAS</h5>
+                </li>
+                <li>
+                    <p>7 de 8 agendamentos</p>
+                </li>
+                <hr>
+                <li>
+                    <h5>SEU ATENDIMENTO</h5>
+                </li>
+                <li>
+                    <p>Aluno André Ferreira</p>
+                </li>
+                <hr>
+
+            </ul>
+        </div>
+
+    </div>
+</div>
+<div class="desktop-page container mt-4 mb-5">
+    <div class="d-flex align-items-center gap-4">
+        <div class="agend-list">
+            <h2>Dados de contato</h2>
+            <p>Mantenha seus dados atualizados</p>
+            <div class="d-flex align-items-center gap-4">
+                <ul class="list-unstyled">
+                    <li>
+                        <h5 class="mb-0">telefone</h5>
+                    </li>
+                    <div class=" border border-secondary text-black p-1 rounded w-auto">
+                        <li>
+                            <p>{{ telefone }}</p>
+                        </li>
+                    </div>
+                </ul>
+
+
+                <ul class="list-unstyled">
+                    {% if email %}
+                        <li>
+                            <h5 class="mb-0">Email</h5>
+                        </li>
+                        <div class=" border border-secondary text-black p-1 rounded w-auto">
+                            <li>
+                                <p>{{ email }}</p>
+                            </li>
+                        </div>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+        <div class="agend-list">
+
+            <ul class="list-unstyled">
+                <li>
+                   <h2>Segurança</h2>
+                </li>
+
+                <li>
+                    Altere a sua senha periodicamente
+                </li>
+                <div class=" border border-secondary text-black p-1 rounded w-auto">
+                        <li>
+                            <h2>Alterar senha</h2>
+                        </li>
+                    </div>
+                
+            </ul>
+        </div>
+
+    </div>
+</div>
+<div class="desktop-page container mt-4 mb-5">
+    <div class="agend-list">
+        <h2>Endereço</h2>
+        <p>Mantenha seus dados atualizados</p>
+        <div class="d-flex align-items-center gap-4">
+            <ul class="list-unstyled">
+                <li>
+                    <h5 class="mb-0">Endereço</h5>
+                </li>
+                <div class=" border border-secondary text-black p-1 rounded w-auto">
+                    <li>
+                        <p>{{ logradouro }}</p>
+                    </li>
+                </div>
+            </ul>
+            <ul class="list-unstyled">
+                <li>
+                    <h5 class="mb-0">Número</h5>
+                </li>
+                <div class=" border border-secondary text-black p-1 rounded w-auto">
+                    <li>
+                        <p>{{ number }}</p>
+                    </li>
+                </div>
+            </ul>
+            <ul class="list-unstyled">
+                <li>
+                    <h5 class="mb-0">Complemento</h5>
+                </li>
+                <div class=" border border-secondary text-black p-1 rounded w-auto">
+                    <li>
+                        <p>{{ complement }}</p>
+                    </li>
+                </div>
+            </ul>
+            <ul class="list-unstyled">
+                <li>
+                    <h5 class="mb-0">Bairro</h5>
+                </li>
+                <div class=" border border-secondary text-black p-1 rounded w-auto">
+                    <li>
+                        <p>{{ bairro }}</p>
+                    </li>
+                </div>
+            </ul>
+        </div>
+        <div class="d-flex align-items-center gap-4">
+
+            <ul class="list-unstyled">
+                <li>
+                    <h5 class="mb-0">Município</h5>
+                </li>
+                <div class=" border border-secondary text-black p-1 rounded w-auto">
+                    <li>
+                        <p>{{ municipality }}</p>
+                    </li>
+                </div>
+            </ul>
+            <ul class="list-unstyled">
+                <li>
+                    <h5 class="mb-0">Cidade</h5>
+                </li>
+                <div class=" border border-secondary text-black p-1 rounded w-auto">
+                    <li>
+                        <p>{{ city }}</p>
+                    </li>
+                </div>
+            </ul>
+            <ul class="list-unstyled">
+                <li>
+                    <h5 class="mb-0">Estado</h5>
+                </li>
+                <div class=" border border-secondary text-black p-1 rounded w-auto">
+                    <li>
+                        <p>{{ state }}</p>
+                    </li>
+                </div>
+            </ul>
+            <ul class="list-unstyled">
+                <li>
+                    <h5 class="mb-0">CEP</h5>
+                </li>
+                <div class=" border border-secondary text-black p-1 rounded w-auto">
+                    <li>
+                        <p>{{ cep }}</p>
+                    </li>
+                </div>
+            </ul>
+        </div>
+    </div>
+</div>
+{% if is_accompanied %}
+    <div class="desktop-page container mt-4 mb-5">
+    <div class="d-flex align-items-center gap-4">
+        <div class="agend-list">
+            <h2>Dados do acompanhante</h2>
+            <p>Mantenha seus dados atualizados</p>
+            <div class="d-flex align-items-center gap-4">
+                <ul class="list-unstyled">
+                    <li>
+                        <h5 class="mb-0">Nome completo</h5>
+                    </li>
+                    <div class=" border border-secondary text-black p-1 rounded w-auto">
+                        <li>
+                            <p>{{ guardian_first_name }} {{ guardian_last_name }}</p>
+                        </li>
+                    </div>
+                </ul>
+
+
+                <ul class="list-unstyled">
+                    <li>
+                        <h5 class="mb-0">Parentesco</h5>
+                    </li>
+                    <div class=" border border-secondary text-black p-1 rounded w-auto">
+                        <li>
+                            <p>{{ guardian_relationship }}</p>
+                        </li>
+                    </div>
+                </ul>
+            </div>
+        </div>
+        
+
+    </div>
+</div>
+        
+        {% endif %}
+  
+
+
+{% endblock %}

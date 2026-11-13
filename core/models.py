@@ -38,17 +38,18 @@ class CustomUser(AbstractUser):
     )
 
     logradouro = models.CharField(max_length=200, verbose_name="Logradouro")
-    numero = models.CharField(
+    number = models.CharField(
         max_length=10, validators=[validate_address_number], verbose_name="Número"
     )
-    complemento = models.CharField(
+    complement = models.CharField(
         max_length=100, blank=True, verbose_name="Complemento"
     )
     bairro = models.CharField(max_length=100, verbose_name="Bairro")
-    cidade = models.CharField(
+    municipality = models.CharField(max_length=100, verbose_name="Município",null=True,blank=True)
+    city = models.CharField(
         max_length=100, validators=[validate_letters], verbose_name="Cidade"
     )
-    estado = BRStateField(verbose_name="Estado")
+    state = BRStateField(verbose_name="Estado")
     cep = BRPostalCodeField(verbose_name="CEP")
     must_change_password = models.BooleanField(
         default=False,
@@ -72,11 +73,12 @@ class CustomUser(AbstractUser):
     ADDRESS_FIELDS = (
         "telefone",
         "logradouro",
-        "numero",
-        "complemento",
+        "number",
+        "complement",
         "bairro",
-        "cidade",
-        "estado",
+        "municipality",
+        "city",
+        "state",
         "cep",
     )
     ALL_EDITABLE_FIELDS = (
@@ -100,10 +102,10 @@ class CustomUser(AbstractUser):
         self.cpf = only_digits(self.cpf)
         self.telefone = normalize_phone(self.telefone)
         self.cep = format_cep(self.cep)
-        self.numero = normalize_address_number(self.numero)
+        self.number = normalize_address_number(self.number)
         self.first_name = collapse_spaces(self.first_name)
         self.last_name = collapse_spaces(self.last_name)
-        self.cidade = collapse_spaces(self.cidade)
+        self.city = collapse_spaces(self.city)
 
     def clean_fields(self, exclude=None):
         self.normalize()

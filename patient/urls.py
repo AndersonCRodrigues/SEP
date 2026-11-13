@@ -25,4 +25,5 @@ urlpatterns = [
         name="triagem_detalhe",
     ),
     path("contato/", views.PatientContactView.as_view(), name="contato"),
+    path("perfil/", views.PatientProfileView.as_view(), name="perfil"),
 ]

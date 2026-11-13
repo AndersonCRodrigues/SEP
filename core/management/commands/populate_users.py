@@ -123,10 +123,10 @@ class Command(BaseCommand):
                     telefone="99999999999",
                     logradouro="Rua de Teste",
                     data_nascimento="1990-01-01",
-                    numero="0",
+                    number="0",
                     bairro="Centro",
-                    cidade="Maricá",
-                    estado="RJ",
+                    city="Maricá",
+                    state="RJ",
                     cep="24900-000",
                     role=role,
                 )

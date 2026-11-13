@@ -43,11 +43,12 @@ class PacienteCreationForm(forms.ModelForm):
             "data_nascimento",
             "telefone",
             "logradouro",
-            "numero",
-            "complemento",
+            "number",
+            "complement",
             "bairro",
-            "cidade",
-            "estado",
+            "municipality",
+            "city",
+            "state",
             "cep",
         )
 

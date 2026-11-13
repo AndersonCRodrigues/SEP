@@ -24,11 +24,12 @@ class PerfilAdministrativoView(AdministrativeOnly, UpdateView):
         "last_name",
         "telefone",
         "logradouro",
-        "numero",
-        "complemento",
+        "number",
+        "complement",
         "bairro",
-        "cidade",
-        "estado",
+        "municipality",
+        "city",
+        "state",
         "cep",
     ]
     template_name = "administration/perfil.html"

@@ -23,10 +23,10 @@ COMPLAINT = "Ficha de demonstração do fluxo de triagem."
 ADDRESS = dict(
     telefone="21999990000",
     logradouro="Rua da Demonstração",
-    numero="10",
+    number="10",
     bairro="Centro",
-    cidade="Maricá",
-    estado="RJ",
+    city="Maricá",
+    state="RJ",
     cep="24900-000",
 )
 
@@ -103,8 +103,8 @@ class Command(BaseCommand):
         return paciente
 
     def waiting_queue(self):
-        for numero, (first_name, last_name, flow_status) in enumerate(WAITING, start=1):
-            self.patient(first_name, last_name, f"espera{numero}", flow_status)
+        for number, (first_name, last_name, flow_status) in enumerate(WAITING, start=1):
+            self.patient(first_name, last_name, f"espera{number}", flow_status)
 
         self.stdout.write(
             f"{len(WAITING)} pacientes aguardando triagem, um deles no estado antigo."
