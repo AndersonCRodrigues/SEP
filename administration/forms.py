@@ -9,7 +9,7 @@ from localflavor.br.br_states import STATE_CHOICES
 from localflavor.br.forms import BRCPFField
 from core.fields import format_cep, only_digits
 from core.models import CustomUser
-from core.validators import NO_NUMBER, validate_letters, validate_phone
+from core.validators import validate_letters, validate_phone
 from documents.models import AttendanceCertificate
 from patient.models import Patient
 from scheduling.models import Appointment
