@@ -10,17 +10,15 @@ from core.permissions import ALL, BusinessRulesMixin, RoleScopedQuerySet
 from teacher.models import Teacher
 from core.constants import VISIBLE_TO_AUTHOR
 from utils.fields import EncryptedTextField
-from core.utils import generate_temporary_password, send_temporary_password_email
+
 
 Role = CustomUser.Role
-
 
 def with_open_case(prefix="", **lookups):
     caminho = f"{prefix}assignment_history"
     filtros = {f"{caminho}__end_date__isnull": True}
     filtros.update({f"{caminho}__{campo}": valor for campo, valor in lookups.items()})
     return Q(**filtros)
-
 
 class PatientQuerySet(RoleScopedQuerySet):
     VISIBLE_TO = {
@@ -43,26 +41,35 @@ class PatientQuerySet(RoleScopedQuerySet):
     def awaiting_triage(self):
         return self.filter(flow_status__in=("", Patient.FlowStatus.AWAITING_TRIAGE))
 
-
-# Manager customizado estendendo o CustomUserManager mantido do merge
 class PatientManager(CustomUserManager):
-    def create_with_credentials(self, raw_data, created_by_user=None, commit=True):
-        senha_temporaria = generate_temporary_password()
+    @transaction.atomic
+    def create_with_credentials(self,raw_data,created_by_user=None,commit=True):
+        from patient.services import (
+            build_first_access_url,
+            create_first_access_invitation,
+            send_first_access_sms,
+        )
 
-        raw_data = {**raw_data, "must_change_password": True}  # nosec B105
-        paciente = self.model(**raw_data)
-        paciente.set_password(senha_temporaria)
+        patient_data = { **raw_data,"must_change_password": False}
+        
+        patient = self.model(**patient_data)
+        patient.set_unusable_password()
 
-        if commit:
-            paciente.save()
-            send_temporary_password_email(
-                user=paciente,
-                temporary_password=senha_temporaria,
-                usuario_responsavel=created_by_user,
-            )
+        if not commit:
+            return patient
 
-        return paciente
+        patient.save()
 
+        invitation, token = create_first_access_invitation(patient)
+
+        access_url = build_first_access_url(token)
+
+        def send_after_commit():
+            send_first_access_sms(invitation=invitation, access_url=access_url, responsible_user=created_by_user,)
+
+        transaction.on_commit(send_after_commit)
+
+        return patient
 
 class Patient(BusinessRulesMixin, CustomUser):
     class FlowStatus(models.TextChoices):
@@ -289,3 +296,18 @@ class Patient(BusinessRulesMixin, CustomUser):
 
     def __str__(self):
         return self.nome_completo
+
+class FirstAcess(models.Model):
+    class DeliveryStatus(models.TextChoices):
+        PENDING = 'pending', "pendente"
+        SENT = "sent", "Enviado"
+        FAILED = "failed", "Falhou"
+        SIMULATED = "simulated", "Simulado — sem envio real"
+
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE,related_name="first_acess")
+    token_hash = models.CharField(max_length=64,unique=True,editable=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    used_at = models.DateTimeField(null=True, blank=True)
+    revoked_at = models.DateTimeField(null=True, blank=True)
+    delivery_status = models.CharField(max_length=10, choices=DeliveryStatus.choices,default=DeliveryStatus.PENDING)

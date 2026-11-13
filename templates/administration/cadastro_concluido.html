@@ -41,6 +41,45 @@
       </div>
     </dl>
 
+    {% if first_access_invitation.used_at %}
+    <p role="status">
+      Primeiro acesso concluído. O paciente já definiu sua senha.
+    </p>
+    {% elif first_access_invitation %}
+    {% if first_access_invitation.delivery_status == "simulated" %}
+    <p role="status">
+      O envio do primeiro acesso foi apenas simulado.
+      Nenhum SMS real foi enviado.
+    </p>
+    {% elif first_access_invitation.delivery_status == "pending" %}
+    <p role="status">
+      O envio do link de primeiro acesso está pendente.
+    </p>
+    {% elif first_access_invitation.delivery_status == "failed" %}
+    <p role="alert">
+      Houve falha no envio do link de primeiro acesso.
+    </p>
+    {% elif first_access_invitation.delivery_status == "sent" %}
+    <p role="status">
+      O provedor aceitou o envio do SMS com o link de primeiro acesso.
+    </p>
+    {% endif %}
+    {% else %}
+    <p role="status">
+      Não há convite de primeiro acesso registrado para este paciente.
+    </p>
+    {% endif %}
+
+    {% if not patient.has_usable_password %}
+    <form method="post" action="{% url 'administration:reenviar_primeiro_acesso' patient.pk %}">
+      {% csrf_token %}
+    
+      <button type="submit">
+        Emitir novo link de primeiro acesso
+      </button>
+    </form>
+    {% endif %}
+
     <div class="mobile-actions">
       <a class="mobile-button" href="{% url 'administration:pacientes' %}">Continuar</a>
     </div>
@@ -74,6 +113,45 @@
       </dd>
     </div>
   </dl>
+
+  {% if first_access_invitation.used_at %}
+  <p role="status">
+    Primeiro acesso concluído. O paciente já definiu sua senha.
+  </p>
+  {% elif first_access_invitation %}
+  {% if first_access_invitation.delivery_status == "simulated" %}
+  <p role="status">
+    O envio do primeiro acesso foi apenas simulado.
+    Nenhum SMS real foi enviado.
+  </p>
+  {% elif first_access_invitation.delivery_status == "pending" %}
+  <p role="status">
+    O envio do link de primeiro acesso está pendente.
+  </p>
+  {% elif first_access_invitation.delivery_status == "failed" %}
+  <p role="alert">
+    Houve falha no envio do link de primeiro acesso.
+  </p>
+  {% elif first_access_invitation.delivery_status == "sent" %}
+  <p role="status">
+    O provedor aceitou o envio do SMS com o link de primeiro acesso.
+  </p>
+  {% endif %}
+  {% else %}
+  <p role="status">
+    Não há convite de primeiro acesso registrado para este paciente.
+  </p>
+  {% endif %}
+
+  {% if not patient.has_usable_password %}
+  <form method="post" action="{% url 'administration:reenviar_primeiro_acesso' patient.pk %}">
+    {% csrf_token %}
+  
+    <button type="submit">
+      Emitir novo link de primeiro acesso
+    </button>
+  </form>
+  {% endif %}
 
   <a class="completed-continue" href="{% url 'administration:pacientes' %}">Continuar</a>
 </section>

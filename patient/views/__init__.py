@@ -5,6 +5,7 @@ from .home import PatientHomeView
 from .profile import PatientProfileView
 
 from .triages import PatientTriageDetailView, PatientTriagesView
+from .first_access import PatientFirstAccessView
 
 __all__ = [
     "AppointmentRequestView",
@@ -16,5 +17,5 @@ __all__ = [
     "PatientTriageDetailView",
     "PatientTriagesView",
     "PatientProfileView",
-    
+    "PatientFirstAccessView",
 ]

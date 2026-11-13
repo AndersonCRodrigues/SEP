@@ -18,7 +18,7 @@ from .recording import diff, record
 def log_login(sender, request, user, **kwargs):
     SecurityLog.objects.create(
         user=user,
-        user_identifier=user.email,
+        user_identifier=user.email or f"user:{user.pk}",
         action=SecurityLog.Action.LOGIN,
         ip_address=client_ip(request),
     )
@@ -30,7 +30,7 @@ def log_logout(sender, request, user, **kwargs):
         return
     SecurityLog.objects.create(
         user=user,
-        user_identifier=user.email,
+        user_identifier=user.email or f"user:{user.pk}",
         action=SecurityLog.Action.LOGOUT,
         ip_address=client_ip(request),
     )
