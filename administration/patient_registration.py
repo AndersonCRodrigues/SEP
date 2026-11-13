@@ -35,10 +35,19 @@ STEPS = (
     ),
     Step("telefone", "Contatos", "Telefone de contato", "phone", forms.PhoneForm),
     Step("email", "Contatos", "E-mail de contato", "phone", forms.EmailForm),
-    Step(
-        "logradouro", "Endereço", "Endereço completo", "address", forms.LogradouroForm
-    ),
+    
+    Step("logradouro", "Endereço", "Endereço completo", "address", forms.LogradouroForm),
+    Step("cep", "Endereço", "CEP", "address", forms.CEPForm),
+    Step("number", "Endereço", "Número", "address", forms.NumberForm),
+    Step("municipality", "Endereço", "Município", "address", forms.MunicipalityForm),
     Step("bairro", "Endereço", "Bairro", "address", forms.BairroForm),
+    Step("city", "Endereço", "Cidade", "address", forms.CityForm),
+    Step("state", "Endereço", "Estado", "address", forms.StateForm),
+    Step("complement", "Endereço", "Complemento", "address", forms.ComplementForm),
+    
+    
+    
+    
     Step(
         "acompanhante",
         "Acompanhante",
@@ -152,9 +161,9 @@ class PatientRegistration:
 
         # Preenche os campos do endereço que não são mais perguntados no mobile
         values.setdefault("cep", "24900-000")
-        values.setdefault("numero", "S/N")
-        values.setdefault("cidade", "Maricá")
-        values.setdefault("estado", "RJ")
+        values.setdefault("number", "S/N")
+        values.setdefault("city", "Maricá")
+        values.setdefault("state", "RJ")
 
         Patient(**values).full_clean(exclude=["password"])
         patient = Patient.objects.create_with_credentials(

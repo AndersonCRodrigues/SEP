@@ -19,11 +19,12 @@ class SupervisorCreationForm(ProfessorCreationForm):
             if f
             not in (
                 "logradouro",
-                "numero",
-                "complemento",
+                "number",
+                "complement",
                 "bairro",
-                "cidade",
-                "estado",
+                "municipality",
+                "city",
+                "state",
                 "cep",
             )
         )
