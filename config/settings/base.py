@@ -151,7 +151,7 @@ EMAIL_BACKEND = os.getenv(
 
 #validade do token de primerio acesso, 15 minutos só para teste
 FIRST_ACCESS_TOKEN_TIMEOUT_MINUTES = 15
-FIRST_ACCESS_BASE_URL = "http://127.0.0.1:8000"
+FIRST_ACCESS_BASE_URL = os.environ.get("FIRST_ACCESS_BASE_URL", "")
 
 DEFAULT_FROM_EMAIL = os.getenv("DJANGO_DEFAULT_FROM_EMAIL", "no-reply@sep.local")
 
