@@ -52,7 +52,7 @@ class HomeSuperadminView(GroupRequiredMixin, TemplateView):
         alert_server = alert_servers.first()
         context["alert_server"] = alert_server
         context["alert_message"] = (
-            f"CPU do {alert_server.nome} em {alert_server.cpu_percent}%"
+            alert_server.alert_message()
             if alert_server
             else "Nenhum alerta ativo no momento."
         )
