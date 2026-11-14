@@ -11,6 +11,7 @@ class ServerStatusQuerySet(models.QuerySet):
             "nome",
         )
 
+
 class ServerStatus(models.Model):
     class Health(models.TextChoices):
         SAUDAVEL = "OK", "Saudável"
