@@ -12,6 +12,7 @@ from .mocks import feedback_status
 COLUMNS = ("Referente a:", "Realizada por:", "Recebida:", "Status:")
 NO_AUTHOR = "Autor não identificado"
 
+
 class StudentFeedbacksView(StudentOnly, TemplateView):
     template_name = "student/feedbacks.html"
 
@@ -48,7 +49,9 @@ class StudentFeedbacksView(StudentOnly, TemplateView):
         return [
             {
                 "subject": f"Triagem - {feedback.triage.patient.get_full_name()}",
-                "author": feedback.author.get_full_name() if feedback.author else NO_AUTHOR,
+                "author": feedback.author.get_full_name()
+                if feedback.author
+                else NO_AUTHOR,
                 "moment": feedback.created_at,
                 "changed": feedback.updated_at,
             }
@@ -62,7 +65,9 @@ class StudentFeedbacksView(StudentOnly, TemplateView):
         return [
             {
                 "subject": f"Prontuário - {note.patient.get_full_name()}",
-                "author": note.confirmed_by.get_full_name() if note.confirmed_by else NO_AUTHOR,
+                "author": note.confirmed_by.get_full_name()
+                if note.confirmed_by
+                else NO_AUTHOR,
                 "moment": note.confirmed_at,
                 "changed": note.updated_at,
             }
