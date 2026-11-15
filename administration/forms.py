@@ -3,10 +3,12 @@ import unicodedata
 
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
+from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django.utils.html import format_html
 from localflavor.br.br_states import STATE_CHOICES
 from localflavor.br.forms import BRCPFField
+
 from core.fields import format_cep, only_digits
 from core.models import CustomUser
 from core.validators import NO_NUMBER, validate_letters, validate_phone
@@ -15,7 +17,6 @@ from patient.models import Patient
 from scheduling.models import Appointment
 from students.models import Student
 from utils.masking import mask_cpf
-from django.core.exceptions import ValidationError
 
 PATIENT = "patient"
 STUDENT = "student"
