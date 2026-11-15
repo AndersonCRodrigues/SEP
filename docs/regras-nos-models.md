@@ -192,14 +192,24 @@ campos de **controle** e derive o resto:
 
 ```python
 CONTROL_FIELDS = frozenset(
-    {"id", "patient", "student_author", "status", "closed_by", "closed_at", "created_at"}
+    {
+        "id",
+        "patient",
+        "student_author",
+        "status",
+        "closed_by",
+        "closed_at",
+        "created_at",
+    }
 )
+
 
 @classmethod
 def ficha_fields(cls):
     return tuple(
         f.name for f in cls._meta.concrete_fields if f.name not in cls.CONTROL_FIELDS
     )
+
 
 @classmethod
 def editable_fields_for_role(cls, role):
@@ -258,8 +268,8 @@ razões:
 Elas vivem em `core/user_management.py`:
 
 ```python
-can_manage_user(actor, target_role)      # colunas Create e Delete
-editable_user_fields(actor, target)      # coluna Update
+can_manage_user(actor, target_role)  # colunas Create e Delete
+editable_user_fields(actor, target)  # coluna Update
 ```
 
 `can_manage_user` trata `is_superuser` como Superadmin: uma conta criada por
@@ -438,9 +448,9 @@ de um caso por aluno.
 O que entrou no lugar:
 
 ```python
-CaseAssignment.objects.assign(aluno, paciente)   # abre e poe o paciente em atendimento
-CaseAssignment.objects.release(caso)             # fecha (end_date = hoje)
-aluno.open_cases                                 # os casos abertos deste aluno
+CaseAssignment.objects.assign(aluno, paciente)  # abre e poe o paciente em atendimento
+CaseAssignment.objects.release(caso)  # fecha (end_date = hoje)
+aluno.open_cases  # os casos abertos deste aluno
 ```
 
 Duas invariantes, cada uma no seu lugar:
@@ -598,13 +608,13 @@ se alguém o adicionar. Mover só acontece por `advance_to()`, que consulta o ma
 
 ```python
 ALLOWED_TRANSITIONS = {
-    "":                (AWAITING_TRIAGE, IN_TRIAGE, IN_TREATMENT),
-    AWAITING_TRIAGE:   (IN_TRIAGE, REFERRED),
-    IN_TRIAGE:         (AWAITING_REVIEW, REFERRED),
-    AWAITING_REVIEW:   (IN_TRIAGE, REFERRED),
-    REFERRED:          (IN_TRIAGE, IN_TREATMENT),
-    IN_TREATMENT:      (DISCHARGED,),
-    DISCHARGED:        (AWAITING_TRIAGE, IN_TRIAGE),
+    "": (AWAITING_TRIAGE, IN_TRIAGE, IN_TREATMENT),
+    AWAITING_TRIAGE: (IN_TRIAGE, REFERRED),
+    IN_TRIAGE: (AWAITING_REVIEW, REFERRED),
+    AWAITING_REVIEW: (IN_TRIAGE, REFERRED),
+    REFERRED: (IN_TRIAGE, IN_TREATMENT),
+    IN_TREATMENT: (DISCHARGED,),
+    DISCHARGED: (AWAITING_TRIAGE, IN_TRIAGE),
 }
 ```
 
