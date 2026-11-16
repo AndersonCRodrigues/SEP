@@ -53,7 +53,7 @@ class PatientManager(CustomUserManager):
             send_first_access_sms,
         )
 
-        patient_data = {**raw_data, "must_change_password": False}
+        patient_data = {**raw_data, "must_change_password": False}  # nosec B105
 
         patient = self.model(**patient_data)
         patient.set_unusable_password()
