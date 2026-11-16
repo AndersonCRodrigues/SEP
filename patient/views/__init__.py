@@ -16,5 +16,4 @@ __all__ = [
     "PatientTriageDetailView",
     "PatientTriagesView",
     "PatientProfileView",
-    
 ]

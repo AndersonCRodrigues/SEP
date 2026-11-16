@@ -14,9 +14,9 @@ from django.db import DatabaseError, transaction
 
 
 RETRY_MESSAGE = (
-    "Não foi possível concluir o cadastro. "
-    "Nenhum dado foi salvo, tente novamente."
+    "Não foi possível concluir o cadastro. Nenhum dado foi salvo, tente novamente."
 )
+
 
 class PainelEstudanteView(StudentOnly, TemplateView):
     template_name = "student/student_panel.html"
