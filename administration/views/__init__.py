@@ -30,5 +30,5 @@ __all__ = [
     "RoomsView",
     "ScheduleView",
     "cadastrar_administrativo",
-    "PatientFirstAccessReissueView"
+    "PatientFirstAccessReissueView",
 ]
