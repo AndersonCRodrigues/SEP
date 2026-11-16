@@ -23,9 +23,18 @@ BACKUP_TITLES = {
     BackupStatus.FALHOU: "Falha no backup",
 }
 
+UNKNOWN_BACKUP_TITLE = "Backup com situação desconhecida"
+
 
 def backup_badge(backup):
-    return {"label": backup.get_status_display(), "level": BACKUP_LEVELS[backup.status]}
+    return {
+        "label": backup.get_status_display(),
+        "level": BACKUP_LEVELS.get(backup.status, "neutral"),
+    }
+
+
+def backup_title(backup):
+    return BACKUP_TITLES.get(backup.status, UNKNOWN_BACKUP_TITLE)
 
 
 class HomeSuperadminView(GroupRequiredMixin, TemplateView):
@@ -83,7 +92,7 @@ class HomeSuperadminView(GroupRequiredMixin, TemplateView):
             recent_activities.append(
                 {
                     "kind": "backup",
-                    "title": BACKUP_TITLES[backup.status],
+                    "title": backup_title(backup),
                     **backup_badge(backup),
                     "detail": f"{self.momento(quando)} — {backup.escopo}",
                     "url": reverse("superadmin:backups"),
