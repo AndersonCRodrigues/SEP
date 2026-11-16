@@ -11,6 +11,8 @@ from patient.models import Patient
 from utils.masking import mask_cpf
 from ..patient_registration import STEPS, PatientRegistration
 from .access import AdministrativeOnly, CanRegisterPatients
+from django.shortcuts import get_object_or_404
+from patient.services import reissue_first_access_invitation
 
 COLUMNS = ("Nome:", "CPF:", "Situação:", "Cadastrado em:")
 
@@ -187,6 +189,25 @@ class RegistrationCompletedView(CanRegisterPatients, DetailView):
     context_object_name = "patient"
 
     def get_queryset(self):
-        return Patient.objects.visible_to(self.request.user).select_related(
-            "registered_by"
-        )
+        return Patient.objects.visible_to(self.request.user).select_related("registered_by")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context["first_access_invitation"] = (self.object.first_acess.order_by("-created_at", "-pk").first())
+
+        return context
+
+class PatientFirstAccessReissueView(CanRegisterPatients, View):
+    def post(self, request, pk):
+        patient = get_object_or_404(Patient.objects.visible_to(request.user), pk=pk,)
+
+        try:
+            reissue_first_access_invitation(patient=patient,responsible_user=request.user)
+
+        except ValidationError as error:
+            messages.error(request, " ".join(error.messages))
+        else:
+            messages.success(request,"Novo convite criado. Confira a situação do envio.")
+
+        return redirect("administration:cadastro_concluido",pk=patient.pk,)
