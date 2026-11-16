@@ -4,7 +4,6 @@ from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView, UpdateView
-import logging
 from core.mixins import GroupRequiredMixin
 from core.utils import sincronizar_grupo
 
@@ -13,7 +12,6 @@ from ..models import Student
 from .access import StudentOnly
 from django.db import DatabaseError, transaction
 
-logger = logging.getLogger(__name__)
 
 RETRY_MESSAGE = (
     "Não foi possível concluir o cadastro. "
@@ -70,7 +68,6 @@ def cadastrar_aluno(request):
                     user = form.save()
                     sincronizar_grupo(user)
             except DatabaseError:
-                logger.exception("Cadastro de aluno desfeito por falha no banco.")
                 form.add_error(None, RETRY_MESSAGE)
             else:
                 messages.success(request, "Aluno cadastrado com sucesso!")
