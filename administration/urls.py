@@ -34,4 +34,9 @@ urlpatterns = [
         views.CertificateAppointmentsView.as_view(),
         name="atestados_atendimentos",
     ),
+    path(
+    "pacientes/<int:pk>/primeiro-acesso/reenviar/",
+    views.PatientFirstAccessReissueView.as_view(),
+    name="reenviar_primeiro_acesso",
+),
 ]
