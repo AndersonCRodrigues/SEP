@@ -24,7 +24,7 @@ class HomeSuperadminView(GroupRequiredMixin, TemplateView):
         today_start = timezone.localtime(timezone.now()).replace(
             hour=0, minute=0, second=0, microsecond=0
         )
-        alert_servers = ServerStatus.objects.with_alert()
+        alert_servers = list(ServerStatus.objects.with_alert())
         uptime_medio = ServerStatus.objects.aggregate(media=Avg("uptime_percent"))[
             "media"
         ]
@@ -46,10 +46,10 @@ class HomeSuperadminView(GroupRequiredMixin, TemplateView):
                     created_at__gte=today_start
                 ).count(),
             },
-            {"label": "Alertas abertos", "value": alert_servers.count()},
+            {"label": "Alertas abertos", "value": len(alert_servers)},
         ]
 
-        alert_server = alert_servers.first()
+        alert_server = alert_servers[0] if alert_servers else None
         context["alert_server"] = alert_server
         context["alert_message"] = (
             alert_server.alert_message()
