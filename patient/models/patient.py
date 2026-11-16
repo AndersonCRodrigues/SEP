@@ -14,11 +14,13 @@ from utils.fields import EncryptedTextField
 
 Role = CustomUser.Role
 
+
 def with_open_case(prefix="", **lookups):
     caminho = f"{prefix}assignment_history"
     filtros = {f"{caminho}__end_date__isnull": True}
     filtros.update({f"{caminho}__{campo}": valor for campo, valor in lookups.items()})
     return Q(**filtros)
+
 
 class PatientQuerySet(RoleScopedQuerySet):
     VISIBLE_TO = {
@@ -41,17 +43,18 @@ class PatientQuerySet(RoleScopedQuerySet):
     def awaiting_triage(self):
         return self.filter(flow_status__in=("", Patient.FlowStatus.AWAITING_TRIAGE))
 
+
 class PatientManager(CustomUserManager):
     @transaction.atomic
-    def create_with_credentials(self,raw_data,created_by_user=None,commit=True):
+    def create_with_credentials(self, raw_data, created_by_user=None, commit=True):
         from patient.services import (
             build_first_access_url,
             create_first_access_invitation,
             send_first_access_sms,
         )
 
-        patient_data = { **raw_data,"must_change_password": False}
-        
+        patient_data = {**raw_data, "must_change_password": False}
+
         patient = self.model(**patient_data)
         patient.set_unusable_password()
 
@@ -65,11 +68,16 @@ class PatientManager(CustomUserManager):
         access_url = build_first_access_url(token)
 
         def send_after_commit():
-            send_first_access_sms(invitation=invitation, access_url=access_url, responsible_user=created_by_user,)
+            send_first_access_sms(
+                invitation=invitation,
+                access_url=access_url,
+                responsible_user=created_by_user,
+            )
 
         transaction.on_commit(send_after_commit)
 
         return patient
+
 
 class Patient(BusinessRulesMixin, CustomUser):
     class FlowStatus(models.TextChoices):
@@ -297,17 +305,22 @@ class Patient(BusinessRulesMixin, CustomUser):
     def __str__(self):
         return self.nome_completo
 
+
 class FirstAcess(models.Model):
     class DeliveryStatus(models.TextChoices):
-        PENDING = 'pending', "pendente"
+        PENDING = "pending", "pendente"
         SENT = "sent", "Enviado"
         FAILED = "failed", "Falhou"
         SIMULATED = "simulated", "Simulado — sem envio real"
 
-    patient = models.ForeignKey(Patient, on_delete=models.CASCADE,related_name="first_acess")
-    token_hash = models.CharField(max_length=64,unique=True,editable=False)
+    patient = models.ForeignKey(
+        Patient, on_delete=models.CASCADE, related_name="first_acess"
+    )
+    token_hash = models.CharField(max_length=64, unique=True, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
     used_at = models.DateTimeField(null=True, blank=True)
     revoked_at = models.DateTimeField(null=True, blank=True)
-    delivery_status = models.CharField(max_length=10, choices=DeliveryStatus.choices,default=DeliveryStatus.PENDING)
+    delivery_status = models.CharField(
+        max_length=10, choices=DeliveryStatus.choices, default=DeliveryStatus.PENDING
+    )

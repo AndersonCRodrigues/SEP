@@ -45,7 +45,9 @@ class CustomUser(AbstractUser):
         max_length=100, blank=True, verbose_name="Complemento"
     )
     bairro = models.CharField(max_length=100, verbose_name="Bairro")
-    municipality = models.CharField(max_length=100, verbose_name="Município",null=True,blank=True)
+    municipality = models.CharField(
+        max_length=100, verbose_name="Município", null=True, blank=True
+    )
     city = models.CharField(
         max_length=100, validators=[validate_letters], verbose_name="Cidade"
     )
