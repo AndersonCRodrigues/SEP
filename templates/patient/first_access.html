@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Primeiro acesso{% endblock %}
+{% block title_suffix %} | SEP Maricá{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/components/mobile_shell.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/mobile_cards.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/list_panel.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/components/password_toggle.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/form_cadastro.css' %}">
+{% endblock %}
+
+{% block brand %}
+{% url 'login' as home_url %}
+{% include "components/site_brand.html" %}
+{% endblock %}
+
+{% block main_nav %}{% endblock %}
+{% block page_header %}{% endblock %}
+
+{% block content %}
+{% url 'login' as back_url %}
+{% include "components/mobile_top.html" with title="Primeiro acesso" %}
+
+<div class="list-panel-title desktop-page">Primeiro acesso</div>
+
+<div class="figma-form-container mobile-column">
+    {% if link_errors %}
+    <div class="figma-error-alert" role="alert">
+        {% for error in link_errors %}
+        <p>{{ error }}</p>
+        {% endfor %}
+    </div>
+
+    <p>Entre em contato com a equipe para solicitar um novo link.</p>
+
+    <a href="{% url 'login' %}">Voltar para o login</a>
+    {% else %}
+    <p class="list-panel-subtitle">
+        Crie sua senha para acessar o sistema.
+    </p>
+
+    {% if form.non_field_errors %}
+    <div class="figma-error-alert" role="alert">
+        {{ form.non_field_errors }}
+    </div>
+    {% endif %}
+
+    <form class="figma-custom-form" method="post">
+        {% csrf_token %}
+
+        {% for field in form %}
+        {{ field.errors }}
+
+        <p>
+            {{ field.label_tag }}
+
+            <span class="password-field">
+                {{ field }}
+                {% include "components/password_toggle.html" with target=field.id_for_label %}
+            </span>
+        </p>
+        {% endfor %}
+
+        <div class="figma-actions-center">
+            <button type="submit" class="btn-submit-figma">
+                Criar senha
+            </button>
+        </div>
+    </form>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block footer %}
+{{ block.super }}
+{% include "components/mobile_footer.html" with standalone=True %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'core/js/password_toggle.js' %}"></script>
+{% endblock %}
