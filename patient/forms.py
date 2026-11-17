@@ -43,11 +43,12 @@ class PacienteCreationForm(forms.ModelForm):
             "data_nascimento",
             "telefone",
             "logradouro",
-            "numero",
-            "complemento",
+            "number",
+            "complement",
             "bairro",
-            "cidade",
-            "estado",
+            "municipality",
+            "city",
+            "state",
             "cep",
         )
 
@@ -124,3 +125,20 @@ class AppointmentRequestForm(forms.ModelForm):
     def save_for(self, patient):
         self.instance.patient = patient
         return self.save()
+
+class FirstAccessPasswordForm(forms.Form):
+    password = forms.CharField(
+        label="Crie sua senha",
+        strip=False,
+        widget=forms.PasswordInput(
+            attrs={"autocomplete": "new-password"}
+        ),
+    )
+
+    password_confirmation = forms.CharField(
+        label="Confirme sua senha",
+        strip=False,
+        widget=forms.PasswordInput(
+            attrs={"autocomplete": "new-password"}
+        ),
+    )

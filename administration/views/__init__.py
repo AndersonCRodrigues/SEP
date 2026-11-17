@@ -14,6 +14,7 @@ from .patients import (
 )
 from .rooms import RoomsView
 from .schedule import ScheduleView
+from .patients import PatientFirstAccessReissueView
 
 __all__ = [
     "AdministrativeHomeView",
@@ -29,4 +30,5 @@ __all__ = [
     "RoomsView",
     "ScheduleView",
     "cadastrar_administrativo",
+    "PatientFirstAccessReissueView"
 ]
