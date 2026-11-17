@@ -9,6 +9,33 @@ from django.db.models import Avg, Q
 from audit.models import SecurityLog
 from .models import ServerStatus, RolePermissionScope, BackupRecord
 
+BackupStatus = BackupRecord.Status
+
+BACKUP_LEVELS = {
+    BackupStatus.CONCLUIDO: "success",
+    BackupStatus.AGENDADO: "neutral",
+    BackupStatus.FALHOU: "danger",
+}
+
+BACKUP_TITLES = {
+    BackupStatus.CONCLUIDO: "Backup automático concluído",
+    BackupStatus.AGENDADO: "Backup agendado",
+    BackupStatus.FALHOU: "Falha no backup",
+}
+
+UNKNOWN_BACKUP_TITLE = "Backup com situação desconhecida"
+
+
+def backup_badge(backup):
+    return {
+        "label": backup.get_status_display(),
+        "level": BACKUP_LEVELS.get(backup.status, "neutral"),
+    }
+
+
+def backup_title(backup):
+    return BACKUP_TITLES.get(backup.status, UNKNOWN_BACKUP_TITLE)
+
 
 class HomeSuperadminView(GroupRequiredMixin, TemplateView):
     required_group = "Superadmin"
@@ -60,13 +87,11 @@ class HomeSuperadminView(GroupRequiredMixin, TemplateView):
         recent_activities = []
         for backup in BackupRecord.objects.all()[:3]:
             quando = backup.executado_em or backup.agendado_para
-            concluido = backup.status == BackupRecord.Status.CONCLUIDO
             recent_activities.append(
                 {
                     "kind": "backup",
-                    "title": "Backup automático concluído"
-                    if concluido
-                    else "Backup agendado",
+                    "title": backup_title(backup),
+                    **backup_badge(backup),
                     "detail": f"{self.momento(quando)} — {backup.escopo}",
                     "url": reverse("superadmin:backups"),
                     "link_label": "Ver backups",
@@ -179,3 +204,10 @@ class BackupListView(GroupRequiredMixin, ListView):
     model = BackupRecord
     template_name = "superadmin/backups.html"
     context_object_name = "backups"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["rows"] = [
+            {"backup": backup, **backup_badge(backup)} for backup in context["backups"]
+        ]
+        return context
