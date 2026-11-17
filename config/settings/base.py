@@ -149,7 +149,7 @@ EMAIL_BACKEND = os.getenv(
     "django.core.mail.backends.console.EmailBackend",
 )
 
-#validade do token de primerio acesso, 15 minutos só para teste
+# validade do token de primerio acesso, 15 minutos só para teste
 FIRST_ACCESS_TOKEN_TIMEOUT_MINUTES = 15
 FIRST_ACCESS_BASE_URL = os.environ.get("FIRST_ACCESS_BASE_URL", "")
 
@@ -252,5 +252,4 @@ __all__ = [
     "WSGI_APPLICATION",
     "FIRST_ACCESS_TOKEN_TIMEOUT_MINUTES",
     "FIRST_ACCESS_BASE_URL",
-
 ]
