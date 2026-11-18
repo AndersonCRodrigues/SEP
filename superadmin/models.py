@@ -1,6 +1,7 @@
 from django.db import models
-from django.db.models import Case, Value, When
+from django.db.models import Case, F, Value, When
 from core.models import CustomUser
+from django.db.models.functions import Coalesce
 
 
 class ServerStatusQuerySet(models.QuerySet):
@@ -77,6 +78,13 @@ class RolePermissionScope(models.Model):
         return f"{self.get_role_display()} — {self.escopo_acesso}"
 
 
+class BackupRecordQuerySet(models.QuerySet):
+    def latest_first(self):
+        return self.annotate(
+            event_at=Coalesce("executado_em", "agendado_para")
+        ).order_by(F("event_at").desc(nulls_last=True), "-pk")
+
+
 class BackupRecord(models.Model):
     class Status(models.TextChoices):
         CONCLUIDO = "OK", "Concluído"
@@ -90,6 +98,7 @@ class BackupRecord(models.Model):
     )
     executado_em = models.DateTimeField(null=True, blank=True)
     agendado_para = models.DateTimeField(null=True, blank=True)
+    objects = BackupRecordQuerySet.as_manager()
 
     class Meta:
         verbose_name = "Registro de backup"
