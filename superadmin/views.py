@@ -41,6 +41,8 @@ class HomeSuperadminView(GroupRequiredMixin, TemplateView):
     required_group = "Superadmin"
     template_name = "superadmin/home_superadmin.html"
 
+    ACTIVITIES_SHOWN = 5
+
     @staticmethod
     def momento(quando):
         return f"{timezone.localtime(quando):%d/%m %H:%M}" if quando else "sem data"
@@ -84,22 +86,30 @@ class HomeSuperadminView(GroupRequiredMixin, TemplateView):
             else "Nenhum alerta ativo no momento."
         )
 
-        recent_activities = []
-        for backup in BackupRecord.objects.all()[:3]:
-            quando = backup.executado_em or backup.agendado_para
-            recent_activities.append(
+        context["activities"] = self.recent_activities()
+
+        return context
+
+    def recent_activities(self):
+        items = []
+
+        for backup in BackupRecord.objects.latest_first()[: self.ACTIVITIES_SHOWN]:
+            items.append(
                 {
                     "kind": "backup",
                     "title": backup_title(backup),
                     **backup_badge(backup),
-                    "detail": f"{self.momento(quando)} — {backup.escopo}",
+                    "detail": f"{self.momento(backup.event_at)} — {backup.escopo}",
                     "url": reverse("superadmin:backups"),
                     "link_label": "Ver backups",
-                    "when": quando,
+                    "when": backup.event_at,
                 }
             )
-        for log in SecurityLog.objects.all()[:3]:
-            recent_activities.append(
+
+        for log in SecurityLog.objects.order_by("-created_at", "-pk")[
+            : self.ACTIVITIES_SHOWN
+        ]:
+            items.append(
                 {
                     "kind": "security",
                     "title": log.get_action_display(),
@@ -110,12 +120,11 @@ class HomeSuperadminView(GroupRequiredMixin, TemplateView):
                     "when": log.created_at,
                 }
             )
-        recent_activities.sort(
-            key=lambda item: item["when"] or timezone.now(), reverse=True
-        )
-        context["activities"] = recent_activities[:5]
 
-        return context
+        dated = [item for item in items if item["when"] is not None]
+        undated = [item for item in items if item["when"] is None]
+        dated.sort(key=lambda item: item["when"], reverse=True)
+        return (dated + undated)[: self.ACTIVITIES_SHOWN]
 
 
 class PerfilSuperadminView(GroupRequiredMixin, UpdateView):
