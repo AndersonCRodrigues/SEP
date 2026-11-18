@@ -11,6 +11,33 @@ from core.models import CustomUser
 
 from .models import BackupRecord, RolePermissionScope, ServerStatus
 
+BackupStatus = BackupRecord.Status
+
+BACKUP_LEVELS = {
+    BackupStatus.CONCLUIDO: "success",
+    BackupStatus.AGENDADO: "neutral",
+    BackupStatus.FALHOU: "danger",
+}
+
+BACKUP_TITLES = {
+    BackupStatus.CONCLUIDO: "Backup automático concluído",
+    BackupStatus.AGENDADO: "Backup agendado",
+    BackupStatus.FALHOU: "Falha no backup",
+}
+
+UNKNOWN_BACKUP_TITLE = "Backup com situação desconhecida"
+
+
+def backup_badge(backup):
+    return {
+        "label": backup.get_status_display(),
+        "level": BACKUP_LEVELS.get(backup.status, "neutral"),
+    }
+
+
+def backup_title(backup):
+    return BACKUP_TITLES.get(backup.status, UNKNOWN_BACKUP_TITLE)
+
 
 class HomeSuperadminView(GroupRequiredMixin, TemplateView):
     required_group = "Superadmin"
@@ -26,9 +53,7 @@ class HomeSuperadminView(GroupRequiredMixin, TemplateView):
         today_start = timezone.localtime(timezone.now()).replace(
             hour=0, minute=0, second=0, microsecond=0
         )
-        servers_needing_attention = ServerStatus.objects.filter(
-            health=ServerStatus.Health.ATENCAO
-        )
+        alert_servers = list(ServerStatus.objects.with_alert())
         uptime_medio = ServerStatus.objects.aggregate(media=Avg("uptime_percent"))[
             "media"
         ]
@@ -50,13 +75,13 @@ class HomeSuperadminView(GroupRequiredMixin, TemplateView):
                     created_at__gte=today_start
                 ).count(),
             },
-            {"label": "Alertas abertos", "value": servers_needing_attention.count()},
+            {"label": "Alertas abertos", "value": len(alert_servers)},
         ]
 
-        alert_server = servers_needing_attention.first()
+        alert_server = alert_servers[0] if alert_servers else None
         context["alert_server"] = alert_server
         context["alert_message"] = (
-            f"CPU do {alert_server.nome} em {alert_server.cpu_percent}%"
+            alert_server.alert_message()
             if alert_server
             else "Nenhum alerta ativo no momento."
         )
@@ -64,13 +89,11 @@ class HomeSuperadminView(GroupRequiredMixin, TemplateView):
         recent_activities = []
         for backup in BackupRecord.objects.all()[:3]:
             quando = backup.executado_em or backup.agendado_para
-            concluido = backup.status == BackupRecord.Status.CONCLUIDO
             recent_activities.append(
                 {
                     "kind": "backup",
-                    "title": "Backup automático concluído"
-                    if concluido
-                    else "Backup agendado",
+                    "title": backup_title(backup),
+                    **backup_badge(backup),
                     "detail": f"{self.momento(quando)} — {backup.escopo}",
                     "url": reverse("superadmin:backups"),
                     "link_label": "Ver backups",
@@ -183,3 +206,10 @@ class BackupListView(GroupRequiredMixin, ListView):
     model = BackupRecord
     template_name = "superadmin/backups.html"
     context_object_name = "backups"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["rows"] = [
+            {"backup": backup, **backup_badge(backup)} for backup in context["backups"]
+        ]
+        return context

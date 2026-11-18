@@ -68,9 +68,9 @@
     <h2 class="visually-hidden">Alertas</h2>
     {% if alert_server %}
     {% url 'superadmin:servidores' as alert_url %}
-    {% include "components/alert_card.html" with alert_title="Alerta ativo" alert_action="Ver logs de infraestrutura" %}
+    {% include "components/alert_card.html" with alert_title="Alerta ativo" alert_message=alert_message alert_url=alert_url alert_action="Ver logs de infraestrutura" only %}
     {% else %}
-    {% include "components/alert_card.html" with alert_title="Tudo certo" alert_level="ok" %}
+    {% include "components/alert_card.html" with alert_title="Tudo certo" alert_message=alert_message alert_level="ok" only %}
     {% endif %}
   </section>
 </div>

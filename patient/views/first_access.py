@@ -11,7 +11,9 @@ from patient.services import set_first_access_password, validate_first_access_in
 
 
 @method_decorator(never_cache, name="dispatch")
-@method_decorator(sensitive_post_parameters("password", "password_confirmation"), name="dispatch")
+@method_decorator(
+    sensitive_post_parameters("password", "password_confirmation"), name="dispatch"
+)
 class PatientFirstAccessView(View):
     template_name = "patient/first_access.html"
 
@@ -24,7 +26,9 @@ class PatientFirstAccessView(View):
         try:
             validate_first_access_invitation(token)
         except ValidationError as error:
-            return render(request, self.template_name, {"link_errors": error.messages}, status=400)
+            return render(
+                request, self.template_name, {"link_errors": error.messages}, status=400
+            )
 
         return render(request, self.template_name, {"form": FirstAccessPasswordForm()})
 
@@ -33,9 +37,15 @@ class PatientFirstAccessView(View):
 
         if form.is_valid():
             try:
-                set_first_access_password(token=token,password=form.cleaned_data["password"],password_confirmation=form.cleaned_data["password_confirmation"])
-                messages.success(request, "Senha criada com sucesso! Faça login para acessar.")
-                return redirect("login")  
+                set_first_access_password(
+                    token=token,
+                    password=form.cleaned_data["password"],
+                    password_confirmation=form.cleaned_data["password_confirmation"],
+                )
+                messages.success(
+                    request, "Senha criada com sucesso! Faça login para acessar."
+                )
+                return redirect("login")
             except ValidationError as error:
                 form.add_error(None, error)
 
