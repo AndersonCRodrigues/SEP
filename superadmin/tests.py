@@ -5,6 +5,7 @@ from django.test import SimpleTestCase, TestCase
 from django.urls import reverse
 from django.utils import timezone
 
+from audit.models import SecurityLog
 from core.models import CustomUser
 
 from .models import BackupRecord, ServerStatus
@@ -161,3 +162,78 @@ class HomeAlertTests(TestCase):
         self.assertEqual(self.open_alerts(context), 0)
         self.assertIsNone(context["alert_server"])
         self.assertEqual(context["alert_message"], "Nenhum alerta ativo no momento.")
+
+
+class HomeRecentActivitiesTests(TestCase):
+    TEN_DAYS = 60 * 24 * 10
+
+    def setUp(self):
+        login_superadmin(self.client)
+        SecurityLog.objects.all().delete()
+        self.now = timezone.now()
+
+    def make_logs(self, *minutes_ago):
+        for minutes in minutes_ago:
+            log = SecurityLog.objects.create(
+                action=SecurityLog.Action.LOGIN, detail=f"log {minutes}"
+            )
+            SecurityLog.objects.filter(pk=log.pk).update(
+                created_at=self.now - timedelta(minutes=minutes)
+            )
+
+    def make_backups(self, *minutes_ago):
+        BackupRecord.objects.bulk_create(
+            BackupRecord(
+                escopo=f"backup {minutes}",
+                status=BackupRecord.Status.CONCLUIDO,
+                executado_em=None
+                if minutes is None
+                else self.now - timedelta(minutes=minutes),
+            )
+            for minutes in minutes_ago
+        )
+
+    def activities(self):
+        return self.client.get(reverse("superadmin:home")).context["activities"]
+
+    def test_recent_logs_win_over_old_and_undated_backups(self):
+        self.make_logs(1, 2, 3, 4, 5)
+        self.make_backups(self.TEN_DAYS, self.TEN_DAYS, self.TEN_DAYS, None)
+        activities = self.activities()
+        self.assertEqual(len(activities), 5)
+        self.assertEqual({a["kind"] for a in activities}, {"security"})
+
+    def test_undated_backup_never_ahead_of_dated(self):
+        self.make_logs(1, 2, 3)
+        self.make_backups(None)
+        activities = self.activities()
+        self.assertEqual([a["kind"] for a in activities][-1], "backup")
+        self.assertIsNone(activities[-1]["when"])
+
+    def test_fewer_than_five_candidates_keeps_all_and_undated_last(self):
+        self.make_logs(10, 20)
+        self.make_backups(15, None)
+        activities = self.activities()
+        self.assertEqual(
+            [(a["kind"], a["when"] is None) for a in activities],
+            [
+                ("security", False),
+                ("backup", False),
+                ("security", False),
+                ("backup", True),
+            ],
+        )
+
+    def test_sources_are_mixed_by_date(self):
+        self.make_logs(2, 4, 6)
+        self.make_backups(1, 3, 5)
+        activities = self.activities()
+        self.assertEqual(
+            [a["kind"] for a in activities],
+            ["backup", "security", "backup", "security", "backup"],
+        )
+
+    def test_many_undated_backups_do_not_hide_a_dated_one(self):
+        self.make_backups(None, None, None, None, None, None, self.TEN_DAYS)
+        activities = self.activities()
+        self.assertIsNotNone(activities[0]["when"])
