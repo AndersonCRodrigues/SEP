@@ -4,6 +4,8 @@ from django.db import transaction
 
 from core.utils import sincronizar_grupo
 from patient.models import Patient
+from django.core.exceptions import ValidationError
+from django.utils import timezone
 
 from . import forms
 
@@ -20,7 +22,7 @@ class Step:
     title: str
     icon: str
     form_class: type
-    only_if_accompanied: bool = False
+    only_if_minor: bool = False
 
 
 STEPS = (
@@ -61,7 +63,7 @@ STEPS = (
         "Nome do responsável",
         "companion",
         forms.GuardianNameForm,
-        only_if_accompanied=True,
+        only_if_minor=True,
     ),
     Step(
         "parentesco",
@@ -69,7 +71,7 @@ STEPS = (
         "Grau de parentesco",
         "companion",
         forms.GuardianRelationshipForm,
-        only_if_accompanied=True,
+        only_if_minor=True,
     ),
 )
 
@@ -90,9 +92,33 @@ class PatientRegistration:
     def accompanied(self):
         return self.answers.get("acompanhante", {}).get("is_accompanied") == "sim"
 
+    @property
+    def is_minor(self):
+        form = forms.BirthDateForm(
+            data=self.answers.get("nascimento", {})
+        )
+
+        if not form.is_valid():
+            return False
+
+        birth_date = form.cleaned_data["data_nascimento"]
+        today = timezone.localdate()
+
+        age = (
+            today.year
+            - birth_date.year
+            - ((today.month, today.day) < (birth_date.month, birth_date.day))
+        )
+
+        return age < 18
+
     def steps(self):
+        minor = self.is_minor
+
         return [
-            step for step in STEPS if self.accompanied or not step.only_if_accompanied
+            step
+            for step in STEPS
+            if not step.only_if_minor or minor
         ]
 
     def step(self, slug):
@@ -112,10 +138,6 @@ class PatientRegistration:
         self.answers[step.slug] = {
             name: data.get(name, "") for name in step.form_class.base_fields
         }
-        if not self.accompanied:
-            for skipped in STEPS:
-                if skipped.only_if_accompanied:
-                    self.answers.pop(skipped.slug, None)
         self.session[SESSION_KEY] = self.answers
 
     def first_unanswered(self):
@@ -156,7 +178,19 @@ class PatientRegistration:
         values = {"registered_by": registered_by}
         for step in self.steps():
             form = step.form_class(data=self.answer(step))
-            form.is_valid()
+
+            if not form.is_valid():
+                errors = []
+
+                for field_name, messages in form.errors.items():
+                    field = form.fields.get(field_name)
+                    label = field.label if field else step.title
+
+                    for message in messages:
+                        errors.append(f"{label}: {message}")
+
+                raise ValidationError(errors)
+
             values.update(form.cleaned_data)
 
         # Preenche os campos do endereço que não são mais perguntados no mobile
