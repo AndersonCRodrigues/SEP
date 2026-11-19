@@ -13,6 +13,7 @@ from ..patient_registration import STEPS, PatientRegistration
 from .access import AdministrativeOnly, CanRegisterPatients
 from django.shortcuts import get_object_or_404
 from patient.services import reissue_first_access_invitation
+from ..models import Cookie_draft
 
 COLUMNS = ("Nome:", "CPF:", "Situação:", "Cadastrado em:")
 
@@ -105,46 +106,47 @@ class PatientsView(AdministrativeOnly, TemplateView):
         return pacientes.filter(procura)
 
 
-def to_step(step):
-    return redirect("administration:cadastrar_paciente_etapa", step=step.slug)
+def to_step(step,draft):
+    
+    return redirect("administration:cadastrar_paciente_etapa",draft=draft, step=step.slug)
 
 
 class PatientRegistrationStartView(CanRegisterPatients, View):
     def get(self, request):
-        PatientRegistration.start(request.session)
-        return to_step(STEPS[0])
-
+        draft=Cookie_draft.objects.create(
+            answered_by=request.user
+        )
+        
+        return to_step(STEPS[0],draft=draft.id)
 
 class PatientRegistrationStepView(CanRegisterPatients, View):
     template_name = "administration/cadastrar_paciente.html"
+    
 
-    def dispatch(self, request, *args, **kwargs):
-        wizard = PatientRegistration(request.session)
-        if wizard.session_complete:
-            return redirect("administration:pacientes")
-        return super().dispatch(request, *args, **kwargs)
+    def get(self, request, step,draft):
+        self.draft=get_object_or_404(Cookie_draft,id=draft,answered_by=request.user)
+        wizard = PatientRegistration(self.draft)
 
-    def get(self, request, step):
-        wizard = PatientRegistration(request.session)
-        current = wizard.step(step)
+        current = wizard.step(step,)
         if current is None:
-            return to_step(STEPS[0])
+            return to_step(STEPS[0],draft=self.draft.id)
         if wizard.is_ahead(current):
-            return to_step(wizard.first_unanswered())
+            return to_step(wizard.first_unanswered(),draft=self.draft.id)
 
         form = current.form_class(initial=wizard.answer(current))
         return self.respond(request, wizard, current, form)
 
-    def post(self, request, step):
-        wizard = PatientRegistration(request.session)
+    def post(self, request, step,draft):
+        self.draft=get_object_or_404(Cookie_draft,id=draft,answered_by=request.user)
+        wizard = PatientRegistration(self.draft)
         current = wizard.step(step)
         if current is None:
-            return to_step(STEPS[0])
+            return to_step(STEPS[0],draft=self.draft.id)
 
         if request.POST.get("action") == "back":
             previous, _ = wizard.neighbours(current)
             wizard.save(current, request.POST)
-            return to_step(previous or current)
+            return to_step(previous or current,draft=self.draft.id)
 
         form = current.form_class(data=request.POST)
         if not form.is_valid():
@@ -153,17 +155,17 @@ class PatientRegistrationStepView(CanRegisterPatients, View):
         wizard.save(current, request.POST)
         _, following = wizard.neighbours(current)
         if following:
-            return to_step(following)
+            return to_step(following,draft=self.draft.id)
 
         pending = wizard.first_unanswered()
         if pending:
-            return to_step(pending)
+            return to_step(pending,draft=self.draft.id)
 
         try:
             patient = wizard.complete(request.user)
         except ValidationError as error:
             messages.error(request, " ".join(error.messages))
-            return to_step(STEPS[0])
+            return to_step(STEPS[0],draft=self.draft.id)
 
         return redirect("administration:cadastro_concluido", pk=patient.pk)
 
