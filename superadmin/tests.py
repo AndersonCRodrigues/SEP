@@ -1,4 +1,6 @@
+import re
 from datetime import timedelta
+from html import unescape
 
 from django.contrib.auth.models import Group
 from django.test import SimpleTestCase, TestCase
@@ -9,6 +11,8 @@ from core.models import CustomUser
 
 from .models import BackupRecord, ServerStatus
 from .views import BACKUP_LEVELS, BACKUP_TITLES
+from audit.models import SecurityLog
+
 
 EXPECTED = {
     BackupRecord.Status.CONCLUIDO: (
@@ -161,3 +165,73 @@ class HomeAlertTests(TestCase):
         self.assertEqual(self.open_alerts(context), 0)
         self.assertIsNone(context["alert_server"])
         self.assertEqual(context["alert_message"], "Nenhum alerta ativo no momento.")
+
+
+class SecurityLogPaginationTests(TestCase):
+    TOTAL = 25
+
+    def setUp(self):
+        login_superadmin(self.client)
+
+    def make_logs(self, term):
+        SecurityLog.objects.bulk_create(
+            SecurityLog(action=SecurityLog.Action.LOGIN, detail=f"{term} {i}")
+            for i in range(self.TOTAL)
+        )
+
+    def get(self, query):
+        return self.client.get(reverse("superadmin:logs") + query)
+
+    @staticmethod
+    def page_links(response):
+        return {
+            unescape(href)
+            for href in re.findall(r'href="(\?[^"]*)"', response.content.decode())
+        }
+
+    def follow_single_link(self, response):
+        links = self.page_links(response)
+        self.assertEqual(len(links), 1)
+        return self.get(links.pop())
+
+    def assert_search_kept(self, response, term, page):
+        context = response.context
+        self.assertEqual(context["search"], term)
+        self.assertEqual(context["page_obj"].number, page)
+        self.assertEqual(context["page_obj"].paginator.count, self.TOTAL)
+
+    def test_term_with_special_chars_survives_next_and_previous(self):
+        for term in ("a&b", "a b", "a+b", "100%", "a#b", "a=b", "ação"):
+            with self.subTest(term=term):
+                self.make_logs(term)
+                first = self.client.get(reverse("superadmin:logs"), {"q": term})
+                self.assert_search_kept(first, term, 1)
+
+                second = self.follow_single_link(first)
+                self.assert_search_kept(second, term, 2)
+
+                back = self.follow_single_link(second)
+                self.assert_search_kept(back, term, 1)
+
+    def test_page_param_is_replaced_not_duplicated(self):
+        self.make_logs("a&b")
+        response = self.get("?q=a%26b&page=2")
+        self.assertEqual(self.page_links(response), {"?q=a%26b&page=1"})
+
+    def test_empty_search_and_no_results(self):
+        self.make_logs("evento")
+        empty = self.get("?q=")
+        self.assertEqual(empty.status_code, 200)
+        self.assertEqual(empty.context["search"], "")
+
+        none = self.get("?q=nada-encontrado")
+        self.assertEqual(none.context["page_obj"].paginator.count, 0)
+        self.assertContains(none, "Nenhum log encontrado.")
+        self.assertEqual(self.page_links(none), set())
+
+    def test_search_value_is_escaped_in_html(self):
+        term = '"><b>x'
+        self.make_logs(term)
+        response = self.client.get(reverse("superadmin:logs"), {"q": term})
+        self.assertNotContains(response, '"><b>x')
+        self.assertContains(response, "&quot;&gt;&lt;b&gt;x")
