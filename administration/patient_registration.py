@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-
+from django.core.exceptions import ValidationError
 from django.db import transaction
 
 from core.utils import sincronizar_grupo
@@ -35,9 +35,8 @@ STEPS = (
     ),
     Step("telefone", "Contatos", "Telefone de contato", "phone", forms.PhoneForm),
     Step("email", "Contatos", "E-mail de contato", "phone", forms.EmailForm),
-    Step(
-        "logradouro", "Endereço", "Endereço completo", "address", forms.LogradouroForm
-    ),
+    
+    Step("logradouro", "Endereço", "Endereço completo", "address", forms.LogradouroForm),
     Step("cep", "Endereço", "CEP", "address", forms.CEPForm),
     Step("number", "Endereço", "Número", "address", forms.NumberForm),
     Step("municipality", "Endereço", "Município", "address", forms.MunicipalityForm),
@@ -45,6 +44,10 @@ STEPS = (
     Step("city", "Endereço", "Cidade", "address", forms.CityForm),
     Step("state", "Endereço", "Estado", "address", forms.StateForm),
     Step("complement", "Endereço", "Complemento", "address", forms.ComplementForm),
+    
+    
+    
+    
     Step(
         "acompanhante",
         "Acompanhante",
@@ -72,20 +75,22 @@ STEPS = (
 
 
 class PatientRegistration:
-    def __init__(self, session):
-        self.session = session
-        self.answers = session.get(SESSION_KEY, {})
-        self.session_complete = session.get(SESSION_KEY_COMPLETED, False)
+    def __init__(self, draft):
+        self.draft=draft
+        if self.draft.data is None:
+            self.draft.data={}
+        self.answers=self.draft.data
 
-    @classmethod
-    def start(cls, session):
-        session[SESSION_KEY] = {}
-        session[SESSION_KEY_COMPLETED] = False
-        return cls(session)
+
 
     @property
     def accompanied(self):
         return self.answers.get("acompanhante", {}).get("is_accompanied") == "sim"
+    @property
+    def completed(self):
+            return self.draft.status=='done'
+        
+            
 
     def steps(self):
         return [
@@ -113,7 +118,7 @@ class PatientRegistration:
             for skipped in STEPS:
                 if skipped.only_if_accompanied:
                     self.answers.pop(skipped.slug, None)
-        self.session[SESSION_KEY] = self.answers
+        self.draft.save(update_fields=['data','realese'])
 
     def first_unanswered(self):
         return next(
@@ -151,23 +156,26 @@ class PatientRegistration:
     @transaction.atomic
     def complete(self, registered_by):
         values = {"registered_by": registered_by}
+        if self.completed:
+            self.draft.status='done'
+            raise ValidationError("esse cadastro ja foi realizado,por favor faça outro")
         for step in self.steps():
             form = step.form_class(data=self.answer(step))
-            form.is_valid()
-            values.update(form.cleaned_data)
+            if  form.is_valid():
+                values.update(form.cleaned_data)
+            else:
+                raise ValidationError(f"{step.slug} inválido")
 
         # Preenche os campos do endereço que não são mais perguntados no mobile
-        values.setdefault("cep", "24900-000")
-        values.setdefault("number", "S/N")
-        values.setdefault("city", "Maricá")
-        values.setdefault("state", "RJ")
+
 
         Patient(**values).full_clean(exclude=["password"])
         patient = Patient.objects.create_with_credentials(
             raw_data=values, created_by_user=registered_by
         )
         sincronizar_grupo(patient)
+        self.draft.status='done'
+        self.draft.save(update_fields=['status','realese'])
 
-        self.session.pop(SESSION_KEY, None)
-        self.session[SESSION_KEY_COMPLETED] = True
+
         return patient
