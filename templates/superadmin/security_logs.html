@@ -46,11 +46,11 @@
       {% if page_obj.paginator.num_pages > 1 %}
       <div style="display:flex; justify-content:space-between; align-items:center; margin: 16px 0; font-family: var(--font-main); font-size: 13px;">
         {% if page_obj.has_previous %}
-        <a href="?page={{ page_obj.previous_page_number }}{% if search %}&q={{ search }}{% endif %}" class="mobile-button" style="padding: 8px 20px;">‹ Anterior</a>
+        <a href="{% querystring page=page_obj.previous_page_number %}" class="mobile-button" style="padding: 8px 20px;">‹ Anterior</a>
         {% else %}<span></span>{% endif %}
         <span>{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
         {% if page_obj.has_next %}
-        <a href="?page={{ page_obj.next_page_number }}{% if search %}&q={{ search }}{% endif %}" class="mobile-button" style="padding: 8px 20px;">Próxima ›</a>
+        <a href="{% querystring page=page_obj.next_page_number %}" class="mobile-button" style="padding: 8px 20px;">Próxima ›</a>
         {% else %}<span></span>{% endif %}
       </div>
       {% endif %}
@@ -119,11 +119,11 @@
 {% if page_obj.paginator.num_pages > 1 %}
 <nav class="list-pagination" aria-label="Paginação de logs">
   {% if page_obj.has_previous %}
-  <a class="btn-limpar" href="?page={{ page_obj.previous_page_number }}{% if search %}&q={{ search }}{% endif %}">&lt; Anterior</a>
+  <a class="btn-limpar" href="{% querystring page=page_obj.previous_page_number %}">&lt; Anterior</a>
   {% endif %}
   <span class="list-pagination-info">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
   {% if page_obj.has_next %}
-  <a class="btn-limpar" href="?page={{ page_obj.next_page_number }}{% if search %}&q={{ search }}{% endif %}">Próxima &gt;</a>
+  <a class="btn-limpar" href="{% querystring page=page_obj.next_page_number %}">Próxima &gt;</a>
   {% endif %}
 </nav>
 {% endif %}
