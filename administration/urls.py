@@ -15,7 +15,7 @@ urlpatterns = [
         name="cadastrar_paciente",
     ),
     path(
-        "cadastrar-paciente/<slug:step>/",
+        "cadastrar-paciente/<uuid:draft>/<slug:step>/",
         views.PatientRegistrationStepView.as_view(),
         name="cadastrar_paciente_etapa",
     ),
@@ -33,10 +33,5 @@ urlpatterns = [
         "atestados/atendimentos/",
         views.CertificateAppointmentsView.as_view(),
         name="atestados_atendimentos",
-    ),
-    path(
-        "pacientes/<int:pk>/primeiro-acesso/reenviar/",
-        views.PatientFirstAccessReissueView.as_view(),
-        name="reenviar_primeiro_acesso",
     ),
 ]
