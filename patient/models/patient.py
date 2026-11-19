@@ -8,7 +8,8 @@ from core.fields import collapse_spaces
 from core.managers import CustomUserManager
 from core.models import CustomUser
 from core.permissions import ALL, BusinessRulesMixin, RoleScopedQuerySet
-from core.utils import generate_temporary_password, send_temporary_password_email
+
+# from core.utils import generate_temporary_password, send_temporary_password_email
 from core.validators import validate_letters
 from teacher.models import Teacher
 from utils.fields import EncryptedTextField
