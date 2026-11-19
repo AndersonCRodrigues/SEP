@@ -126,19 +126,16 @@ class AppointmentRequestForm(forms.ModelForm):
         self.instance.patient = patient
         return self.save()
 
+
 class FirstAccessPasswordForm(forms.Form):
     password = forms.CharField(
         label="Crie sua senha",
         strip=False,
-        widget=forms.PasswordInput(
-            attrs={"autocomplete": "new-password"}
-        ),
+        widget=forms.PasswordInput(attrs={"autocomplete": "new-password"}),
     )
 
     password_confirmation = forms.CharField(
         label="Confirme sua senha",
         strip=False,
-        widget=forms.PasswordInput(
-            attrs={"autocomplete": "new-password"}
-        ),
+        widget=forms.PasswordInput(attrs={"autocomplete": "new-password"}),
     )

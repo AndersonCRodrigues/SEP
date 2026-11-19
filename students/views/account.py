@@ -4,13 +4,18 @@ from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView, UpdateView
-
 from core.mixins import GroupRequiredMixin
 from core.utils import sincronizar_grupo
 
 from ..forms import AlunoCreationForm
 from ..models import Student
 from .access import StudentOnly
+from django.db import DatabaseError, transaction
+
+
+RETRY_MESSAGE = (
+    "Não foi possível concluir o cadastro. Nenhum dado foi salvo, tente novamente."
+)
 
 
 class PainelEstudanteView(StudentOnly, TemplateView):
@@ -58,10 +63,15 @@ def cadastrar_aluno(request):
     if request.method == "POST":
         form = AlunoCreationForm(request.POST)
         if form.is_valid():
-            user = form.save()
-            sincronizar_grupo(user)
-            messages.success(request, "Aluno cadastrado com sucesso!")
-            return redirect("supervisor:painel")
+            try:
+                with transaction.atomic():
+                    user = form.save()
+                    sincronizar_grupo(user)
+            except DatabaseError:
+                form.add_error(None, RETRY_MESSAGE)
+            else:
+                messages.success(request, "Aluno cadastrado com sucesso!")
+                return redirect("supervisor:painel")
     else:
         form = AlunoCreationForm()
 

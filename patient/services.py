@@ -15,15 +15,20 @@ from audit.models import SecurityLog
 logger = logging.getLogger(__name__)
 
 sms_test_outbox = []
+
+
 def build_first_access_url(token):
     base_url = settings.FIRST_ACCESS_BASE_URL.rstrip("/")
 
     if not base_url:
-        raise ImproperlyConfigured("Configure FIRST_ACCESS_BASE_URL com o endereço publico do sistema")
+        raise ImproperlyConfigured(
+            "Configure FIRST_ACCESS_BASE_URL com o endereço publico do sistema"
+        )
 
-    access_path = reverse("patient:primeiro_acesso",kwargs={"token": token})
+    access_path = reverse("patient:primeiro_acesso", kwargs={"token": token})
 
     return f"{base_url}{access_path}"
+
 
 @transaction.atomic
 def create_first_access_invitation(patient):
@@ -36,21 +41,28 @@ def create_first_access_invitation(patient):
 
     now = timezone.now()
 
-    FirstAcess.objects.filter(patient=patient, used_at__isnull=True, revoked_at__isnull=True,).update(revoked_at=now)
+    FirstAcess.objects.filter(
+        patient=patient,
+        used_at__isnull=True,
+        revoked_at__isnull=True,
+    ).update(revoked_at=now)
 
     token = secrets.token_urlsafe(32)
     token_hash = hashlib.sha256(token.encode("utf-8")).hexdigest()
 
-    invitation = FirstAcess.objects.create(patient=patient, token_hash=token_hash, expires_at=now + timedelta(minutes=validity_minutes))
+    invitation = FirstAcess.objects.create(
+        patient=patient,
+        token_hash=token_hash,
+        expires_at=now + timedelta(minutes=validity_minutes),
+    )
     return invitation, token
+
 
 def validate_first_access_invitation(token, *, for_update=False):
     if not isinstance(token, str) or not token:
         raise ValidationError("Link inválido.")
 
-    token_hash = hashlib.sha256(
-        token.encode("utf-8")
-    ).hexdigest()
+    token_hash = hashlib.sha256(token.encode("utf-8")).hexdigest()
 
     invitations = FirstAcess.objects.all()
 
@@ -73,6 +85,7 @@ def validate_first_access_invitation(token, *, for_update=False):
 
     return invitation
 
+
 @transaction.atomic
 def set_first_access_password(token, password, password_confirmation):
     if password != password_confirmation:
@@ -80,9 +93,7 @@ def set_first_access_password(token, password, password_confirmation):
 
     invitation = validate_first_access_invitation(token)
 
-    patient = Patient.objects.select_for_update().get(
-        pk=invitation.patient_id
-    )
+    patient = Patient.objects.select_for_update().get(pk=invitation.patient_id)
 
     invitation = validate_first_access_invitation(
         token,
@@ -97,15 +108,26 @@ def set_first_access_password(token, password, password_confirmation):
 
     invitation.used_at = timezone.now()
     invitation.save(update_fields=["used_at"])
-    FirstAcess.objects.filter(patient=patient, used_at__isnull=True, revoked_at__isnull=True,).update(revoked_at=timezone.now())
+    FirstAcess.objects.filter(
+        patient=patient,
+        used_at__isnull=True,
+        revoked_at__isnull=True,
+    ).update(revoked_at=timezone.now())
 
     return patient
 
+
 # uso com dados mockados nenhum sms real é enviado
 @transaction.atomic
-def deliver_first_access_sms(invitation, access_url,responsible_user=None,):
+def deliver_first_access_sms(
+    invitation,
+    access_url,
+    responsible_user=None,
+):
     if not settings.DEBUG:
-        raise ImproperlyConfigured("O simulador de SMS só pode ser usado em desenvolvimento.")
+        raise ImproperlyConfigured(
+            "O simulador de SMS só pode ser usado em desenvolvimento."
+        )
 
     patient = invitation.patient
 
@@ -114,13 +136,13 @@ def deliver_first_access_sms(invitation, access_url,responsible_user=None,):
         detail = "Primeiro acesso pendente: paciente sem telefone."
         message = None
     else:
-        message = (
-            "SEP: crie sua senha pelo link: "
-            f"{access_url}"
-        )
+        message = f"SEP: crie sua senha pelo link: {access_url}"
 
         invitation.delivery_status = FirstAcess.DeliveryStatus.SIMULATED
-        detail = ("Mensagem de primeiro acesso preparada no simulador. ""Nenhum SMS real foi enviado.")
+        detail = (
+            "Mensagem de primeiro acesso preparada no simulador. "
+            "Nenhum SMS real foi enviado."
+        )
 
     invitation.save(update_fields=["delivery_status"])
 
@@ -132,23 +154,37 @@ def deliver_first_access_sms(invitation, access_url,responsible_user=None,):
         ),
         action=SecurityLog.Action.CREATE,
         detail=detail,
-        target_model=(
-            f"{patient._meta.app_label}.{type(patient).__name__}"
-        ),
-        target_id=str(patient.pk)
+        target_model=(f"{patient._meta.app_label}.{type(patient).__name__}"),
+        target_id=str(patient.pk),
     )
 
     if message is not None:
         transaction.on_commit(
-            lambda: sms_test_outbox.append({"invitation_id": invitation.pk, "to": patient.telefone,"message": message}))
+            lambda: sms_test_outbox.append(
+                {
+                    "invitation_id": invitation.pk,
+                    "to": patient.telefone,
+                    "message": message,
+                }
+            )
+        )
 
     return invitation.delivery_status
 
-def send_first_access_sms(invitation,access_url,responsible_user=None):
+
+def send_first_access_sms(invitation, access_url, responsible_user=None):
     try:
-        return deliver_first_access_sms(invitation=invitation, access_url=access_url, responsible_user=responsible_user)
+        return deliver_first_access_sms(
+            invitation=invitation,
+            access_url=access_url,
+            responsible_user=responsible_user,
+        )
     except Exception as error:
-        logger.error("Falha no envio do convite %s. Tipo: %s", invitation.pk, type(error).__name__)
+        logger.error(
+            "Falha no envio do convite %s. Tipo: %s",
+            invitation.pk,
+            type(error).__name__,
+        )
 
         try:
             FirstAcess.objects.filter(pk=invitation.pk).update(
@@ -156,9 +192,13 @@ def send_first_access_sms(invitation,access_url,responsible_user=None):
             )
         except Exception as status_error:
             logger.error(
-                "Não foi possível registrar a falha do convite %s. Tipo: %s", invitation.pk, type(status_error).__name__)
+                "Não foi possível registrar a falha do convite %s. Tipo: %s",
+                invitation.pk,
+                type(status_error).__name__,
+            )
 
         return FirstAcess.DeliveryStatus.FAILED
+
 
 @transaction.atomic
 def reissue_first_access_invitation(patient, responsible_user):
@@ -175,9 +215,13 @@ def reissue_first_access_invitation(patient, responsible_user):
         invitation.refresh_from_db()
         if invitation.revoked_at is not None or invitation.used_at is not None:
             return
-        
-        send_first_access_sms(invitation=invitation, access_url=access_url, responsible_user=responsible_user,)
-        
+
+        send_first_access_sms(
+            invitation=invitation,
+            access_url=access_url,
+            responsible_user=responsible_user,
+        )
+
     transaction.on_commit(send_after_commit)
 
     return invitation

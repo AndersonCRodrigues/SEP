@@ -37,8 +37,9 @@ STEPS = (
     ),
     Step("telefone", "Contatos", "Telefone de contato", "phone", forms.PhoneForm),
     Step("email", "Contatos", "E-mail de contato", "phone", forms.EmailForm),
-    
-    Step("logradouro", "Endereço", "Endereço completo", "address", forms.LogradouroForm),
+    Step(
+        "logradouro", "Endereço", "Endereço completo", "address", forms.LogradouroForm
+    ),
     Step("cep", "Endereço", "CEP", "address", forms.CEPForm),
     Step("number", "Endereço", "Número", "address", forms.NumberForm),
     Step("municipality", "Endereço", "Município", "address", forms.MunicipalityForm),
@@ -46,10 +47,6 @@ STEPS = (
     Step("city", "Endereço", "Cidade", "address", forms.CityForm),
     Step("state", "Endereço", "Estado", "address", forms.StateForm),
     Step("complement", "Endereço", "Complemento", "address", forms.ComplementForm),
-    
-    
-    
-    
     Step(
         "acompanhante",
         "Acompanhante",
