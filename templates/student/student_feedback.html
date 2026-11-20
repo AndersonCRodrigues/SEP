@@ -32,89 +32,30 @@
     {# Título pill #}
     <div class="m-feedback-title-pill">Feedbacks</div>
 
-    {# Lista de cards sem caixa externa #}
     <div class="m-feedback-list">
-      {% if feedbacks %}
+      {% if feedbacks_error %}
+        <p class="text-center text-muted py-3">{{ feedbacks_error }}</p>
+      {% else %}
         {% for fb in feedbacks %}
         <div class="m-feedback-card">
           <div class="m-feedback-info">
-            <span class="m-feedback-title">{{ fb.referente }}</span>
-            <span class="m-feedback-detail"><i class="bi bi-person"></i> {{ fb.realizada_por }}</span>
-            <span class="m-feedback-detail"><i class="bi bi-calendar-event"></i> {{ fb.recebida }}</span>
+            <span class="m-feedback-title">{{ fb.subject }}</span>
+            <span class="m-feedback-detail"><i class="bi bi-person"></i> {{ fb.author }}</span>
+            <span class="m-feedback-detail"><i class="bi bi-calendar-event"></i> {{ fb.received }}</span>
           </div>
           <div class="m-feedback-badge-container">
-            {% if fb.status == 'novo' %}
-              <span class="m-badge-novo">Novo</span>
-            {% elif fb.status == 'lida' %}
-              <span class="m-badge-lida">Lida</span>
+            {% if fb.label == "Novo" %}
+              <span class="m-badge-novo">{{ fb.label }}</span>
+            {% elif fb.label == "Lida" %}
+              <span class="m-badge-lida">{{ fb.label }}</span>
             {% else %}
-              <span class="m-badge-pendente">Pendente</span>
+              <span class="m-badge-pendente">{{ fb.label }}</span>
             {% endif %}
           </div>
         </div>
+        {% empty %}
+        <p class="text-center text-muted py-3">Você ainda não recebeu feedbacks.</p>
         {% endfor %}
-      {% else %}
-        {# Mocks baseados no print #}
-        <div class="m-feedback-card">
-          <div class="m-feedback-info">
-            <span class="m-feedback-title">Triagem - José Santos</span>
-            <span class="m-feedback-detail"><i class="bi bi-person"></i> Supervisor Geral</span>
-            <span class="m-feedback-detail"><i class="bi bi-calendar-event"></i> Recebida ás <strong>14:20</strong></span>
-          </div>
-          <div class="m-feedback-badge-container">
-            <span class="m-badge-lida">Lida</span>
-          </div>
-        </div>
-        <div class="m-feedback-card">
-          <div class="m-feedback-info">
-            <span class="m-feedback-title">Prontuário - Camila Duarte</span>
-            <span class="m-feedback-detail"><i class="bi bi-person"></i> Prof. Renata Alvez</span>
-            <span class="m-feedback-detail"><i class="bi bi-calendar-event"></i> Recebida - Ontem</span>
-          </div>
-          <div class="m-feedback-badge-container">
-            <span class="m-badge-lida">Lida</span>
-          </div>
-        </div>
-        <div class="m-feedback-card">
-          <div class="m-feedback-info">
-            <span class="m-feedback-title">Prontuário - Rafael Nunes</span>
-            <span class="m-feedback-detail"><i class="bi bi-person"></i> Prof. Marcos Lima</span>
-            <span class="m-feedback-detail"><i class="bi bi-calendar-event"></i> Recebida - Hoje</span>
-          </div>
-          <div class="m-feedback-badge-container">
-            <span class="m-badge-novo">Novo</span>
-          </div>
-        </div>
-        <div class="m-feedback-card">
-          <div class="m-feedback-info">
-            <span class="m-feedback-title">Triagem - José Santos</span>
-            <span class="m-feedback-detail"><i class="bi bi-person"></i> Supervisor Geral</span>
-            <span class="m-feedback-detail"><i class="bi bi-calendar-event"></i> Recebida ás <strong>14:20</strong></span>
-          </div>
-          <div class="m-feedback-badge-container">
-            <span class="m-badge-novo">Novo</span>
-          </div>
-        </div>
-        <div class="m-feedback-card">
-          <div class="m-feedback-info">
-            <span class="m-feedback-title">Prontuário - Camila Duarte</span>
-            <span class="m-feedback-detail"><i class="bi bi-person"></i> Supervisor Geral</span>
-            <span class="m-feedback-detail"><i class="bi bi-calendar-event"></i> Recebida ás <strong>14:20</strong></span>
-          </div>
-          <div class="m-feedback-badge-container">
-            <span class="m-badge-pendente">Pendente</span>
-          </div>
-        </div>
-        <div class="m-feedback-card">
-          <div class="m-feedback-info">
-            <span class="m-feedback-title">Prontuário - Rafael Nunes</span>
-            <span class="m-feedback-detail"><i class="bi bi-person"></i> Prof. Renata Alvez</span>
-            <span class="m-feedback-detail"><i class="bi bi-calendar-event"></i> Recebida ás <strong>14:20</strong></span>
-          </div>
-          <div class="m-feedback-badge-container">
-            <span class="m-badge-pendente">Pendente</span>
-          </div>
-        </div>
       {% endif %}
     </div>
 
@@ -126,60 +67,36 @@
       Feedbacks recebidos
     </div>
 
+    {% if feedbacks_error %}
+      {% include "components/error_state.html" with message=feedbacks_error retry_url=request.path %}
+    {% elif feedbacks %}
     <div class="feedback-wrapper">
       <div class="feedback-header">
-        <div>Referente a:</div>
-        <div>Realizada por:</div>
-        <div>Recebida:</div>
-        <div>Status:</div>
+        {% for column in columns %}<div>{{ column }}</div>{% endfor %}
       </div>
 
       <div class="feedback-container">
-        {% if feedbacks %}
-          {% for fb in feedbacks %}
-          <div class="feedback-row">
-            <div>{{ fb.referente }}</div>
-            <div>{{ fb.realizada_por }}</div>
-            <div>{{ fb.recebida }}</div>
-            <div class="text-end">
-              {% if fb.status == 'novo' %}
-                <span class="badge-novo">Novo</span>
-              {% elif fb.status == 'lida' %}
-                <span class="badge-lida">Lida</span>
-              {% else %}
-                <span class="badge-editada">Editada</span>
-              {% endif %}
-            </div>
+        {% for fb in feedbacks %}
+        <div class="feedback-row">
+          <div>{{ fb.subject }}</div>
+          <div>{{ fb.author }}</div>
+          <div>{{ fb.received }}</div>
+          <div class="text-end">
+            {% if fb.label == "Novo" %}
+              <span class="badge-novo">{{ fb.label }}</span>
+            {% elif fb.label == "Lida" %}
+              <span class="badge-lida">{{ fb.label }}</span>
+            {% else %}
+              <span class="badge-editada">{{ fb.label }}</span>
+            {% endif %}
           </div>
-          {% endfor %}
-        {% else %}
-          <div class="feedback-row">
-            <div>Triagem - José Santos</div>
-            <div>Supervisor geral</div>
-            <div>Recebida às 14:20</div>
-            <div class="text-end"><span class="badge-novo">Novo</span></div>
-          </div>
-          <div class="feedback-row">
-            <div>Triagem - Camila Duarte</div>
-            <div>Supervisor geral</div>
-            <div>Recebida às 13:05</div>
-            <div class="text-end"><span class="badge-novo">Novo</span></div>
-          </div>
-          <div class="feedback-row">
-            <div>Prontuário - Rafael Nunes</div>
-            <div>Prof. Renata Alvez</div>
-            <div>Analisada hoje</div>
-            <div class="text-end"><span class="badge-lida">Lida</span></div>
-          </div>
-          <div class="feedback-row">
-            <div>Prontuário - Ana Beatriz</div>
-            <div>Prof. Marcos Lima</div>
-            <div>Recebida ontem</div>
-            <div class="text-end"><span class="badge-editada">Editada</span></div>
-          </div>
-        {% endif %}
+        </div>
+        {% endfor %}
       </div>
     </div>
+    {% else %}
+    {% include "components/empty_state.html" with message="Você ainda não recebeu feedbacks." %}
+    {% endif %}
   </div>
 
 </div>

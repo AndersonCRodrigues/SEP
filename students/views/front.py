@@ -8,6 +8,7 @@ from django.views.generic import TemplateView
 
 from ..models import Student
 from .access import StudentOnly
+from .feedbacks import StudentFeedbacksView
 
 
 class TriagemAlunoView(StudentOnly, TemplateView):
@@ -26,5 +27,5 @@ class EncaminhamentosAlunoView(StudentOnly, TemplateView):
     template_name = "student/student_referral.html"
 
 
-class FeedbacksAlunoView(StudentOnly, TemplateView):
+class FeedbacksAlunoView(StudentFeedbacksView):
     template_name = "student/student_feedback.html"

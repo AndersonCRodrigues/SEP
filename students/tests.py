@@ -1,12 +1,16 @@
 from unittest.mock import patch
+import os
+from io import StringIO
 
 from django.db import DatabaseError
 from django.test import TestCase
 from django.urls import reverse
 
+from django.core.management import call_command
 from core.models import CustomUser
 from students.models import Advising, Student
 from teacher.models import Teacher
+from triage.models import TriageFeedback
 
 SYNC_PATH = "students.views.account.sincronizar_grupo"
 EMAIL_ALUNO = "novo.aluno@teste.com"
@@ -32,7 +36,7 @@ class CadastrarAlunoTransacaoTests(TestCase):
     def setUp(self):
         self.operador = CustomUser.objects.create_superuser(
             email="coordenador@teste.com",
-            password="Senha@12345",
+            password="Senha@12345",  # nosec B106
             first_name="Coordenador",
             last_name="Teste",
             cpf="11144477735",
@@ -97,3 +101,91 @@ class CadastrarAlunoTransacaoTests(TestCase):
         self.assertContains(resposta, "tente novamente")
         self.assertFalse(Advising.objects.filter(student__email=EMAIL_ALUNO).exists())
         self.assertFalse(Student.objects.filter(email=EMAIL_ALUNO).exists())
+
+
+class FeedbacksAreaAlunoTests(TestCase):
+    URL = "students:area_feedbacks"
+    NOMES_MOCKADOS = (
+        "Camila Duarte",
+        "Rafael Nunes",
+        "Ana Beatriz",
+        "Renata Alvez",
+        "Marcos Lima",
+    )
+
+    @classmethod
+    def setUpTestData(cls):
+        with patch.dict(os.environ, {"NODE_ENV": "dev"}):
+            call_command("populate_users", roles=["PR", "SV"], stdout=StringIO())
+            call_command("populate_student_home", stdout=StringIO())
+        cls.aluno_com_dados = Student.objects.get(email="aluno.demo@teste.com")
+        cls.aluno_vazio = Student.objects.get(email="aluno.vazio@teste.com")
+
+    def test_aluno_sem_feedback_ve_estado_vazio_e_nao_ve_dados_de_outro(self):
+        self.client.force_login(self.aluno_vazio)
+
+        resposta = self.client.get(reverse(self.URL))
+
+        self.assertEqual(resposta.status_code, 200)
+        self.assertEqual(resposta.context["feedbacks"], [])
+        self.assertContains(resposta, "Você ainda não recebeu feedbacks.")
+        self.assertNotContains(resposta, "José Santos")
+        for nome in self.NOMES_MOCKADOS:
+            self.assertNotContains(resposta, nome)
+
+    def test_aluno_com_dados_ve_so_os_proprios_feedbacks(self):
+        self.client.force_login(self.aluno_com_dados)
+
+        resposta = self.client.get(reverse(self.URL))
+
+        assuntos = sorted(f["subject"] for f in resposta.context["feedbacks"])
+        self.assertEqual(
+            assuntos,
+            [
+                "Prontuário - Ana Beatriz",
+                "Triagem - José Santos",
+                "Triagem - José Santos",
+                "Triagem - José Santos",
+            ],
+        )
+
+    def test_rota_alternativa_e_oficial_mostram_o_mesmo_conjunto(self):
+        self.client.force_login(self.aluno_com_dados)
+
+        alternativa = self.client.get(reverse(self.URL)).context["feedbacks"]
+        oficial = self.client.get(reverse("students:feedbacks")).context["feedbacks"]
+
+        self.assertEqual(
+            [(f["subject"], f["author"]) for f in alternativa],
+            [(f["subject"], f["author"]) for f in oficial],
+        )
+
+    def test_falha_de_banco_mostra_erro_em_vez_de_dados_fixos(self):
+        self.client.force_login(self.aluno_com_dados)
+
+        with patch.object(
+            TriageFeedback.objects.__class__,
+            "visible_to",
+            side_effect=DatabaseError("falha induzida"),
+        ):
+            resposta = self.client.get(reverse(self.URL))
+
+        self.assertContains(resposta, "Não foi possível carregar os feedbacks agora.")
+        for nome in self.NOMES_MOCKADOS:
+            self.assertNotContains(resposta, nome)
+
+    def test_acesso_anonimo_e_de_outro_perfil_continua_bloqueado(self):
+        url = reverse(self.URL)
+        self.assertRedirects(
+            self.client.get(url),
+            f"{reverse('login')}?next={url}",
+            fetch_redirect_response=False,
+        )
+
+        supervisor = Teacher.objects.filter(role=CustomUser.Role.SUPERVISOR).first()
+        self.client.force_login(supervisor)
+        self.assertRedirects(
+            self.client.get(url),
+            reverse("supervisor:home"),
+            fetch_redirect_response=False,
+        )
