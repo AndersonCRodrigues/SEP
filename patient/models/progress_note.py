@@ -50,7 +50,7 @@ class ProgressNote(BusinessRulesMixin, models.Model):
         settings.AUTH_USER_MODEL,
         null=True,
         blank=True,
-        on_delete=models.SET_NULL,
+        on_delete=models.PROTECT,
         related_name="confirmed_progress_notes",
         verbose_name="Confirmado por",
     )
