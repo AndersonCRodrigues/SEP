@@ -35,8 +35,10 @@ def minhas_triagens(request):
             "Apenas Alunos podem acessar as próprias triagens."
         )
 
-    triagens = TriageRecord.objects.filter(student_author_id=request.user.pk).order_by(
-        "-created_at"
+    triagens = (
+        TriageRecord.objects.visible_to(request.user)
+        .select_related("patient")
+        .order_by("-created_at")
     )
 
     return render(request, "triage/minhas_triagens.html", {"triagens": triagens})
@@ -182,6 +184,8 @@ def edit_triage(request, pk):
     is_staff = user.role in [Role.SUPERVISOR, Role.PROFESSOR]
 
     if is_dono_aluno:
+        if not TriageRecord.objects.visible_to(user).filter(pk=triage.pk).exists():
+            return HttpResponseForbidden("Você não tem acesso a essa triagem.")
         if not triage.editable_fields_for(user):
             return HttpResponseForbidden(
                 "Essa triagem não pode mais ser editada pelo aluno."
@@ -269,7 +273,7 @@ def triage_detail_student(request, pk):
 
     triage = get_object_or_404(TriageRecord, pk=pk)
 
-    if triage.student_author_id != request.user.pk:
+    if not TriageRecord.objects.visible_to(request.user).filter(pk=triage.pk).exists():
         return HttpResponseForbidden("Você não tem acesso a essa triagem.")
 
     triage.refresh_from_db()
