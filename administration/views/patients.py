@@ -125,6 +125,12 @@ class PatientRegistrationStepView(CanRegisterPatients, View):
 
     def get(self, request, step, draft):
         self.draft = get_object_or_404(Cookie_draft, id=draft, answered_by=request.user)
+        if self.draft.status=='done':
+            if self.draft.patient_id:
+                return redirect("administration:cadastro_concluido", pk=self.draft.patient.patient_id)
+            else:
+                return redirect("administration:pacientes", )
+            
         wizard = PatientRegistration(self.draft)
 
         current = wizard.step(
