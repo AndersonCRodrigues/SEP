@@ -48,7 +48,19 @@ class Cookie_draft(BusinessRulesMixin, models.Model):
     data = models.JSONField(default=register)
     create = models.DateTimeField(auto_now_add=True)
     realese = models.DateTimeField(auto_now=True)
+    patient = models.OneToOneField("patient.Patient", 
+                                   null=True,
+                                   blank=True, 
+                                   related_name="patient_draft",
+                                   on_delete=models.SET_NULL)
 
     CREATABLE_BY = (Role.ADMINISTRATIVO,)
-    EDITABLE_FIELDS = {Role.ADMINISTRATIVO: ("data")}
+    EDITABLE_FIELDS = {Role.ADMINISTRATIVO: ("data",)}
     DELETABLE_BY = ()
+    
+    @classmethod
+    def can_be_created_by(cls, user, **context):
+        if not super().can_be_created_by(user) or user.role !=Role.ADMINISTRATIVO:
+            return False
+        return True
+    
