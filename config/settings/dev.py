@@ -3,7 +3,7 @@ import os
 from .base import *
 
 DEBUG = True
-CSRF_FAILURE_VIEW="core.exception_handlers.csrfail"
+CSRF_FAILURE_VIEW = "core.exception_handlers.csrfail"
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "host.docker.internal"]
 

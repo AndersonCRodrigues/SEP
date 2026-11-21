@@ -151,12 +151,11 @@ class PatientRegistration:
     @transaction.atomic
     def complete(self, registered_by):
         status = Cookie_draft.objects.select_for_update().get(pk=self.draft.pk)
-        if status.status =="done":
-             raise ValidationError("esse cadastro ja foi realizado,por favor faça outro")
-            
+        if status.status == "done":
+            raise ValidationError("esse cadastro ja foi realizado,por favor faça outro")
+
         values = {"registered_by": registered_by}
-        
-           
+
         for step in self.steps():
             form = step.form_class(data=self.answer(step))
             if form.is_valid():
@@ -172,6 +171,6 @@ class PatientRegistration:
         )
         sincronizar_grupo(patient)
         self.draft.status = "done"
-        self.draft.save(update_fields=["status", "realese","patient"])
+        self.draft.save(update_fields=["status", "realese", "patient"])
 
         return patient

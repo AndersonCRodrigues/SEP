@@ -1,5 +1,5 @@
 from django.contrib import messages
-from django.shortcuts import redirect,render
+from django.shortcuts import redirect, render
 from django.urls import resolve
 from http import HTTPStatus
 
@@ -32,11 +32,15 @@ def custom_permission_denied_view(request, exception):
     return redirect(home_url_name)
 
 
-
-def csrfail(request,reason=''):
-    referer=request.META.get("HTTP_REFERER","/")
-    if resolve(request.path).url_name=="login":
+def csrfail(request, reason=""):
+    referer = request.META.get("HTTP_REFERER", "/")
+    if resolve(request.path).url_name == "login":
         if request.user.is_authenticated:
             return redirect("home_redirect")
         return redirect("login")
-    return render(request,"crsfail.html",context={"referer":referer},status=HTTPStatus.FORBIDDEN)
+    return render(
+        request,
+        "crsfail.html",
+        context={"referer": referer},
+        status=HTTPStatus.FORBIDDEN,
+    )
