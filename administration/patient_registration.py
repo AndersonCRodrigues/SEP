@@ -1,11 +1,12 @@
 from dataclasses import dataclass
-
+from django.core.exceptions import ValidationError
 from django.db import transaction
 
 from core.utils import sincronizar_grupo
 from patient.models import Patient
 
 from . import forms
+from .models import Cookie_draft
 
 SESSION_KEY = "patient_registration"
 SESSION_KEY_COMPLETED = "patient_registration_completed"
@@ -72,20 +73,19 @@ STEPS = (
 
 
 class PatientRegistration:
-    def __init__(self, session):
-        self.session = session
-        self.answers = session.get(SESSION_KEY, {})
-        self.session_complete = session.get(SESSION_KEY_COMPLETED, False)
-
-    @classmethod
-    def start(cls, session):
-        session[SESSION_KEY] = {}
-        session[SESSION_KEY_COMPLETED] = False
-        return cls(session)
+    def __init__(self, draft):
+        self.draft = draft
+        if self.draft.data is None:
+            self.draft.data = {}
+        self.answers = self.draft.data
 
     @property
     def accompanied(self):
         return self.answers.get("acompanhante", {}).get("is_accompanied") == "sim"
+
+    @property
+    def completed(self):
+        return self.draft.status == "done"
 
     def steps(self):
         return [
@@ -113,7 +113,7 @@ class PatientRegistration:
             for skipped in STEPS:
                 if skipped.only_if_accompanied:
                     self.answers.pop(skipped.slug, None)
-        self.session[SESSION_KEY] = self.answers
+        self.draft.save(update_fields=["data", "realese"])
 
     def first_unanswered(self):
         return next(
@@ -150,24 +150,27 @@ class PatientRegistration:
 
     @transaction.atomic
     def complete(self, registered_by):
+        status = Cookie_draft.objects.select_for_update().get(pk=self.draft.pk)
+        if status.status == "done":
+            raise ValidationError("esse cadastro ja foi realizado,por favor faça outro")
+
         values = {"registered_by": registered_by}
+
         for step in self.steps():
             form = step.form_class(data=self.answer(step))
-            form.is_valid()
-            values.update(form.cleaned_data)
+            if form.is_valid():
+                values.update(form.cleaned_data)
+            else:
+                raise ValidationError(f"{step.slug} inválido")
 
         # Preenche os campos do endereço que não são mais perguntados no mobile
-        values.setdefault("cep", "24900-000")
-        values.setdefault("number", "S/N")
-        values.setdefault("city", "Maricá")
-        values.setdefault("state", "RJ")
 
         Patient(**values).full_clean(exclude=["password"])
         patient = Patient.objects.create_with_credentials(
             raw_data=values, created_by_user=registered_by
         )
         sincronizar_grupo(patient)
+        self.draft.status = "done"
+        self.draft.save(update_fields=["status", "realese", "patient"])
 
-        self.session.pop(SESSION_KEY, None)
-        self.session[SESSION_KEY_COMPLETED] = True
         return patient

@@ -15,7 +15,7 @@ urlpatterns = [
         name="cadastrar_paciente",
     ),
     path(
-        "cadastrar-paciente/<slug:step>/",
+        "cadastrar-paciente/<uuid:draft>/<slug:step>/",
         views.PatientRegistrationStepView.as_view(),
         name="cadastrar_paciente_etapa",
     ),
