@@ -6,6 +6,7 @@ from core.utils import sincronizar_grupo
 from patient.models import Patient
 
 from . import forms
+from .models import Cookie_draft
 
 SESSION_KEY = "patient_registration"
 SESSION_KEY_COMPLETED = "patient_registration_completed"
@@ -149,10 +150,13 @@ class PatientRegistration:
 
     @transaction.atomic
     def complete(self, registered_by):
+        status = Cookie_draft.objects.select_for_update().get(pk=self.draft.pk)
+        if status.status =="done":
+             raise ValidationError("esse cadastro ja foi realizado,por favor faça outro")
+            
         values = {"registered_by": registered_by}
-        if self.completed:
-            self.draft.status = "done"
-            raise ValidationError("esse cadastro ja foi realizado,por favor faça outro")
+        
+           
         for step in self.steps():
             form = step.form_class(data=self.answer(step))
             if form.is_valid():
@@ -168,6 +172,6 @@ class PatientRegistration:
         )
         sincronizar_grupo(patient)
         self.draft.status = "done"
-        self.draft.save(update_fields=["status", "realese"])
+        self.draft.save(update_fields=["status", "realese","patient"])
 
         return patient
