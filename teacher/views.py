@@ -15,9 +15,7 @@ from core.models import CustomUser
 from core.month_calendar import displayed_month, month_calendar, month_range
 from core.search import full_name_lookup
 from core.utils import sincronizar_grupo
-from patient.models import Patient
-
-from patient.models import ProgressNote
+from patient.models import Patient, ProgressNote
 from students.models import (
     Advising,
     CaseAssignment,

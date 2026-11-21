@@ -194,7 +194,7 @@ class TriageRecord(BusinessRulesMixin, models.Model):
         settings.AUTH_USER_MODEL,
         null=True,
         blank=True,
-        on_delete=models.SET_NULL,
+        on_delete=models.PROTECT,
         related_name="closed_triage_records",
         verbose_name="Fechada por",
     )

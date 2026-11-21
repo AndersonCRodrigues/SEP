@@ -6,9 +6,10 @@ from django.urls import reverse_lazy
 from django.views.generic import TemplateView, UpdateView
 
 from core.models import CustomUser
-from core.utils import sincronizar_grupo
 from core.notifications import enviar_credenciais_por_telefone
-from supervisor.utils import gerar_senha_temporaria, enviar_email_credenciais
+from core.utils import sincronizar_grupo
+from supervisor.utils import enviar_email_credenciais, gerar_senha_temporaria
+
 from ..forms import AdministrativoCreationForm
 from .access import AdministrativeOnly
 
