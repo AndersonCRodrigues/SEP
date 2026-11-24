@@ -5,8 +5,8 @@ from django.utils import timezone
 from django.views.generic import TemplateView
 
 from core.constants import TriageStatus
-from core.month_calendar import displayed_month, month_calendar, month_range
 from core.models import CustomUser
+from core.month_calendar import displayed_month, month_calendar, month_range
 from teacher.models import Teacher
 from triage.models import TriageRecord
 
