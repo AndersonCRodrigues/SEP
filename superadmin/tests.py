@@ -1,5 +1,8 @@
 from datetime import timedelta
+from decimal import Decimal
 
+from django.core.exceptions import ValidationError
+from django.db import IntegrityError, transaction
 from django.contrib.auth.models import Group
 from django.test import SimpleTestCase, TestCase
 from django.urls import reverse
@@ -161,3 +164,61 @@ class HomeAlertTests(TestCase):
         self.assertEqual(self.open_alerts(context), 0)
         self.assertIsNone(context["alert_server"])
         self.assertEqual(context["alert_message"], "Nenhum alerta ativo no momento.")
+
+
+class ServerPercentRangeTests(TestCase):
+    INTEGER_CASES = {-1: False, 0: True, 50: True, 100: True, 101: False}
+    UPTIME_CASES = {
+        "-0.01": False,
+        "0": True,
+        "99.99": True,
+        "100.00": True,
+        "100.01": False,
+    }
+
+    def assert_range(self, field, cases):
+        for value, accepted in cases.items():
+            with self.subTest(field=field, value=value):
+                server = make_server(**{field: value})
+                if accepted:
+                    server.full_clean()
+                    continue
+                with self.assertRaises(ValidationError) as caught:
+                    server.full_clean()
+                self.assertIn(field, caught.exception.message_dict)
+
+    def test_full_clean_accepts_only_0_to_100(self):
+        for field in ("cpu_percent", "memoria_percent"):
+            self.assert_range(field, self.INTEGER_CASES)
+        self.assert_range(
+            "uptime_percent",
+            {Decimal(value): ok for value, ok in self.UPTIME_CASES.items()},
+        )
+
+    def test_database_rejects_out_of_range_on_every_write_path(self):
+        make_server().save()
+        writes = {
+            "save": lambda: make_server(cpu_percent=101).save(),
+            "bulk_create": lambda: ServerStatus.objects.bulk_create(
+                [make_server(memoria_percent=101)]
+            ),
+            "update": lambda: ServerStatus.objects.update(
+                uptime_percent=Decimal("100.01")
+            ),
+            "uptime negativo": lambda: make_server(
+                uptime_percent=Decimal("-0.01")
+            ).save(),
+        }
+        for path, write in writes.items():
+            with self.subTest(path=path):
+                with self.assertRaises(IntegrityError), transaction.atomic():
+                    write()
+
+    def test_database_accepts_the_limits(self):
+        make_server(
+            uptime_percent=Decimal("100.00"), cpu_percent=100, memoria_percent=0
+        ).save()
+        make_server(
+            uptime_percent=Decimal("0"), cpu_percent=0, memoria_percent=100
+        ).save()
+        self.assertEqual(ServerStatus.objects.count(), 2)
