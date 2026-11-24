@@ -1,7 +1,7 @@
 import os
 from datetime import date, datetime, time, timedelta
 
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
 
 from areas.models import AreaActing
@@ -9,7 +9,7 @@ from core.models import CustomUser
 from documents.models import AttendanceCertificate, InternshipDeclaration
 from patient.models import Patient
 from scheduling.models import Appointment, Room, RoomBooking
-from students.models import CaseAssignment, Student
+from students.models import Student
 from teacher.models import Teacher
 
 ROOMS = 7
@@ -40,13 +40,12 @@ class Command(BaseCommand):
     )
 
     def add_arguments(self, parser):
-        parser.add_argument(
-            "--manter",
-            action="store_true",
-            help="Não apaga a demonstração anterior antes de criar a nova.",
-        )
+       parser.add_argument("--confirmar-base-demo", action="store_true", help="Confirma que a carga será executada em uma base destinada à demonstração.")
 
     def handle(self, *args, **options):
+        self.created_appointment_ids = []
+        self.created_certificate_ids = []
+
         if os.getenv("NODE_ENV") != "dev":
             self.stdout.write(
                 self.style.WARNING(
@@ -54,7 +53,8 @@ class Command(BaseCommand):
                 )
             )
             return
-
+        if not options["confirmar_base_demo"]:
+            raise CommandError("Carga não executada. Use --confirmar-base-demo somente em uma base destinada à demonstração.")
         now = timezone.localtime()
         today = now.date()
 
@@ -72,8 +72,6 @@ class Command(BaseCommand):
             )
             return
 
-        if not options["manter"]:
-            self.clear()
 
         students, patients = self.prepare_people(teacher, area)
         if not (students and patients):
@@ -93,82 +91,90 @@ class Command(BaseCommand):
 
         self.summarize(today, now)
 
-    def clear(self):
-        InternshipDeclaration.objects.all().delete()
-        AttendanceCertificate.objects.all().delete()
-        Appointment.objects.all().delete()
-        RoomBooking.objects.all().delete()
-        Room.objects.all().delete()
-        self.stdout.write("Demonstração anterior removida.")
-
     def prepare_people(self, teacher, area):
-        students = list(Student.objects.all()[:4])
-        for student in students:
-            if not student.current_advisor_id:
-                student.current_advisor = teacher
-            student.stage = Student.Stage.TREATMENT
-            student.save()
+        students = list(Student.objects.filter(stage=Student.Stage.TREATMENT, current_advisor=teacher).order_by("pk")[:4])
+        patients = list(Patient.objects.filter(flow_status=Patient.FlowStatus.IN_TREATMENT).order_by("pk")[:6])
 
-        patients = list(Patient.objects.all()[:6])
-        for student, patient in zip(students, patients):
-            if not student.open_cases.exists():
-                self.ready_for_treatment(patient)
-                CaseAssignment.objects.assign(student, patient, acting_area=area)
-
-        self.stdout.write(
-            f"{len(students)} alunos e {len(patients)} pacientes prontos."
-        )
+        self.stdout.write(f"{len(students)} alunos e {len(patients)} pacientes selecionados, sem alterações.")
         return students, patients
 
-    @staticmethod
-    def ready_for_treatment(patient):
-        flow = Patient.FlowStatus
-        allowed = Patient.ALLOWED_TRANSITIONS
-        if patient.flow_status == flow.IN_TREATMENT:
-            return
-        if flow.IN_TREATMENT in allowed.get(patient.flow_status, ()):
-            return
-        if flow.REFERRED not in allowed.get(patient.flow_status, ()):
-            patient.advance_to(flow.IN_TRIAGE)
-        patient.advance_to(flow.REFERRED)
-
     def create_rooms(self):
-        rooms = [
-            Room.objects.create(
-                name=f"Sala {number}",
-                room_type=(
-                    Room.RoomType.CHILD if number > ROOMS - 2 else Room.RoomType.ADULT
-                ),
+        rooms = []
+
+        for number in range(1, ROOMS + 1):
+            room, _ = Room.objects.get_or_create(
+                name=f"[DEMO ADM-07] Sala {number}",
+                defaults={
+                    "room_type": (
+                        Room.RoomType.CHILD
+                        if number > ROOMS - 2
+                        else Room.RoomType.ADULT
+                    ),
+                    "status": Room.Status.ACTIVE,
+                },
             )
-            for number in range(1, ROOMS + 1)
-        ]
-        for number, status in enumerate(UNUSABLE_ROOMS, start=ROOMS + 1):
-            Room.objects.create(name=f"Sala {number}", status=status)
+            rooms.append(room)
+
+        for number, status in enumerate(
+            UNUSABLE_ROOMS,
+            start=ROOMS + 1,
+        ):
+            Room.objects.get_or_create(
+                name=f"[DEMO ADM-07] Sala {number}",
+                defaults={
+                    "room_type": Room.RoomType.ADULT,
+                    "status": status,
+                },
+            )
 
         self.stdout.write(
-            f"{len(rooms)} salas utilizaveis e {len(UNUSABLE_ROOMS)} fora de uso."
+            f"{len(rooms)} salas da demonstração disponíveis para a carga."
         )
+
         return rooms
 
     def book(self, rooms, students, patients, now):
         window_start = datetime.combine(date.min, (now - RoomBooking.DURATION).time())
         step = timedelta(minutes=50 // OCCUPIED_ROOMS)
+        created_count = 0
 
         for number, room in enumerate(rooms[:OCCUPIED_ROOMS]):
-            start = (window_start + step * (number + 1) + timedelta(minutes=1)).time()
-            RoomBooking.objects.create(
+            if not room.is_usable:
+                continue
+
+            existing_booking = RoomBooking.objects.filter(
                 room=room,
-                patient=patients[number % len(patients)],
-                student=students[number % len(students)],
+                weekday=now.weekday(),
+                end_date__isnull=True,
+            ).exists()
+
+            if existing_booking:
+                continue
+
+            start = (window_start + step * (number + 1)+ timedelta(minutes=1)).time()
+
+            _, created = RoomBooking.objects.get_or_create(
+                room=room,
                 weekday=now.weekday(),
                 start_time=start,
+                end_date__isnull=True,
+                defaults={
+                    "patient": patients[number % len(patients)],
+                    "student": students[number % len(students)],
+                },
             )
 
-        self.stdout.write(f"{OCCUPIED_ROOMS} salas ocupadas neste horário.")
+            if created:
+                created_count += 1
+
+        self.stdout.write(f"{created_count} reservas abertas criadas. "
+            "Reservas existentes foram preservadas.")
 
     def release(self, rooms, student, patient, today):
+        created_count = 0
+
         for room, days in zip(rooms[OCCUPIED_ROOMS:], (0, 2)):
-            RoomBooking.objects.create(
+            _, created = RoomBooking.objects.get_or_create(
                 room=room,
                 patient=patient,
                 student=student,
@@ -176,33 +182,56 @@ class Command(BaseCommand):
                 start_time=time(16, 0),
                 end_date=today - timedelta(days=days),
             )
-        self.stdout.write("2 reservas encerradas (viram 'Sala liberada').")
+
+            if created:
+                created_count += 1
+
+        self.stdout.write(
+            f"{created_count} reservas encerradas criadas."
+        )
 
     def schedule(self, rooms, students, patients, teacher, now):
         start = now.replace(hour=8, minute=0, second=0, microsecond=0)
+        created_today = 0
+
         for number in range(APPOINTMENTS_TODAY):
             when = start + timedelta(minutes=50 * number)
-            Appointment.objects.create(
-                patient=patients[number % len(patients)],
-                assigned_student=students[number % len(students)],
-                teacher=teacher,
-                room=rooms[number % OCCUPIED_ROOMS],
-                kind=(
-                    Appointment.Kind.SESSION
-                    if number % 3
-                    else Appointment.Kind.SCREENING
-                ),
-                status=(
-                    Appointment.Status.ATTENDED
-                    if when < now
-                    else Appointment.Status.SCHEDULED
-                ),
-                scheduled_at=when,
-                duration_minutes=50,
-            )
-        self.stdout.write(f"{APPOINTMENTS_TODAY} atendimentos hoje.")
+            room = rooms[number % OCCUPIED_ROOMS]
 
-        created = 0
+            if not room.is_usable:
+                continue
+
+            appointment, created = Appointment.objects.get_or_create(
+                room=room,
+                scheduled_at=when,
+                defaults={
+                    "patient": patients[number % len(patients)],
+                    "assigned_student": students[number % len(students)],
+                    "teacher": teacher,
+                    "kind": (
+                        Appointment.Kind.SESSION
+                        if number % 3
+                        else Appointment.Kind.SCREENING
+                    ),
+                    "status": (
+                        Appointment.Status.ATTENDED
+                        if when < now
+                        else Appointment.Status.SCHEDULED
+                    ),
+                    "duration_minutes": 50,
+                },
+            )
+
+            if created:
+                self.created_appointment_ids.append(appointment.pk)
+                created_today += 1
+
+        self.stdout.write(
+            f"{created_today} atendimentos criados para hoje."
+        )
+
+        created_month = 0
+
         for number, day in enumerate(DAYS_WITH_SCHEDULE):
             try:
                 when = timezone.make_aware(
@@ -210,60 +239,100 @@ class Command(BaseCommand):
                 )
             except ValueError:
                 continue
-            Appointment.objects.create(
-                patient=patients[number % len(patients)],
-                assigned_student=students[number % len(students)],
-                teacher=teacher,
-                room=rooms[(number + 3) % len(rooms)],
-                scheduled_at=when,
-                duration_minutes=50,
-            )
-            created += 1
-        self.stdout.write(f"{created} agendamentos espalhados pelo mês (calendário).")
 
-    def schedule_week(self, rooms, students, patients, teacher, now):
-        for number, (offset, hour, status) in enumerate(WEEK_SCHEDULE):
-            when = (now + timedelta(days=offset)).replace(
-                hour=hour, minute=30, second=0, microsecond=0
-            )
-            Appointment.objects.create(
-                patient=patients[number % len(patients)],
-                assigned_student=students[number % len(students)],
-                teacher=teacher,
-                room=rooms[number % len(rooms)],
-                status=status,
+            room = rooms[(number + 3) % len(rooms)]
+
+            if not room.is_usable:
+                continue
+
+            appointment, created = Appointment.objects.get_or_create(
+                room=room,
                 scheduled_at=when,
-                duration_minutes=50,
+                defaults={
+                    "patient": patients[number % len(patients)],
+                    "assigned_student": students[number % len(students)],
+                    "teacher": teacher,
+                    "duration_minutes": 50,
+                },
             )
+
+            if created:
+                self.created_appointment_ids.append(appointment.pk)
+                created_month += 1
+
         self.stdout.write(
-            f"{len(WEEK_SCHEDULE)} atendimentos nos dias vizinhos (agenda da semana)."
+            f"{created_month} agendamentos criados para o calendário."
         )
 
-    def issue(self, patients, administrative, area, today):
-        for number in range(CERTIFICATES_TODAY):
-            AttendanceCertificate.objects.create(
-                patient=patients[number % len(patients)],
-                kind=(
-                    AttendanceCertificate.Kind.DECLARATION
-                    if number % 2
-                    else AttendanceCertificate.Kind.MEDICAL_CERTIFICATE
-                ),
-                content="Compareceu ao atendimento no Serviço Escola de Psicologia.",
-                status=AttendanceCertificate.Status.ISSUED,
-                issued_at=today,
-                issued_by=administrative,
-                acting_area=area,
+
+    def schedule_week(self, rooms, students, patients, teacher, now):
+        created_count = 0
+
+        for number, (offset, hour, status) in enumerate(WEEK_SCHEDULE):
+            when = (now + timedelta(days=offset)).replace(hour=hour, minute=30, second=0, microsecond=0)
+            room = rooms[number % len(rooms)]
+
+            if not room.is_usable:
+                continue
+
+            appointment, created = Appointment.objects.get_or_create(
+                room=room, scheduled_at=when,
+                defaults={
+                    "patient": patients[number % len(patients)],
+                    "assigned_student": students[number % len(students)],
+                    "teacher": teacher,
+                    "status": status,
+                    "duration_minutes": 50,
+                },
             )
-        self.stdout.write(f"{CERTIFICATES_TODAY} atestados emitidos hoje.")
+
+            if created:
+                self.created_appointment_ids.append(appointment.pk)
+                created_count += 1
+
+        self.stdout.write(f"{created_count} atendimentos criados para a agenda da semana.")
+
+    def issue(self, patients, administrative, area, today):
+        created_count = 0
+
+        for number in range(CERTIFICATES_TODAY):
+            document, created = AttendanceCertificate.objects.get_or_create(
+                patient=patients[number % len(patients)],
+                student=None,
+                content=(
+                    f"[DEMO ADM-07:issued:{today}:{number}] "
+                    "Compareceu ao atendimento no Serviço Escola de Psicologia."
+                ),
+                defaults={
+                    "kind": (
+                        AttendanceCertificate.Kind.DECLARATION
+                        if number % 2
+                        else AttendanceCertificate.Kind.MEDICAL_CERTIFICATE
+                    ),
+                    "status": AttendanceCertificate.Status.ISSUED,
+                    "issued_at": today,
+                    "issued_by": administrative,
+                    "acting_area": area,
+                },
+            )
+
+            if created:
+                self.created_certificate_ids.append(document.pk)
+                created_count += 1
+
+        self.stdout.write(
+            f"{created_count} documentos de demonstração emitidos para hoje."
+        )
 
     def request_declarations(self, patients, students, administrative, area, today):
         for number in range(PENDING_DECLARATIONS):
-            AttendanceCertificate.objects.create(
+            document = AttendanceCertificate.objects.create(
                 patient=patients[number % len(patients)],
                 kind=AttendanceCertificate.Kind.DECLARATION,
                 content="Aguardando emissão da declaração de comparecimento.",
                 acting_area=area,
             )
+            self.created_certificate_ids.append(document.pk)
 
         for number, student in enumerate(students[:INTERNSHIP_DECLARATIONS]):
             issued = number == 0
@@ -282,7 +351,7 @@ class Command(BaseCommand):
                 issued_by=administrative if issued else None,
             )
 
-        AttendanceCertificate.objects.create(
+        document = AttendanceCertificate.objects.create(
             student=students[0],
             kind=AttendanceCertificate.Kind.MEDICAL_CERTIFICATE,
             content="Compareceu ao atendimento no Serviço Escola de Psicologia.",
@@ -291,6 +360,7 @@ class Command(BaseCommand):
             issued_by=administrative,
             acting_area=area,
         )
+        self.created_certificate_ids.append(document.pk)
 
         self.stdout.write(
             f"{PENDING_DECLARATIONS} declaracoes pendentes de paciente, "
@@ -298,15 +368,13 @@ class Command(BaseCommand):
         )
 
     def spread_over_time(self, now):
-        for number, appointment in enumerate(Appointment.objects.order_by("id")):
-            Appointment.objects.filter(pk=appointment.pk).update(
-                created_at=now - timedelta(days=number % 6, hours=number % 7)
-            )
-        for number, document in enumerate(AttendanceCertificate.objects.order_by("id")):
-            AttendanceCertificate.objects.filter(pk=document.pk).update(
-                created_at=now - timedelta(hours=number * HOURS_BETWEEN_ACTIVITIES)
-            )
-        self.stdout.write("Atividades distribuídas nos últimos dias.")
+        for number, appointment_id in enumerate(self.created_appointment_ids):
+            Appointment.objects.filter(pk=appointment_id).update(created_at=now - timedelta(days=number % 6, hours=number % 7))
+
+        for number, certificate_id in enumerate(self.created_certificate_ids):
+            AttendanceCertificate.objects.filter(pk=certificate_id).update(created_at=now - timedelta(hours=number * HOURS_BETWEEN_ACTIVITIES))
+
+        self.stdout.write("Datas ajustadas somente nos registros criados nesta execução.")
 
     def summarize(self, today, now):
         occupied = (
