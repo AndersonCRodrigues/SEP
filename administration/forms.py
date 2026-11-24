@@ -3,10 +3,12 @@ import unicodedata
 
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
+from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django.utils.html import format_html
 from localflavor.br.br_states import STATE_CHOICES
 from localflavor.br.forms import BRCPFField
+
 from core.fields import format_cep, only_digits
 from core.models import CustomUser
 from core.validators import validate_letters, validate_phone

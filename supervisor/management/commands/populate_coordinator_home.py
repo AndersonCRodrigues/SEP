@@ -5,6 +5,7 @@ from datetime import timedelta
 from django.core.management.base import BaseCommand
 from django.db import transaction
 from django.utils import timezone
+
 from areas.models import AreaActing
 from core.constants import TriageStatus
 from core.models import CustomUser
