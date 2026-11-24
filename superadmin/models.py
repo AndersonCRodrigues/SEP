@@ -1,7 +1,11 @@
 from django.db import models
 
-from django.db.models import Case, Value, When
+from django.db.models import Case, Q, Value, When
 from core.models import CustomUser
+from core.validators import PERCENT_RANGE, PERCENT_VALIDATORS
+
+
+PERCENT_FIELDS = ("uptime_percent", "cpu_percent", "memoria_percent")
 
 
 class ServerStatusQuerySet(models.QuerySet):
@@ -24,10 +28,17 @@ class ServerStatus(models.Model):
 
     nome = models.CharField(max_length=100, verbose_name="Servidor")
     uptime_percent = models.DecimalField(
-        max_digits=5, decimal_places=2, verbose_name="Uptime (%)"
+        max_digits=5,
+        decimal_places=2,
+        validators=PERCENT_VALIDATORS,
+        verbose_name="Uptime (%)",
     )
-    cpu_percent = models.PositiveSmallIntegerField(verbose_name="CPU (%)")
-    memoria_percent = models.PositiveSmallIntegerField(verbose_name="Memória (%)")
+    cpu_percent = models.PositiveSmallIntegerField(
+        validators=PERCENT_VALIDATORS, verbose_name="CPU (%)"
+    )
+    memoria_percent = models.PositiveSmallIntegerField(
+        validators=PERCENT_VALIDATORS, verbose_name="Memória (%)"
+    )
     health = models.CharField(
         max_length=2, choices=Health.choices, default=Health.SAUDAVEL
     )
@@ -39,6 +50,14 @@ class ServerStatus(models.Model):
         verbose_name = "Status de servidor"
         verbose_name_plural = "Status de servidores"
         ordering = ["nome"]
+        constraints = [
+            models.CheckConstraint(
+                condition=Q(**{f"{field}__range": PERCENT_RANGE}),
+                name=f"serverstatus_{field}_range",
+                violation_error_message="Percentual deve ficar entre 0 e 100.",
+            )
+            for field in PERCENT_FIELDS
+        ]
 
     def __str__(self):
         return f"{self.nome} ({self.get_health_display()})"
