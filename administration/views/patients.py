@@ -177,7 +177,7 @@ class PatientRegistrationStepView(CanRegisterPatients, View):
                 "form": form,
                 "step": step,
                 "number": wizard.number(step),
-                "total": len(STEPS),
+                "total": len(wizard.steps()),
                 "is_first": step == STEPS[0],
                 "sections": wizard.sections(step),
             },
