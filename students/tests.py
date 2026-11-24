@@ -32,7 +32,7 @@ class CadastrarAlunoTransacaoTests(TestCase):
     def setUp(self):
         self.operador = CustomUser.objects.create_superuser(
             email="coordenador@teste.com",
-            password="Senha@12345",
+            password="Senha@12345",  # nosec B106
             first_name="Coordenador",
             last_name="Teste",
             cpf="11144477735",
