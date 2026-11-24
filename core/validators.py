@@ -1,6 +1,14 @@
-from django.core.validators import RegexValidator
+from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
 
 NO_NUMBER = "S/N"
+
+PERCENT_RANGE = (0, 100)
+
+
+PERCENT_VALIDATORS = (
+    MinValueValidator(PERCENT_RANGE[0]),
+    MaxValueValidator(PERCENT_RANGE[1]),
+)
 
 validate_letters = RegexValidator(
     r"^[^\W\d_]+(?:[ '’-][^\W\d_]+)*$",
