@@ -124,14 +124,27 @@ class AppointmentRequest(BusinessRulesMixin, models.Model):
             raise ValidationError(
                 "Só o Administrativo responde solicitações de horário."
             )
-        if not self.is_pending:
-            raise ValidationError("Esta solicitação já foi respondida.")
 
-        self.status = self.Status.ACCEPTED if accepted else self.Status.DECLINED
-        self.response = response.strip()
-        self.answered_by = user
-        self.answered_at = timezone.now()
-        self.save(update_fields=["status", "response", "answered_by", "answered_at"])
+        status = self.Status.ACCEPTED if accepted else self.Status.DECLINED
+        response_text = response.strip()
+        answered_by = user
+        answered_at = timezone.now()
+
+        new_status = AppointmentRequest.objects.filter(
+            pk=self.pk, status=self.Status.PENDING
+        ).update(
+            status=status,
+            response=response_text,
+            answered_by=answered_by,
+            answered_at=answered_at,
+        )
+
+        if new_status == 0:
+            raise ValidationError("Esta solicitação já foi respondida.")
+        self.status = status
+        self.response = response_text
+        self.answered_by = answered_by
+        self.answered_at = answered_at
 
     def __str__(self):
         return f"Solicitação de {self.patient} para {self.preferred_date:%d/%m/%Y}"
