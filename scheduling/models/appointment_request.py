@@ -131,7 +131,9 @@ class AppointmentRequest(BusinessRulesMixin, models.Model):
         self.response = response.strip()
         self.answered_by = user
         self.answered_at = timezone.now()
-        self.save(update_fields=["status", "response", "answered_by", "answered_at"])
+        new_status=AppointmentRequest.objects.filter(pk=user.id,status="pending").update(status=self.status)
+        if new_status !=0:
+            self.save(update_fields=["status", "response", "answered_by", "answered_at"])
 
     def __str__(self):
         return f"Solicitação de {self.patient} para {self.preferred_date:%d/%m/%Y}"
