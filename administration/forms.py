@@ -305,25 +305,25 @@ class BirthDateForm(RegistrationStepForm):
     )
 
     def clean_data_nascimento(self):
-        data_nascimento = self.cleaned_data["data_nascimento"]
-        hoje = timezone.localdate()
+        date_of_birth = self.cleaned_data["data_nascimento"]
+        today = timezone.localdate()
 
-        idade = (
-            hoje.year
-            - data_nascimento.year
-            - ((hoje.month, hoje.day) < (data_nascimento.month, data_nascimento.day))
+        age = (
+            today.year
+            - date_of_birth.year
+            - ((today.month, today.day) < (date_of_birth.month, date_of_birth.day))
         )
 
-        if data_nascimento > hoje:
+        if date_of_birth > today:
             raise ValidationError("A data de nascimento não pode ser no futuro.")
 
-        if idade < 5:
+        if age < 5:
             raise ValidationError("É necessário ter no mínimo 5 anos.")
 
-        if idade > 100:
+        if age > 100:
             raise ValidationError("É necessário ter no máximo 100 anos.")
 
-        return data_nascimento
+        return date_of_birth
 
 
 class PhoneForm(RegistrationStepForm):
@@ -370,7 +370,6 @@ class LogradouroForm(RegistrationStepForm):
         max_length=200,
         widget=forms.TextInput(attrs={"placeholder": "Ex: Rua das Flores, 123"}),
     )
-
 
 class BairroForm(RegistrationStepForm):
     """Etapa de bairro."""
@@ -431,11 +430,10 @@ class MunicipalityForm(RegistrationStepForm):
 class StateForm(RegistrationStepForm):
     state = forms.ChoiceField(
         label="Estado",
-        choices=[("", "---------"), *STATE_CHOICES],
-        error_messages={"invalid_choice": "Escolha um estado válido."},
-    )
-
-
+                choices=[("", "---------"), *STATE_CHOICES],
+                error_messages={"invalid_choice": "Escolha um estado válido."},
+                )
+    
 class CityForm(RegistrationStepForm):
     city = forms.CharField(
         label="Cidade",
@@ -446,13 +444,10 @@ class CityForm(RegistrationStepForm):
 
 class ComplementForm(RegistrationStepForm):
     complement = forms.CharField(
-        label="Cidade",
-        max_length=50,
-        widget=forms.TextInput(
-            attrs={"placeholder": "Exemplo:Casa 1 em frente ao condomínio A "}
-        ),
-    )
-
+        label="Cidade",max_length=50,
+        widget=forms.TextInput(attrs={
+            "placeholder":"Exemplo:Casa 1 em frente ao condomínio A "})
+    )    
 
 class AccompaniedForm(RegistrationStepForm):
     is_accompanied = forms.TypedChoiceField(
@@ -465,12 +460,11 @@ class AccompaniedForm(RegistrationStepForm):
         error_messages={"invalid_choice": "Responda sim ou não."},
     )
 
-
 class GuardianNameForm(RegistrationStepForm):
     guardian_first_name = forms.CharField(
         label="Nome do responsável",
         max_length=150,
-        required=False,
+        required=True,
         validators=[validate_letters],
         widget=forms.TextInput(
             attrs={"placeholder": "Nome do responsável", "data-only": "letters"}
@@ -479,7 +473,7 @@ class GuardianNameForm(RegistrationStepForm):
     guardian_last_name = forms.CharField(
         label="Sobrenome do responsável",
         max_length=150,
-        required=False,
+        required=True,
         validators=[validate_letters],
         widget=forms.TextInput(
             attrs={"placeholder": "Sobrenome do responsável", "data-only": "letters"}
@@ -491,7 +485,7 @@ class GuardianRelationshipForm(RegistrationStepForm):
     guardian_relationship = forms.CharField(
         label="Grau de parentesco",
         max_length=100,
-        required=False,
+        required=True,
         validators=[validate_letters],
         widget=forms.TextInput(
             attrs={
