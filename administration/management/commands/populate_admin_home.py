@@ -9,8 +9,9 @@ from core.models import CustomUser
 from documents.models import AttendanceCertificate, InternshipDeclaration
 from patient.models import Patient
 from scheduling.models import Appointment, Room, RoomBooking
-from students.models import Student
+from students.models import Student, CaseAssignment
 from teacher.models import Teacher
+from django.db import transaction
 
 ROOMS = 7
 UNUSABLE_ROOMS = (Room.Status.MAINTENANCE, Room.Status.INACTIVE)
@@ -42,6 +43,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
        parser.add_argument("--confirmar-base-demo", action="store_true", help="Confirma que a carga será executada em uma base destinada à demonstração.")
 
+    @transaction.atomic
     def handle(self, *args, **options):
         self.created_appointment_ids = []
         self.created_certificate_ids = []
@@ -92,10 +94,21 @@ class Command(BaseCommand):
         self.summarize(today, now)
 
     def prepare_people(self, teacher, area):
-        students = list(Student.objects.filter(stage=Student.Stage.TREATMENT, current_advisor=teacher).order_by("pk")[:4])
-        patients = list(Patient.objects.filter(flow_status=Patient.FlowStatus.IN_TREATMENT).order_by("pk")[:6])
+        cases = CaseAssignment.objects.open().filter(
+            student__stage=Student.Stage.TREATMENT,
+            student__current_advisor=teacher,
+            patient__flow_status=Patient.FlowStatus.IN_TREATMENT,
+            acting_area=area,
+        ).select_related("student", "patient").order_by("pk")[:6]
 
-        self.stdout.write(f"{len(students)} alunos e {len(patients)} pacientes selecionados, sem alterações.")
+        students = []
+        patients = []
+
+        for case in cases:
+            students.append(case.student)
+            patients.append(case.patient)
+
+        self.stdout.write(f"{len(students)} vínculos ativos selecionados, sem alterações.")
         return students, patients
 
     def create_rooms(self):
