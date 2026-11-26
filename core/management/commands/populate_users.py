@@ -144,6 +144,8 @@ class Command(BaseCommand):
                 if role == CustomUser.Role.SUPERADMIN:
                     user.is_staff = True
                     user.is_superuser = True
+                
+                user.demo_source = "populate_users"
                 # POR FAVOR NÃO ALTERAR
                 user.set_password("Senha123!")
 

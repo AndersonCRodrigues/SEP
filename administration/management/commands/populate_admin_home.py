@@ -9,9 +9,10 @@ from core.models import CustomUser
 from documents.models import AttendanceCertificate, InternshipDeclaration
 from patient.models import Patient
 from scheduling.models import Appointment, Room, RoomBooking
-from students.models import Student, CaseAssignment
+from students.models import Student, CaseAssignment, Advising
 from teacher.models import Teacher
 from django.db import transaction
+from django.db.models import Q
 
 ROOMS = 7
 UNUSABLE_ROOMS = (Room.Status.MAINTENANCE, Room.Status.INACTIVE)
@@ -63,9 +64,10 @@ class Command(BaseCommand):
         administrative = CustomUser.objects.filter(
             role=CustomUser.Role.ADMINISTRATIVO
         ).first()
-        teacher = Teacher.objects.filter(role=CustomUser.Role.PROFESSOR).first()
-        area = AreaActing.objects.first()
-
+        administrative = CustomUser.objects.filter(role=CustomUser.Role.ADMINISTRATIVO, demo_source="populate_users").order_by("pk").first()
+        teacher = Teacher.objects.filter(role=CustomUser.Role.PROFESSOR, demo_source="populate_users").order_by("pk").first()
+        area = teacher.acting_areas.order_by("pk").first() if teacher else None
+        
         if not (administrative and teacher and area):
             self.stdout.write(
                 self.style.ERROR(
@@ -74,7 +76,7 @@ class Command(BaseCommand):
             )
             return
 
-
+        self.prepare_demo_cases(teacher, area)
         students, patients = self.prepare_people(teacher, area)
         if not (students and patients):
             self.stdout.write(
@@ -93,10 +95,36 @@ class Command(BaseCommand):
 
         self.summarize(today, now)
 
+    def prepare_demo_cases(self, teacher, area):
+            students = Student.objects.filter(demo_source="populate_users").filter(Q(current_advisor__isnull=True) | Q(current_advisor=teacher)).order_by("pk")
+            patients = Patient.objects.filter(demo_source="populate_users", flow_status=Patient.FlowStatus.AWAITING_TRIAGE).order_by("pk")
+
+            students = [student for student in students if not student.case_history.filter(end_date__isnull=True).exists()][:4]
+            patients = [patient for patient in patients if not patient.assignment_history.filter(end_date__isnull=True).exists()][:6]
+
+            today = timezone.localdate()
+            term = f"{today.year}.{1 if today.month <= 6 else 2}"
+
+            for student, patient in zip(students, patients):
+                if student.current_advisor_id is None:
+                    Advising.objects.change_advisor(student, teacher, term=term)
+                    student.refresh_from_db()
+
+                if student.stage != Student.Stage.TREATMENT:
+                    student.stage = Student.Stage.TREATMENT
+                    student.save(update_fields=["stage"])
+
+                patient.advance_to(Patient.FlowStatus.IN_TRIAGE)
+                patient.advance_to(Patient.FlowStatus.REFERRED)
+                CaseAssignment.objects.assign(student=student, patient=patient, acting_area=area)
+
+    
     def prepare_people(self, teacher, area):
         cases = CaseAssignment.objects.open().filter(
             student__stage=Student.Stage.TREATMENT,
             student__current_advisor=teacher,
+            student__demo_source="populate_users",
+            patient__demo_source="populate_users",
             patient__flow_status=Patient.FlowStatus.IN_TREATMENT,
             acting_area=area,
         ).select_related("student", "patient").order_by("pk")[:6]
@@ -147,7 +175,6 @@ class Command(BaseCommand):
         return rooms
 
     def book(self, rooms, students, patients, now):
-        window_start = datetime.combine(date.min, (now - RoomBooking.DURATION).time())
         step = timedelta(minutes=50 // OCCUPIED_ROOMS)
         created_count = 0
 
@@ -155,21 +182,25 @@ class Command(BaseCommand):
             if not room.is_usable:
                 continue
 
-            existing_booking = RoomBooking.objects.filter(
-                room=room,
-                weekday=now.weekday(),
-                end_date__isnull=True,
-            ).exists()
+            start = now - RoomBooking.DURATION + step * (number + 1) + timedelta(minutes=1)
+            earliest = start - RoomBooking.DURATION
+            end = start + RoomBooking.DURATION
 
-            if existing_booking:
+            if earliest.date() == end.date():
+                conflict = Q(weekday=start.weekday(), start_time__gt=earliest.time(), start_time__lt=end.time())
+            else:
+                conflict = (
+                    Q(weekday=earliest.weekday(), start_time__gt=earliest.time())
+                    | Q(weekday=end.weekday(), start_time__lt=end.time())
+                )
+
+            if RoomBooking.objects.filter(conflict, room=room, end_date__isnull=True).exists():
                 continue
-
-            start = (window_start + step * (number + 1)+ timedelta(minutes=1)).time()
 
             _, created = RoomBooking.objects.get_or_create(
                 room=room,
-                weekday=now.weekday(),
-                start_time=start,
+                weekday=start.weekday(),
+                start_time=start.time(),
                 end_date__isnull=True,
                 defaults={
                     "patient": patients[number % len(patients)],
@@ -180,9 +211,8 @@ class Command(BaseCommand):
             if created:
                 created_count += 1
 
-        self.stdout.write(f"{created_count} reservas abertas criadas. "
-            "Reservas existentes foram preservadas.")
-
+        self.stdout.write(f"{created_count} reservas abertas criadas. Reservas existentes foram preservadas.")
+    
     def release(self, rooms, student, patient, today):
         created_count = 0
 
@@ -309,19 +339,15 @@ class Command(BaseCommand):
         created_count = 0
 
         for number in range(CERTIFICATES_TODAY):
+            patient = patients[number % len(patients)]
+            kind = AttendanceCertificate.Kind.DECLARATION if number % 2 else AttendanceCertificate.Kind.MEDICAL_CERTIFICATE
+
             document, created = AttendanceCertificate.objects.get_or_create(
-                patient=patients[number % len(patients)],
-                student=None,
-                content=(
-                    f"[DEMO ADM-07:issued:{today}:{number}] "
-                    "Compareceu ao atendimento no Serviço Escola de Psicologia."
-                ),
+                demo_key=f"adm07:issued:{today}:{patient.pk}:{number}",
                 defaults={
-                    "kind": (
-                        AttendanceCertificate.Kind.DECLARATION
-                        if number % 2
-                        else AttendanceCertificate.Kind.MEDICAL_CERTIFICATE
-                    ),
+                    "patient": patient,
+                    "kind": kind,
+                    "content": "Compareceu ao atendimento no Serviço Escola de Psicologia.",
                     "status": AttendanceCertificate.Status.ISSUED,
                     "issued_at": today,
                     "issued_by": administrative,
@@ -333,53 +359,68 @@ class Command(BaseCommand):
                 self.created_certificate_ids.append(document.pk)
                 created_count += 1
 
-        self.stdout.write(
-            f"{created_count} documentos de demonstração emitidos para hoje."
-        )
+        self.stdout.write(f"{created_count} documentos de demonstração emitidos para hoje.")
+
 
     def request_declarations(self, patients, students, administrative, area, today):
+        pending_count = 0
+        internship_count = 0
+
         for number in range(PENDING_DECLARATIONS):
-            document = AttendanceCertificate.objects.create(
-                patient=patients[number % len(patients)],
-                kind=AttendanceCertificate.Kind.DECLARATION,
-                content="Aguardando emissão da declaração de comparecimento.",
-                acting_area=area,
+            patient = patients[number % len(patients)]
+
+            document, created = AttendanceCertificate.objects.get_or_create(
+                demo_key=f"adm07:pending:{today}:{patient.pk}:{number}",
+                defaults={
+                    "patient": patient,
+                    "kind": AttendanceCertificate.Kind.DECLARATION,
+                    "content": "Aguardando emissão da declaração de comparecimento.",
+                    "status": AttendanceCertificate.Status.PENDING,
+                    "acting_area": area,
+                },
             )
-            self.created_certificate_ids.append(document.pk)
+
+            if created:
+                self.created_certificate_ids.append(document.pk)
+                pending_count += 1
 
         for number, student in enumerate(students[:INTERNSHIP_DECLARATIONS]):
             issued = number == 0
-            InternshipDeclaration.objects.create(
-                student=student,
-                content="Horas de estágio cumpridas no período.",
-                start_date=today - timedelta(days=30),
-                end_date=today,
-                total_minutes=60 * 40,
-                status=(
-                    InternshipDeclaration.Status.ISSUED
-                    if issued
-                    else InternshipDeclaration.Status.PENDING
-                ),
-                issued_at=today if issued else None,
-                issued_by=administrative if issued else None,
+
+            _, created = InternshipDeclaration.objects.get_or_create(
+                demo_key=f"adm07:internship:{today}:{student.pk}",
+                defaults={
+                    "student": student,
+                    "content": "Horas de estágio cumpridas no período.",
+                    "start_date": today - timedelta(days=30),
+                    "end_date": today,
+                    "total_minutes": 60 * 40,
+                    "status": InternshipDeclaration.Status.ISSUED if issued else InternshipDeclaration.Status.PENDING,
+                    "issued_at": today if issued else None,
+                    "issued_by": administrative if issued else None,
+                },
             )
 
-        document = AttendanceCertificate.objects.create(
-            student=students[0],
-            kind=AttendanceCertificate.Kind.MEDICAL_CERTIFICATE,
-            content="Compareceu ao atendimento no Serviço Escola de Psicologia.",
-            status=AttendanceCertificate.Status.ISSUED,
-            issued_at=today,
-            issued_by=administrative,
-            acting_area=area,
-        )
-        self.created_certificate_ids.append(document.pk)
+            if created:
+                internship_count += 1
 
-        self.stdout.write(
-            f"{PENDING_DECLARATIONS} declaracoes pendentes de paciente, "
-            f"{INTERNSHIP_DECLARATIONS} de estagio e 1 atestado de aluno."
+        document, created = AttendanceCertificate.objects.get_or_create(
+            demo_key=f"adm07:student:{today}:{students[0].pk}",
+            defaults={
+                "student": students[0],
+                "kind": AttendanceCertificate.Kind.MEDICAL_CERTIFICATE,
+                "content": "Compareceu ao atendimento no Serviço Escola de Psicologia.",
+                "status": AttendanceCertificate.Status.ISSUED,
+                "issued_at": today,
+                "issued_by": administrative,
+                "acting_area": area,
+            },
         )
 
+        if created:
+            self.created_certificate_ids.append(document.pk)
+
+        self.stdout.write(f"Criados: {pending_count} declarações pendentes, {internship_count} declarações de estágio e {int(created)} atestado de aluno.")
     def spread_over_time(self, now):
         for number, appointment_id in enumerate(self.created_appointment_ids):
             Appointment.objects.filter(pk=appointment_id).update(created_at=now - timedelta(days=number % 6, hours=number % 7))
