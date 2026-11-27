@@ -1,10 +1,9 @@
 import os
-from datetime import date, datetime, time, timedelta
+from datetime import datetime, time, timedelta
 
 from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
 
-from areas.models import AreaActing
 from core.models import CustomUser
 from documents.models import AttendanceCertificate, InternshipDeclaration
 from patient.models import Patient
