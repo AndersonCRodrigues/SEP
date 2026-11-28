@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('administration', '0001_initial'),
-        ('patient', '0005_firstacess'),
+        ('patient', '0006_firstacess'),
     ]
 
     operations = [
