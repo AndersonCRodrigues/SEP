@@ -371,6 +371,7 @@ class LogradouroForm(RegistrationStepForm):
         widget=forms.TextInput(attrs={"placeholder": "Ex: Rua das Flores, 123"}),
     )
 
+
 class BairroForm(RegistrationStepForm):
     """Etapa de bairro."""
 
@@ -430,10 +431,11 @@ class MunicipalityForm(RegistrationStepForm):
 class StateForm(RegistrationStepForm):
     state = forms.ChoiceField(
         label="Estado",
-                choices=[("", "---------"), *STATE_CHOICES],
-                error_messages={"invalid_choice": "Escolha um estado válido."},
-                )
-    
+        choices=[("", "---------"), *STATE_CHOICES],
+        error_messages={"invalid_choice": "Escolha um estado válido."},
+    )
+
+
 class CityForm(RegistrationStepForm):
     city = forms.CharField(
         label="Cidade",
@@ -444,10 +446,13 @@ class CityForm(RegistrationStepForm):
 
 class ComplementForm(RegistrationStepForm):
     complement = forms.CharField(
-        label="Cidade",max_length=50,
-        widget=forms.TextInput(attrs={
-            "placeholder":"Exemplo:Casa 1 em frente ao condomínio A "})
-    )    
+        label="Cidade",
+        max_length=50,
+        widget=forms.TextInput(
+            attrs={"placeholder": "Exemplo:Casa 1 em frente ao condomínio A "}
+        ),
+    )
+
 
 class AccompaniedForm(RegistrationStepForm):
     is_accompanied = forms.TypedChoiceField(
@@ -459,6 +464,7 @@ class AccompaniedForm(RegistrationStepForm):
         widget=forms.RadioSelect,
         error_messages={"invalid_choice": "Responda sim ou não."},
     )
+
 
 class GuardianNameForm(RegistrationStepForm):
     guardian_first_name = forms.CharField(

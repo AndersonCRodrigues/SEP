@@ -57,7 +57,9 @@ class CustomUser(AbstractUser):
         default=False,
         verbose_name="Precisa trocar a senha",
     )
-    demo_source = models.CharField(max_length=80, blank=True, default="", editable=False, db_index=True)
+    demo_source = models.CharField(
+        max_length=80, blank=True, default="", editable=False, db_index=True
+    )
 
     role = models.CharField(
         max_length=2, choices=Role.choices, default=Role.ALUNO, verbose_name="Cargo"

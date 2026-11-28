@@ -91,9 +91,7 @@ class PatientRegistration:
 
     @property
     def is_minor(self):
-        form = forms.BirthDateForm(
-            data=self.answers.get("nascimento", {})
-        )
+        form = forms.BirthDateForm(data=self.answers.get("nascimento", {}))
 
         if not form.is_valid():
             return False
@@ -112,11 +110,7 @@ class PatientRegistration:
     def steps(self):
         minor = self.is_minor
 
-        return [
-            step
-            for step in STEPS
-            if not step.only_if_minor or minor
-        ]
+        return [step for step in STEPS if not step.only_if_minor or minor]
 
     def step(self, slug):
         return next((step for step in self.steps() if step.slug == slug), None)
