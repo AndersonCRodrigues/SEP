@@ -32,8 +32,9 @@ services:
       dockerfile: Dockerfile
       target: app
     container_name: django-docker
+   
     command: >
-      sh -c "python3 manage.py makemigrations core areas teacher students patient documents audit triage &&
+      sh -c "python3 manage.py makemigrations administration core areas teacher students patient documents audit triage &&
              python3 manage.py migrate &&
              python3 manage.py populate_users &&
              python3 manage.py setup_roles &&

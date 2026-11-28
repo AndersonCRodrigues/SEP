@@ -1,5 +1,7 @@
 from django.contrib import messages
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
+from django.urls import resolve
+from http import HTTPStatus
 
 from core.models import CustomUser
 
@@ -28,3 +30,17 @@ def custom_permission_denied_view(request, exception):
 
     home_url_name = HOME_BY_ROLE.get(request.user.role, "login")
     return redirect(home_url_name)
+
+
+def csrfail(request, reason=""):
+    referer = request.META.get("HTTP_REFERER", "/")
+    if resolve(request.path).url_name == "login":
+        if request.user.is_authenticated:
+            return redirect("home_redirect")
+        return redirect("login")
+    return render(
+        request,
+        "crsfail.html",
+        context={"referer": referer},
+        status=HTTPStatus.FORBIDDEN,
+    )
