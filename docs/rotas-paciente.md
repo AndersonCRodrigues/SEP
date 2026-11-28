@@ -307,14 +307,18 @@ dá para rodar quantas vezes quiser sem duplicar.
 
 ### O que testar nos estados vazios
 
-Não há seed de paciente vazio. Para ver os vazios, entre com qualquer paciente
-criado pelo `populate_users` (`pa@teste.com`, senha `Senha123!`): ele nasce
-aguardando triagem, sem sessão nem solicitação. A tela de triagens é a mais
-interessante nesse caso — ela mostra "Há uma triagem em andamento..." em vez de
-"Você ainda não tem triagem concluída." assim que o paciente entra em triagem,
-que é a única parte da tela que olha o `flow_status`.
+Para ver os estados vazios, utilize um paciente criado pelo `populate_users`
+que ainda não tenha participado das cargas de demonstração. Ele nasce
+aguardando triagem, sem sessão nem solicitação. Em uma base nova,
+`pa@teste.com` tem a senha `Senha123!`, mas pode deixar de representar um
+estado vazio depois que `populate_admin_home` preparar seus vínculos e
+atendimentos.
 
-Atenção a um efeito colateral entre áreas: o `populate_admin_home` apaga todos
-os agendamentos, salas e documentos antes de recriar os dele. Rodar aquele
-comando depois deste esvazia as telas de agendamento e histórico do paciente de
-demonstração; basta rodar o `populate_patient_home` de novo.
+O `populate_admin_home` exige `--confirmar-base-demo` e não realiza mais a
+exclusão geral de agendamentos, salas e documentos. Executá-lo depois desta
+carga não deve remover as sessões do paciente de demonstração nem alterar
+as datas de criação desses registros. Os indicadores administrativos podem
+incluir os dados das duas cargas.
+
+Não é necessário executar novamente `populate_patient_home` para compensar
+uma limpeza feita pelo comando administrativo.
