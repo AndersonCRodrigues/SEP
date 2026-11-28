@@ -1,5 +1,5 @@
 from django.shortcuts import redirect
-
+from django.conf import settings
 from .views import CustomLogoutView, ForcePasswordChangeView
 
 
@@ -11,6 +11,9 @@ class ForcePasswordChangeMiddleware:
         return self.get_response(request)
 
     def process_view(self, request, view_func, view_args, view_kwargs):
+        if settings.STATIC_URL and request.path.startswith(settings.STATIC_URL):
+            return None
+
         if not request.user.is_authenticated:
             return None
 
