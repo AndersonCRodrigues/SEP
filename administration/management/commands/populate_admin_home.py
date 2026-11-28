@@ -3,7 +3,6 @@ from datetime import datetime, time, timedelta
 
 from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
-
 from core.models import CustomUser
 from documents.models import AttendanceCertificate, InternshipDeclaration
 from patient.models import Patient
