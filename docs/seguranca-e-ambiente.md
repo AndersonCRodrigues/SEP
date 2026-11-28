@@ -34,7 +34,7 @@ Consequência:
 
 ```python
 TriageRecord.objects.filter(chief_complaint__icontains="ansiedade")  # sempre vazio
-TriageRecord.objects.filter(cpf__exact="12345678900")                # sempre vazio
+TriageRecord.objects.filter(cpf__exact="12345678900")  # sempre vazio
 ```
 
 Não levanta erro — **retorna vazio em silêncio**, que é pior.

@@ -1,13 +1,15 @@
 from django.contrib import messages
+from django.db.models import Avg, Q
+from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.formats import number_format
-from django.urls import reverse, reverse_lazy
-from django.views.generic import ListView, TemplateView, UpdateView, DetailView
-from core.models import CustomUser
-from core.mixins import GroupRequiredMixin
-from django.db.models import Avg, Q
+from django.views.generic import DetailView, ListView, TemplateView, UpdateView
+
 from audit.models import SecurityLog
-from .models import ServerStatus, RolePermissionScope, BackupRecord
+from core.mixins import GroupRequiredMixin
+from core.models import CustomUser
+
+from .models import BackupRecord, RolePermissionScope, ServerStatus
 
 BackupStatus = BackupRecord.Status
 

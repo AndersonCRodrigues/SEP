@@ -1,7 +1,9 @@
 from django.db import models
+
 from django.db.models import Case, F, Value, When
 from core.models import CustomUser
 from django.db.models.functions import Coalesce
+
 
 
 class ServerStatusQuerySet(models.QuerySet):
