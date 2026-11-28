@@ -44,6 +44,9 @@ class BaseCertificate(BusinessRulesMixin, models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Criado em")
 
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Atualizado em")
+    demo_key = models.CharField(
+        max_length=120, unique=True, null=True, blank=True, editable=False
+    )
 
     DOCUMENT_FIELDS = ("content", "issued_at", "status")
 
