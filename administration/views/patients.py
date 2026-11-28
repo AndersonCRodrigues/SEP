@@ -1,14 +1,16 @@
+from django.contrib import messages
+from django.core.exceptions import ValidationError
 from django.db import DatabaseError
 from django.db.models import Q, Value
 from django.db.models.functions import Replace
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from django.core.exceptions import ValidationError
+from django.shortcuts import redirect, render
 from django.views.generic import DetailView, TemplateView, View
+
 from core.fields import only_digits
 from core.search import full_name_lookup
 from patient.models import Patient
 from utils.masking import mask_cpf
+
 from ..patient_registration import STEPS, PatientRegistration
 from .access import AdministrativeOnly, CanRegisterPatients
 from django.shortcuts import get_object_or_404
@@ -190,7 +192,7 @@ class PatientRegistrationStepView(CanRegisterPatients, View):
                 "form": form,
                 "step": step,
                 "number": wizard.number(step),
-                "total": len(STEPS),
+                "total": len(wizard.steps()),
                 "is_first": step == STEPS[0],
                 "sections": wizard.sections(step),
             },

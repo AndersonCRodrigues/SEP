@@ -361,38 +361,70 @@ indicadores à mão, em vez de usar `summary_list.html`.
 
 ## 8. Como popular o banco para testar
 
-Todos os comandos de seed só rodam com `NODE_ENV=dev` — fora disso eles avisam e
-não criam nada. Rodando pelo container:
+Execute os comandos em uma base destinada à demonstração, com `NODE_ENV=dev`.
+O `populate_admin_home` também exige a confirmação `--confirmar-base-demo`.
+Essa opção não identifica o banco automaticamente; confira o ambiente antes
+de executar.
+
+Rodando pelo container:
 
 ```bash
-docker exec django-docker python manage.py populate_users
-docker exec django-docker python manage.py populate_admin_home
+docker exec django-docker python manage.py migrate
+docker exec django-docker python manage.py populate_users --qtd 3
+docker exec django-docker python manage.py populate_admin_home --confirmar-base-demo
 ```
 
-`populate_users` cria os usuários base; sem um Administrativo, um Professor e uma
-área, o segundo comando para e manda rodar o primeiro. Por padrão o
-`populate_admin_home` **apaga a demonstração anterior** — salas, reservas,
-atendimentos, atestados e declarações — antes de recriar. `--manter` acrescenta
-sem apagar, mas aí os nomes de sala repetem.
+O `populate_users` cria os usuários base com `demo_source="populate_users"`.
+O comando administrativo seleciona o Administrativo e o Professor dessa carga,
+usa uma área vinculada ao Professor e prepara vínculos de atendimento entre
+alunos e pacientes identificados como dados de demonstração.
+
+O `populate_admin_home` não apaga os registros anteriores. Ele reutiliza as
+salas identificadas pelo prefixo `[DEMO ADM-07]`, preserva os atendimentos já
+existentes nos horários encontrados e ajusta as datas de criação somente dos
+registros criados naquela execução.
+
+Para repetir a carga administrativa, execute somente:
+
+```bash
+docker exec django-docker python manage.py populate_admin_home --confirmar-base-demo
+```
+
+Repetir `populate_users` cria outros usuários. Os documentos identificados por
+`demo_key` são reutilizados na mesma data e com as mesmas pessoas; em outra
+data, um novo conjunto diário pode ser criado. Documentos antigos sem essa
+identificação permanecem preservados.
+
+A opção `--manter` foi removida, pois não existe mais limpeza automática.
 
 | Conta | Senha | Para quê |
 |---|---|---|
-| `ad@teste.com` | `Senha123!` | O Administrativo; há mais cinco (`ad1@` … `ad5@teste.com`) para testar em dois navegadores |
+| `ad@teste.com` | `Senha123!` | Primeiro Administrativo criado em uma base nova. Com `--qtd 3`, também são criados `ad1@teste.com` e `ad2@teste.com`. Se essas contas já existirem, o comando utiliza outros sufixos. |
 
 ### Comportamento esperado
 
-O próprio comando imprime o resumo do que a página inicial deve exibir: **Salas
-ocupadas 5/7, Atendimentos hoje 18, Declarações pendentes 3, Atestados emitidos
-7**. Se a home mostrar outra coisa, o seed não rodou ou algo apagou os dados.
+O comando imprime um resumo dos indicadores consultados no banco. Os totais
+incluem registros anteriores e de outras cargas, portanto não são valores
+fixos. A ocupação das salas também depende do horário em que a página é aberta.
 
 | Tela | O que deve aparecer |
 |---|---|
-| Página inicial | Os quatro indicadores acima, as cinco atividades recentes (agendamentos criados, documentos emitidos e salas liberadas, misturados por data) e o calendário do mês |
-| Pacientes | Todos os pacientes do banco, com CPF mascarado, situação do fluxo e data de cadastro. A busca aceita nome ou CPF — com ou sem pontuação, porque a comparação é por dígitos — e o filtro corta por situação |
-| Agenda | Abre em "Hoje" com os 18 atendimentos, os passados como "Compareceu" e os futuros como "Agendado". Os filtros de período, situação, tipo e sala são independentes e ignoram valor fora da lista |
-| Salas | Sete cartões utilizáveis, cinco deles "Ocupada até HH:MM", mais duas salas fora de uso: uma em manutenção e uma inativa. Duas reservas encerradas aparecem como "Sala liberada" nas atividades da home |
-| Declarações | As declarações de comparecimento e as de estágio numa lista só, ordenadas por data, com selo verde para emitida e vermelho para pendente. A tela é de leitura: o botão de gerar não tem lógica |
-| Atestados | Os sete atestados emitidos hoje na lista da direita, e o formulário à esquerda |
+| Página inicial | Os indicadores dos dados existentes, as atividades recentes e o calendário do mês |
+| Pacientes | Os pacientes visíveis ao Administrativo, com CPF mascarado, situação do fluxo e data de cadastro |
+| Agenda | Os atendimentos do período escolhido, incluindo os exemplos da carga e os registros anteriores preservados |
+| Salas | As salas existentes e as da demonstração, com a situação e a ocupação calculadas no momento da consulta |
+| Declarações | As declarações de comparecimento e de estágio, com suas situações e datas |
+| Atestados | Os documentos emitidos apresentados pela tela e o formulário de emissão |
+
+Para verificar a preservação dos dados, crie uma sala e um atendimento
+independentes em banco descartável, execute a carga duas vezes e confira se
+ambos mantêm seus dados e o vínculo entre atendimento e sala.
+
+Para verificar a repetição dos documentos, execute a versão atual duas vezes
+na mesma data e com as mesmas pessoas. A segunda execução deve informar zero
+documentos criados. A primeira execução após a atualização pode acrescentar
+documentos, pois os registros antigos sem `demo_key` não são reconhecidos
+automaticamente como pertencentes à nova carga.
 
 ### O que testar no formulário de atestado
 

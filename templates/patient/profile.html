@@ -246,11 +246,11 @@
         </div>
     </div>
 </div>
-{% if is_accompanied %}
+{% if guardian_first_name or guardian_last_name or guardian_relationship %}
     <div class="desktop-page container mt-4 mb-5">
     <div class="d-flex align-items-center gap-4">
         <div class="agend-list">
-            <h2>Dados do acompanhante</h2>
+            <h2>Dados do Responsavel</h2>
             <p>Mantenha seus dados atualizados</p>
             <div class="d-flex align-items-center gap-4">
                 <ul class="list-unstyled">
