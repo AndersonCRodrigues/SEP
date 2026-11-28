@@ -59,7 +59,7 @@
                     {% for triage in triagens %}
                     <div class="list-group-item px-0 d-flex justify-content-between align-items-center">
                         <div>
-                            <strong>{{ triage.patient.nome_completo }}</strong>
+                            <strong>{{ triage.patient_label|default:triage.patient.first_name }}</strong>
                             <div class="text-body-secondary small">
                                 Status: {{ triage.get_status_display }} | Data: {{ triage.created_at|date:"d/m/Y" }}
                             </div>

@@ -41,8 +41,8 @@
         {% for caso in casos_abertos %}
         <div class="m-triage-card">
           <div class="m-triage-card-left">
-            <div class="m-triage-patient-name">{{ caso.patient.nome_completo }}</div>
-            <div class="m-triage-patient-id">ID: #{{ caso.patient.pk }}</div>
+            <div class="m-triage-patient-name">{{ caso.patient_label }}</div>
+            <div class="m-triage-patient-id">ID: #{{ caso.patient_id }}</div>
             <div class="m-triage-info">
               <i class="bi bi-person-fill"></i>
               Encaminhado por: <strong>{{ caso.responsible }}</strong>
@@ -53,7 +53,7 @@
             </div>
           </div>
           <div class="m-triage-card-right">
-            <a href="/triage/create/{{ caso.patient.pk }}/" class="m-btn-iniciar">Iniciar</a>
+            <a href="/triage/create/{{ caso.patient_id }}/" class="m-btn-iniciar">Iniciar</a>
           </div>
         </div>
         {% endfor %}
@@ -126,11 +126,11 @@
         {% if casos_abertos %}
           {% for caso in casos_abertos %}
           <div class="triage-row">
-            <div>{{ caso.patient.nome_completo }} #{{ caso.patient.pk }}</div>
+            <div>{{ caso.patient_label }} #{{ caso.patient_id }}</div>
             <div>{{ caso.acting_area }}</div>
             <div>{{ caso.start_date|date:"d/m/Y" }}</div>
             <div class="text-end">
-              <a href="/triage/create/{{ caso.patient.pk }}/" class="btn-iniciar">Iniciar</a>
+              <a href="/triage/create/{{ caso.patient_id }}/" class="btn-iniciar">Iniciar</a>
             </div>
           </div>
           {% endfor %}

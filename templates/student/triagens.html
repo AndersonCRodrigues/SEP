@@ -26,7 +26,7 @@
 
   <div class="mobile-content">
     {% for triage in triages %}
-    {% include "components/mobile_row.html" with variant="white" name=triage.name code=triage.patient.pk when=triage.waiting_since|date:"d/m/Y - H:i" action_url=triage.start_url action_label="Iniciar" %}
+    {% include "components/mobile_row.html" with variant="white" name=triage.name code=triage.patient_id when=triage.waiting_since|date:"d/m/Y - H:i" action_url=triage.start_url action_label="Iniciar" %}
     {% empty %}
     <p class="mobile-empty">Nenhum paciente aguardando triagem.</p>
     {% endfor %}

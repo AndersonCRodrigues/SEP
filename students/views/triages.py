@@ -3,6 +3,7 @@ from django.utils import timezone
 from django.views.generic import DetailView, TemplateView
 
 from triage.models import TriageRecord
+from utils.masking import student_patient_label
 
 from .access import StudentOnly
 from .dates import updated_label
@@ -21,8 +22,8 @@ class StudentTriagesView(StudentOnly, TemplateView):
         context["columns"] = COLUMNS
         context["triages"] = [
             {
-                "patient": paciente,
-                "name": paciente.get_full_name(),
+                "patient_id": paciente.pk,
+                "name": student_patient_label(paciente),
                 "waiting_since": paciente.created_at,
                 "waiting_label": updated_label(paciente.created_at, now).replace(
                     "Atualizado", "Aguardando"
@@ -46,6 +47,7 @@ class TriageCompletedView(StudentOnly, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         triage = context["triage"]
+        context["patient_label"] = student_patient_label(triage.patient)
         context["completed_at"] = timezone.localtime(
             triage.submitted_at or triage.closed_at or triage.created_at
         )

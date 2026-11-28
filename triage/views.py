@@ -13,6 +13,7 @@ from patient.models import Patient
 from students.models import Student
 from teacher.models import Teacher
 from triage.models import Referral, TriageFeedback, TriageRecord
+from utils.masking import student_patient_initials, student_patient_label
 
 from .forms import (
     TriageRecordForm,
@@ -35,9 +36,13 @@ def minhas_triagens(request):
             "Apenas Alunos podem acessar as próprias triagens."
         )
 
-    triagens = TriageRecord.objects.filter(student_author_id=request.user.pk).order_by(
-        "-created_at"
+    triagens = list(
+        TriageRecord.objects.filter(student_author_id=request.user.pk)
+        .select_related("patient")
+        .order_by("-created_at")
     )
+    for triagem in triagens:
+        triagem.patient_label = student_patient_label(triagem.patient)
 
     return render(request, "triage/minhas_triagens.html", {"triagens": triagens})
 
@@ -47,7 +52,10 @@ def fila_triagem(request):
     if request.user.role != Role.ALUNO:
         return HttpResponseForbidden("Apenas Alunos podem acessar a fila de triagem.")
 
-    pacientes_aguardando = Patient.objects.awaiting_triage()
+    pacientes_aguardando = [
+        {"pk": paciente.pk, "label": student_patient_label(paciente)}
+        for paciente in Patient.objects.awaiting_triage()
+    ]
 
     return render(
         request,
@@ -60,19 +68,15 @@ def to_triage_step(patient_id, step):
     return redirect("triage:create_triage_step", patient_id=patient_id, step=step.slug)
 
 
-def patient_initials(patient):
-    nomes = patient.get_full_name().split()
-    return "".join(nome[0] for nome in nomes[:2]).upper()
-
-
 def render_triage_step(request, wizard, step, form):
     return render(
         request,
         "triage/create_triage.html",
         {
             "patient": wizard.patient,
+            "patient_label": student_patient_label(wizard.patient),
             "patient_age": wizard.patient.current_age,
-            "patient_initials": patient_initials(wizard.patient),
+            "patient_initials": student_patient_initials(wizard.patient),
             "form": form,
             "step": step,
             "number": wizard.number(step),
@@ -220,11 +224,14 @@ def edit_triage(request, pk):
 
     if user.role == Role.ALUNO:
         cancel_url = reverse("triage:minhas_triagens")
+        patient_label = student_patient_label(triage.patient)
     else:
         cancel_url = reverse("triage:triage_detail_supervisor", args=[pk])
+        patient_label = triage.patient.nome_completo
 
     context = {
         "triage": triage,
+        "patient_label": patient_label,
         "triage_form": triage_form,
         "iarv_form": iarv_form,
         "cancel_url": cancel_url,
@@ -292,7 +299,7 @@ def triage_detail_student(request, pk):
             field.widget.attrs["disabled"] = "disabled"
 
     context = {
-        "paciente": triage.patient.nome_completo,
+        "paciente": student_patient_label(triage.patient),
         "triage": triage,
         "iarv": iarv,
         "triage_form": triage_form,

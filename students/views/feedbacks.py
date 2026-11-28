@@ -4,6 +4,7 @@ from django.views.generic import TemplateView
 
 from patient.models import ProgressNote
 from triage.models import TriageFeedback
+from utils.masking import student_patient_label
 
 from .access import StudentOnly
 from .dates import received_label
@@ -48,7 +49,7 @@ class StudentFeedbacksView(StudentOnly, TemplateView):
     def triage_feedbacks(user):
         return [
             {
-                "subject": f"Triagem - {feedback.triage.patient.get_full_name()}",
+                "subject": f"Triagem - {student_patient_label(feedback.triage.patient)}",
                 "author": feedback.author.get_full_name()
                 if feedback.author
                 else NO_AUTHOR,
@@ -64,7 +65,7 @@ class StudentFeedbacksView(StudentOnly, TemplateView):
     def record_feedbacks(user):
         return [
             {
-                "subject": f"Prontuário - {note.patient.get_full_name()}",
+                "subject": f"Prontuário - {student_patient_label(note.patient)}",
                 "author": note.confirmed_by.get_full_name()
                 if note.confirmed_by
                 else NO_AUTHOR,

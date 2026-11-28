@@ -6,6 +6,7 @@ from django.views.generic import TemplateView
 from core.month_calendar import displayed_month, month_calendar, month_range
 from scheduling.models import Appointment
 from triage.models import TriageFeedback
+from utils.masking import student_patient_label
 
 from ..models import CaseAssignment
 from .access import StudentOnly
@@ -96,7 +97,7 @@ class HomeEstudanteView(StudentOnly, TemplateView):
 
         desde = timezone.localtime(patient.created_at)
         return activity | {
-            "title": f"Triagem - {patient.get_full_name()}",
+            "title": f"Triagem - {student_patient_label(patient)}",
             "detail": f"Aguardando desde {desde:%d/%m/%Y}",
             "label": "Pendente",
             "level": "warning",
@@ -114,7 +115,7 @@ class HomeEstudanteView(StudentOnly, TemplateView):
 
         return activity | {
             "title": "Encaminhamento concluído",
-            "detail": f"{case.patient.get_full_name()} em {case.acting_area.nome}",
+            "detail": f"{student_patient_label(case.patient)} em {case.acting_area.nome}",
             "label": "Ativo",
             "level": "success",
         }

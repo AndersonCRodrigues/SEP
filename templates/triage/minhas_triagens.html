@@ -27,11 +27,11 @@
   <div class="mobile-content">
     {% for triagem in triagens %}
     {% if triagem.status == "AB" %}
-    {% include "components/mobile_row.html" with variant="white" name=triagem.patient.get_full_name when=triagem.created_at|date:"d/m/Y" label=triagem.get_status_display level="danger" %}
+    {% include "components/mobile_row.html" with variant="white" name=triagem.patient_label when=triagem.created_at|date:"d/m/Y" label=triagem.get_status_display level="danger" %}
     {% elif triagem.status == "FE" or triagem.status == "EN" %}
-    {% include "components/mobile_row.html" with variant="white" name=triagem.patient.get_full_name when=triagem.created_at|date:"d/m/Y" label=triagem.get_status_display level="success" %}
+    {% include "components/mobile_row.html" with variant="white" name=triagem.patient_label when=triagem.created_at|date:"d/m/Y" label=triagem.get_status_display level="success" %}
     {% else %}
-    {% include "components/mobile_row.html" with variant="white" name=triagem.patient.get_full_name when=triagem.created_at|date:"d/m/Y" label=triagem.get_status_display level="warning" %}
+    {% include "components/mobile_row.html" with variant="white" name=triagem.patient_label when=triagem.created_at|date:"d/m/Y" label=triagem.get_status_display level="warning" %}
     {% endif %}
     {% empty %}
     <p class="mobile-empty">Você ainda não fez nenhuma triagem.</p>
@@ -58,7 +58,7 @@
   <div class="list-panel-container">
     {% for triagem in triagens %}
     <div class="list-panel-row my-triages-grid hover-lift">
-      <div>{{ triagem.patient.get_full_name }}</div>
+      <div>{{ triagem.patient_label }}</div>
       <div>{{ triagem.created_at|date:"d/m/Y - H:i" }}h</div>
       <div>
         {% if triagem.status == "AB" %}

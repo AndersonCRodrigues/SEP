@@ -24,7 +24,7 @@
     <!-- Info do paciente -->
     <div class="mobile-notice" style="background: #F5F0EB; border-radius: 8px; padding: 12px 16px; border: 1px solid #75151A; display: flex; flex-direction: column; gap: 4px; margin-top: 12px; position: relative;">
       <span style="font-family: var(--font-main); font-size: 11px; color: #8F8F8F; line-height: 1;">Paciente</span>
-      <span style="font-family: var(--font-main); font-size: 14px; font-weight: 700; color: #3A0C10; line-height: 1;">{{ patient.get_full_name }}</span>
+      <span style="font-family: var(--font-main); font-size: 14px; font-weight: 700; color: #3A0C10; line-height: 1;">{{ patient_label }}</span>
     </div>
     
     <!-- Progress bar -->
@@ -76,7 +76,7 @@
     <p class="registration-brand">
       <span class="registration-avatar" aria-hidden="true">{{ patient_initials }}</span>
       <span class="registration-brand-text">
-        <strong class="registration-name">{{ patient.get_full_name }}</strong>
+        <strong class="registration-name">{{ patient_label }}</strong>
         <span class="registration-subtitle">#{{ patient.pk }}</span>
       </span>
     </p>

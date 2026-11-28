@@ -2,6 +2,8 @@ from django.db import DatabaseError
 from django.utils import timezone
 from django.views.generic import TemplateView
 
+from utils.masking import student_patient_label
+
 from ..models import CaseAssignment
 from .access import StudentOnly
 from .mocks import referral_status
@@ -30,7 +32,8 @@ class StudentReferralsView(StudentOnly, TemplateView):
     @staticmethod
     def referrals(user, today):
         return [
-            {"patient": case.patient.get_full_name()} | referral_status(case, today)
+            {"patient": student_patient_label(case.patient)}
+            | referral_status(case, today)
             for case in CaseAssignment.objects.visible_to(user)
             .filter(end_date__isnull=True)
             .select_related("patient")

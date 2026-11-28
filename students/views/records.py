@@ -3,6 +3,7 @@ from django.utils import timezone
 from django.views.generic import TemplateView
 
 from patient.models import ProgressNote
+from utils.masking import student_patient_label
 
 from ..models import CaseAssignment
 from .access import StudentOnly
@@ -37,13 +38,13 @@ class StudentRecordsView(StudentOnly, TemplateView):
             CaseAssignment.objects.visible_to(user)
             .filter(end_date__isnull=True)
             .select_related("patient")
-            .order_by("patient__first_name", "patient__last_name")
+            .order_by("patient__first_name", "patient__pk")
         ):
             note = latest.get(case.patient_id)
             label, level = record_status(note) if note else ("Pendente", "danger")
             rows.append(
                 {
-                    "patient": case.patient.get_full_name(),
+                    "patient": student_patient_label(case.patient),
                     "updated": updated_label(note.updated_at if note else None, now),
                     "label": label,
                     "level": level,
