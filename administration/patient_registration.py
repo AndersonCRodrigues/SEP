@@ -4,7 +4,6 @@ from django.db import transaction
 
 from core.utils import sincronizar_grupo
 from patient.models import Patient
-from django.core.exceptions import ValidationError
 from django.utils import timezone
 
 from . import forms
@@ -75,8 +74,9 @@ STEPS = (
 
 
 class PatientRegistration:
-    def __init__(self, draft):
+    def __init__(self, draft, session=None):
         self.draft = draft
+        self.session = session
         if self.draft.data is None:
             self.draft.data = {}
         self.answers = self.draft.data
@@ -88,6 +88,7 @@ class PatientRegistration:
     @property
     def completed(self):
         return self.draft.status == "done"
+
     def is_minor(self):
         form = forms.BirthDateForm(data=self.answers.get("nascimento", {}))
 
@@ -106,7 +107,7 @@ class PatientRegistration:
         return age < 18
 
     def steps(self):
-        minor = self.is_minor
+        minor = self.is_minor()
 
         return [step for step in STEPS if not step.only_if_minor or minor]
 
@@ -127,12 +128,15 @@ class PatientRegistration:
         self.answers[step.slug] = {
             name: data.get(name, "") for name in step.form_class.base_fields
         }
-        if not self.accompanied:
-            for skipped in STEPS:
-                if skipped.only_if_accompanied:
-                    self.answers.pop(skipped.slug, None)
+
+        active = {s.slug for s in self.steps()}
+        for slug in list(self.answers):
+            if slug not in active:
+                self.answers.pop(slug)
+
         self.draft.save(update_fields=["data", "realese"])
-        self.session[SESSION_KEY] = self.answers
+        if self.session is not None:
+            self.session[SESSION_KEY] = self.answers
 
     def first_unanswered(self):
         return next(
